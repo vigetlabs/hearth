@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+compose_project="$(
+  git branch --show-current \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//'
+)"
+
+compose=(docker compose -p "$compose_project" -f docker-compose.dev.yml)
+
 echo "Checking unstaged and untracked files..."
 changed_files="$(
     {
@@ -26,13 +34,13 @@ echo "=========================="
 
 if changed_matching '(^api/|^docker-compose\.dev\.yml$|^Gemfile|^Gemfile\.lock$)'; then
   echo "API files changed. Running RSpec..."
-  docker compose -f docker-compose.dev.yml exec -T api bundle exec rspec
+  "${compose[@]}" exec -T api bundle exec rspec
 
   echo "Running Rubocop..."
-  docker compose -f docker-compose.dev.yml exec -T api bundle exec rubocop
+  "${compose[@]}" exec -T api bundle exec rubocop
 
   echo "Running Brakeman..."
-  docker compose -f docker-compose.dev.yml exec -T api bundle exec brakeman -z
+  "${compose[@]}" exec -T api bundle exec brakeman -z
 else
   echo "No API files changed. Skipping API checks."
 fi
@@ -40,6 +48,9 @@ fi
 if changed_matching '^client/'; then
   echo "Client files changed. Running client lint..."
   npm --prefix client run lint
+
+  echo "Running client format check..."
+  npm --prefix client run format:check
 
   echo "Running client typecheck..."
   npm --prefix client run typecheck
