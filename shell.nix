@@ -10,6 +10,8 @@ pkgs.mkShell {
     typescript-language-server
 
     nodejs_24
+
+    just
   ];
 
   shellHook = ''
