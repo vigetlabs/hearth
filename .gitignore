@@ -1,0 +1,58 @@
+# === API ===
+# Ignore bundler config.
+api/.bundle
+
+# Ignore all environment files.
+api/.env*
+api/.kamal/secrets*
+
+# Ignore all logfiles and tempfiles.
+api/log/*
+api/tmp/*
+!api/log/.keep
+!api/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+api/tmp/pids/*
+!api/tmp/pids/
+!api/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+api/storage/*
+!api/storage/.keep
+api/tmp/storage/*
+!api/tmp/storage/
+!api/tmp/storage/.keep
+
+# Ignore master key for decrypting credentials and more.
+api/config/master.key
+
+# === SERVICES ===
+services/.env
+
+
+# === CLIENT ===
+# Logs
+client/logs
+client/*.log
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+client/pnpm-debug.log*
+client/lerna-debug.log*
+client/.vite
+
+client/node_modules
+client/dist
+client/dist-ssr
+client/*.local
+client/.env
+
+# === PERSONAL FILES ===
+inbox.txt.tuxedo-lock
+todo.txt
+.direnv/
+.direnv/bin
+
+
+
