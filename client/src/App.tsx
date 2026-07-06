@@ -13,6 +13,8 @@ function HealthCheck() {
 
   if (isLoading) return <div>Checking API...</div>
   if (isError) return <div>API is down</div>
+  if (!data) return <div>No API status returned</div>
+
 
   return <div>API status: {data.status}</div>
 }

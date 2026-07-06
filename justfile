@@ -16,6 +16,14 @@ DDC := "docker compose -p " + CUR_WORKTREE + " -f " + DEV_COMPOSE
 help:
   just --list
 
+# Set up pre-commit functionality
+setup-precommit:
+  pre-commit install
+
+# Manually check commit status against pre-commit hook
+check:
+  ./scripts/check-commit-status
+
 # Build Docker services (API + DB)
 build:
   {{DDC}} build

@@ -29,3 +29,17 @@ node --version
 
 This project uses Node.js `24.16.0`. If your version does not match, install or switch the correct version using a Node version manager such as `nvm` or `asdf`.
 
+#### Pre-commit
+
+This project uses `pre-commit` `4.5.1` to run checks before commits, such as tests, linting, formatting, or security checks. To check if `pre-commit` is installed run:
+
+```
+pre-commit --version
+```
+
+If `pre-commit` is not installed, install version `4.5.1` using one of the following methods:
+
+```
+pip install pre-commit==4.5.1
+```
+
