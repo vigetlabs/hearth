@@ -3,7 +3,7 @@
 api/.bundle
 
 # Ignore all environment files.
-api/.env*
+api/.env
 api/.kamal/secrets*
 
 # Ignore all logfiles and tempfiles.
