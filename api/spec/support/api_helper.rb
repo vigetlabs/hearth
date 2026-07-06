@@ -7,4 +7,3 @@ end
 RSpec.configure do |config|
   config.include ApiHelper, type: :request
 end
-
