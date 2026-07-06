@@ -1,8 +1,14 @@
 import '@/App.css'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <div className='text-error'>Hello, World!</div>
+    <QueryClientProvider client={queryClient}>
+      <div className='text-error'>Hello, World!</div>
+    </QueryClientProvider>
   )
 }
 
