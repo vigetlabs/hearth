@@ -12,6 +12,7 @@ pkgs.mkShell {
     nodejs_24
 
     just
+    pre-commit
   ];
 
   shellHook = ''
