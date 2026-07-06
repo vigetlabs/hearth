@@ -3,21 +3,21 @@ repos:
     hooks:
       - id: api-rspec
         name: Run RSpec
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec rspec
+        entry: bash -lc 'PROJECT=$(git branch --show-current | tr "[:upper:]" "[:lower:]" | sed -E "s/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//"); docker compose -p "$PROJECT" -f docker-compose.dev.yml exec -T api bundle exec rspec'
         language: system
         pass_filenames: false
         files: ^api/
 
       - id: api-rubocop
         name: Run Rubocop
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec rubocop
+        entry: bash -lc 'PROJECT=$(git branch --show-current | tr "[:upper:]" "[:lower:]" | sed -E "s/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//"); docker compose -p "$PROJECT" -f docker-compose.dev.yml exec -T api bundle exec rubocop'
         language: system
         pass_filenames: false
         files: ^api/.*\.rb$
 
       - id: api-brakeman
         name: Run Brakeman
-        entry: docker compose -f docker-compose.dev.yml exec -T api bundle exec brakeman -z
+        entry: bash -lc 'PROJECT=$(git branch --show-current | tr "[:upper:]" "[:lower:]" | sed -E "s/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//"); docker compose -p "$PROJECT" -f docker-compose.dev.yml exec -T api bundle exec brakeman -z'
         language: system
         pass_filenames: false
         files: ^api/
