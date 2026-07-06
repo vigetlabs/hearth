@@ -35,3 +35,10 @@ repos:
         language: system
         pass_filenames: false
         files: ^client/
+
+      - id: client-format-check
+        name: Check client formatting
+        entry: bash -lc 'cd client && npm run format:check'
+        language: system
+        pass_filenames: false
+        files: ^client/
