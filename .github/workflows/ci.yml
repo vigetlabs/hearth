@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  # === API JOBS === #
+  lint_api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.1
+          working-directory: api
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bin/rubocop -f github
+
+  test_spec:
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: api_test
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 4.0.1
+          working-directory: api
+          bundler-cache: true
+
+      - name: Prepare database
+        working-directory: api
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/api_test
+        run: bin/rails db:drop db:create db:schema:load
+
+      - name: Run tests
+        working-directory: api
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/api_test
+        run: bundle exec rspec
+
+  # === CLIENT JOBS ===
+  # lint_client:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run: 
+  #       working-directory: client
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v6
+  #
+  #     - name: Setup node
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version: '24'
+  #         cache: 'npm'
+  #         cache-dependency-path: 'client/package-lock.json'
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Lint code
+  #       run: npm run lint
+  #
+  # type_check:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: client
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v6
+  #
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version: '24'
+  #         cache: 'npm'
+  #         cache-dependency-path: 'client/package-lock.json'
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Type check code
+  #       run: npx tsc --noEmit
+  #
