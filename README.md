@@ -55,7 +55,7 @@ If `just` is not installed, install it using your favorite system package manage
 
 #### Optional: Nix Development Shell
 
-This project includes a Nix development shell through `flake.nix` and `shell.nix`. If you have Nix installed with flakes enabled, you can enter ta project shell with the required development tools by running the following command from the project root:
+This project includes a Nix development shell through `flake.nix` and `shell.nix`. If you have Nix installed with flakes enabled, you can enter the project shell with the required development tools by running the following command from the project root:
 
 ```
 nix develop
