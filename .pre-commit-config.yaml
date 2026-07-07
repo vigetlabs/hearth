@@ -24,21 +24,21 @@ repos:
 
       - id: client-lint
         name: Run client linter
-        entry: bash -lc 'cd client && npm run lint'
+        entry: bash -lc 'npm --prefix client run lint'
         language: system
         pass_filenames: false
         files: ^client/
 
       - id: client-typecheck
         name: Run client typecheck
-        entry: bash -lc 'cd client && npm run typecheck'
+        entry: bash -lc 'npm --prefix client run typecheck'
         language: system
         pass_filenames: false
         files: ^client/
 
       - id: client-format-check
         name: Check client formatting
-        entry: bash -lc 'cd client && npm run format:check'
+        entry: bash -lc 'npm --prefix client run format:check'
         language: system
         pass_filenames: false
         files: ^client/
