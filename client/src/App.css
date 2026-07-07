@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fg-primary: #020403;
+  --color-error: #df3530;
+}
