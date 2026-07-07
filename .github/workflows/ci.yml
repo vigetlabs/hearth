@@ -49,7 +49,18 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config
+        run: |
+          sudo find /etc/apt/sources.list.d -type f \
+            \( -name '*azure*' -o -name '*microsoft*' \) \
+            -delete
+
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential \
+            git \
+            libpq-dev \
+            libyaml-dev \
+            pkg-config
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -81,7 +92,7 @@ jobs:
   lint_client:
     runs-on: ubuntu-latest
     defaults:
-      run: 
+      run:
         working-directory: client
     steps:
       - name: Checkout code
@@ -124,4 +135,3 @@ jobs:
 
       - name: Prettier format check
         run: npm run format:check
-
