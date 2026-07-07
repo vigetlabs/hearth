@@ -1,21 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-compose_project="$(
-  git branch --show-current \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//'
-)"
-
-compose=(docker compose -p "$compose_project" -f docker-compose.dev.yml)
-
 echo "Checking unstaged and untracked files..."
+
 changed_files="$(
-    {
-      git diff --name-only --diff-filter=ACMRD
-      git ls-files --others --exclude-standard
-    } | sort -u
-  )"
+  {
+    git diff --name-only --diff-filter=ACMRD
+    git ls-files --others --exclude-standard
+  } | sort -u
+)"
 
 changed_matching() {
   echo "$changed_files" | grep -Eq "$1"
@@ -27,20 +20,20 @@ if [ -z "$changed_files" ]; then
 fi
 
 echo
-echo "======Changed files ======"
+echo "====== Changed files ======"
 echo "$changed_files"
 echo
-echo "=========================="
+echo "==========================="
 
-if changed_matching '(^api/|^docker-compose\.dev\.yml$|^Gemfile|^Gemfile\.lock$)'; then
+if changed_matching '(^api/|^docker-compose\.dev\.yml$|^api/Gemfile|^api/Gemfile\.lock$)'; then
   echo "API files changed. Running RSpec..."
-  "${compose[@]}" exec -T api bundle exec rspec
+  scripts/compose-api bundle exec rspec
 
   echo "Running Rubocop..."
-  "${compose[@]}" exec -T api bundle exec rubocop
+  scripts/compose-api bundle exec rubocop
 
   echo "Running Brakeman..."
-  "${compose[@]}" exec -T api bundle exec brakeman -z
+  scripts/compose-api bundle exec brakeman -z
 else
   echo "No API files changed. Skipping API checks."
 fi
