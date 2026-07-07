@@ -1,0 +1,44 @@
+repos:
+  - repo: local
+    hooks:
+      - id: api-rspec
+        name: Run RSpec
+        entry: scripts/get-branch-project bundle exec rspec
+        language: system
+        pass_filenames: false
+        files: ^api/
+
+      - id: api-rubocop
+        name: Run Rubocop
+        entry: scripts/get-branch-project bundle exec rubocop
+        language: system
+        pass_filenames: false
+        files: ^api/.*\.rb$
+
+      - id: api-brakeman
+        name: Run Brakeman
+        entry: scripts/get-branch-project bundle exec brakeman -z
+        language: system
+        pass_filenames: false
+        files: ^api/
+
+      - id: client-lint
+        name: Run client linter
+        entry: bash -lc 'npm --prefix client run lint'
+        language: system
+        pass_filenames: false
+        files: ^client/
+
+      - id: client-typecheck
+        name: Run client typecheck
+        entry: bash -lc 'npm --prefix client run typecheck'
+        language: system
+        pass_filenames: false
+        files: ^client/
+
+      - id: client-format-check
+        name: Check client formatting
+        entry: bash -lc 'npm --prefix client run format:check'
+        language: system
+        pass_filenames: false
+        files: ^client/
