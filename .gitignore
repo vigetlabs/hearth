@@ -47,6 +47,7 @@ client/dist
 client/dist-ssr
 client/*.local
 client/.env
+*.tsbuildinfo
 
 # === PERSONAL FILES ===
 inbox.txt.tuxedo-lock
