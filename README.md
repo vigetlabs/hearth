@@ -108,7 +108,7 @@ This project uses pre-commit hooks to help ensure code quality. To install the p
 just setup-precommit
 ```
 
-After installation, the hooks will run automatically when you create a commit. You can also run the checks manually at any time:
+After installation, the hooks will run automatically when you create a commit. You can also run the checks manually to check unstaged + untracked files at any time:
 
 ```
 just check
