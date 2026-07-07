@@ -53,6 +53,16 @@ just --version
 
 If `just` is not installed, install it using your favorite system package manager. Please refer to [just documentation](https://github.com/casey/just). 
 
+#### Optional: Nix Development Shell
+
+This project includes a Nix development shell through `flake.nix` and `shell.nix`. If you have Nix installed with flakes enabled, you can enter ta project shell with the required development tools by running the following command from the project root:
+
+```
+nix develop
+```
+
+The Nix shell provides tooling such as Ruby, Rails, Node.js, TypeScript, `just`, `pre-commit`, and `tig`.
+
 ### Local Development Setup
 
 #### Environment Variables
