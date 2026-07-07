@@ -74,7 +74,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/api_test
         run: bundle exec rspec
 
-  === CLIENT JOBS ===
+  # === CLIENT JOBS ===
   lint_client:
     runs-on: ubuntu-latest
     defaults:
@@ -117,5 +117,8 @@ jobs:
         run: npm ci
 
       - name: Type check code
-        run: npx tsc --noEmit
+        run: npm run typecheck
+
+      - name: Prettier format check
+        run: npm run format:check
 
