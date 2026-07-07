@@ -94,10 +94,11 @@ npm install
 Then start the frontend development server:
 
 ```
-npm run dev
+./dev-start.sh
+
 ```
 
-The local development environment should now be fully running.
+The local development environment should now be fully running. Another option to quickly start the frontend development server once the frontend dependencies have been installed is to run `just vite` at the project root.
 
 #### Pre-commit Setup
 

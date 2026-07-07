@@ -32,6 +32,10 @@ build:
 up:
   {{DDC}} up
 
+# Start the Vite development server 
+vite:
+  cd client && ./dev-start.sh
+
 # Stop dev containers
 down:
   {{DDC}} down
