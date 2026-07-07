@@ -29,11 +29,11 @@ build:
   {{DDC}} build
 
 # Start dev containers in the foreground
-up:
+api:
   {{DDC}} up
 
 # Start the Vite development server 
-vite:
+client:
   cd client && ./dev-start.sh
 
 # Stop dev containers

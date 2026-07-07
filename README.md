@@ -79,7 +79,7 @@ From the project root, you can start the Ruby on Rails API and PostgreSQL databa
 
 ```
 just build
-just up
+just api
 ```
 
 The `just build` command builds the local Docker images, and `just up` starts the development services.
@@ -98,7 +98,7 @@ Then start the frontend development server:
 
 ```
 
-The local development environment should now be fully running. Another option to quickly start the frontend development server once the frontend dependencies have been installed is to run `just vite` at the project root.
+The local development environment should now be fully running. Another option to quickly start the frontend development server once the frontend dependencies have been installed is to run `just client` at the project root.
 
 #### Pre-commit Setup
 
