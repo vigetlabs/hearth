@@ -7,7 +7,7 @@ Rails.application.routes.draw do
       devise_for :users,
         path: "users",
         controllers: {
-          registrations: "users/registrations"
+          registrations: "api/v1/users/registrations"
         }
     end
   end
