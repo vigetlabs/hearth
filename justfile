@@ -48,4 +48,16 @@ reset:
 api-shell:
   {{DDC}} exec api sh
 
+rubocop:
+  {{DDC}} exec -T api sh -c 'bundle exec rubocop'
+
+rubocop-fix:
+  {{DDC}} exec -T api sh -c 'bundle exec rubocop -a'
+
+rspec:
+  {{DDC}} exec -T api sh -c 'bundle exec rspec'
+
+prettier:
+  cd client && npm run format
+
 
