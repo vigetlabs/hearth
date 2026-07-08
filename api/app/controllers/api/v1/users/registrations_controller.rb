@@ -1,4 +1,4 @@
-class Api::V1::Users::RegistrationsController < ApplicationController
+class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
 
   respond_to :json
