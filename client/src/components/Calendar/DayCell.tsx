@@ -1,4 +1,4 @@
-import { isSameDay } from "@/util/date";
+import { isSameDay } from "@/util/dates/date";
 
 interface DayCellProps {
   date: Date;

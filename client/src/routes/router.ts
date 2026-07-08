@@ -20,11 +20,11 @@ export const router = createBrowserRouter([
           { path: "login", Component: Login },
         ],
       },
+      {
+        id: "calendar",
+        path: "/calendar",
+        Component: CalendarPage,
+      },
     ],
-  },
-  {
-    id: "calendar",
-    path: "/calendar",
-    Component: CalendarPage,
   },
 ]);

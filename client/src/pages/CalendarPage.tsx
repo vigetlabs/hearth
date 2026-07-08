@@ -1,6 +1,6 @@
-import { Calendar } from "@/components/Calendar";
-import type { EventsByDate } from "@/types/calendar";
-import { addDays, startOfWeek, toDateKey } from "@/util/date";
+import { Calendar } from "@/components/Calendar/Calendar";
+import type { EventsByDate } from "@/types/Calendar/calendar";
+import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 
 // Sample data anchored to the current week so it shows up in both views.
 const weekStart = startOfWeek(new Date());
