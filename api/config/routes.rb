@@ -8,7 +8,11 @@ Rails.application.routes.draw do
 
       devise_for :users,
         path: "users",
+        path_names: {
+          sign_in: "login"
+        },
         controllers: {
+          sessions: "api/v1/users/sessions",
           registrations: "api/v1/users/registrations"
         }
     end
