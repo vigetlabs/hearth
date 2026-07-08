@@ -15,6 +15,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "up" => "rails/health#show", as: :rails_health_check
       get "health", to: "health#show"
+
+      scope "users" do
+        get "/me", to: "users/users#me"
+      end
     end
   end
 end
