@@ -1,6 +1,8 @@
 require_relative "boot"
+require_relative "../app/middleware/jwt_cookie_middleware.rb"
 
 require "rails/all"
+
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -15,6 +17,8 @@ module Api
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+    config.middleware.use JwtCookieMiddleware
+    config.middleware.use ActionDispatch::Cookies
 
     # Configuration for the application, engines, and railties goes here.
     #
