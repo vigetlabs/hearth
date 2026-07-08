@@ -1,4 +1,4 @@
-class Api::V1::Users::SessionsController < ApplicationController
+class Api::V1::Users::SessionsController < Devise::SessionsController
   include ApiResponse
 
   respond_to :json
