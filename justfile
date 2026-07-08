@@ -48,6 +48,9 @@ reset:
 api-shell:
   {{DDC}} exec api sh
 
+swaggerize:
+  {{DDC}} exec -T api sh -c 'bundle exec rails rswag:specs:swaggerize'
+
 rubocop:
   {{DDC}} exec -T api sh -c 'bundle exec rubocop'
 
