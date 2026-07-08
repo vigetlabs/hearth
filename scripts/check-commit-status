@@ -27,13 +27,13 @@ echo "==========================="
 
 if changed_matching '(^api/|^docker-compose\.dev\.yml$|^api/Gemfile|^api/Gemfile\.lock$)'; then
   echo "API files changed. Running RSpec..."
-  scripts/compose-api bundle exec rspec
+  scripts/get-branch-project bundle exec rspec
 
   echo "Running Rubocop..."
-  scripts/compose-api bundle exec rubocop
+  scripts/get-branch-project bundle exec rubocop
 
   echo "Running Brakeman..."
-  scripts/compose-api bundle exec brakeman -z
+  scripts/get-branch-project bundle exec brakeman -z
 else
   echo "No API files changed. Skipping API checks."
 fi
