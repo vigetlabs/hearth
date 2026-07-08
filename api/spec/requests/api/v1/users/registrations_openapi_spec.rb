@@ -34,7 +34,7 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
       end
 
       response "422", "invalid user params" do
-        schema "$ref" => "#/components/schemas/validation_error_response"
+        schema OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
 
         let(:payload) do
           {
