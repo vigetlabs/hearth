@@ -19,6 +19,7 @@ class Api::V1::Users::RegistrationsController < ApplicationController
     else
       error_response(
         message: "User could not be created",
+        errors: validation_errors(new_user),
       )
     end
   end
@@ -34,5 +35,14 @@ class Api::V1::Users::RegistrationsController < ApplicationController
         :password,
         :password_confirmation,
       )
+  end
+
+  def validation_errors(record)
+    record.errors.map do |error|
+      {
+        field: error.attribute.to_s,
+        message: error.message
+      }
+    end
   end
 end

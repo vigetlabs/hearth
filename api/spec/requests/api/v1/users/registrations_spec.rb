@@ -63,8 +63,31 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
 
       it "returns an error response" do
         post api_path("/users"), params: invalid_params
+        expect(response).to have_http_status(:unprocessable_content)
         json = JSON.parse(response.body)
+
         expect(json["status"]["message"]).to eq("User could not be created")
+        expect(json["errors"]).to be_an(Array)
+
+        expect(json["errors"]).to include(
+          hash_including(
+            "field" => "email",
+            "message" => "can't be blank"
+          )
+        )
+        expect(json["errors"]).to include(
+          hash_including(
+            "field" => "first_name",
+            "message" => "can't be blank"
+          )
+        )
+
+        expect(json["errors"]).to include(
+          hash_including(
+            "field" => "last_name",
+            "message" => "can't be blank"
+          )
+        )
       end
     end
   end

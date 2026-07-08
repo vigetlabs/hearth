@@ -41,25 +41,9 @@ RSpec.configure do |config|
           user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
 
+          error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
           error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
-
-          validation_error_response: {
-            type: :object,
-            required: %w[status errors],
-            properties: {
-              status: {
-                type: :object,
-                required: %w[message],
-                properties: {
-                  message: { type: :string }
-                }
-              },
-              errors: {
-                type: :array,
-                items: { type: :string }
-              }
-            }
-          }
+          validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
         }
       }
     }
