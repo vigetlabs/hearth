@@ -63,4 +63,5 @@ rspec:
 prettier:
   cd client && npm run format
 
-
+types:
+  cd client && npm run generate:api-types
