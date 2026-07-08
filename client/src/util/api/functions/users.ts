@@ -1,6 +1,10 @@
 import { api } from "@/util/api/api";
 
-import type { CreateUserRequest, UserResponse } from "@/types/api/users";
+import type {
+  CreateUserRequest,
+  UserResponse,
+  LoginUserRequest,
+} from "@/types/api/users";
 
 export function createUserObjectPayload(
   email: string,
@@ -30,3 +34,35 @@ export async function createUser(
 
   return response;
 }
+
+export function createUserLoginObjectPayload(
+  email: string,
+  password: string,
+): LoginUserRequest {
+  return {
+    user: {
+      email,
+      password,
+    },
+  };
+}
+
+export async function loginUser(
+  payload: LoginUserRequest,
+): Promise<UserResponse> {
+  const response = await api
+    .post("/users/login", {
+      json: payload,
+    })
+    .json<UserResponse>();
+
+  return response;
+}
+
+// export async function loginUser(fields: RequiredUserFields) {
+//   const response: UserResponse = await api.post("/users/login", {
+//     json: createUserPayload(fields.username, fields.password)
+//   }).json();
+//
+//   return response.data.user;
+// }
