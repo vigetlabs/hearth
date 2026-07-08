@@ -1,0 +1,211 @@
+---
+openapi: 3.0.1
+info:
+  title: Intern Project API
+  version: v1
+paths:
+  "/api/v1/users":
+    post:
+      summary: Creates a user account
+      tags:
+      - Users
+      parameters: []
+      responses:
+        '201':
+          description: user created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - status
+                - data
+                properties:
+                  status:
+                    type: object
+                    required:
+                    - message
+                    properties:
+                      message:
+                        type: string
+                  data:
+                    type: object
+                    required:
+                    - user
+                    properties:
+                      user:
+                        type: object
+                        required:
+                        - id
+                        - email
+                        - first_name
+                        - last_name
+                        properties:
+                          id:
+                            type: integer
+                          email:
+                            type: string
+                            format: email
+                          first_name:
+                            type: string
+                          last_name:
+                            type: string
+        '422':
+          description: invalid user params
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/validation_error_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - first_name
+                  - last_name
+                  - password
+                  - password_confirmation
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    password:
+                      type: string
+                      format: password
+                    password_confirmation:
+                      type: string
+                      format: password
+        required: true
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com
+components:
+  schemas:
+    status:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          type: string
+    user:
+      type: object
+      required:
+      - id
+      - email
+      - first_name
+      - last_name
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+    user_response:
+      type: object
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          type: object
+          required:
+          - user
+          properties:
+            user:
+              type: object
+              required:
+              - id
+              - email
+              - first_name
+              - last_name
+              properties:
+                id:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+    create_user_request:
+      type: object
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          required:
+          - email
+          - first_name
+          - last_name
+          - password
+          - password_confirmation
+          properties:
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+            password:
+              type: string
+              format: password
+            password_confirmation:
+              type: string
+              format: password
+    error_response:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: object
+          required:
+          - message
+          properties:
+            message:
+              type: string
+    validation_error_response:
+      type: object
+      required:
+      - status
+      - errors
+      properties:
+        status:
+          type: object
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        errors:
+          type: array
+          items:
+            type: string

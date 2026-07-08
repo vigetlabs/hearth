@@ -23,7 +23,7 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
 
       it "returns a success response" do
         post api_path("/users"), params: valid_params
-        expect(response).to have_http_status(:ok)
+        expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
         expect(json["status"]["message"]).to eq("User created successfully")
         user_data = json["data"]["user"]
@@ -59,12 +59,6 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
         expect do
           post api_path("/users"), params: invalid_params
         end.not_to change(User, :count)
-      end
-
-      it "returns an error response" do
-        post api_path("/users"), params: invalid_params
-        json = JSON.parse(response.body)
-        expect(json["status"]["message"]).to eq("User could not be created")
       end
 
       it "returns an error response" do

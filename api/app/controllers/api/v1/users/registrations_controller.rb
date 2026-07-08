@@ -14,7 +14,7 @@ class Api::V1::Users::RegistrationsController < ApplicationController
       success_response(
         data: data,
         message: "User created successfully",
-        status: :ok
+        status: :created
       )
     else
       error_response(
