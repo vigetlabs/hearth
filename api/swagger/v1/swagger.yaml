@@ -54,6 +54,20 @@ paths:
             schema:
               "$ref": "#/components/schemas/login_user_request"
         required: true
+  "/api/v1/users/me":
+    get:
+      summary: Fetches user information for current authenticated user
+      tags:
+      - Users
+      security:
+      - cookie_auth: []
+      responses:
+        '200':
+          description: fetched user successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/user_response"
 servers:
 - url: https://{defaultHost}
   variables:
