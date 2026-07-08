@@ -23,18 +23,7 @@ export interface paths {
       };
       requestBody: {
         content: {
-          "application/json": {
-            user: {
-              /** Format: email */
-              email: string;
-              first_name: string;
-              last_name: string;
-              /** Format: password */
-              password: string;
-              /** Format: password */
-              password_confirmation: string;
-            };
-          };
+          "application/json": components["schemas"]["create_user_request"];
         };
       };
       responses: {
@@ -44,22 +33,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": {
-              /** @description Shared status metadata returned by API responses. */
-              status: {
-                message: string;
-              };
-              data: {
-                /** @description Public user account data returned by the API. */
-                user: {
-                  id: number;
-                  /** Format: email */
-                  email: string;
-                  first_name: string;
-                  last_name: string;
-                };
-              };
-            };
+            "application/json": components["schemas"]["user_response"];
           };
         };
         /** @description invalid user params */
@@ -68,16 +42,56 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": {
-              /** @description Shared status metadata returned by API responses. */
-              status: {
-                message: string;
-              };
-              errors: {
-                field: string;
-                message: string;
-              }[];
-            };
+            "application/json": components["schemas"]["validation_error_response"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/users/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Logs in a user to their account */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["login_user_request"];
+        };
+      };
+      responses: {
+        /** @description logged in successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["user_response"];
+          };
+        };
+        /** @description invalid login credentials */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["user_devise_invalid_login_response"];
           };
         };
       };
@@ -120,6 +134,14 @@ export interface components {
           last_name: string;
         };
       };
+    };
+    /** @description Full response body for invalid login request */
+    user_devise_invalid_login_response: {
+      /**
+       * @description Devise authentication error message
+       * @example Invalid Email or password.
+       */
+      error: string;
     };
     /** @description Request body for creating a new user account */
     create_user_request: {
