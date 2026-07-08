@@ -39,3 +39,5 @@ end
 
 gem "devise", "~> 5.0"
 gem "jsonapi-serializer", "~> 2.2"
+gem "rswag", "~> 2.17"
+gem "ostruct"
