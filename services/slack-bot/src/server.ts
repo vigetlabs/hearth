@@ -1,6 +1,7 @@
 import http from 'node:http'
 import { assertConfig, config } from './config.ts'
 import { verifySlackSignature } from './verify.ts'
+import { UPDATE_SCHEDULE } from './prompt.ts'
 
 // Signature verification needs the signing secret.
 assertConfig(['signingSecret'])
@@ -13,8 +14,9 @@ const server = http.createServer((req, res) => {
 
   let raw = ''
   req.on('data', (c) => (raw += c))
-  req.on('end', async () => {
-    // This endpoint is public and mutates data — verify the signature first.
+  req.on('end', () => {
+    // This endpoint is public and acts on user input — verify the signature
+    // against the raw body first.
     const ok = verifySlackSignature(
       raw,
       req.headers['x-slack-request-timestamp'] as string,
@@ -25,34 +27,16 @@ const server = http.createServer((req, res) => {
       return
     }
 
-    const body = new URLSearchParams(raw)
-    const payload = JSON.parse(body.get('payload')!)
-    const action = payload.actions[0]
-    const recordId = action.value // the id we encoded on the button
-    const yes = action.action_id === 'record_yes'
-
-    await updateRecord(recordId, yes) // <-- your domain logic
-
-    // Ack fast (must be < 3s). Swap the message for a confirmation by POSTing to
-    // payload.response_url with replace_original: true.
-    await fetch(payload.response_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        replace_original: true,
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `Thanks <@${payload.user.id}>! Recorded ✅`,
-            },
-          },
-        ],
-      }),
-    })
-
+    // Ack immediately (Slack requires a response within 3s), then do the work.
     res.writeHead(200).end()
+
+    try {
+      const body = new URLSearchParams(raw)
+      const payload = JSON.parse(body.get('payload') ?? '{}') as BlockActions
+      handleInteraction(payload)
+    } catch (err) {
+      console.error('failed to handle interaction:', err)
+    }
   })
 })
 
@@ -63,7 +47,28 @@ server.listen(config.port, () => {
   )
 })
 
-async function updateRecord(id: string, yes: boolean): Promise<void> {
-  // Replace with a call into the Rails API / your domain persistence.
-  console.log(`record ${id} -> ${yes ? 'yes' : 'no'}`)
+type BlockActions = {
+  type?: string
+  user?: { id?: string }
+  actions?: Array<{ action_id?: string; value?: string }>
+}
+
+function handleInteraction(payload: BlockActions): void {
+  if (payload.type !== 'block_actions') return
+
+  const action = payload.actions?.[0]
+  if (!action) return
+
+  switch (action.action_id) {
+    case UPDATE_SCHEDULE:
+      // The button also carries a `url`, so Slack has already opened the editor
+      // in the user's browser. We just record the click-through for now — this
+      // is the seam where you'd persist intent via the Rails API.
+      console.log(
+        `user ${payload.user?.id} clicked Update Schedule (record ${action.value})`,
+      )
+      break
+    default:
+      console.log(`unhandled action: ${action.action_id}`)
+  }
 }

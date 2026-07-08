@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "start": "node --env-file=.env src/server.ts",
+    "schedule": "node --env-file=.env src/scheduler.ts",
+    "send-now": "node --env-file=.env src/send_now.ts",
     "send-demo": "node --env-file=.env src/send-demo.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@slack/web-api": "^7.11.0"
+    "@slack/web-api": "^7.11.0",
+    "cron": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
