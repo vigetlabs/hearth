@@ -1,10 +1,20 @@
 import { createBrowserRouter } from "react-router";
 import App from "@/App";
 
+import Index from "@/pages/Index/Index";
+import Signup from "@/pages/Signup/Signup";
+
 export const router = createBrowserRouter([
   {
     id: "root",
     path: "/",
     Component: App,
+    children: [
+      { index: true, Component: Index },
+      {
+        path: "users",
+        children: [{ path: "signup", Component: Signup }],
+      },
+    ],
   },
 ]);
