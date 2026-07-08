@@ -13,8 +13,6 @@ export interface SlackService {
   listActiveGroupMembers(usergroupId: string): Promise<SlackMember[]>
 }
 
-// Same "real, active person" test the reference app persists to its DB — here we
-// just apply it live at send time.
 function isActiveMember(u: {
   deleted?: boolean
   is_bot?: boolean
@@ -37,10 +35,6 @@ export class LiveSlackService implements SlackService {
     this.botClient = botClient
   }
 
-  // Every active real person in the workspace — the same pool the reference app
-  // (ketchup) targets. users.list returns everyone who ever joined, paginated,
-  // so we walk the cursor and filter each page to real, active people. Uses the
-  // bot token (needs users:read + users:read.email scopes).
   async listActiveUsers(): Promise<SlackMember[]> {
     const members: SlackMember[] = []
     let cursor: string | undefined

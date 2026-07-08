@@ -7,12 +7,13 @@ export const UPDATE_SCHEDULE = 'update_schedule'
 // Where the button sends people to edit their schedule. Stubbed for now.
 const SCHEDULE_EDITOR_URL = 'https://example.com'
 
-type DayLocation = 'office' | 'remote'
+type DayLocation = 'falls church' | 'durham' | 'remote'
 type ScheduleDay = { label: string; location: DayLocation }
 
 const LOCATION_META: Record<DayLocation, { emoji: string; label: string }> = {
-  office: { emoji: '🏢', label: 'In office' },
-  remote: { emoji: '🏠', label: 'Remote' },
+  'falls church': { emoji: '🌸', label: 'Falls Church' },
+  'durham': { emoji: '🐂', label: 'Durham' },
+  'remote': { emoji: '🏠', label: 'Remote' },
 }
 
 // Mock data: next week's Mon–Fri with a fixed in/out pattern. Swap this out for
@@ -20,10 +21,10 @@ const LOCATION_META: Record<DayLocation, { emoji: string; label: string }> = {
 function nextWeekSchedule(): ScheduleDay[] {
   const monday = nextMonday()
   const pattern: DayLocation[] = [
-    'office',
+    'falls church',
     'remote',
-    'office',
-    'office',
+    'durham',
+    'falls church',
     'remote',
   ]
   const fmt = new Intl.DateTimeFormat('en-US', {
@@ -47,6 +48,7 @@ function nextMonday(): Date {
   return d
 }
 
+// One line per day: emoji, bold date, and the office location.
 function formatSchedule(days: ScheduleDay[]): string {
   return days
     .map((d) => {
@@ -67,26 +69,29 @@ export function buildPrompt(recordId: string): {
   const range = `${week[0]!.label} – ${week[week.length - 1]!.label}`
 
   return {
-    text: `Your schedule for next week (${range})`,
+    text: `Your work locations for next week (${range})`,
     blocks: [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `:calendar:  *Here's your schedule for next week!*\n_${range}_`,
+          text: `:calendar:  *Here are your work locations for next week!*`,
         },
-      },
-      { type: 'divider' },
-      {
-        type: 'section',
-        text: { type: 'mrkdwn', text: formatSchedule(week) },
       },
       { type: 'divider' },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*Need to change something?*\nUpdate your in-office days for next week.',
+          text: formatSchedule(week),
+        },
+      },
+      { type: 'divider' },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*Need to change something? Want to spy on coworkers\' plans?* \nUpdate your in-office days to coordinate with your team.',
         },
       },
       {
@@ -102,6 +107,9 @@ export function buildPrompt(recordId: string): {
           },
         ],
       },
+      {
+        type: 'divider'
+      }
     ],
   }
 }
