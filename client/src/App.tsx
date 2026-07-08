@@ -5,7 +5,9 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import { getHealth } from "@/util/api/health";
+import { getHealth } from "@/util/api/functions/health";
+
+import SignupForm from "@/components/SignupForm/SignupForm";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="text-error">Hello, World!</div>
       <HealthCheck />
+      <SignupForm />
     </QueryClientProvider>
   );
 }
