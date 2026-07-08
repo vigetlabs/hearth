@@ -1,6 +1,11 @@
 module OpenApi::Schemas::V1::Users
+  # USER_OBJECT: Public user object returned by the API
+  #
+  # This is not a full response body. It only describes the user resource itself. Sensitive feilds like password and
+  # encrypted passwords should never be included in this schema
   USER_OBJECT = {
     type: :object,
+    description: "Public user account data returned by the API.",
     required: %w[
       id
       email
@@ -15,8 +20,13 @@ module OpenApi::Schemas::V1::Users
     }
   }
 
+  # CREATE_USER_REQUEST: Request body for creating a user account
+  #
+  # Use this as the request body schema for `POST /api/v1/users`. This schema includes password fields because
+  # clients need to submit them when creating an account. These fields do not appear in USER_OBJECT
   CREATE_USER_REQUEST = {
     type: :object,
+    description: "Request body for creating a new user account",
     required: %w[user],
     properties: {
       user: {
@@ -39,8 +49,13 @@ module OpenApi::Schemas::V1::Users
     }
   }
 
+  # USER_RESPONSE: Full response body for returning one user
+  #
+  # Use this when an endpoint returns a single user wrapped in the standard API response structure. Examples include
+  # successful registration, reading the current user, or updating account information
   USER_RESPONSE = {
     type: :object,
+    description: "Full response body for endpoints that return one user.",
     required: %w[status data],
     properties: {
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
