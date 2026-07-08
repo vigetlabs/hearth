@@ -16,6 +16,7 @@ export default function Index() {
     <div>
       <div>API status: {data.status}</div>
       <Link to="/users/signup">Signup</Link>
+      <Link to="/users/login">Login</Link>
     </div>
   );
 }

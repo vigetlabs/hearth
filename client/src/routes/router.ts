@@ -3,6 +3,7 @@ import App from "@/App";
 
 import Index from "@/pages/Index/Index";
 import Signup from "@/pages/Signup/Signup";
+import Login from "@/pages/Login/Login";
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +14,10 @@ export const router = createBrowserRouter([
       { index: true, Component: Index },
       {
         path: "users",
-        children: [{ path: "signup", Component: Signup }],
+        children: [
+          { path: "signup", Component: Signup },
+          { path: "login", Component: Login },
+        ],
       },
     ],
   },
