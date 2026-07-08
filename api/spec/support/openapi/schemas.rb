@@ -14,9 +14,5 @@ module OpenApi
 end
 
 require_relative "schemas/v1/statuses/status"
-
 require_relative "schemas/v1/errors/errors"
-
-require_relative "schemas/v1/users/user"
-require_relative "schemas/v1/users/user_response"
-require_relative "schemas/v1/users/create_user_request"
+require_relative "schemas/v1/users/users"
