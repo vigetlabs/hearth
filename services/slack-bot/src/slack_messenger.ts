@@ -9,25 +9,25 @@ type Result<T = {}> = { success: false } | ({ success: true } & T)
 // sends into no-ops so you can run locally without spamming a workspace.
 export class SlackMessenger {
   private slack: SlackService
-  private userIds: string[]
+  private userId?: string
 
-  constructor(slack: SlackService, userIds: string[] = []) {
+  constructor(slack: SlackService, userId?: string) {
     this.slack = slack
-    this.userIds = userIds
+    this.userId = userId
   }
 
   private get enabled(): boolean {
     return config.useSlack
   }
 
-  // DM one user, or a group DM if userIds has several.
+  // DM a single user.
   async sendDirectMessage({ text, blocks }: SendParams): Promise<Result> {
     if (!this.enabled) return { success: true }
-    if (this.userIds.length === 0) throw new Error('no user ids for DM')
+    if (!this.userId) throw new Error('no user id for DM')
 
     try {
       const { channel } = await this.slack.botClient.conversations.open({
-        users: this.userIds.join(','),
+        users: this.userId,
       })
       if (!channel?.id) throw new Error('no channel id')
 

@@ -48,7 +48,6 @@ function nextMonday(): Date {
   return d
 }
 
-// One line per day: emoji, bold date, and the office location.
 function formatSchedule(days: ScheduleDay[]): string {
   return days
     .map((d) => {
@@ -58,9 +57,6 @@ function formatSchedule(days: ScheduleDay[]): string {
     .join('\n')
 }
 
-// The weekly prompt: a nicely styled schedule for next week plus a button to
-// update it. `recordId` travels on the button `value` so the interactivity
-// handler can tie a click back to this send.
 export function buildPrompt(recordId: string): {
   text: string
   blocks: KnownBlock[]
@@ -107,9 +103,6 @@ export function buildPrompt(recordId: string): {
           },
         ],
       },
-      {
-        type: 'divider'
-      }
     ],
   }
 }

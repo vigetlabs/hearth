@@ -10,7 +10,7 @@ Runs on Node 24's native TypeScript support — no build step, no compiler.
 1. Create an app at <https://api.slack.com/apps> → **From scratch**, and pick
    your workspace. (One app per environment is a good pattern.)
 2. **OAuth & Permissions → Bot Token Scopes**, add:
-   `chat:write`, `im:write`, `mpim:write`, `users:read`, `usergroups:read`.
+   `chat:write`, `im:write`, `users:read`, `usergroups:read`.
 3. Click **Install to Workspace** and authorize. Copy the **Bot User OAuth
    Token** (`xoxb-…`) from the top of that page.
 4. **Basic Information → App Credentials**, copy the **Signing Secret**.

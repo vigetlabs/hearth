@@ -25,7 +25,7 @@ export async function sendWeeklyPrompt(
   const outcomes: SendOutcome[] = []
   for (const member of members) {
     if (!member.id) continue
-    const res = await new SlackMessenger(slack, [member.id]).sendDirectMessage(
+    const res = await new SlackMessenger(slack, member.id).sendDirectMessage(
       message,
     )
     outcomes.push({ id: member.id, success: res.success })
