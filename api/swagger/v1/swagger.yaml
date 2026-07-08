@@ -218,6 +218,26 @@ components:
             password_confirmation:
               type: string
               format: password
+    login_user_request:
+      type: object
+      description: Request body for logging in to a user account.
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          description: Credentials for the user account being authenticated.
+          required:
+          - email
+          - password
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+              format: password
+              writeOnly: true
     error:
       type: object
       description: One individual error detail, usually used inside an errors array.

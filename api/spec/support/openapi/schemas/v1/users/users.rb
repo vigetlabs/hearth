@@ -49,6 +49,34 @@ module OpenApi::Schemas::V1::Users
     }
   }
 
+  # LOGIN_USER_REQUEST: Request body for logging in to a user account
+  #
+  # Use this as the request body schema for `POST /api/v1/users/login`. This schema includes credentials the client
+  # must submit to authenticate
+  LOGIN_USER_REQUEST = {
+    type: :object,
+    description: "Request body for logging in to a user account.",
+    required: %w[user],
+    properties: {
+      user: {
+        type: :object,
+        description: "Credentials for the user account being authenticated.",
+        required: %w[email password],
+        properties: {
+          email: {
+            type: :string,
+            format: :email
+          },
+          password: {
+            type: :string,
+            format: :password,
+            writeOnly: true
+          }
+        }
+      }
+    }
+  }
+
   # USER_RESPONSE: Full response body for returning one user
   #
   # Use this when an endpoint returns a single user wrapped in the standard API response structure. Examples include

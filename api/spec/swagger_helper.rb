@@ -40,6 +40,7 @@ RSpec.configure do |config|
           user: OpenApi::Schemas::V1::Users::USER_OBJECT,
           user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
+          login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
 
           error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
           error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
