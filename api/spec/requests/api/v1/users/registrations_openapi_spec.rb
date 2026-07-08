@@ -11,11 +11,11 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
       parameter name: :payload,
         in: :body,
         required: true,
-        schema: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST
+        schema: { "$ref" => "#/components/schemas/create_user_request" }
 
       response "201", "user created successfully" do
         # SUCCESS RESPONSE SCHEMA
-        schema OpenApi::Schemas::V1::Users::USER_RESPONSE
+        schema "$ref" => "#/components/schemas/user_response"
 
           # INPUT DATA TO TEST `200` CASE
           let(:payload) do
@@ -35,6 +35,7 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
 
       response "422", "invalid user params" do
         schema OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
+        schema "$ref" => "#/components/schemas/validation_error_response"
 
         let(:payload) do
           {
