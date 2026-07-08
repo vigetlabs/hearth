@@ -2,7 +2,6 @@
 // Loaded via `node --env-file=.env` (see package.json scripts).
 export const config = {
   botToken: process.env.SLACK_BOT_TOKEN,
-  userToken: process.env.SLACK_USER_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   usergroupId: process.env.SLACK_USERGROUP_ID,
   useSlack: process.env.USE_SLACK === 'true',

@@ -4,7 +4,7 @@
 import { assertConfig } from './config.ts'
 import { sendWeeklyPrompt } from './send_prompt.ts'
 
-assertConfig(['botToken', 'usergroupId'])
+assertConfig(['botToken'])
 
 const outcomes = await sendWeeklyPrompt()
 const ok = outcomes.filter((o) => o.success).length

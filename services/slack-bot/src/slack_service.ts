@@ -9,7 +9,6 @@ export type SlackMember = {
 // An interface plus a live implementation, so tests can inject a fake.
 export interface SlackService {
   botClient: WebClient
-  userClient: WebClient
   listActiveUsers(): Promise<SlackMember[]>
   listActiveGroupMembers(usergroupId: string): Promise<SlackMember[]>
 }
@@ -25,27 +24,34 @@ function isActiveMember(u: {
   return (
     u.deleted === false &&
     u.is_bot === false &&
-    u.is_restricted === false &&
+    u.is_restricted === false && // contractors / guests
+    u.name !== 'vl' && // shared vl@viget.com account, not a person (no-op on other workspaces)
     u.name !== 'slackbot'
   )
 }
 
 export class LiveSlackService implements SlackService {
   botClient: WebClient
-  userClient: WebClient
 
-  constructor(
-    botClient = new WebClient(config.botToken),
-    userClient = new WebClient(config.userToken),
-  ) {
+  constructor(botClient = new WebClient(config.botToken)) {
     this.botClient = botClient
-    this.userClient = userClient
   }
 
-  // users.list returns everyone who ever joined — filter to real, active people.
+  // Every active real person in the workspace — the same pool the reference app
+  // (ketchup) targets. users.list returns everyone who ever joined, paginated,
+  // so we walk the cursor and filter each page to real, active people. Uses the
+  // bot token (needs users:read + users:read.email scopes).
   async listActiveUsers(): Promise<SlackMember[]> {
-    const res = await this.userClient.users.list({})
-    return (res.members ?? []).filter(isActiveMember)
+    const members: SlackMember[] = []
+    let cursor: string | undefined
+
+    do {
+      const res = await this.botClient.users.list({ limit: 200, cursor })
+      members.push(...(res.members ?? []).filter(isActiveMember))
+      cursor = res.response_metadata?.next_cursor || undefined
+    } while (cursor)
+
+    return members
   }
 
   // Resolve a Slack user group to its members, then keep only active accounts.
@@ -71,7 +77,6 @@ export class LiveSlackService implements SlackService {
 // For tests: no network, returns whatever roster you hand it.
 export class FakeSlackService implements SlackService {
   botClient = {} as WebClient
-  userClient = {} as WebClient
   private users: SlackMember[]
 
   constructor(users: SlackMember[] = []) {

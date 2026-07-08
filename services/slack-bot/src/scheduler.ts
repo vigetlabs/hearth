@@ -5,7 +5,7 @@ import { CronJob } from 'cron'
 import { assertConfig } from './config.ts'
 import { sendWeeklyPrompt } from './send_prompt.ts'
 
-assertConfig(['botToken', 'usergroupId'])
+assertConfig(['botToken'])
 
 // Fridays at 12:00, Eastern (handles EST/EDT automatically via the timezone).
 const job = CronJob.from({
