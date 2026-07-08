@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import App from "@/App";
+import { CalendarPage } from "@/pages/CalendarPage";
 
 import Index from "@/pages/Index/Index";
 import Signup from "@/pages/Signup/Signup";
@@ -18,6 +19,11 @@ export const router = createBrowserRouter([
           { path: "signup", Component: Signup },
           { path: "login", Component: Login },
         ],
+      },
+      {
+        id: "calendar",
+        path: "/calendar",
+        Component: CalendarPage,
       },
     ],
   },
