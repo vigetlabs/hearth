@@ -54,6 +54,7 @@ inbox.txt.tuxedo-lock
 todo.txt
 .direnv/
 .direnv/bin
+.gem/
 
 
 
