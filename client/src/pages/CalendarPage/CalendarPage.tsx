@@ -12,7 +12,7 @@ const sampleEvents: EventsByDate = {
   [toDateKey(addDays(weekStart, 15))]: ["Heidi", "Ivan"],
 };
 
-export function CalendarPage() {
+export default function CalendarPage() {
   return (
     <div className="mx-auto max-w-4xl p-6">
       <h1 className="mb-4 text-xl font-semibold text-gray-900">Schedule</h1>

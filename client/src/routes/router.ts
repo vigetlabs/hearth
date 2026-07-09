@@ -1,10 +1,13 @@
 import { createBrowserRouter } from "react-router";
 import App from "@/App";
-import { CalendarPage } from "@/pages/CalendarPage";
 
-import Index from "@/pages/Index/Index";
-import Signup from "@/pages/Signup/Signup";
-import Login from "@/pages/Login/Login";
+import { authLoader } from "@/routes/loaders/authLoader";
+
+import IndexPage from "@/pages/IndexPage/IndexPage";
+import SignupPage from "@/pages/SignupPage/SignupPage";
+import LoginPage from "@/pages/LoginPage/LoginPage";
+import ProfilePage from "@/pages/ProfilePage/ProfilePage";
+import CalendarPage from "@/pages/CalendarPage/CalendarPage";
 
 export const router = createBrowserRouter([
   {
@@ -12,18 +15,18 @@ export const router = createBrowserRouter([
     path: "/",
     Component: App,
     children: [
-      { index: true, Component: Index },
+      { index: true, Component: IndexPage },
       {
         path: "users",
         children: [
-          { path: "signup", Component: Signup },
-          { path: "login", Component: Login },
+          { path: "signup", Component: SignupPage },
+          { path: "login", Component: LoginPage },
+          { path: "profile", Component: ProfilePage, loader: authLoader },
         ],
       },
       {
-        id: "calendar",
-        path: "/calendar",
-        Component: CalendarPage,
+        path: "calendar",
+        children: [{ index: true, Component: CalendarPage }],
       },
     ],
   },
