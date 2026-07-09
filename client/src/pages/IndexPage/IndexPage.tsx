@@ -2,7 +2,7 @@ import { getHealth } from "@/util/api/functions/health";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
-export default function Index() {
+export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["health"],
     queryFn: getHealth,
