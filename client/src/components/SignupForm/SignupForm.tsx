@@ -28,9 +28,8 @@ export default function SignupForm() {
 
     createUserMutation.mutate(payload, {
       onSuccess: () => {
-        // LOG RIGHT NOW TO DO SOMETHING
-        // @TODO: Add more functionality
-        navigate("/users/login");
+        // Head into the office picker directly after the account is created.
+        navigate("/users/office");
       },
       onError: async () => {
         // @TODO: Add error handling

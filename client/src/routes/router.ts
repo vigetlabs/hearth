@@ -5,6 +5,7 @@ import { authLoader } from "@/routes/loaders/authLoader";
 
 import IndexPage from "@/pages/IndexPage/IndexPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
+import OfficePickerPage from "@/pages/OfficePickerPage/OfficePickerPage";
 import LoginPage from "@/pages/LoginPage/LoginPage";
 import ProfilePage from "@/pages/ProfilePage/ProfilePage";
 import CalendarPage from "@/pages/CalendarPage/CalendarPage";
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
         path: "users",
         children: [
           { path: "signup", Component: SignupPage },
+          { path: "office", Component: OfficePickerPage },
           { path: "login", Component: LoginPage },
           { path: "profile", Component: ProfilePage, loader: authLoader },
         ],
