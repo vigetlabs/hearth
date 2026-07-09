@@ -1,0 +1,77 @@
+// The schedule domain + its persistence seam.
+//
+// Today `InMemoryScheduleStore` keeps everything in a Map so the whole in-DM
+// editing flow works with no backend. Later, a `LiveScheduleStore` implementing
+// the same interface will call the Rails API — one endpoint keyed by user id,
+// body = the whole week (see setSchedule) — and nothing else in the bot changes.
+
+export type DayLocation = 'falls church' | 'durham' | 'remote'
+
+export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri'
+
+// A user's whole week in one object — the exact shape the future API endpoint
+// takes/returns. One resource, five fields; the day is a key, not a route.
+export type WeekSchedule = Record<Weekday, DayLocation>
+
+export const WEEKDAYS: { key: Weekday; label: string }[] = [
+  { key: 'mon', label: 'Monday' },
+  { key: 'tue', label: 'Tuesday' },
+  { key: 'wed', label: 'Wednesday' },
+  { key: 'thu', label: 'Thursday' },
+  { key: 'fri', label: 'Friday' },
+]
+
+export const LOCATION_META: Record<
+  DayLocation,
+  { emoji: string; label: string }
+> = {
+  'falls church': { emoji: '🌸', label: 'Falls Church' },
+  'durham': { emoji: '🐂', label: 'Durham' },
+  'remote': { emoji: '🏠', label: 'Remote' },
+}
+
+export const LOCATIONS = Object.keys(LOCATION_META) as DayLocation[]
+
+export function isDayLocation(v: string | undefined): v is DayLocation {
+  return v !== undefined && (LOCATIONS as string[]).includes(v)
+}
+
+// Used until a user saves their own, and as the seed for a fresh store. Stands in
+// for the "default schedule" the API will eventually own.
+export function defaultWeek(): WeekSchedule {
+  return {
+    mon: 'falls church',
+    tue: 'remote',
+    wed: 'durham',
+    thu: 'falls church',
+    fri: 'remote',
+  }
+}
+
+// Render a week as Block Kit mrkdwn (for confirmation messages).
+export function formatWeek(week: WeekSchedule): string {
+  return WEEKDAYS.map(({ key, label }) => {
+    const { emoji, label: loc } = LOCATION_META[week[key]]
+    return `${emoji}  *${label}*  —  ${loc}`
+  }).join('\n')
+}
+
+// Persistence seam. Swap the implementation, keep the interface. [[one-endpoint-per-user]]
+export interface ScheduleStore {
+  getSchedule(userId: string): Promise<WeekSchedule>
+  setSchedule(userId: string, week: WeekSchedule): Promise<void>
+}
+
+// No backend: holds schedules in memory for the life of the process. Restarting
+// the server resets everyone to defaultWeek(). Fine for building/demoing the UI.
+export class InMemoryScheduleStore implements ScheduleStore {
+  private byUser = new Map<string, WeekSchedule>()
+
+  async getSchedule(userId: string): Promise<WeekSchedule> {
+    return this.byUser.get(userId) ?? defaultWeek()
+  }
+
+  async setSchedule(userId: string, week: WeekSchedule): Promise<void> {
+    this.byUser.set(userId, week)
+  }
+}

@@ -1,20 +1,12 @@
 import type { KnownBlock } from '@slack/web-api'
+import { LOCATION_META } from './schedule_store.ts'
+import type { DayLocation } from './schedule_store.ts'
 
-// Action id for the "Update Schedule" button — the interactivity endpoint
-// (server.ts) dispatches on this.
-export const UPDATE_SCHEDULE = 'update_schedule'
+// Action id for the "Edit Schedule" button. The interactivity endpoint
+// (server.ts) dispatches on this and opens the schedule modal.
+export const EDIT_SCHEDULE = 'edit_schedule'
 
-// Where the button sends people to edit their schedule. Stubbed for now.
-const SCHEDULE_EDITOR_URL = 'https://example.com'
-
-type DayLocation = 'falls church' | 'durham' | 'remote'
 type ScheduleDay = { label: string; location: DayLocation }
-
-const LOCATION_META: Record<DayLocation, { emoji: string; label: string }> = {
-  'falls church': { emoji: '🌸', label: 'Falls Church' },
-  'durham': { emoji: '🐂', label: 'Durham' },
-  'remote': { emoji: '🏠', label: 'Remote' },
-}
 
 // Mock data: next week's Mon–Fri with a fixed in/out pattern. Swap this out for
 // a real lookup (Rails API / DB) later — the rest of the prompt is unchanged.
@@ -87,7 +79,7 @@ export function buildPrompt(recordId: string): {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*Need to change something? Want to spy on coworkers\' plans?* \nUpdate your in-office days to coordinate with your team.',
+          text: '*Need to change something?* \nEdit your in-office days right here to coordinate with your team.',
         },
       },
       {
@@ -95,10 +87,9 @@ export function buildPrompt(recordId: string): {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: 'Update Schedule', emoji: true },
-            action_id: UPDATE_SCHEDULE,
+            text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+            action_id: EDIT_SCHEDULE,
             style: 'primary',
-            url: SCHEDULE_EDITOR_URL,
             value: recordId,
           },
         ],
