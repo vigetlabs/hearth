@@ -47,4 +47,46 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
       end
     end
   end
+
+  path "/api/v1/users/logout" do
+    delete "Logs out a user from their active authenticated session" do
+      tags "Users"
+      produces "application/json"
+      security [ cookie_auth: [] ]
+
+      parameter name: "Cookie",
+              in: :header,
+              type: :string,
+              required: true
+
+      response "200", "logged out user successfully" do
+        schema "$ref" => "#/components/schemas/generic_success_response"
+
+        let!(:user) { create(:user) }
+
+        let(:auth_token) do
+          post api_path("/users/login"), params: {
+            user: {
+              email: user.email,
+              password: "password"
+            }
+          },
+          as: :json
+          response.cookies["jwt_token"]
+        end
+
+        let(:Cookie) { "jwt_token=#{auth_token}" }
+
+
+        run_test!
+      end
+
+      response "401", "invalid active session" do
+        schema "$ref" => "#/components/schemas/generic_error_response"
+        let(:Cookie) { "jwt_token=not-a-token" }
+
+        run_test!
+      end
+    end
+  end
 end

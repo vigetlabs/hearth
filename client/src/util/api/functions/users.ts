@@ -6,6 +6,8 @@ import type {
   LoginUserRequest,
 } from "@/types/api/users";
 
+import type { GenericSuccessResponse } from "@/types/api/generics";
+
 export function createUserObjectPayload(
   email: string,
   first_name: string,
@@ -61,6 +63,14 @@ export async function loginUser(
 
 export async function getCurrentUser(): Promise<UserResponse> {
   const response = await api.get("/users/me").json<UserResponse>();
+
+  return response;
+}
+
+export async function logoutUser(): Promise<GenericSuccessResponse> {
+  const response = await api
+    .delete("/users/logout")
+    .json<GenericSuccessResponse>();
 
   return response;
 }
