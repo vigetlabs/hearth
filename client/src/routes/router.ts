@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router";
 import App from "@/App";
 import { CalendarPage } from "@/pages/CalendarPage";
 
+import { authLoader } from "@/routes/loaders/authLoader";
+
 import Index from "@/pages/Index/Index";
 import Signup from "@/pages/Signup/Signup";
 import Login from "@/pages/Login/Login";
@@ -19,7 +21,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "signup", Component: Signup },
           { path: "login", Component: Login },
-          { path: "profile", Component: ProfilePage },
+          { path: "profile", Component: ProfilePage, loader: authLoader },
         ],
       },
       {
