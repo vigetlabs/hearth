@@ -1,108 +1,148 @@
 import type { KnownBlock } from '@slack/web-api'
+import { config } from './config.ts'
+import { LOCATION_META, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
+import type { DayLocation, WeekSchedule } from './schedule_store.ts'
 
-// Action id for the "Update Schedule" button — the interactivity endpoint
-// (server.ts) dispatches on this.
-export const UPDATE_SCHEDULE = 'update_schedule'
+// Action id for the "Edit Schedule" button. The interactivity endpoint
+// (server.ts) dispatches on this and opens the schedule modal.
+export const EDIT_SCHEDULE = 'edit_schedule'
 
-// Where the button sends people to edit their schedule. Stubbed for now.
-const SCHEDULE_EDITOR_URL = 'https://example.com'
+// Action id for the "Confirm" button. server.ts dispatches on this, sends the
+// user's current week through the store (the API seam), then re-renders this
+// message with confirmed: true.
+export const CONFIRM_SCHEDULE = 'confirm_schedule'
 
-type DayLocation = 'falls church' | 'durham' | 'remote'
+// Action id for the "See who's in" link button. It's a Slack `url` button, so
+// the click opens the calendar client-side; server.ts acks it as a no-op.
+export const VIEW_CALENDAR = 'view_calendar'
+
 type ScheduleDay = { label: string; location: DayLocation }
 
-const LOCATION_META: Record<DayLocation, { emoji: string; label: string }> = {
-  'falls church': { emoji: '🌸', label: 'Falls Church' },
-  'durham': { emoji: '🐂', label: 'Durham' },
-  'remote': { emoji: '🏠', label: 'Remote' },
-}
-
-// Mock data: next week's Mon–Fri with a fixed in/out pattern. Swap this out for
-// a real lookup (Rails API / DB) later — the rest of the prompt is unchanged.
-function nextWeekSchedule(): ScheduleDay[] {
+// Attach next week's Mon–Fri dates to a stored week's locations. The dates are
+// computed here; the locations come from the store (or defaultWeek()).
+function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
   const monday = nextMonday()
-  const pattern: DayLocation[] = [
-    'falls church',
-    'remote',
-    'durham',
-    'falls church',
-    'remote',
-  ]
   const fmt = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   })
 
-  return pattern.map((location, i) => {
+  return WEEKDAYS.map(({ key }, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    return { label: fmt.format(d), location }
+    return { label: fmt.format(d), location: week[key] }
   })
-}
-
-function nextMonday(): Date {
-  const d = new Date()
-  const daysUntilMonday = (8 - d.getDay()) % 7 || 7
-  d.setDate(d.getDate() + daysUntilMonday)
-  d.setHours(0, 0, 0, 0)
-  return d
 }
 
 function formatSchedule(days: ScheduleDay[]): string {
   return days
     .map((d) => {
       const { emoji, label } = LOCATION_META[d.location]
-      return `${emoji}  *${d.label}*  —  ${label}`
+      return `*${d.label}*  —  ${emoji} ${label}`
     })
     .join('\n')
 }
 
-export function buildPrompt(recordId: string): {
+// Renders the weekly DM for a given week. Defaults to defaultWeek() so callers
+// without a stored schedule (e.g. the first send) still work; the interactivity
+// endpoint passes the user's saved week to re-render the message in place.
+export function buildPrompt(
+  recordId: string,
+  week: WeekSchedule = defaultWeek(),
+  { confirmed = false }: { confirmed?: boolean } = {},
+): {
   text: string
   blocks: KnownBlock[]
 } {
-  const week = nextWeekSchedule()
-  const range = `${week[0]!.label} – ${week[week.length - 1]!.label}`
+  const days = nextWeekSchedule(week)
+  const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
+
+  type ActionElements = Extract<KnownBlock, { type: 'actions' }>['elements']
+
+  // A url button opening the team calendar. Kept first (leftmost) so it reads as
+  // the "look before you decide" step and holds a stable spot when Confirm drops
+  // away on confirm. Present in both states — seeing who's in is useful either way.
+  const viewButton: ActionElements[number] = {
+    type: 'button',
+    text: { type: 'plain_text', text: '👀 See who’s in', emoji: true },
+    action_id: VIEW_CALENDAR,
+    url: `${config.webAppUrl}/calendar`,
+  }
+
+  // Once confirmed, the Confirm button drops away (it's done) and a small
+  // context line acknowledges it in place; Edit stays so plans can still change.
+  const actionElements: ActionElements = confirmed
+    ? [
+        viewButton,
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+          action_id: EDIT_SCHEDULE,
+          value: recordId,
+        },
+      ]
+    : [
+        viewButton,
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Confirm', emoji: true },
+          action_id: CONFIRM_SCHEDULE,
+          style: 'primary',
+          value: recordId,
+        },
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+          action_id: EDIT_SCHEDULE,
+          value: recordId,
+        },
+      ]
+
+  const blocks: KnownBlock[] = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:wave:  *Here are your work locations for next week!*`,
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: formatSchedule(days),
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: '*Coordinating with your team?* \nSee who else is heading in that week, then confirm or edit your days.',
+      },
+    },
+    {
+      type: 'actions',
+      elements: actionElements,
+    },
+  ]
+
+  if (confirmed) {
+    blocks.push({
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: ':white_check_mark:  Schedule confirmed for next week.',
+        },
+      ],
+    })
+  }
 
   return {
     text: `Your work locations for next week (${range})`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `:calendar:  *Here are your work locations for next week!*`,
-        },
-      },
-      { type: 'divider' },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: formatSchedule(week),
-        },
-      },
-      { type: 'divider' },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: '*Need to change something? Want to spy on coworkers\' plans?* \nUpdate your in-office days to coordinate with your team.',
-        },
-      },
-      {
-        type: 'actions',
-        elements: [
-          {
-            type: 'button',
-            text: { type: 'plain_text', text: 'Update Schedule', emoji: true },
-            action_id: UPDATE_SCHEDULE,
-            style: 'primary',
-            url: SCHEDULE_EDITOR_URL,
-            value: recordId,
-          },
-        ],
-      },
-    ],
+    blocks,
   }
 }
