@@ -24,7 +24,7 @@ module OpenApi::Schemas::V1::Generics
   GENERIC_ERROR_RESPONSE = {
     type: :object,
     description: "Generic error response body",
-    required: %w[status data],
+    required: %w[status errors],
     properties: {
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       errors: {

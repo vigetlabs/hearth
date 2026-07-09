@@ -80,6 +80,13 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
 
         run_test!
       end
+
+      response "401", "invalid active session" do
+        schema "$ref" => "#/components/schemas/generic_error_response"
+        let(:Cookie) { "jwt_token=not-a-token" }
+
+        run_test!
+      end
     end
   end
 end

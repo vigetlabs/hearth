@@ -43,29 +43,54 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
   end
 
   describe "DELETE /users/logout" do
-    it "logs out and revokes the JWT using JTIMatcher strategy" do
+    let!(:user) { create(:user) }
+
+    def login_user
       post api_path("/users/login"), params: {
         user: {
           email: user.email,
           password: "password"
+
         }
       },
       as: :json
+      response.cookies["jwt_token"]
+    end
 
-      token = response.cookies["jwt_token"]
-      original_jti = user.reload.jti
+    context "when the user has a valid JWT cookie" do
+      let(:token) { login_user }
+      let(:original_jti) { user.reload.jti }
 
-      delete api_path("/users/logout"), headers: {
-        "Cookie": "jwt_token=#{token}"
-      }
+      before do
+        original_jti
+        delete api_path("/users/logout"), headers: {
+          "Cookie": "jwt_token=#{token}"
+        }
+      end
 
-      expect(response).to have_http_status(:ok)
-      expect(user.reload.jti).not_to eq(original_jti)
+      it "returns ok" do
+        expect(response).to have_http_status(:ok)
+      end
 
-      get api_path("/users/me"), headers: {
-        "Cookie": "jwt_token=#{token}"
-      }
-      expect(response).to have_http_status(:unauthorized)
+      it "revokes the JWT using JTIMatcher strategy" do
+        expect(user.reload.jti).not_to eq(original_jti)
+      end
+
+      it "prevents the old token from being usable again" do
+        get api_path("/users/me"), headers: {
+          "Cookie": "jwt_token=#{token}"
+        }
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context "when the JWT cookie is invalid" do
+      it "rescues invalid token variations" do
+        delete api_path("/users/logout"), headers: {
+          "Cookie": "jwt_token=invalid-token"
+        }
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
   end
 end
