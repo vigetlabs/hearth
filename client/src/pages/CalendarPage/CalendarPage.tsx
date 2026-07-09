@@ -1,5 +1,5 @@
 import { Calendar } from "@/components/Calendar/Calendar";
-import type { EventsByDate } from "@/types/Calendar/calendar";
+import type { EventsByDate } from "@/types/calendar/calendar";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 
 // Sample data anchored to the current week so it shows up in both views.
