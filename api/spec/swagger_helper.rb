@@ -35,6 +35,9 @@ RSpec.configure do |config|
       ],
       components: {
         schemas: {
+          generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
+          generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
+
           status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
 
           user: OpenApi::Schemas::V1::Users::USER_OBJECT,

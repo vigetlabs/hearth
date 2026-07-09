@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { DayCell } from "@/components/Calendar/DayCell";
-import type { EventsByDate } from "@/types/Calendar/calendar";
+import type { EventsByDate } from "@/types/calendar/calendar";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 
 // The view is simply how many weeks are stacked, starting from a Monday — never

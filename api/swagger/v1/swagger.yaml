@@ -54,6 +54,32 @@ paths:
             schema:
               "$ref": "#/components/schemas/login_user_request"
         required: true
+  "/api/v1/users/logout":
+    delete:
+      summary: Logs out a user from their active authenticated session
+      tags:
+      - Users
+      security:
+      - cookie_auth: []
+      parameters:
+      - name: Cookie
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: logged out user successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/generic_success_response"
+        '401':
+          description: invalid active session
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/generic_error_response"
   "/api/v1/users/me":
     get:
       summary: Fetches user information for current authenticated user
@@ -75,6 +101,54 @@ servers:
       default: www.example.com
 components:
   schemas:
+    generic_success_response:
+      type: object
+      description: Generic success response body
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          nullable: true
+          description: No resource payload is returned for this response
+          example:
+    generic_error_response:
+      type: object
+      description: Generic error response body
+      required:
+      - status
+      - errors
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        errors:
+          type: array
+          items:
+            type: object
+            description: One individual error detail, usually used inside an errors
+              array.
+            required:
+            - field
+            - message
+            properties:
+              field:
+                type: string
+              message:
+                type: string
     status:
       type: object
       description: Shared status metadata returned by API responses.
