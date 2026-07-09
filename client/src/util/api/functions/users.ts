@@ -59,10 +59,8 @@ export async function loginUser(
   return response;
 }
 
-// export async function loginUser(fields: RequiredUserFields) {
-//   const response: UserResponse = await api.post("/users/login", {
-//     json: createUserPayload(fields.username, fields.password)
-//   }).json();
-//
-//   return response.data.user;
-// }
+export async function getCurrentUser(): Promise<UserResponse> {
+  const response = await api.get("/users/me").json<UserResponse>();
+
+  return response;
+}

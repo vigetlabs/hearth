@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { useState } from "react";
 
 import { useCreateUserMutation } from "@/util/api/mutations/users/createUserMutation";
@@ -10,6 +11,8 @@ export default function SignupForm() {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const navigate = useNavigate();
 
   const createUserMutation = useCreateUserMutation();
 
@@ -24,10 +27,10 @@ export default function SignupForm() {
     );
 
     createUserMutation.mutate(payload, {
-      onSuccess: (user) => {
+      onSuccess: () => {
         // LOG RIGHT NOW TO DO SOMETHING
         // @TODO: Add more functionality
-        console.log(user);
+        navigate("/users/login");
       },
       onError: async () => {
         // @TODO: Add error handling

@@ -2,7 +2,7 @@ import { getHealth } from "@/util/api/functions/health";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 
-export default function Index() {
+export default function IndexPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["health"],
     queryFn: getHealth,
@@ -15,8 +15,15 @@ export default function Index() {
   return (
     <div>
       <div>API status: {data.status}</div>
-      <Link to="/users/signup">Signup</Link>
-      <Link to="/users/login">Login</Link>
+      <Link to="/users/signup" className="p-2">
+        Signup
+      </Link>
+      <Link to="/users/login" className="p-2">
+        Login
+      </Link>
+      <Link to="/calendar" className="p-2">
+        Calendar
+      </Link>
     </div>
   );
 }
