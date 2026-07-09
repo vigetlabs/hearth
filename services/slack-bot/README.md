@@ -119,7 +119,11 @@ npm run send-demo
 
 The **Edit Schedule** button opens a modal in Slack with one radio group per
 weekday (Falls Church / Durham / Remote). On **Save**, the whole week is
-persisted in a single write and the bot DMs a confirmation.
+persisted in a single write and **the original DM is rewritten in place** to
+show the saved schedule (via `chat.update`). The modal carries the source
+message's channel/ts in its `private_metadata` so the submit handler knows which
+message to update; if that's ever missing it falls back to a fresh confirmation
+DM.
 
 This needs the interactivity endpoint (`src/server.ts`) running, because a
 non-link button delivers its click to your app's **Request URL** — that POST is

@@ -1,6 +1,6 @@
 import type { KnownBlock } from '@slack/web-api'
-import { LOCATION_META } from './schedule_store.ts'
-import type { DayLocation } from './schedule_store.ts'
+import { LOCATION_META, WEEKDAYS, defaultWeek } from './schedule_store.ts'
+import type { DayLocation, WeekSchedule } from './schedule_store.ts'
 
 // Action id for the "Edit Schedule" button. The interactivity endpoint
 // (server.ts) dispatches on this and opens the schedule modal.
@@ -8,27 +8,20 @@ export const EDIT_SCHEDULE = 'edit_schedule'
 
 type ScheduleDay = { label: string; location: DayLocation }
 
-// Mock data: next week's Mon–Fri with a fixed in/out pattern. Swap this out for
-// a real lookup (Rails API / DB) later — the rest of the prompt is unchanged.
-function nextWeekSchedule(): ScheduleDay[] {
+// Attach next week's Mon–Fri dates to a stored week's locations. The dates are
+// computed here; the locations come from the store (or defaultWeek()).
+function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
   const monday = nextMonday()
-  const pattern: DayLocation[] = [
-    'falls church',
-    'remote',
-    'durham',
-    'falls church',
-    'remote',
-  ]
   const fmt = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   })
 
-  return pattern.map((location, i) => {
+  return WEEKDAYS.map(({ key }, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    return { label: fmt.format(d), location }
+    return { label: fmt.format(d), location: week[key] }
   })
 }
 
@@ -49,12 +42,18 @@ function formatSchedule(days: ScheduleDay[]): string {
     .join('\n')
 }
 
-export function buildPrompt(recordId: string): {
+// Renders the weekly DM for a given week. Defaults to defaultWeek() so callers
+// without a stored schedule (e.g. the first send) still work; the interactivity
+// endpoint passes the user's saved week to re-render the message in place.
+export function buildPrompt(
+  recordId: string,
+  week: WeekSchedule = defaultWeek(),
+): {
   text: string
   blocks: KnownBlock[]
 } {
-  const week = nextWeekSchedule()
-  const range = `${week[0]!.label} – ${week[week.length - 1]!.label}`
+  const days = nextWeekSchedule(week)
+  const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
 
   return {
     text: `Your work locations for next week (${range})`,
@@ -71,7 +70,7 @@ export function buildPrompt(recordId: string): {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: formatSchedule(week),
+          text: formatSchedule(days),
         },
       },
       { type: 'divider' },

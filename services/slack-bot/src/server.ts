@@ -4,6 +4,7 @@ import { verifySlackSignature } from './verify.ts'
 import { EDIT_SCHEDULE } from './prompt.ts'
 import { LiveSlackService } from './slack_service.ts'
 import { SlackMessenger } from './slack_messenger.ts'
+import { buildPrompt } from './prompt.ts'
 import { InMemoryScheduleStore, formatWeek } from './schedule_store.ts'
 import type { ScheduleStore } from './schedule_store.ts'
 import {
@@ -73,7 +74,24 @@ type Interaction = {
   user?: { id?: string }
   trigger_id?: string
   actions?: Array<{ action_id?: string; value?: string }>
+  // On a block_actions from a message button, these locate the source message
+  // so we can rewrite it later.
+  container?: { message_ts?: string }
+  channel?: { id?: string }
   view?: SubmittedView
+}
+
+// What we stash in the modal's private_metadata so the submit handler can find
+// (and re-render) the original message.
+type MessageRef = { channel?: string; ts?: string; recordId?: string }
+
+function parseMessageRef(raw?: string): MessageRef {
+  if (!raw) return {}
+  try {
+    return JSON.parse(raw) as MessageRef
+  } catch {
+    return {}
+  }
 }
 
 async function handleInteraction(payload: Interaction): Promise<void> {
@@ -100,10 +118,18 @@ async function handleBlockActions(payload: Interaction): Promise<void> {
       const userId = payload.user?.id
       if (!userId || !payload.trigger_id) return
 
+      // Carry the source message's location (+ its record id) into the modal so
+      // the submit handler can rewrite that same message.
+      const ref: MessageRef = {
+        channel: payload.channel?.id,
+        ts: payload.container?.message_ts,
+        recordId: action.value,
+      }
+
       const week = await store.getSchedule(userId)
       await slack.botClient.views.open({
         trigger_id: payload.trigger_id,
-        view: buildScheduleModal(week),
+        view: buildScheduleModal(week, JSON.stringify(ref)),
       })
       break
     }
@@ -124,6 +150,15 @@ async function handleViewSubmission(payload: Interaction): Promise<void> {
   await store.setSchedule(userId, week)
   console.log(`saved schedule for ${userId}:`, week)
 
+  // Preferred path: rewrite the original DM in place so it shows the saved week.
+  const ref = parseMessageRef(payload.view.private_metadata)
+  if (ref.channel && ref.ts) {
+    const { text, blocks } = buildPrompt(ref.recordId ?? 'weekly', week)
+    await slack.botClient.chat.update({ channel: ref.channel, ts: ref.ts, text, blocks })
+    return
+  }
+
+  // Fallback (no source message to update): confirm with a fresh DM.
   await new SlackMessenger(slack, userId).sendDirectMessage({
     text: 'Your schedule for next week is updated',
     blocks: [

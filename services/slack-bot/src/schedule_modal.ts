@@ -26,8 +26,13 @@ function locationOption(loc: DayLocation): PlainTextOption {
 }
 
 // One input block per weekday, each a 3-way radio group pre-selected to the
-// user's current location for that day.
-export function buildScheduleModal(week: WeekSchedule): ModalView {
+// user's current location for that day. `privateMetadata` is an opaque string
+// Slack stores on the view and returns on submit — server.ts uses it to carry
+// the original message's channel/ts so it can rewrite that message in place.
+export function buildScheduleModal(
+  week: WeekSchedule,
+  privateMetadata?: string,
+): ModalView {
   const blocks: KnownBlock[] = WEEKDAYS.map(({ key, label }) => ({
     type: 'input',
     block_id: key,
@@ -43,6 +48,7 @@ export function buildScheduleModal(week: WeekSchedule): ModalView {
   return {
     type: 'modal',
     callback_id: SCHEDULE_MODAL_CALLBACK,
+    private_metadata: privateMetadata,
     title: { type: 'plain_text', text: 'Edit Schedule' },
     submit: { type: 'plain_text', text: 'Save' },
     close: { type: 'plain_text', text: 'Cancel' },
@@ -54,6 +60,7 @@ export function buildScheduleModal(week: WeekSchedule): ModalView {
 // block_id (weekday) then action_id.
 export type SubmittedView = {
   callback_id?: string
+  private_metadata?: string
   state?: {
     values?: Record<
       string,

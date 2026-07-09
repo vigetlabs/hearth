@@ -66,6 +66,20 @@ test('modal build → parse is a faithful round-trip', () => {
   assert.deepEqual(parseSchedule(asSubmittedView(week)), week)
 })
 
+test('modal carries private_metadata through for in-place message updates', () => {
+  const ref = JSON.stringify({ channel: 'D1', ts: '111.222', recordId: 'weekly' })
+  const modal = buildScheduleModal(defaultWeek(), ref)
+
+  // Slack echoes private_metadata back verbatim on submit; the submit handler
+  // parses it to find the message to rewrite.
+  assert.equal(modal.private_metadata, ref)
+  assert.deepEqual(JSON.parse(modal.private_metadata!), {
+    channel: 'D1',
+    ts: '111.222',
+    recordId: 'weekly',
+  })
+})
+
 test('parseSchedule falls back to the default for a missing/garbage day', () => {
   const view: SubmittedView = {
     callback_id: SCHEDULE_MODAL_CALLBACK,
