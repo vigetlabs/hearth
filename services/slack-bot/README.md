@@ -1,7 +1,8 @@
 # slack-bot
 
 Sends a weekly "here's your schedule for next week" DM to a group of Slack
-users, with an **Update Schedule** button that links to the schedule editor.
+users, with an **Edit Schedule** button that opens an in-DM modal for editing
+next week's work locations.
 
 Runs on Node 24's native TypeScript support — no build step, no compiler.
 
@@ -49,12 +50,14 @@ Each piece is small and testable in isolation:
 | `src/config.ts` | Reads + validates env (`node --env-file=.env` loads it) |
 | `src/slack_service.ts` | Wrapper over `@slack/web-api`. Resolves the user group and filters to active accounts. Ships a `FakeSlackService` for tests |
 | `src/slack_messenger.ts` | Outbound Block Kit messages (DM + channel), gated by the `USE_SLACK` kill-switch |
-| `src/prompt.ts` | Builds the weekly message (schedule + Update Schedule button). Mock schedule data lives here |
+| `src/prompt.ts` | Builds the weekly message (schedule + Edit Schedule button). Mock display data lives here |
+| `src/schedule_store.ts` | Schedule domain types + persistence seam. In-memory `InMemoryScheduleStore` today; swap for a Rails-backed store later |
+| `src/schedule_modal.ts` | Builds the Edit Schedule modal from a week and parses a submission back into one |
 | `src/send_prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both `schedule` and `send-now` |
 | `src/scheduler.ts` | Friday cron entry point (`schedule`) |
 | `src/send_now.ts` | Manual group-send entry point (`send-now`) |
 | `src/send-demo.ts` | Single-user entry point (`send-demo`) |
-| `src/verify.ts` + `src/server.ts` | Optional interactivity endpoint (signature verification + action routing) |
+| `src/verify.ts` + `src/server.ts` | Interactivity endpoint: signature verification, opens the modal, persists submissions |
 
 **Recipient filtering.** `SLACK_USERGROUP_ID` is the subset selector, maintained
 in Slack itself. At send time the bot resolves the group live and drops any
@@ -112,20 +115,38 @@ npm run send-demo
 | Send the weekly DM to the group right now | `send-now` |
 | Check my setup by DMing just myself | `send-demo` |
 
-## The Update Schedule button & interactivity
+## The Edit Schedule button & interactivity
 
-The button in the DM is a **link** to the schedule editor
-(`SCHEDULE_EDITOR_URL` in `src/prompt.ts`, currently `https://example.com`).
-Clicking opens that URL in the browser — Slack handles this client-side, so the
-three DM triggers are fully functional on their own.
+The **Edit Schedule** button opens a modal in Slack with one radio group per
+weekday (Falls Church / Durham / Remote). On **Save**, the whole week is
+persisted in a single write and **the original DM is rewritten in place** to
+show the saved schedule (via `chat.update`). The modal carries the source
+message's channel/ts in its `private_metadata` so the submit handler knows which
+message to update; if that's ever missing it falls back to a fresh confirmation
+DM.
 
-`src/server.ts` is a separate, **optional** interactivity endpoint. It only
-matters if you later replace the link with in-DM editing (modals, in-place
-schedule updates). That path needs a publicly reachable **Request URL** (set
-under **Interactivity & Shortcuts**; tunnel with `ngrok http 3000` in dev),
-`SLACK_SIGNING_SECRET` for request verification, and a response within Slack's
-3-second window. None of it is required for the current link-button funnel.
+This needs the interactivity endpoint (`src/server.ts`) running, because a
+non-link button delivers its click to your app's **Request URL** — that POST is
+the only way the press reaches your code. So unlike the three DM triggers, the
+button is **not** self-contained: it requires
+
+- a publicly reachable **Request URL** set under **Interactivity & Shortcuts**
+  (tunnel with `ngrok http 3000` in dev), pointing at `/slack/handle-event`,
+- `SLACK_SIGNING_SECRET` for request verification, and
+- the server to ack within Slack's 3-second window (it does — it acks first,
+  then opens the modal / saves).
 
 ```bash
 npm start   # runs the interactivity endpoint on PORT (default 3000)
 ```
+
+### Where the data lives (and the API seam)
+
+Schedules are currently held in memory by `InMemoryScheduleStore`
+(`src/schedule_store.ts`) — restarting `npm start` resets everyone to the
+default week. This is deliberate: it lets the full editing flow work with **no
+backend**. When the Rails API is ready, add a `LiveScheduleStore` implementing
+the same `ScheduleStore` interface (`getSchedule` / `setSchedule`) and swap the
+one line in `server.ts`. Because a modal submission hands back the entire week
+at once, `setSchedule` maps to a **single** endpoint keyed by user id (body =
+the whole week) — no per-day routes.
