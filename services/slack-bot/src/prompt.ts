@@ -1,4 +1,5 @@
 import type { KnownBlock } from '@slack/web-api'
+import { config } from './config.ts'
 import { LOCATION_META, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
 import type { DayLocation, WeekSchedule } from './schedule_store.ts'
 
@@ -10,6 +11,10 @@ export const EDIT_SCHEDULE = 'edit_schedule'
 // user's current week through the store (the API seam), then re-renders this
 // message with confirmed: true.
 export const CONFIRM_SCHEDULE = 'confirm_schedule'
+
+// Action id for the "See who's in" link button. It's a Slack `url` button, so
+// the click opens the calendar client-side; server.ts acks it as a no-op.
+export const VIEW_CALENDAR = 'view_calendar'
 
 type ScheduleDay = { label: string; location: DayLocation }
 
@@ -53,10 +58,23 @@ export function buildPrompt(
   const days = nextWeekSchedule(week)
   const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
 
+  type ActionElements = Extract<KnownBlock, { type: 'actions' }>['elements']
+
+  // A url button opening the team calendar. Kept first (leftmost) so it reads as
+  // the "look before you decide" step and holds a stable spot when Confirm drops
+  // away on confirm. Present in both states — seeing who's in is useful either way.
+  const viewButton: ActionElements[number] = {
+    type: 'button',
+    text: { type: 'plain_text', text: '👀 See who’s in', emoji: true },
+    action_id: VIEW_CALENDAR,
+    url: `${config.webAppUrl}/calendar`,
+  }
+
   // Once confirmed, the Confirm button drops away (it's done) and a small
   // context line acknowledges it in place; Edit stays so plans can still change.
-  const actionElements: Extract<KnownBlock, { type: 'actions' }>['elements'] = confirmed
+  const actionElements: ActionElements = confirmed
     ? [
+        viewButton,
         {
           type: 'button',
           text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
@@ -65,6 +83,7 @@ export function buildPrompt(
         },
       ]
     : [
+        viewButton,
         {
           type: 'button',
           text: { type: 'plain_text', text: 'Confirm', emoji: true },
@@ -101,7 +120,7 @@ export function buildPrompt(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '*Need to change something?* \nEdit your in-office days to coordinate with your team.',
+        text: '*Coordinating with your team?* \nSee who else is heading in that week, then confirm or edit your days.',
       },
     },
     {

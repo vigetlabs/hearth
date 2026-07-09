@@ -6,6 +6,9 @@ export const config = {
   usergroupId: process.env.SLACK_USERGROUP_ID,
   useSlack: process.env.USE_SLACK === 'true',
   port: Number(process.env.PORT ?? 3000),
+  // Base URL of the web app the DM links to (e.g. the team calendar). Defaults
+  // to the local Vite dev server so the bot runs without extra env locally.
+  webAppUrl: process.env.WEB_APP_URL ?? 'http://localhost:5173',
 }
 
 type ConfigKey = keyof typeof config

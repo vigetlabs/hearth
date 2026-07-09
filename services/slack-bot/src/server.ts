@@ -1,7 +1,7 @@
 import http from 'node:http'
 import { assertConfig, config } from './config.ts'
 import { verifySlackSignature } from './verify.ts'
-import { CONFIRM_SCHEDULE, EDIT_SCHEDULE } from './prompt.ts'
+import { CONFIRM_SCHEDULE, EDIT_SCHEDULE, VIEW_CALENDAR } from './prompt.ts'
 import { LiveSlackService } from './slack_service.ts'
 import { SlackMessenger } from './slack_messenger.ts'
 import { buildPrompt } from './prompt.ts'
@@ -151,6 +151,10 @@ async function handleBlockActions(payload: Interaction): Promise<void> {
       await slack.botClient.chat.update({ channel, ts, text, blocks })
       break
     }
+    case VIEW_CALENDAR:
+      // A url button — Slack opens the link client-side. Nothing to do here;
+      // we just ack (already done before dispatch) so it isn't logged as stray.
+      break
     default:
       console.log(`unhandled action: ${action.action_id}`)
   }
