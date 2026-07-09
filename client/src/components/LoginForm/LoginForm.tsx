@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { useState } from "react";
 
 import { useLoginUserMutation } from "@/util/api/mutations/users/loginUserMutation";
@@ -7,6 +8,8 @@ import { createUserLoginObjectPayload } from "@/util/api/functions/users";
 export default function LoginForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const navigate = useNavigate();
 
   const loginUserMutation = useLoginUserMutation();
 
@@ -22,6 +25,7 @@ export default function LoginForm() {
       onSuccess: (user) => {
         // @TODO: Add more functionality
         console.log(user);
+        navigate("/users/profile");
       },
       onError: async () => {
         // @TODO: Add error handling
