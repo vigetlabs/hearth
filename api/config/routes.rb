@@ -4,7 +4,8 @@ Rails.application.routes.draw do
   devise_for :users,
     path: "api/v1/users",
     path_names: {
-      sign_in: "login"
+      sign_in: "login",
+      sign_out: "logout"
     },
     controllers: {
       sessions: "api/v1/users/sessions",

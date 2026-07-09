@@ -41,4 +41,31 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe "DELETE /users/logout" do
+    it "logs out and revokes the JWT using JTIMatcher strategy" do
+      post api_path("/users/login"), params: {
+        user: {
+          email: user.email,
+          password: "password"
+        }
+      },
+      as: :json
+
+      token = response.cookies["jwt_token"]
+      original_jti = user.reload.jti
+
+      delete api_path("/users/logout"), headers: {
+        "Cookie": "jwt_token=#{token}"
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.jti).not_to eq(original_jti)
+
+      get api_path("/users/me"), headers: {
+        "Cookie": "jwt_token=#{token}"
+      }
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end
