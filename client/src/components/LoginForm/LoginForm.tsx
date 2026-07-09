@@ -1,15 +1,21 @@
 import { useNavigate } from "react-router";
 import { useState } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useLoginUserMutation } from "@/util/api/mutations/users/loginUserMutation";
-import type { LoginUserRequest } from "@/types/api/users";
 import { createUserLoginObjectPayload } from "@/util/api/functions/users";
+
+import type { LoginUserRequest } from "@/types/api/users";
+
+import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
 export default function LoginForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const loginUserMutation = useLoginUserMutation();
 
@@ -23,8 +29,7 @@ export default function LoginForm() {
 
     loginUserMutation.mutate(payload, {
       onSuccess: (user) => {
-        // @TODO: Add more functionality
-        console.log(user);
+        queryClient.setQueryData(generateCurrentUserKey(), user);
         navigate("/users/profile");
       },
       onError: async () => {
