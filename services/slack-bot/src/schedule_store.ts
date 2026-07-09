@@ -48,6 +48,29 @@ export function defaultWeek(): WeekSchedule {
   }
 }
 
+// Next week's Monday at 00:00 local time.
+export function nextMonday(): Date {
+  const d = new Date()
+  const daysUntilMonday = (8 - d.getDay()) % 7 || 7
+  d.setDate(d.getDate() + daysUntilMonday)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+// Next week's date for each weekday, formatted like "Jul 13". Shared by the DM
+// prompt and the modal so the two always show the same dates.
+export function nextWeekDates(): Record<Weekday, string> {
+  const monday = nextMonday()
+  const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+  const dates = {} as Record<Weekday, string>
+  WEEKDAYS.forEach(({ key }, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    dates[key] = fmt.format(d)
+  })
+  return dates
+}
+
 // Render a week as Block Kit mrkdwn (for confirmation messages).
 export function formatWeek(week: WeekSchedule): string {
   return WEEKDAYS.map(({ key, label }) => {
@@ -60,6 +83,10 @@ export function formatWeek(week: WeekSchedule): string {
 export interface ScheduleStore {
   getSchedule(userId: string): Promise<WeekSchedule>
   setSchedule(userId: string, week: WeekSchedule): Promise<void>
+  // The user confirmed their current week as-is (the "Confirm" button). Distinct
+  // from setSchedule so the Rails seam can record an explicit confirmation
+  // (e.g. a confirmed_at timestamp) rather than just another save.
+  confirmSchedule(userId: string, week: WeekSchedule): Promise<void>
 }
 
 // No backend: holds schedules in memory for the life of the process. Restarting
@@ -72,6 +99,12 @@ export class InMemoryScheduleStore implements ScheduleStore {
   }
 
   async setSchedule(userId: string, week: WeekSchedule): Promise<void> {
+    this.byUser.set(userId, week)
+  }
+
+  // No backend to notify — persist the week so the confirmed state survives
+  // an in-process re-render. LiveScheduleStore will POST this to the API.
+  async confirmSchedule(userId: string, week: WeekSchedule): Promise<void> {
     this.byUser.set(userId, week)
   }
 }

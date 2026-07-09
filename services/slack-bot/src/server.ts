@@ -1,7 +1,7 @@
 import http from 'node:http'
 import { assertConfig, config } from './config.ts'
 import { verifySlackSignature } from './verify.ts'
-import { EDIT_SCHEDULE } from './prompt.ts'
+import { CONFIRM_SCHEDULE, EDIT_SCHEDULE } from './prompt.ts'
 import { LiveSlackService } from './slack_service.ts'
 import { SlackMessenger } from './slack_messenger.ts'
 import { buildPrompt } from './prompt.ts'
@@ -133,6 +133,24 @@ async function handleBlockActions(payload: Interaction): Promise<void> {
       })
       break
     }
+    case CONFIRM_SCHEDULE: {
+      const userId = payload.user?.id
+      const channel = payload.channel?.id
+      const ts = payload.container?.message_ts
+      if (!userId || !channel || !ts) return
+
+      // Send the user's current week through the store (the API seam), then
+      // rewrite this same message in place with a small confirmation.
+      const week = await store.getSchedule(userId)
+      await store.confirmSchedule(userId, week)
+      console.log(`confirmed schedule for ${userId}:`, week)
+
+      const { text, blocks } = buildPrompt(action.value ?? 'weekly', week, {
+        confirmed: true,
+      })
+      await slack.botClient.chat.update({ channel, ts, text, blocks })
+      break
+    }
     default:
       console.log(`unhandled action: ${action.action_id}`)
   }
@@ -151,9 +169,14 @@ async function handleViewSubmission(payload: Interaction): Promise<void> {
   console.log(`saved schedule for ${userId}:`, week)
 
   // Preferred path: rewrite the original DM in place so it shows the saved week.
+  // A saved edit is itself a confirmation, so it lands in the same confirmed
+  // state as the Confirm button — the Confirm button drops away and the green
+  // check acknowledges it, rather than leaving a now-pointless Confirm to click.
   const ref = parseMessageRef(payload.view.private_metadata)
   if (ref.channel && ref.ts) {
-    const { text, blocks } = buildPrompt(ref.recordId ?? 'weekly', week)
+    const { text, blocks } = buildPrompt(ref.recordId ?? 'weekly', week, {
+      confirmed: true,
+    })
     await slack.botClient.chat.update({ channel: ref.channel, ts: ref.ts, text, blocks })
     return
   }

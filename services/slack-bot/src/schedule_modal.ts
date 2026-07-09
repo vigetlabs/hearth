@@ -8,6 +8,7 @@ import {
   WEEKDAYS,
   defaultWeek,
   isDayLocation,
+  nextWeekDates,
 } from './schedule_store.ts'
 import type { DayLocation, WeekSchedule } from './schedule_store.ts'
 
@@ -33,10 +34,11 @@ export function buildScheduleModal(
   week: WeekSchedule,
   privateMetadata?: string,
 ): ModalView {
+  const dates = nextWeekDates()
   const blocks: KnownBlock[] = WEEKDAYS.map(({ key, label }) => ({
     type: 'input',
     block_id: key,
-    label: { type: 'plain_text', text: label, emoji: true },
+    label: { type: 'plain_text', text: `${label}  ·  ${dates[key]}`, emoji: true },
     element: {
       type: 'radio_buttons',
       action_id: LOCATION_ACTION,

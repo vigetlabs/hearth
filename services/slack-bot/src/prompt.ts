@@ -1,10 +1,15 @@
 import type { KnownBlock } from '@slack/web-api'
-import { LOCATION_META, WEEKDAYS, defaultWeek } from './schedule_store.ts'
+import { LOCATION_META, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
 import type { DayLocation, WeekSchedule } from './schedule_store.ts'
 
 // Action id for the "Edit Schedule" button. The interactivity endpoint
 // (server.ts) dispatches on this and opens the schedule modal.
 export const EDIT_SCHEDULE = 'edit_schedule'
+
+// Action id for the "Confirm" button. server.ts dispatches on this, sends the
+// user's current week through the store (the API seam), then re-renders this
+// message with confirmed: true.
+export const CONFIRM_SCHEDULE = 'confirm_schedule'
 
 type ScheduleDay = { label: string; location: DayLocation }
 
@@ -25,19 +30,11 @@ function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
   })
 }
 
-function nextMonday(): Date {
-  const d = new Date()
-  const daysUntilMonday = (8 - d.getDay()) % 7 || 7
-  d.setDate(d.getDate() + daysUntilMonday)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
 function formatSchedule(days: ScheduleDay[]): string {
   return days
     .map((d) => {
       const { emoji, label } = LOCATION_META[d.location]
-      return `${emoji}  *${d.label}*  —  ${label}`
+      return `*${d.label}*  —  ${emoji} ${label}`
     })
     .join('\n')
 }
@@ -48,6 +45,7 @@ function formatSchedule(days: ScheduleDay[]): string {
 export function buildPrompt(
   recordId: string,
   week: WeekSchedule = defaultWeek(),
+  { confirmed = false }: { confirmed?: boolean } = {},
 ): {
   text: string
   blocks: KnownBlock[]
@@ -55,44 +53,77 @@ export function buildPrompt(
   const days = nextWeekSchedule(week)
   const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
 
+  // Once confirmed, the Confirm button drops away (it's done) and a small
+  // context line acknowledges it in place; Edit stays so plans can still change.
+  const actionElements: Extract<KnownBlock, { type: 'actions' }>['elements'] = confirmed
+    ? [
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+          action_id: EDIT_SCHEDULE,
+          value: recordId,
+        },
+      ]
+    : [
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Confirm', emoji: true },
+          action_id: CONFIRM_SCHEDULE,
+          style: 'primary',
+          value: recordId,
+        },
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+          action_id: EDIT_SCHEDULE,
+          value: recordId,
+        },
+      ]
+
+  const blocks: KnownBlock[] = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:wave:  *Here are your work locations for next week!*`,
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: formatSchedule(days),
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: '*Need to change something?* \nEdit your in-office days to coordinate with your team.',
+      },
+    },
+    {
+      type: 'actions',
+      elements: actionElements,
+    },
+  ]
+
+  if (confirmed) {
+    blocks.push({
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text: ':white_check_mark:  Schedule confirmed for next week.',
+        },
+      ],
+    })
+  }
+
   return {
     text: `Your work locations for next week (${range})`,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `:calendar:  *Here are your work locations for next week!*`,
-        },
-      },
-      { type: 'divider' },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: formatSchedule(days),
-        },
-      },
-      { type: 'divider' },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: '*Need to change something?* \nEdit your in-office days right here to coordinate with your team.',
-        },
-      },
-      {
-        type: 'actions',
-        elements: [
-          {
-            type: 'button',
-            text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
-            action_id: EDIT_SCHEDULE,
-            style: 'primary',
-            value: recordId,
-          },
-        ],
-      },
-    ],
+    blocks,
   }
 }
