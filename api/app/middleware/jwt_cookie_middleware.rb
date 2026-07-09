@@ -10,7 +10,31 @@ class JwtCookieMiddleware
     if token.present? && env["HTTP_AUTHORIZATION"].blank?
       env["HTTP_AUTHORIZATION"] = "Bearer #{token}"
     end
-    status, headers, response = @app.call(env)
+
+    begin
+      status, headers, response = @app.call(env)
+    rescue JWT::DecodeError
+      headers = { "Content-Type" => "application/json" }
+      Rack::Utils.delete_cookie_header!(headers, "jwt_token", path: "/")
+
+      return [
+        401,
+        headers,
+        [
+          {
+            status: {
+              message: "Unauthorized"
+            },
+            errors: [
+              {
+                field: "jwt_token",
+                message: "Invalid or expired token"
+              }
+            ]
+          }.to_json
+        ]
+      ]
+    end
 
     auth_header = headers["Authorization"]
     if auth_header.present? && auth_header.start_with?("Bearer ")
