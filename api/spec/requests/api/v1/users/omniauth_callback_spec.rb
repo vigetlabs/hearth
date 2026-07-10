@@ -33,5 +33,19 @@ RSpec.describe "Api::V1::Users::OmniauthCallbacks", type: :request do
         expect(response.cookies["jwt_token"]).to be_present
       end
     end
+
+    context "when Google SSO fails" do
+      before do
+        OmniAuth.config.mock_auth[:google_oauth2] = :invalid_credentials
+      end
+
+      it "redirects to the frontend login page with an error in URL" do
+        get api_path("/users/auth/google_oauth2/callback")
+        expect(response).to redirect_to(
+          "#{Rails.application.credentials.dig(:google, :frontend_url)}/users/login?error=sso_failed"
+        )
+        expect(response.cookies["jwt_token"]).not_to be_present
+      end
+    end
   end
 end
