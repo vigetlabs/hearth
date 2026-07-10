@@ -1,101 +1,119 @@
 import { useState } from "react";
 
 import { DayCell } from "@/components/Calendar/DayCell";
+import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 import type { EventsByDate } from "@/types/calendar/calendar";
+import { useOffice } from "@/util/office/useOffice";
+import { useAuth } from "@/util/auth/useAuth";
+import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
-
-// The view is simply how many weeks are stacked, starting from a Monday — never
-// snapped to calendar-month boundaries.
-const VIEW_WEEKS = [1, 4] as const;
-type View = (typeof VIEW_WEEKS)[number];
 
 const WEEKDAYS_PER_WEEK = 5; // Mon–Fri
 
-const rangeFormat = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
+// A week can straddle two months, so we title it by the month containing its
+// Thursday — the same convention ISO weeks use.
+const THURSDAY_INDEX = 3;
+const monthYearFormat = new Intl.DateTimeFormat(undefined, {
+  month: "long",
+  year: "numeric",
 });
-const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
 interface CalendarProps {
   events: EventsByDate;
 }
 
 export function Calendar({ events }: CalendarProps) {
-  const [view, setView] = useState<View>(1);
-  // `focus` is always the Monday of the first visible week, so switching views
-  // never lands on a partial week.
-  const [focus, setFocus] = useState(() => startOfWeek(new Date()));
+  const { office } = useOffice();
+  const { user } = useAuth();
+  const myName = userDisplayName(user);
 
-  const visibleWeeks = view;
+  // `focus` is always the Monday of the visible week, so navigation never lands
+  // on a partial week.
+  const [focus, setFocus] = useState(() => startOfWeek(new Date()));
+  // Local attendance so toggling yourself in/out of a day updates the grid.
+  const [attendance, setAttendance] = useState<EventsByDate>(events);
+
   const days: Date[] = [];
-  for (let week = 0; week < visibleWeeks; week++) {
-    for (let day = 0; day < WEEKDAYS_PER_WEEK; day++) {
-      days.push(addDays(focus, week * 7 + day));
-    }
+  for (let day = 0; day < WEEKDAYS_PER_WEEK; day++) {
+    days.push(addDays(focus, day));
   }
 
-  const step = 7 * visibleWeeks;
-  const goPrev = () => setFocus((f) => addDays(f, -step));
-  const goNext = () => setFocus((f) => addDays(f, step));
+  const goPrev = () => setFocus((f) => addDays(f, -7));
+  const goNext = () => setFocus((f) => addDays(f, 7));
   const goToday = () => setFocus(startOfWeek(new Date()));
 
-  // Weekday names for the column headers, taken from the first visible week so
-  // they always line up with the grid columns below.
-  const weekdayLabels = days
-    .slice(0, WEEKDAYS_PER_WEEK)
-    .map((day) => weekdayFormat.format(day));
+  function toggleMine(key: string) {
+    if (!myName) return;
+    setAttendance((prev) => {
+      const list = prev[key] ?? [];
+      const nextList = list.includes(myName)
+        ? list.filter((name) => name !== myName)
+        : [...list, myName];
+      return { ...prev, [key]: nextList };
+    });
+  }
 
   const gridColumns = {
     gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
   };
 
-  const rangeTitle = `${rangeFormat.format(days[0])} – ${rangeFormat.format(
-    days[days.length - 1],
-  )}`;
+  const monthTitle = monthYearFormat.format(days[THURSDAY_INDEX]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <ViewToggle view={view} onChange={setView} />
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between pb-5">
+        <div className="flex items-center gap-3">
+          <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
+            {office.name}
+            <span aria-hidden="true">{office.emoji}</span>
+          </h2>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            {rangeTitle}
-          </span>
-          <div className="flex gap-1">
+          <OfficeSwitcher />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button onClick={goToday} className={navButton}>
+            jump to today
+          </button>
+          <div className="flex items-center gap-2">
             <button
               onClick={goPrev}
-              className={navButton}
-              aria-label="Previous"
+              className={arrowButton}
+              aria-label="Previous week"
             >
               ‹
             </button>
-            <button onClick={goToday} className={navButton}>
-              Today
-            </button>
-            <button onClick={goNext} className={navButton} aria-label="Next">
+            <span className="min-w-[8.5rem] text-center text-base font-bold text-gray-900">
+              {monthTitle}
+            </span>
+            <button
+              onClick={goNext}
+              className={arrowButton}
+              aria-label="Next week"
+            >
               ›
             </button>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-2" style={gridColumns}>
-        {weekdayLabels.map((label) => (
-          <div
-            key={label}
-            className="text-center text-xs font-medium uppercase text-gray-400"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid gap-2" style={gridColumns}>
+      <div
+        className="grid overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
+        style={gridColumns}
+      >
         {days.map((day) => {
           const key = toDateKey(day);
-          return <DayCell key={key} date={day} names={events[key] ?? []} />;
+          const names = attendance[key] ?? [];
+          return (
+            <DayCell
+              key={key}
+              date={day}
+              names={names}
+              myName={myName}
+              isMine={names.includes(myName)}
+              onToggleMine={() => toggleMine(key)}
+            />
+          );
         })}
       </div>
     </div>
@@ -103,29 +121,7 @@ export function Calendar({ events }: CalendarProps) {
 }
 
 const navButton =
-  "rounded-md border border-gray-200 px-2.5 py-1 text-sm text-gray-700 hover:bg-gray-100";
+  "rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100";
 
-interface ViewToggleProps {
-  view: View;
-  onChange: (view: View) => void;
-}
-
-function ViewToggle({ view, onChange }: ViewToggleProps) {
-  return (
-    <div className="inline-flex rounded-md border border-gray-200 p-0.5">
-      {VIEW_WEEKS.map((weeks) => (
-        <button
-          key={weeks}
-          onClick={() => onChange(weeks)}
-          className={`rounded px-3 py-1 text-sm ${
-            view === weeks
-              ? "bg-gray-900 text-white"
-              : "text-gray-600 hover:bg-gray-100"
-          }`}
-        >
-          {weeks} {weeks === 1 ? "week" : "weeks"}
-        </button>
-      ))}
-    </div>
-  );
-}
+const arrowButton =
+  "flex h-7 w-7 items-center justify-center rounded-md text-lg text-gray-600 hover:bg-gray-100";

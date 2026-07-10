@@ -1,22 +1,35 @@
 import { Calendar } from "@/components/Calendar/Calendar";
 import type { EventsByDate } from "@/types/calendar/calendar";
+import { useAuth } from "@/util/auth/useAuth";
+import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 
-// Sample data anchored to the current week so it shows up in both views.
-const weekStart = startOfWeek(new Date());
-const sampleEvents: EventsByDate = {
-  [toDateKey(weekStart)]: ["Alice", "Bob"],
-  [toDateKey(addDays(weekStart, 2))]: ["Carol"],
-  [toDateKey(addDays(weekStart, 4))]: ["Dave", "Erin", "Frank"],
-  [toDateKey(addDays(weekStart, 8))]: ["Grace"],
-  [toDateKey(addDays(weekStart, 15))]: ["Heidi", "Ivan"],
-};
-
 export default function CalendarPage() {
+  const { user } = useAuth();
+  const me = userDisplayName(user);
+
+  // Sample data anchored to the current week, seeding the logged-in user on a
+  // few days so their highlight and the in/out toggle are visible.
+  const weekStart = startOfWeek(new Date());
+  const sampleEvents: EventsByDate = {
+    [toDateKey(weekStart)]: ["Jackson F", "Abby Smith", me].filter(Boolean),
+    [toDateKey(addDays(weekStart, 1))]: ["Jackson F", me].filter(Boolean),
+    [toDateKey(addDays(weekStart, 2))]: ["Natalie D", "Tommy B", "Laura L"],
+    [toDateKey(addDays(weekStart, 3))]: [me].filter(Boolean),
+    [toDateKey(addDays(weekStart, 4))]: [
+      "Blair C",
+      "Tommy B",
+      "Laura L",
+      "Abby S",
+      "Jeremy F",
+    ],
+  };
+
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">Schedule</h1>
-      <Calendar events={sampleEvents} />
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-5xl p-6">
+        <Calendar events={sampleEvents} />
+      </div>
     </div>
   );
 }
