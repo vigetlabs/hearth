@@ -36,6 +36,7 @@ jobs:
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
       DATABASE_USERNAME: postgres
