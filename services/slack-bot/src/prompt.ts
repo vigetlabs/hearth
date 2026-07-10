@@ -1,7 +1,7 @@
 import type { KnownBlock } from '@slack/web-api'
 import { config } from './config.ts'
-import { LOCATION_META, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
-import type { DayLocation, WeekSchedule } from './schedule_store.ts'
+import { OFFICE, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
+import type { WeekSchedule } from './schedule_store.ts'
 
 // Action id for the "Edit Schedule" button. The interactivity endpoint
 // (server.ts) dispatches on this and opens the schedule modal.
@@ -16,10 +16,10 @@ export const CONFIRM_SCHEDULE = 'confirm_schedule'
 // the click opens the calendar client-side; server.ts acks it as a no-op.
 export const VIEW_CALENDAR = 'view_calendar'
 
-type ScheduleDay = { label: string; location: DayLocation }
+type ScheduleDay = { label: string; inOffice: boolean }
 
-// Attach next week's Mon–Fri dates to a stored week's locations. The dates are
-// computed here; the locations come from the store (or defaultWeek()).
+// Attach next week's Mon–Fri dates to a stored week's in-office flags. The dates
+// are computed here; the flags come from the store (or defaultWeek()).
 function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
   const monday = nextMonday()
   const fmt = new Intl.DateTimeFormat('en-US', {
@@ -31,15 +31,15 @@ function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
   return WEEKDAYS.map(({ key }, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    return { label: fmt.format(d), location: week[key] }
+    return { label: fmt.format(d), inOffice: week[key] }
   })
 }
 
 function formatSchedule(days: ScheduleDay[]): string {
   return days
     .map((d) => {
-      const { emoji, label } = LOCATION_META[d.location]
-      return `*${d.label}*  —  ${emoji} ${label}`
+      const mark = d.inOffice ? `${OFFICE.emoji} ${OFFICE.label}` : '🏠 Out'
+      return `*${d.label}*  —  ${mark}`
     })
     .join('\n')
 }
@@ -104,7 +104,7 @@ export function buildPrompt(
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `:wave:  *Here are your work locations for next week!*`,
+        text: `:wave:  *Here's your office schedule for next week!*`,
       },
     },
     { type: 'divider' },

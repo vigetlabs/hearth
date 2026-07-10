@@ -1,4 +1,7 @@
 set shell := ["bash", "-cu"]
+# Windows-only: use Git Bash (which sees native node/docker) instead of the
+# default `bash`, which resolves to WSL. Ignored on macOS/Linux.
+set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-cu"]
 
 CUR_BRANCH := `git branch --show-current`
 

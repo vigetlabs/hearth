@@ -5,13 +5,12 @@
 // the same interface will call the Rails API — one endpoint keyed by user id,
 // body = the whole week (see setSchedule) — and nothing else in the bot changes.
 
-export type DayLocation = 'falls church' | 'durham' | 'remote'
-
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri'
 
 // A user's whole week in one object — the exact shape the future API endpoint
 // takes/returns. One resource, five fields; the day is a key, not a route.
-export type WeekSchedule = Record<Weekday, DayLocation>
+// `true` means the user is in the office that day (see OFFICE); `false` is out.
+export type WeekSchedule = Record<Weekday, boolean>
 
 export const WEEKDAYS: { key: Weekday; label: string }[] = [
   { key: 'mon', label: 'Monday' },
@@ -21,30 +20,23 @@ export const WEEKDAYS: { key: Weekday; label: string }[] = [
   { key: 'fri', label: 'Friday' },
 ]
 
-export const LOCATION_META: Record<
-  DayLocation,
-  { emoji: string; label: string }
-> = {
-  'falls church': { emoji: '🌸', label: 'Falls Church' },
-  'durham': { emoji: '🐂', label: 'Durham' },
-  'remote': { emoji: '🏠', label: 'Remote' },
-}
-
-export const LOCATIONS = Object.keys(LOCATION_META) as DayLocation[]
-
-export function isDayLocation(v: string | undefined): v is DayLocation {
-  return v !== undefined && (LOCATIONS as string[]).includes(v)
+// The office these check-ins are for. Canned for now — later this comes from the
+// user's assigned office (Falls Church / Durham / …) via the API, and the modal
+// + DM already read it from here so only this constant has to change.
+export const OFFICE: { emoji: string; label: string } = {
+  emoji: '🌸',
+  label: 'Falls Church',
 }
 
 // Used until a user saves their own, and as the seed for a fresh store. Stands in
 // for the "default schedule" the API will eventually own.
 export function defaultWeek(): WeekSchedule {
   return {
-    mon: 'falls church',
-    tue: 'remote',
-    wed: 'durham',
-    thu: 'falls church',
-    fri: 'remote',
+    mon: true,
+    tue: false,
+    wed: true,
+    thu: true,
+    fri: false,
   }
 }
 
@@ -71,11 +63,12 @@ export function nextWeekDates(): Record<Weekday, string> {
   return dates
 }
 
-// Render a week as Block Kit mrkdwn (for confirmation messages).
+// Render a week as Block Kit mrkdwn (for confirmation messages): each day marked
+// in-office or out for the canned OFFICE.
 export function formatWeek(week: WeekSchedule): string {
   return WEEKDAYS.map(({ key, label }) => {
-    const { emoji, label: loc } = LOCATION_META[week[key]]
-    return `${emoji}  *${label}*  —  ${loc}`
+    const mark = week[key] ? `${OFFICE.emoji} ${OFFICE.label}` : '🏠  Out'
+    return `*${label}*  —  ${mark}`
   }).join('\n')
 }
 
