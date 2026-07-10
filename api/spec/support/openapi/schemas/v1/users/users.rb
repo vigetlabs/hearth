@@ -4,8 +4,6 @@ module OpenApi::Schemas::V1::Users
   # This is not a full response body. It only describes the user resource itself. Sensitive feilds like password and
   # encrypted passwords should never be included in this schema
   #
-  # @NOTE office_id, lab, and default_schedule properties should later be included in the required array once controller
-  # can return them
   USER_OBJECT = {
     type: :object,
     description: "Public user account data returned by the API.",
