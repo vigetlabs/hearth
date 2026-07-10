@@ -4,8 +4,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   InMemoryScheduleStore,
+  WEEKDAYS,
   defaultWeek,
-  isDayLocation,
 } from '../src/schedule_store.ts'
 import type { WeekSchedule } from '../src/schedule_store.ts'
 import {
@@ -15,16 +15,17 @@ import {
 } from '../src/schedule_modal.ts'
 import type { SubmittedView } from '../src/schedule_modal.ts'
 
-// Turn a WeekSchedule into the view.state.values shape Slack posts back, so we
-// can drive parseSchedule the way a real view_submission would.
+// Turn a WeekSchedule into the view.state.values shape Slack posts back: the
+// single "office_days" checkbox group reports the checked weekdays as
+// selected_options, so we can drive parseSchedule like a real view_submission.
 function asSubmittedView(week: WeekSchedule): SubmittedView {
-  const values: NonNullable<
-    NonNullable<SubmittedView['state']>['values']
-  > = {}
-  for (const [day, loc] of Object.entries(week)) {
-    values[day] = { location: { selected_option: { value: loc } } }
+  const selected_options = WEEKDAYS.filter(({ key }) => week[key]).map(
+    ({ key }) => ({ value: key }),
+  )
+  return {
+    callback_id: SCHEDULE_MODAL_CALLBACK,
+    state: { values: { office_days: { office_days: { selected_options } } } },
   }
-  return { callback_id: SCHEDULE_MODAL_CALLBACK, state: { values } }
 }
 
 test('store returns the default week for an unknown user', async () => {
@@ -35,11 +36,11 @@ test('store returns the default week for an unknown user', async () => {
 test('store round-trips a saved week per user', async () => {
   const store = new InMemoryScheduleStore()
   const mine: WeekSchedule = {
-    mon: 'durham',
-    tue: 'durham',
-    wed: 'remote',
-    thu: 'falls church',
-    fri: 'remote',
+    mon: true,
+    tue: true,
+    wed: false,
+    thu: true,
+    fri: false,
   }
 
   await store.setSchedule('U1', mine)
@@ -50,19 +51,18 @@ test('store round-trips a saved week per user', async () => {
 
 test('modal build → parse is a faithful round-trip', () => {
   const week: WeekSchedule = {
-    mon: 'remote',
-    tue: 'falls church',
-    wed: 'durham',
-    thu: 'remote',
-    fri: 'falls church',
+    mon: false,
+    tue: true,
+    wed: false,
+    thu: false,
+    fri: true,
   }
 
-  // The modal seeds each day's radio group with initial_option = the saved value.
+  // The modal pre-checks exactly the in-office days in its one checkbox group.
   const modal = buildScheduleModal(week)
   assert.equal(modal.callback_id, SCHEDULE_MODAL_CALLBACK)
-  assert.equal(modal.blocks.length, 5)
 
-  // A submission echoing those selections parses back to the same week.
+  // A submission echoing those checkboxes parses back to the same week.
   assert.deepEqual(parseSchedule(asSubmittedView(week)), week)
 })
 
@@ -80,28 +80,38 @@ test('modal carries private_metadata through for in-place message updates', () =
   })
 })
 
-test('parseSchedule falls back to the default for a missing/garbage day', () => {
+test('parseSchedule treats only checked boxes as in-office', () => {
   const view: SubmittedView = {
     callback_id: SCHEDULE_MODAL_CALLBACK,
     state: {
       values: {
-        mon: { location: { selected_option: { value: 'durham' } } },
-        tue: { location: { selected_option: { value: 'atlantis' } } }, // not a location
-        // wed/thu/fri missing entirely
+        office_days: {
+          office_days: { selected_options: [{ value: 'mon' }, { value: 'wed' }] },
+        },
       },
     },
   }
 
-  const parsed = parseSchedule(view)
-  const fallback = defaultWeek()
-
-  assert.equal(parsed.mon, 'durham')
-  assert.equal(parsed.tue, fallback.tue)
-  assert.equal(parsed.wed, fallback.wed)
+  assert.deepEqual(parseSchedule(view), {
+    mon: true,
+    tue: false,
+    wed: true,
+    thu: false,
+    fri: false,
+  })
 })
 
-test('isDayLocation guards unknown values', () => {
-  assert.equal(isDayLocation('remote'), true)
-  assert.equal(isDayLocation('mars'), false)
-  assert.equal(isDayLocation(undefined), false)
+test('parseSchedule reads a fully-remote week (nothing checked) as all out', () => {
+  const view: SubmittedView = {
+    callback_id: SCHEDULE_MODAL_CALLBACK,
+    state: { values: { office_days: { office_days: { selected_options: [] } } } },
+  }
+
+  assert.deepEqual(parseSchedule(view), {
+    mon: false,
+    tue: false,
+    wed: false,
+    thu: false,
+    fri: false,
+  })
 })
