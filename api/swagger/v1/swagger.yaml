@@ -236,72 +236,6 @@ components:
                 type: string
               message:
                 type: string
-    user:
-      type: object
-      description: Public user account data returned by the API.
-      required:
-      - id
-      - email
-      - first_name
-      - last_name
-      properties:
-        id:
-          type: integer
-        email:
-          type: string
-          format: email
-        first_name:
-          type: string
-        last_name:
-          type: string
-    user_response:
-      type: object
-      description: Full response body for endpoints that return one user.
-      required:
-      - status
-      - data
-      properties:
-        status:
-          type: object
-          description: Shared status metadata returned by API responses.
-          required:
-          - message
-          properties:
-            message:
-              type: string
-        data:
-          type: object
-          required:
-          - user
-          properties:
-            user:
-              type: object
-              description: Public user account data returned by the API.
-              required:
-              - id
-              - email
-              - first_name
-              - last_name
-              properties:
-                id:
-                  type: integer
-                email:
-                  type: string
-                  format: email
-                first_name:
-                  type: string
-                last_name:
-                  type: string
-    user_devise_invalid_login_response:
-      type: object
-      description: Full response body for invalid login request
-      required:
-      - error
-      properties:
-        error:
-          type: string
-          description: Devise authentication error message
-          example: Invalid Email or password.
     create_user_request:
       type: object
       description: Request body for creating a new user account
@@ -355,7 +289,6 @@ components:
       description: Public schedule data returned by the API.
       required:
       - id
-      - office_id
       - is_default
       - monday
       - tuesday
@@ -458,7 +391,6 @@ components:
               description: Public schedule data returned by the API.
               required:
               - id
-              - office_id
               - is_default
               - monday
               - tuesday
@@ -522,7 +454,6 @@ components:
                 description: Public schedule data returned by the API.
                 required:
                 - id
-                - office_id
                 - is_default
                 - monday
                 - tuesday
@@ -699,6 +630,50 @@ components:
                 type: string
               last_name:
                 type: string
+              office_id:
+                type: integer
+                nullable: true
+              default_schedule:
+                type: object
+                description: Public schedule data returned by the API.
+                required:
+                - id
+                - is_default
+                - monday
+                - tuesday
+                - wednesday
+                - thursday
+                - friday
+                - saturday
+                - sunday
+                properties:
+                  id:
+                    type: integer
+                  office_id:
+                    type: integer
+                  is_default:
+                    type: boolean
+                  monday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  tuesday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  wednesday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  thursday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  friday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  saturday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  sunday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
         visit_date:
           type: string
           format: date
@@ -784,6 +759,57 @@ components:
                         type: string
                       last_name:
                         type: string
+                      office_id:
+                        type: integer
+                        nullable: true
+                      default_schedule:
+                        type: object
+                        description: Public schedule data returned by the API.
+                        required:
+                        - id
+                        - is_default
+                        - monday
+                        - tuesday
+                        - wednesday
+                        - thursday
+                        - friday
+                        - saturday
+                        - sunday
+                        properties:
+                          id:
+                            type: integer
+                          office_id:
+                            type: integer
+                          is_default:
+                            type: boolean
+                          monday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          tuesday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          wednesday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          thursday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          friday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          saturday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          sunday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
                 visit_date:
                   type: string
                   format: date
@@ -852,6 +878,57 @@ components:
                           type: string
                         last_name:
                           type: string
+                        office_id:
+                          type: integer
+                          nullable: true
+                        default_schedule:
+                          type: object
+                          description: Public schedule data returned by the API.
+                          required:
+                          - id
+                          - is_default
+                          - monday
+                          - tuesday
+                          - wednesday
+                          - thursday
+                          - friday
+                          - saturday
+                          - sunday
+                          properties:
+                            id:
+                              type: integer
+                            office_id:
+                              type: integer
+                            is_default:
+                              type: boolean
+                            monday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            tuesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            wednesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            thursday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            friday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            saturday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            sunday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
                   visit_date:
                     type: string
                     format: date
@@ -867,3 +944,164 @@ components:
                     format: date-time
                     description: Updated-at time in ISO 8601 format
                     example: '2026-07-10T13:42:18.123Z'
+    user:
+      type: object
+      description: Public user account data returned by the API.
+      required:
+      - id
+      - email
+      - first_name
+      - last_name
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        office_id:
+          type: integer
+          nullable: true
+        default_schedule:
+          type: object
+          description: Public schedule data returned by the API.
+          required:
+          - id
+          - is_default
+          - monday
+          - tuesday
+          - wednesday
+          - thursday
+          - friday
+          - saturday
+          - sunday
+          properties:
+            id:
+              type: integer
+            office_id:
+              type: integer
+            is_default:
+              type: boolean
+            monday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            tuesday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            wednesday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            thursday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            friday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            saturday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+            sunday:
+              type: boolean
+              description: Whether the user has selected this day in their schedule
+    user_response:
+      type: object
+      description: Full response body for endpoints that return one user.
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          type: object
+          required:
+          - user
+          properties:
+            user:
+              type: object
+              description: Public user account data returned by the API.
+              required:
+              - id
+              - email
+              - first_name
+              - last_name
+              properties:
+                id:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                office_id:
+                  type: integer
+                  nullable: true
+                default_schedule:
+                  type: object
+                  description: Public schedule data returned by the API.
+                  required:
+                  - id
+                  - is_default
+                  - monday
+                  - tuesday
+                  - wednesday
+                  - thursday
+                  - friday
+                  - saturday
+                  - sunday
+                  properties:
+                    id:
+                      type: integer
+                    office_id:
+                      type: integer
+                    is_default:
+                      type: boolean
+                    monday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    tuesday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    wednesday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    thursday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    friday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    saturday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+                    sunday:
+                      type: boolean
+                      description: Whether the user has selected this day in their
+                        schedule
+    user_devise_invalid_login_response:
+      type: object
+      description: Full response body for invalid login request
+      required:
+      - error
+      properties:
+        error:
+          type: string
+          description: Devise authentication error message
+          example: Invalid Email or password.
