@@ -3,6 +3,7 @@ import { Link, useBlocker } from "react-router";
 
 import { useAuth } from "@/util/auth/useAuth";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import LockIcon from "@/components/icons/LockIcon";
 
 const OFFICES = [
   { id: "boulder", name: "Boulder", emoji: "⛰️" },
@@ -26,7 +27,6 @@ const DEFAULT_SCHEDULE: Record<Weekday, boolean> = {
 
 interface FormSnapshot {
   name: string;
-  email: string;
   selectedOffice: string;
   inOffice: Record<Weekday, boolean>;
 }
@@ -37,7 +37,9 @@ export default function ProfilePage() {
   const [name, setName] = useState(
     user ? `${user.first_name} ${user.last_name}` : "",
   );
-  const [email, setEmail] = useState(user?.email ?? "");
+  // Email is tied to the user's Google account and can't be edited here, so it
+  // stays out of the form state (and the dirty/save logic) entirely.
+  const email = user?.email ?? "";
   const [selectedOffice, setSelectedOffice] = useState<string>(DEFAULT_OFFICE);
   const [inOffice, setInOffice] =
     useState<Record<Weekday, boolean>>(DEFAULT_SCHEDULE);
@@ -51,14 +53,12 @@ export default function ProfilePage() {
   // from this. Saving re-baselines it, clearing the dirty flag.
   const [savedSnapshot, setSavedSnapshot] = useState<FormSnapshot>({
     name: user ? `${user.first_name} ${user.last_name}` : "",
-    email: user?.email ?? "",
     selectedOffice: DEFAULT_OFFICE,
     inOffice: DEFAULT_SCHEDULE,
   });
 
   const isDirty =
     name !== savedSnapshot.name ||
-    email !== savedSnapshot.email ||
     selectedOffice !== savedSnapshot.selectedOffice ||
     WEEKDAYS.some((day) => inOffice[day] !== savedSnapshot.inOffice[day]);
 
@@ -110,7 +110,7 @@ export default function ProfilePage() {
     }
 
     // @TODO: Persist profile changes once an update endpoint exists.
-    setSavedSnapshot({ name, email, selectedOffice, inOffice });
+    setSavedSnapshot({ name, selectedOffice, inOffice });
     setSaveFeedback("saved");
   }
 
@@ -152,17 +152,24 @@ export default function ProfilePage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-1.5 block text-sm font-semibold text-gray-900"
+                  className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-gray-900"
                 >
                   Email
+                  <LockIcon className="h-3.5 w-3.5 text-gray-400" />
                 </label>
                 <input
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-500 focus:border-gray-500 focus:outline-none"
+                  readOnly
+                  disabled
+                  aria-describedby="email-help"
+                  className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-gray-500 focus:outline-none"
                 />
+                <p id="email-help" className="mt-1.5 text-xs text-gray-500">
+                  Your email is managed through your Google account and can't be
+                  changed.
+                </p>
               </div>
             </div>
           </section>

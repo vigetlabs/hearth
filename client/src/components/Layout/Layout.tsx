@@ -1,4 +1,5 @@
 import AuthProvider from "@/components/AuthProvider/AuthProvider";
+import OfficeProvider from "@/components/OfficeProvider/OfficeProvider";
 import Header from "@/components/Header/Header";
 
 interface LayoutProps {
@@ -8,8 +9,10 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <AuthProvider>
-      <Header />
-      {children}
+      <OfficeProvider>
+        <Header />
+        {children}
+      </OfficeProvider>
     </AuthProvider>
   );
 }

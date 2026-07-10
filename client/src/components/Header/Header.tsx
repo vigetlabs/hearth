@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
 import { useAuth } from "@/util/auth/useAuth";
+import { userDisplayName } from "@/util/auth/displayName";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
@@ -30,14 +31,14 @@ export default function Header() {
     });
   }
 
-  const triggerLabel = `${user.first_name} ${user.last_name[0] ?? ""}`.trim();
+  const triggerLabel = userDisplayName(user);
 
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
       <div className="flex items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-lg bg-gray-100" />
-          <span className="text-lg font-bold text-gray-900">PN</span>
+          <span className="text-lg font-bold text-gray-900">Hearth</span>
         </Link>
 
         <DropdownMenu.Root>
