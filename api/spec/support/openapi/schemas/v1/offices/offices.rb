@@ -35,7 +35,7 @@ module OpenApi::Schemas::V1::Offices
 
   # OFFICE_RESPONSE: Full response body for returning an office
   #
-  # Use this when an endpoint returns a single schedule wrppaed in the standard
+  # Use this when an endpoint returns a single schedule wrapped in the standard
   # API response structure. Examples include reading an office's data.
   OFFICE_RESPONSE = {
     type: :object,
