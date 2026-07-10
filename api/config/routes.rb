@@ -9,7 +9,8 @@ Rails.application.routes.draw do
     },
     controllers: {
       sessions: "api/v1/users/sessions",
-      registrations: "api/v1/users/registrations"
+      registrations: "api/v1/users/registrations",
+      omniauth_callbacks: "api/v1/users/omniauth_callbacks"
     }
 
   namespace :api do
@@ -19,6 +20,10 @@ Rails.application.routes.draw do
 
       scope "users" do
         get "/me", to: "users/users#me"
+
+        # frontend facing google_oauth routes
+        get "/auth/google", to: "users/google_oauth#redirect"
+        get "/auth/failure", to: "users/google_oauth#failure"
       end
     end
   end

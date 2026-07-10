@@ -3,8 +3,11 @@ class User < ApplicationRecord
 
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :jwt_authenticatable, jwt_revocation_strategy: self
+         :jwt_authenticatable, :omniauthable, jwt_revocation_strategy: self,
+         omniauth_providers: [ :google_oauth2 ]
 
   validates :first_name, presence: true
   validates :last_name, presence: true
+
+  has_many :user_identities, dependent: :destroy
 end
