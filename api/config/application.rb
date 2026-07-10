@@ -20,6 +20,11 @@ module Api
     config.middleware.use JwtCookieMiddleware
     config.middleware.use ActionDispatch::Cookies
 
+    config.session_store :cookie_store,
+      key: "_single_sign_on_session",
+      same_site: :lax
+    config.middleware.use config.session_store, config.session_options
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
