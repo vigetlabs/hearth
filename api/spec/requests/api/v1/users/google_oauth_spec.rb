@@ -15,7 +15,7 @@ RSpec.describe "Api::V1::Users::GoogleOauths", type: :request do
       get api_path("/users/auth/failure")
       expect(response).to have_http_status(:redirect)
       expect(response).to redirect_to(
-        "#{ENV.fetch("FRONTEND_URL")}/users/login?error=sso_failed"
+        "#{Rails.application.credentials.dig(:google, :frontend_url)}/users/login?error=sso_failed"
       )
     end
   end

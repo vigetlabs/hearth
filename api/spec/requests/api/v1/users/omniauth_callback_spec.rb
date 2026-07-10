@@ -19,7 +19,7 @@ RSpec.describe "Api::V1::Users::OmniauthCallbacks", type: :request do
         callback_request
         expect(response).to have_http_status(:redirect)
         expect(response).to redirect_to(
-          "#{ENV.fetch("FRONTEND_URL")}/users/profile"
+          "#{Rails.application.credentials.dig(:google, :frontend_url)}/users/profile"
         )
       end
 

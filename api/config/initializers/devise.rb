@@ -11,13 +11,12 @@
 Devise.setup do |config|
   config.navigational_formats = []
   config.omniauth :google_oauth2,
-    ENV.fetch("GOOGLE_CLIENT_ID"),
-    ENV.fetch("GOOGLE_CLIENT_SECRET"),
+    Rails.application.credentials.dig(:google, :google_client_id),
+    Rails.application.credentials.dig(:google, :google_client_secret),
     scope: "email, profile"
 
   config.jwt do |jwt|
-    # jwt.secret = Rails.application.credentials.devise_jwt_secret_key!
-    jwt.secret = ENV.fetch("DEVISE_JWT_SECRET_KEY")
+    jwt.secret = Rails.application.credentials.dig(:jwt, :devise_jwt_secret_key)
     # jwt.dispatch_requests = [
     #   [ "POST", %r{^/login$} ]
     # ]
