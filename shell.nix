@@ -3,7 +3,6 @@
 pkgs.mkShell {
   packages = with pkgs; [
     ruby_4_0
-    rubyPackages.rails
     tig
 
     typescript
