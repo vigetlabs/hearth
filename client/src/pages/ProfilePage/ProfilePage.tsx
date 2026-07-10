@@ -4,31 +4,23 @@ import { Link, useBlocker } from "react-router";
 import { useAuth } from "@/util/auth/useAuth";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
-
-const OFFICES = [
-  { id: "boulder", name: "Boulder", emoji: "⛰️" },
-  { id: "falls-church", name: "Falls Church", emoji: "🌸" },
-  { id: "chattanooga", name: "Chattanooga", emoji: "🚂" },
-  { id: "durham", name: "Durham", emoji: "🐂" },
-  { id: "remote", name: "Remote", emoji: "🏡", remote: true },
-] as const;
-
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
-type Weekday = (typeof WEEKDAYS)[number];
+import { OFFICES } from "@/types/office/office";
+import { WEEKDAYS } from "@/types/schedule/schedule";
 
 const DEFAULT_OFFICE = "boulder";
-const DEFAULT_SCHEDULE: Record<Weekday, boolean> = {
-  Mon: true,
-  Tue: true,
-  Wed: false,
-  Thu: true,
-  Fri: false,
+// Keyed by weekday `id` (see WEEKDAYS), e.g. "monday".
+const DEFAULT_SCHEDULE: Record<string, boolean> = {
+  monday: true,
+  tuesday: true,
+  wednesday: false,
+  thursday: true,
+  friday: false,
 };
 
 interface FormSnapshot {
   name: string;
   selectedOffice: string;
-  inOffice: Record<Weekday, boolean>;
+  inOffice: Record<string, boolean>;
 }
 
 export default function ProfilePage() {
@@ -42,7 +34,7 @@ export default function ProfilePage() {
   const email = user?.email ?? "";
   const [selectedOffice, setSelectedOffice] = useState<string>(DEFAULT_OFFICE);
   const [inOffice, setInOffice] =
-    useState<Record<Weekday, boolean>>(DEFAULT_SCHEDULE);
+    useState<Record<string, boolean>>(DEFAULT_SCHEDULE);
 
   // Transient feedback shown next to the Save button after a save attempt.
   const [saveFeedback, setSaveFeedback] = useState<
@@ -60,7 +52,7 @@ export default function ProfilePage() {
   const isDirty =
     name !== savedSnapshot.name ||
     selectedOffice !== savedSnapshot.selectedOffice ||
-    WEEKDAYS.some((day) => inOffice[day] !== savedSnapshot.inOffice[day]);
+    WEEKDAYS.some((day) => inOffice[day.id] !== savedSnapshot.inOffice[day.id]);
 
   // Intercept in-app navigation (Go back, the logo, the header menu) while there
   // are unsaved changes so we can confirm before leaving.
@@ -97,8 +89,8 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, [saveFeedback]);
 
-  function toggleDay(day: Weekday) {
-    setInOffice((prev) => ({ ...prev, [day]: !prev[day] }));
+  function toggleDay(dayId: string) {
+    setInOffice((prev) => ({ ...prev, [dayId]: !prev[dayId] }));
   }
 
   function handleSave(event: React.FormEvent<HTMLFormElement>) {
@@ -182,7 +174,7 @@ export default function ProfilePage() {
             <div className="flex flex-wrap gap-4">
               {OFFICES.map((office) => {
                 const isSelected = selectedOffice === office.id;
-                const isRemote = "remote" in office && office.remote;
+                const isRemote = office.dashed;
 
                 return (
                   <button
@@ -214,13 +206,13 @@ export default function ProfilePage() {
 
             <div className="flex flex-wrap gap-3">
               {WEEKDAYS.map((day) => {
-                const isIn = inOffice[day];
+                const isIn = inOffice[day.id];
 
                 return (
                   <button
-                    key={day}
+                    key={day.id}
                     type="button"
-                    onClick={() => toggleDay(day)}
+                    onClick={() => toggleDay(day.id)}
                     className={`flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors ${
                       isIn
                         ? "border-gray-300 bg-gray-100"
@@ -228,7 +220,7 @@ export default function ProfilePage() {
                     }`}
                   >
                     <span className="text-sm font-bold text-gray-900">
-                      {day}
+                      {day.label}
                     </span>
                     {isIn ? (
                       <span className="text-xs text-gray-600">✓ in office</span>
