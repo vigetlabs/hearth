@@ -1,16 +1,21 @@
 module OpenApi
   module Schemas
     module V1
-      module Generics
+      module Statuses
+      end
+      module Errors
       end
 
-      module Statuses
+      module Generics
       end
 
       module Users
       end
 
-      module Errors
+      module Schedules
+      end
+
+      module Offices
       end
     end
   end

@@ -35,6 +35,12 @@ RSpec.configure do |config|
       ],
       components: {
         schemas: {
+          status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
+
+          error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
+          error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
+          validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE,
+
           generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
           generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
 
@@ -46,9 +52,15 @@ RSpec.configure do |config|
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
           login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
 
-          error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
-          error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
-          validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
+          schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
+          create_schedule_request: OpenApi::Schemas::V1::Schedules::CREATE_SCHEDULE_REQUEST,
+          schedule_response: OpenApi::Schemas::V1::Schedules::SCHEDULE_RESPONSE,
+          schedules_response: OpenApi::Schemas::V1::Schedules::SCHEDULES_RESPONSE,
+
+
+          office: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT,
+          office_response: OpenApi::Schemas::V1::Offices::OFFICE_RESPONSE,
+          offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE
         }
       }
     }
