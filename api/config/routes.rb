@@ -25,6 +25,8 @@ Rails.application.routes.draw do
         get "/auth/google", to: "users/google_oauth#redirect"
         get "/auth/failure", to: "users/google_oauth#failure"
       end
+
+      resources :schedules, only: [ :create ], module: :schedules
     end
   end
 end
