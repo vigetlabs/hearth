@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 import App from "@/App";
 
 import { authLoader } from "@/routes/loaders/authLoader";
+import { redirectAuthenticatedUserLoader } from "@/routes/loaders/redirectAuthenticatedUserLoader";
 
 import IndexPage from "@/pages/IndexPage/IndexPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
@@ -24,7 +25,11 @@ export const router = createBrowserRouter([
           { path: "signup", Component: SignupPage },
           { path: "office", Component: OfficePickerPage },
           { path: "schedule", Component: SchedulePickerPage },
-          { path: "login", Component: LoginPage },
+          {
+            path: "login",
+            Component: LoginPage,
+            loader: redirectAuthenticatedUserLoader,
+          },
           { path: "profile", Component: ProfilePage, loader: authLoader },
         ],
       },

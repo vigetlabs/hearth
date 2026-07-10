@@ -17,15 +17,8 @@ class Api::V1::Users::SessionsController < Devise::SessionsController
   end
 
   def respond_to_on_destroy(_)
-    if current_user
-      success_response(
-        message: "Logged out successfully"
-      )
-    else
-      error_response(
-        message: "Failed to find an active session",
-        status: :unauthorized
-      )
-    end
+    success_response(
+      message: "Logged out successfully"
+    )
   end
 end
