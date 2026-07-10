@@ -10,8 +10,10 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <AuthProvider>
       <OfficeProvider>
-        <Header />
-        {children}
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          {children}
+        </div>
       </OfficeProvider>
     </AuthProvider>
   );
