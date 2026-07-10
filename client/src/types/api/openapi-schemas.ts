@@ -367,7 +367,6 @@ export interface components {
     /** @description Public schedule data returned by the API. */
     schedule: {
       id: number;
-      office_id?: number;
       is_default: boolean;
       /** @description Whether the user has selected this day in their schedule */
       monday: boolean;
@@ -414,7 +413,6 @@ export interface components {
         /** @description Public schedule data returned by the API. */
         schedule: {
           id: number;
-          office_id?: number;
           is_default: boolean;
           /** @description Whether the user has selected this day in their schedule */
           monday: boolean;
@@ -593,7 +591,6 @@ export interface components {
       /** @description Public schedule data returned by the API. */
       default_schedule?: {
         id: number;
-        office_id?: number;
         is_default: boolean;
         /** @description Whether the user has selected this day in their schedule */
         monday: boolean;
@@ -630,7 +627,6 @@ export interface components {
           /** @description Public schedule data returned by the API. */
           default_schedule?: {
             id: number;
-            office_id?: number;
             is_default: boolean;
             /** @description Whether the user has selected this day in their schedule */
             monday: boolean;

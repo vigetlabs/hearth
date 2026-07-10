@@ -300,8 +300,6 @@ components:
       properties:
         id:
           type: integer
-        office_id:
-          type: integer
         is_default:
           type: boolean
         monday:
@@ -402,8 +400,6 @@ components:
               properties:
                 id:
                   type: integer
-                office_id:
-                  type: integer
                 is_default:
                   type: boolean
                 monday:
@@ -464,8 +460,6 @@ components:
                 - sunday
                 properties:
                   id:
-                    type: integer
-                  office_id:
                     type: integer
                   is_default:
                     type: boolean
@@ -649,8 +643,6 @@ components:
                 properties:
                   id:
                     type: integer
-                  office_id:
-                    type: integer
                   is_default:
                     type: boolean
                   monday:
@@ -780,8 +772,6 @@ components:
                         properties:
                           id:
                             type: integer
-                          office_id:
-                            type: integer
                           is_default:
                             type: boolean
                           monday:
@@ -901,8 +891,6 @@ components:
                           properties:
                             id:
                               type: integer
-                            office_id:
-                              type: integer
                             is_default:
                               type: boolean
                             monday:
@@ -987,8 +975,6 @@ components:
           properties:
             id:
               type: integer
-            office_id:
-              type: integer
             is_default:
               type: boolean
             monday:
@@ -1070,8 +1056,6 @@ components:
                   - sunday
                   properties:
                     id:
-                      type: integer
-                    office_id:
                       type: integer
                     is_default:
                       type: boolean
