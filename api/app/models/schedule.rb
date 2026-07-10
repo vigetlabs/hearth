@@ -20,4 +20,8 @@ class Schedule < ApplicationRecord
   end
 
   scope :default, -> { where(is_default: true) }
+
+  def active_days
+    DAYS.select  { |day| public_send(day) }
+  end
 end
