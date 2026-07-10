@@ -13,9 +13,21 @@ export default function OfficePicker() {
   function handleContinue() {
     if (!selectedOfficeId) return;
 
-    // @TODO: Persist the selected default office to the API, then advance the
-    // signup flow.
-    navigate("/users/login");
+    // @TODO: Persist the selected default office to the API.
+    const selectedOffice = OFFICES.find(
+      (office) => office.id === selectedOfficeId,
+    );
+
+    // Remote users have no in-office days to pick, so skip the schedule screen
+    // and drop them straight into the calendar.
+    if (selectedOffice?.id === "remote") {
+      navigate("/calendar");
+      return;
+    }
+
+    // Otherwise advance to the schedule screen, passing the office along so it
+    // can tailor its heading.
+    navigate("/users/schedule", { state: { office: selectedOffice } });
   }
 
   return (
