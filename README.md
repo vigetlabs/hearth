@@ -83,8 +83,6 @@ cp services/.env.example services/.env
 
 After copying the example files, review the values in each `.env` file and update them if needed for your local setup. (Refer to 1Password or owners of the repository).
 
-You will also need to create a `master.key` file in `api/config/` and paste the contents of the environment variable into that file.
-
 #### Start the Development Environment
 
 From the project root, you can start the Ruby on Rails API and PostgreSQL database Docker services by running the following command:
