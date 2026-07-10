@@ -26,8 +26,11 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-5xl p-6">
+    // `flex-1` fills the space below the sticky header; `overflow-hidden` keeps
+    // the page pinned to the viewport so it can't scroll or overscroll. The
+    // `py-8` leaves breathing room above and below the calendar card.
+    <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
+      <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
         <Calendar events={sampleEvents} />
       </div>
     </div>

@@ -55,12 +55,19 @@ export function Calendar({ events }: CalendarProps) {
 
   const gridColumns = {
     gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
+    // A single `1fr` row lets the day columns stretch to fill the card, which is
+    // now sized to 90% of the space below the header.
+    gridTemplateRows: "1fr",
   };
 
   const monthTitle = monthYearFormat.format(days[THURSDAY_INDEX]);
 
+  // Remote has no in-office schedule, so the weekly grid doesn't apply — hide it
+  // and the week navigation, leaving only the office title and switcher.
+  const isRemote = office.id === "remote";
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between pb-5">
         <div className="flex items-center gap-3">
           <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
@@ -71,51 +78,59 @@ export function Calendar({ events }: CalendarProps) {
           <OfficeSwitcher />
         </div>
 
-        <div className="flex items-center gap-4">
-          <button onClick={goToday} className={navButton}>
-            jump to today
-          </button>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={goPrev}
-              className={arrowButton}
-              aria-label="Previous week"
-            >
-              ‹
+        {!isRemote && (
+          <div className="flex items-center gap-4">
+            <button onClick={goToday} className={navButton}>
+              jump to today
             </button>
-            <span className="min-w-[8.5rem] text-center text-base font-bold text-gray-900">
-              {monthTitle}
-            </span>
-            <button
-              onClick={goNext}
-              className={arrowButton}
-              aria-label="Next week"
-            >
-              ›
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goPrev}
+                className={arrowButton}
+                aria-label="Previous week"
+              >
+                ‹
+              </button>
+              <span className="min-w-[8.5rem] text-center text-base font-bold text-gray-900">
+                {monthTitle}
+              </span>
+              <button
+                onClick={goNext}
+                className={arrowButton}
+                aria-label="Next week"
+              >
+                ›
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      <div
-        className="grid overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
-        style={gridColumns}
-      >
-        {days.map((day) => {
-          const key = toDateKey(day);
-          const names = attendance[key] ?? [];
-          return (
-            <DayCell
-              key={key}
-              date={day}
-              names={names}
-              myName={myName}
-              isMine={names.includes(myName)}
-              onToggleMine={() => toggleMine(key)}
-            />
-          );
-        })}
-      </div>
+      {isRemote ? (
+        <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-gray-200 px-6 text-center text-sm text-gray-500">
+          Remote has no weekly office schedule.
+        </div>
+      ) : (
+        <div
+          className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
+          style={gridColumns}
+        >
+          {days.map((day) => {
+            const key = toDateKey(day);
+            const names = attendance[key] ?? [];
+            return (
+              <DayCell
+                key={key}
+                date={day}
+                names={names}
+                myName={myName}
+                isMine={names.includes(myName)}
+                onToggleMine={() => toggleMine(key)}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
