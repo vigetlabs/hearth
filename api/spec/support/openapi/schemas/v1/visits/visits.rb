@@ -16,7 +16,7 @@ module OpenApi::Schemas::V1::Visits
     required: %w[
       id
       user
-      vist_date
+      visit_date
       created_at
       updated_at
     ],
