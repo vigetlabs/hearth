@@ -46,7 +46,6 @@ module OpenApi::Schemas::V1::Schedules
     description: "Public schedule data returned by the API.",
     required: [
       "id",
-      "office_id",
       "is_default",
       *DAYS
     ],

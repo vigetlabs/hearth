@@ -9,9 +9,6 @@ module OpenApi
       module Generics
       end
 
-      module Users
-      end
-
       module Schedules
       end
 
@@ -20,6 +17,9 @@ module OpenApi
 
       module Visits
       end
+
+      module Users
+      end
     end
   end
 end
@@ -27,4 +27,7 @@ end
 require_relative "schemas/v1/statuses/status"
 require_relative "schemas/v1/errors/errors"
 require_relative "schemas/v1/generics/generics"
+require_relative "schemas/v1/schedules/schedules"
+require_relative "schemas/v1/offices/offices"
 require_relative "schemas/v1/users/users"
+require_relative "schemas/v1/visits/visits"
