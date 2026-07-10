@@ -35,20 +35,36 @@ RSpec.configure do |config|
       ],
       components: {
         schemas: {
-          generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
-          generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
-
           status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
-
-          user: OpenApi::Schemas::V1::Users::USER_OBJECT,
-          user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
-          user_devise_invalid_login_response: OpenApi::Schemas::V1::Users::USER_DEVISE_INVALID_LOGIN_RESPONSE,
-          create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
-          login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
 
           error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
           error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
-          validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
+          validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE,
+
+          generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
+          generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
+
+          create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
+          login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
+
+          schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
+          create_schedule_request: OpenApi::Schemas::V1::Schedules::CREATE_SCHEDULE_REQUEST,
+          schedule_response: OpenApi::Schemas::V1::Schedules::SCHEDULE_RESPONSE,
+          schedules_response: OpenApi::Schemas::V1::Schedules::SCHEDULES_RESPONSE,
+
+
+          office: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT,
+          office_response: OpenApi::Schemas::V1::Offices::OFFICE_RESPONSE,
+          offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE,
+
+          visit: OpenApi::Schemas::V1::Visits::VISIT_OBJECT,
+          create_visit_request: OpenApi::Schemas::V1::Visits::CREATE_VISIT_REQUEST,
+          visit_response: OpenApi::Schemas::V1::Visits::VISIT_RESPONSE,
+          visits_response: OpenApi::Schemas::V1::Visits::VISITS_RESPONSE,
+
+          user: OpenApi::Schemas::V1::Users::USER_OBJECT,
+          user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
+          user_devise_invalid_login_response: OpenApi::Schemas::V1::Users::USER_DEVISE_INVALID_LOGIN_RESPONSE
         }
       }
     }

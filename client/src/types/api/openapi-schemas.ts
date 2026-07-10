@@ -4,6 +4,108 @@
  */
 
 export interface paths {
+  "/api/v1/users/auth/google": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Starts the Google SSO */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description redirects to the Google OAuth authorization flow */
+        302: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/users/auth/failure": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Handles failed Google SSO attempt */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description redirects to the frontend with an error path in URL */
+        302: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/users/auth/google_oauth2/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Handles the Google OAuth callback */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description sets the JWT cookie and redirects to the frontend profile */
+        302: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/users": {
     parameters: {
       query?: never;
@@ -189,6 +291,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description Shared status metadata returned by API responses. */
+    status: {
+      message: string;
+    };
+    /** @description One individual error detail, usually used inside an errors array. */
+    error: {
+      field: string;
+      message: string;
+    };
+    /** @description Full response body for a generic API error without field-level details. */
+    error_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+    };
+    /** @description Full response body for validation errors with field-level details. */
+    validation_error_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      errors: {
+        field: string;
+        message: string;
+      }[];
+    };
     /** @description Generic success response body */
     generic_success_response: {
       /** @description Shared status metadata returned by API responses. */
@@ -211,43 +340,6 @@ export interface components {
         field: string;
         message: string;
       }[];
-    };
-    /** @description Shared status metadata returned by API responses. */
-    status: {
-      message: string;
-    };
-    /** @description Public user account data returned by the API. */
-    user: {
-      id: number;
-      /** Format: email */
-      email: string;
-      first_name: string;
-      last_name: string;
-    };
-    /** @description Full response body for endpoints that return one user. */
-    user_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        /** @description Public user account data returned by the API. */
-        user: {
-          id: number;
-          /** Format: email */
-          email: string;
-          first_name: string;
-          last_name: string;
-        };
-      };
-    };
-    /** @description Full response body for invalid login request */
-    user_devise_invalid_login_response: {
-      /**
-       * @description Devise authentication error message
-       * @example Invalid Email or password.
-       */
-      error: string;
     };
     /** @description Request body for creating a new user account */
     create_user_request: {
@@ -272,28 +364,300 @@ export interface components {
         password: string;
       };
     };
-    /** @description One individual error detail, usually used inside an errors array. */
-    error: {
-      field: string;
-      message: string;
+    /** @description Public schedule data returned by the API. */
+    schedule: {
+      id: number;
+      office_id?: number;
+      is_default: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      monday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      tuesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      wednesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      thursday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      friday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      saturday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      sunday: boolean;
     };
-    /** @description Full response body for a generic API error without field-level details. */
-    error_response: {
+    /** @description Request body for creating a new schedule */
+    create_schedule_request: {
+      schedule: {
+        is_default: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        monday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        tuesday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        wednesday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        thursday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        friday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        saturday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        sunday: boolean;
+      };
+    };
+    /** @description Full response body for endpoints that return a single schedule. */
+    schedule_response: {
       /** @description Shared status metadata returned by API responses. */
       status: {
         message: string;
       };
+      data: {
+        /** @description Public schedule data returned by the API. */
+        schedule: {
+          id: number;
+          office_id?: number;
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        };
+      };
     };
-    /** @description Full response body for validation errors with field-level details. */
-    validation_error_response: {
+    /** @description Full response body for endpoints that return multiple schedules. */
+    schedules_response: {
       /** @description Shared status metadata returned by API responses. */
       status: {
         message: string;
       };
-      errors: {
-        field: string;
+      data: {
+        schedules: unknown[];
+      };
+    };
+    /** @description Public office data returned by the API. */
+    office: {
+      id: number;
+      name: string;
+      /** @example America/Denver */
+      timezone: string;
+      /** @example Colorado */
+      state: string;
+      /** @example Boulder */
+      city: string;
+    };
+    /** @description Full response body for endpoints that return a single office. */
+    office_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
         message: string;
-      }[];
+      };
+      data: {
+        /** @description Public office data returned by the API. */
+        office: {
+          id: number;
+          name: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example Colorado */
+          state: string;
+          /** @example Boulder */
+          city: string;
+        };
+      };
+    };
+    /** @description Full response body for endpoints that return a single office. */
+    offices_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        offices: unknown[];
+      };
+    };
+    /** @description Public visit data returned by the API. */
+    visit: {
+      id: number;
+      user: unknown;
+      /**
+       * Format: date
+       * @description Calendar date only with no timezone (YYYY-MM-DD)
+       * @example 2026-07-10
+       */
+      visit_date: string;
+      /**
+       * Format: date-time
+       * @description Created-at time in ISO 8601 format
+       * @example 2026-07-10T13:42:18.123Z
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Updated-at time in ISO 8601 format
+       * @example 2026-07-10T13:42:18.123Z
+       */
+      updated_at: string;
+    };
+    /** @description Request body for creating a new visit */
+    create_visit_request: {
+      visit: {
+        /**
+         * Format: date
+         * @description Calendar date only with no timezone (YYYY-MM-DD)
+         * @example 2026-07-10
+         */
+        visit_date: string;
+        office_id: number;
+      };
+    };
+    /** @description Full response body for endpoints that return a single visit. */
+    visit_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        /** @description Public visit data returned by the API. */
+        visit: {
+          id: number;
+          user: unknown;
+          /**
+           * Format: date
+           * @description Calendar date only with no timezone (YYYY-MM-DD)
+           * @example 2026-07-10
+           */
+          visit_date: string;
+          /**
+           * Format: date-time
+           * @description Created-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          created_at: string;
+          /**
+           * Format: date-time
+           * @description Updated-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          updated_at: string;
+        };
+      };
+    };
+    /** @description Full response body for endpoints that return a single visit. */
+    visits_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        visits: {
+          id: number;
+          user: unknown;
+          /**
+           * Format: date
+           * @description Calendar date only with no timezone (YYYY-MM-DD)
+           * @example 2026-07-10
+           */
+          visit_date: string;
+          /**
+           * Format: date-time
+           * @description Created-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          created_at: string;
+          /**
+           * Format: date-time
+           * @description Updated-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          updated_at: string;
+        }[];
+      };
+    };
+    /** @description Public user account data returned by the API. */
+    user: {
+      id: number;
+      /** Format: email */
+      email: string;
+      first_name: string;
+      last_name: string;
+      office_id?: number | null;
+      /** @description Public schedule data returned by the API. */
+      default_schedule?: {
+        id: number;
+        office_id?: number;
+        is_default: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        monday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        tuesday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        wednesday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        thursday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        friday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        saturday: boolean;
+        /** @description Whether the user has selected this day in their schedule */
+        sunday: boolean;
+      };
+      lab?: string;
+    };
+    /** @description Full response body for endpoints that return one user. */
+    user_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        /** @description Public user account data returned by the API. */
+        user: {
+          id: number;
+          /** Format: email */
+          email: string;
+          first_name: string;
+          last_name: string;
+          office_id?: number | null;
+          /** @description Public schedule data returned by the API. */
+          default_schedule?: {
+            id: number;
+            office_id?: number;
+            is_default: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            monday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            tuesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            wednesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            thursday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            friday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            saturday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            sunday: boolean;
+          };
+          lab?: string;
+        };
+      };
+    };
+    /** @description Full response body for invalid login request */
+    user_devise_invalid_login_response: {
+      /**
+       * @description Devise authentication error message
+       * @example Invalid Email or password.
+       */
+      error: string;
     };
   };
   responses: never;
