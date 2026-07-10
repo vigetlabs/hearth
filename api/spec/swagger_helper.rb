@@ -19,7 +19,7 @@ RSpec.configure do |config|
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
       info: {
-        title: 'Intern Project API',
+        title: 'Hearth API',
         version: 'v1'
       },
       paths: {},

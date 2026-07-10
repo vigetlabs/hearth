@@ -1,4 +1,4 @@
-# Intern 2026 Group Project
+# Hearth
 
 ### System Dependencies
 The following software should be installed in order to run this application locally.
