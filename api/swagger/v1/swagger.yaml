@@ -4,6 +4,30 @@ info:
   title: Intern Project API
   version: v1
 paths:
+  "/api/v1/users/auth/google":
+    get:
+      summary: Starts the Google SSO
+      tags:
+      - Users
+      responses:
+        '302':
+          description: redirects to the Google OAuth authorization flow
+  "/api/v1/users/auth/failure":
+    get:
+      summary: Handles failed Google SSO attempt
+      tags:
+      - Users
+      responses:
+        '302':
+          description: redirects to the frontend with an error path in URL
+  "/api/v1/users/auth/google_oauth2/callback":
+    get:
+      summary: Handles the Google OAuth callback
+      tags:
+      - Users
+      responses:
+        '302':
+          description: sets the JWT cookie and redirects to the frontend profile
   "/api/v1/users":
     post:
       summary: Creates a user account
