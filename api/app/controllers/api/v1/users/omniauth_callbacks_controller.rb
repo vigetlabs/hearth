@@ -7,7 +7,7 @@ class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksCon
 
     sign_in(user)
 
-    redirect_to frontend_path("/users/profile"),
+    redirect_to frontend_path("/users/office"),
       allow_other_host: true
   end
 

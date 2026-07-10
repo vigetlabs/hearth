@@ -60,6 +60,9 @@ rubocop-fix:
 rspec:
   {{DDC}} exec -T api sh -c 'bundle exec rspec'
 
+clear-users:
+  {{DDC}} exec -T api sh -c 'rails runner "User.destroy_all"'
+
 prettier:
   cd client && npm run format
 

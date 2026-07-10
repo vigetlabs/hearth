@@ -1,5 +1,5 @@
 {
-  description = "2026 Viget Internship Project Nix Shell";
+  description = "Hearth Nix Shell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
