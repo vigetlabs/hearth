@@ -17,6 +17,9 @@ module OpenApi
 
       module Offices
       end
+
+      module Visits
+      end
     end
   end
 end

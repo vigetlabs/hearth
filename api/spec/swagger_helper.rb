@@ -60,7 +60,12 @@ RSpec.configure do |config|
 
           office: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT,
           office_response: OpenApi::Schemas::V1::Offices::OFFICE_RESPONSE,
-          offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE
+          offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE,
+
+          visit: OpenApi::Schemas::V1::Visits::VISIT_OBJECT,
+          create_visit_request: OpenApi::Schemas::V1::Visits::CREATE_VISIT_REQUEST,
+          visit_response: OpenApi::Schemas::V1::Visits::VISIT_RESPONSE,
+          visits_response: OpenApi::Schemas::V1::Visits::VISITS_RESPONSE
         }
       }
     }
