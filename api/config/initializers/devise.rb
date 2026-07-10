@@ -10,14 +10,25 @@
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
   config.navigational_formats = []
+  config.omniauth :google_oauth2,
+    Rails.application.credentials.dig(:google, :google_client_id),
+    Rails.application.credentials.dig(:google, :google_client_secret),
+    scope: "email, profile"
+
   config.jwt do |jwt|
-    # jwt.secret = Rails.application.credentials.devise_jwt_secret_key!
-    jwt.secret = ENV.fetch("DEVISE_JWT_SECRET_KEY")
+    jwt.secret = Rails.application.credentials.dig(:jwt, :devise_jwt_secret_key)
+    # jwt.dispatch_requests = [
+    #   [ "POST", %r{^/login$} ]
+    # ]
+    # jwt.revocation_requests = [
+    #   [ "DELETE", %r{^/logout$} ]
+    # ]
     jwt.dispatch_requests = [
-      [ "POST", %r{^/login$} ]
+      # ["POST", %r{^/api/v1/users/login$}],
+      [ "GET", %r{^/api/v1/users/auth/google_oauth2/callback$} ]
     ]
     jwt.revocation_requests = [
-      [ "DELETE", %r{^/logout$} ]
+      [ "DELETE", %r{^/api/v1/users/logout$} ]
     ]
     jwt.expiration_time = 1.day.to_i
   end
