@@ -610,6 +610,7 @@ export interface components {
         /** @description Whether the user has selected this day in their schedule */
         sunday: boolean;
       };
+      lab?: string;
     };
     /** @description Full response body for endpoints that return one user. */
     user_response: {
@@ -646,6 +647,7 @@ export interface components {
             /** @description Whether the user has selected this day in their schedule */
             sunday: boolean;
           };
+          lab?: string;
         };
       };
     };

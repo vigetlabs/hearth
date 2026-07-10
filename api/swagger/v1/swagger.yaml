@@ -674,6 +674,8 @@ components:
                   sunday:
                     type: boolean
                     description: Whether the user has selected this day in their schedule
+              lab:
+                type: string
         visit_date:
           type: string
           format: date
@@ -810,6 +812,8 @@ components:
                             type: boolean
                             description: Whether the user has selected this day in
                               their schedule
+                      lab:
+                        type: string
                 visit_date:
                   type: string
                   format: date
@@ -929,6 +933,8 @@ components:
                               type: boolean
                               description: Whether the user has selected this day
                                 in their schedule
+                        lab:
+                          type: string
                   visit_date:
                     type: string
                     format: date
@@ -1006,6 +1012,8 @@ components:
             sunday:
               type: boolean
               description: Whether the user has selected this day in their schedule
+        lab:
+          type: string
     user_response:
       type: object
       description: Full response body for endpoints that return one user.
@@ -1095,6 +1103,8 @@ components:
                       type: boolean
                       description: Whether the user has selected this day in their
                         schedule
+                lab:
+                  type: string
     user_devise_invalid_login_response:
       type: object
       description: Full response body for invalid login request
