@@ -3,8 +3,9 @@ import { useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import GoogleIcon from "@/components/icons/GoogleIcon";
 import SlackIcon from "@/components/icons/SlackIcon";
+
+import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
 
 import { useLoginUserMutation } from "@/util/api/mutations/users/loginUserMutation";
 import { createUserLoginObjectPayload } from "@/util/api/functions/users";
@@ -52,14 +53,7 @@ export default function LoginForm() {
       </h1>
 
       <form onSubmit={handleSubmit} className="mt-8">
-        <button
-          type="button"
-          // @TODO: Wire up Google OAuth
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-semibold text-fg-primary transition-colors hover:bg-gray-50"
-        >
-          <GoogleIcon className="h-5 w-5" />
-          Continue with Google
-        </button>
+        <GoogleSsoButton />
 
         <button
           type="button"
