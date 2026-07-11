@@ -1,0 +1,48 @@
+/*
+  Directional crossfade for the office-signup hero panel. Two stacked layers
+  animate at once when the selected office changes: the incoming image slides in
+  from one side while the outgoing image slides off the other, both drifting the
+  same direction with a fade. `--slide-sign` (-1 = leftward, 1 = rightward) is
+  set inline per transition; `--slide-distance` controls the (small) travel.
+*/
+.office-hero {
+  --slide-distance: 2rem;
+}
+
+.office-hero--enter {
+  animation: office-hero-enter 300ms ease-out;
+}
+
+.office-hero--exit {
+  animation: office-hero-exit 300ms ease-out forwards;
+}
+
+@keyframes office-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--slide-sign) * var(--slide-distance)));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes office-hero-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--slide-sign) * var(--slide-distance) * -1));
+  }
+}
+
+/* Honor reduced-motion by swapping instantly instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .office-hero--enter,
+  .office-hero--exit {
+    animation: none;
+  }
+}

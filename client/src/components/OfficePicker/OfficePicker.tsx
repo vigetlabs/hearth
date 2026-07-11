@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { RadioGroup } from "radix-ui";
 
 import { OFFICES } from "@/types/office/office";
+
+import "./OfficePicker.css";
 
 // The dedicated "fully remote" button below the grid stands in for the remote
 // option, so the cards only cover the physical offices.
@@ -21,8 +23,27 @@ function heroImageFor(officeId: string) {
 
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");
+  // The image showing before the current selection, kept mounted so it can play
+  // its exit animation. `null` means nothing has been picked yet (initial mount,
+  // no transition to animate).
+  const [previousOfficeId, setPreviousOfficeId] = useState<string | null>(null);
+  // Which way the pair slides: "left" when the new card sits left of the old.
+  const [direction, setDirection] = useState<"left" | "right">("right");
 
   const navigate = useNavigate();
+
+  function handleSelectOffice(newOfficeId: string) {
+    // Compare grid positions (OFFICE_CARDS order == left-to-right order) to pick
+    // the slide direction. Fall back to the default hero's slot when nothing was
+    // selected yet, since that's the image currently on screen.
+    const oldOfficeId = selectedOfficeId || DEFAULT_HERO_OFFICE_ID;
+    const oldIndex = OFFICE_CARDS.findIndex((o) => o.id === oldOfficeId);
+    const newIndex = OFFICE_CARDS.findIndex((o) => o.id === newOfficeId);
+
+    setDirection(newIndex < oldIndex ? "left" : "right");
+    setPreviousOfficeId(selectedOfficeId);
+    setSelectedOfficeId(newOfficeId);
+  }
 
   function handleContinue() {
     if (!selectedOfficeId) return;
@@ -43,9 +64,16 @@ export default function OfficePicker() {
     navigate("/calendar");
   }
 
+  // Only play the crossfade when the hero image actually changes. Picking Falls
+  // Church from the initial (unselected) state is a real selection change but
+  // resolves to the same default hero, so it should swap silently.
+  const shouldAnimate =
+    previousOfficeId !== null &&
+    heroImageFor(previousOfficeId) !== heroImageFor(selectedOfficeId);
+
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="flex w-full flex-col px-8 py-8 lg:w-1/2 lg:px-16">
+      <div className="flex w-full flex-col px-8 py-8 lg:w-[55%] lg:px-16">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -64,7 +92,7 @@ export default function OfficePicker() {
 
             <RadioGroup.Root
               value={selectedOfficeId}
-              onValueChange={setSelectedOfficeId}
+              onValueChange={handleSelectOffice}
               aria-label="Which office is your primary?"
               className="mt-10"
             >
@@ -112,10 +140,48 @@ export default function OfficePicker() {
       </div>
 
       <div
-        className="hidden bg-neutral-200 bg-cover bg-center lg:block lg:w-1/2"
-        style={{ backgroundImage: `url(${heroImageFor(selectedOfficeId)})` }}
+        className="relative hidden overflow-hidden bg-neutral-200 lg:block lg:w-[45%]"
         aria-hidden="true"
-      />
+      >
+        {/*
+          Outgoing layer: the image from before the latest pick, sliding off and
+          fading out. Only rendered once a transition has happened. Keyed by the
+          new selection so it remounts (and replays its animation) every switch.
+        */}
+        {shouldAnimate && (
+          <div
+            key={`prev-${selectedOfficeId}`}
+            // Layers overhang the panel horizontally by more than the slide
+            // distance (2rem), so the image always covers the full width as it
+            // slides — its own edge never sweeps into view against the panel cut.
+            className="office-hero office-hero--exit absolute inset-y-0 -inset-x-10 bg-cover bg-center"
+            style={
+              {
+                backgroundImage: `url(${heroImageFor(previousOfficeId)})`,
+                "--slide-sign": direction === "left" ? -1 : 1,
+              } as CSSProperties
+            }
+          />
+        )}
+
+        {/*
+          Incoming layer: the current selection. Slides in from the opposite side
+          and fades up over the outgoing layer. Skips the enter animation on the
+          very first render (no previous image to transition from).
+        */}
+        <div
+          key={`curr-${selectedOfficeId}`}
+          className={`office-hero absolute inset-y-0 -inset-x-10 bg-cover bg-center ${
+            shouldAnimate ? "office-hero--enter" : ""
+          }`}
+          style={
+            {
+              backgroundImage: `url(${heroImageFor(selectedOfficeId)})`,
+              "--slide-sign": direction === "left" ? -1 : 1,
+            } as CSSProperties
+          }
+        />
+      </div>
 
       {/*
         Preload every office hero on mount so switching selection swaps the panel
