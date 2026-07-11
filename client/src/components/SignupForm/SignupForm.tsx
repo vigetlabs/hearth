@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import SlackIcon from "@/components/icons/SlackIcon";
 
 import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
+
+import { DEFAULT_HERO_IMAGE } from "@/components/OfficePicker/heroImage";
 
 import { useCreateUserMutation } from "@/util/api/mutations/users/createUserMutation";
 import { createUserObjectPayload } from "@/util/api/functions/users";
@@ -20,6 +22,14 @@ export default function SignupForm() {
 
   const createUserMutation = useCreateUserMutation();
 
+  // The office picker is the next step after signup. Warm its default hero into
+  // cache now, while the user fills out the form, so that screen paints the
+  // image instantly instead of showing a gray placeholder while it downloads.
+  useEffect(() => {
+    const image = new Image();
+    image.src = DEFAULT_HERO_IMAGE;
+  }, []);
+
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -32,7 +42,6 @@ export default function SignupForm() {
 
     createUserMutation.mutate(payload, {
       onSuccess: () => {
-        // Head into the office picker directly after the account is created.
         navigate("/users/office");
       },
       onError: async () => {

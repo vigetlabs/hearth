@@ -5,21 +5,13 @@ import { RadioGroup } from "radix-ui";
 
 import { OFFICES } from "@/types/office/office";
 
+import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
+
 import "./OfficePicker.css";
 
 // The dedicated "fully remote" button below the grid stands in for the remote
 // option, so the cards only cover the physical offices.
 const OFFICE_CARDS = OFFICES.filter((office) => office.id !== "remote");
-
-// Each office has a matching WebP hero photo in `public/`. Shown before the user
-// has picked an office, while no card is selected. A missing file degrades to
-// the panel's placeholder background instead of breaking the build.
-const DEFAULT_HERO_OFFICE_ID = "falls-church";
-
-function heroImageFor(officeId: string) {
-  const id = officeId || DEFAULT_HERO_OFFICE_ID;
-  return `/images/office-signup/${id}-hero.webp`;
-}
 
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");

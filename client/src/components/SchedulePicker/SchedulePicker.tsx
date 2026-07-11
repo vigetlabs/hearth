@@ -18,8 +18,6 @@ export default function SchedulePicker() {
     return <Navigate to="/users/office" replace />;
   }
 
-  // Remote users are routed straight to the calendar and never land here, so a
-  // day must be picked before the schedule can be saved.
   const canSave = selectedDayIds.size > 0;
 
   function toggleDay(dayId: string) {
