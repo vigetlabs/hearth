@@ -12,6 +12,7 @@ module OpenApi::Schemas::V1::Users
       email
       first_name
       last_name
+      office_id
     ],
     properties: {
       id: { type: :integer },
