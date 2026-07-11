@@ -44,7 +44,7 @@ export default function OfficePicker() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <div className="flex w-full flex-col px-8 py-8 lg:w-1/2 lg:px-16">
         <button
           type="button"
@@ -116,6 +116,18 @@ export default function OfficePicker() {
         style={{ backgroundImage: `url(${heroImageFor(selectedOfficeId)})` }}
         aria-hidden="true"
       />
+
+      {/*
+        Preload every office hero on mount so switching selection swaps the panel
+        instantly. The background-image above is only fetched the first time an
+        office is picked; these hidden <img>s force that fetch + decode up front.
+        display:none images are still loaded by the browser.
+      */}
+      <div className="hidden" aria-hidden="true">
+        {OFFICE_CARDS.map((office) => (
+          <img key={office.id} src={heroImageFor(office.id)} alt="" />
+        ))}
+      </div>
     </div>
   );
 }
