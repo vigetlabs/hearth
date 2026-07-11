@@ -1,14 +1,37 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Users::Users", type: :request do
+  let(:office) { create(:office) }
+  let(:user) { create(:user, office: office) }
+  let(:headers) { auth_headers_for(user) }
+
+  describe "PATCH /users/me" do
+    context "when the user is authorized" do
+      context "with valid parameters" do
+        it "updates the user's name" do
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                first_name: "Sam",
+                last_name: "Brothers"
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+
+            expect(response).to have_http_status(:ok)
+            expect(user.reload).to have_attributes(
+              first_name: "Sam",
+              last_name: "Brothers"
+            )
+        end
+      end
+    end
+  end
+
   describe "GET /users/me" do
     context "when the user is authorized" do
-      let(:user) { create(:user, office: office) }
-      let(:headers) { auth_headers_for(user) }
-
       context "when the user belongs to an office" do
-        let(:office) { create(:office) }
-
         it "returns the user's information" do
           get api_path("/users/me"), headers: headers
 

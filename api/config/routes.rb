@@ -18,12 +18,18 @@ Rails.application.routes.draw do
       get "up" => "rails/health#show", as: :rails_health_check
       get "health", to: "health#show"
 
-      scope "users" do
-        get "/me", to: "users/users#me"
 
+      resources :users, only: [], module: :users do
+        collection do
+          get :me
+          patch :me, action: :update
+        end
+      end
+
+      scope "users/auth" do
         # frontend facing google_oauth routes
-        get "/auth/google", to: "users/google_oauth#redirect"
-        get "/auth/failure", to: "users/google_oauth#failure"
+        get "/google", to: "users/google_oauth#redirect"
+        get "/failure", to: "users/google_oauth#failure"
       end
 
       resources :schedules, only: [ :create ], module: :schedules
