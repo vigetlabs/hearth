@@ -15,4 +15,6 @@ class User < ApplicationRecord
   has_one :default_schedule,
     -> { where(is_default: true) },
     class_name: "Schedule"
+
+  belongs_to :office, optional: true
 end

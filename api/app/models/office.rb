@@ -7,13 +7,17 @@ class Office < ApplicationRecord
       scope: [ :city, :state ],
       case_sensitive: false
     }
+
   validates :timezone,
     presence: true,
     inclusion: {
       in: ActiveSupport::TimeZone.all.map(&:tzinfo).map(&:name)
     }
+
   validates :state, presence: true
   validates :city, presence: true
+
+  has_many :users
 
   def normalize_location_fields
     self.name = name&.squish&.downcase
