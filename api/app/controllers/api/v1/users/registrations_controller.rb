@@ -1,5 +1,6 @@
 class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
+  include SerializeUserHelper
 
   respond_to :json
 
@@ -7,9 +8,7 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
     new_user = User.new(sign_up_params)
 
     if new_user.save
-      user = UserSerializer
-        .new(new_user)
-        .serializable_hash[:data][:attributes]
+      user = serialize_user(new_user)
       data = { user: user }
       success_response(
         data: data,

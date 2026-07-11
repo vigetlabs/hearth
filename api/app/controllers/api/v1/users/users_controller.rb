@@ -19,9 +19,7 @@ class Api::V1::Users::UsersController < ApplicationController
   end
 
   def me
-    user = UserSerializer
-      .new(current_user)
-      .serializable_hash[:data][:attributes]
+    user = serialize_user(current_user)
 
     data = { user: user }
     success_response(

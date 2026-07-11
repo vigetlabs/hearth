@@ -1,14 +1,13 @@
 class Api::V1::Users::SessionsController < Devise::SessionsController
   include ApiResponse
+  include SerializeUserHelper
 
   respond_to :json
 
   private
 
   def respond_with(resource, _opts = {})
-    user = UserSerializer
-      .new(current_user)
-      .serializable_hash[:data][:attributes]
+    user = serialize_user(current_user)
     data = { user: user }
     success_response(
       data: data,
