@@ -4,25 +4,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
   describe "GET /users/me" do
     context "when the user is authorized" do
       let(:user) { create(:user, office: office) }
-
-      let(:auth_token) do
-        post api_path("/users/login"),
-          params: {
-            user: {
-              email: user.email,
-              password: user.password
-            }
-          },
-          as: :json
-
-        response.cookies["jwt_token"]
-      end
-
-      let(:headers) do
-        {
-          "Cookie" => "jwt_token=#{auth_token}"
-        }
-      end
+      let(:headers) { auth_headers_for(user) }
 
       context "when the user belongs to an office" do
         let(:office) { create(:office) }
@@ -37,7 +19,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
           # @TODO: Add default_schedule and lab once integrated
           expect(user_data).to include(
             "email" => user.email,
-            "first_name" => user.first_name,
+            "first_name"=> user.first_name,
             "last_name" => user.last_name,
             "office_id" => office.id
           )
