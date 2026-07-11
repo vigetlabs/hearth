@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :office do
-    name { "The Best Office" }
+    sequence(:name) { |n| "office#{n}" }
     timezone { "America/Denver" }
     state { "Colorado" }
     city { "Boulder" }

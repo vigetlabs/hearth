@@ -25,6 +25,38 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
               last_name: "Brothers"
             )
         end
+
+        it "updates the user's office" do
+          new_office = create(:office)
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                office_id: new_office.id
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+
+            expect(response).to have_http_status(:ok)
+            expect(user.reload.office).to eq(new_office)
+        end
+
+        it "removes the user's office" do
+          office = create(:office)
+          user.update!(office: office)
+
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                office_id: nil
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+
+            expect(response).to have_http_status(:ok)
+            expect(user.reload.office).to be_nil
+        end
       end
     end
   end
