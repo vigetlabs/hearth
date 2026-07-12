@@ -6,6 +6,34 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
   let(:headers) { auth_headers_for(user) }
 
   describe "PATCH /users/me" do
+    context "when the user is not authorized" do
+      it "returns unauthorized when the jwt_token cookie is missing" do
+        patch api_path("/users/me"),
+          params: {
+            user: {
+              first_name: "Ryan"
+            }
+          },
+          as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns unauthorized when the jwt_token is invalid" do
+        patch api_path("/users/me"),
+          params: {
+            user: {
+              first_name: "Ryan"
+            }
+          },
+          headers: {
+            "Cookie" => "jwt_token=bad-token"
+          },
+          as: :json
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+
     context "when the user is authorized" do
       context "with valid parameters" do
         it "updates the user's name" do
@@ -56,6 +84,34 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
 
             expect(response).to have_http_status(:ok)
             expect(user.reload.office).to be_nil
+        end
+      end
+
+      context "with invalid parameters" do
+        it "returns unprocessable content" do
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                office_id: -1
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+            expect(response).to have_http_status(:unprocessable_content)
+            expect(user.office).to eq(office)
+        end
+
+        it "returns a validation error" do
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                office_id: -1
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+            json = JSON.parse(response.body)
+            expect(json["errors"]).to be_present
         end
       end
     end

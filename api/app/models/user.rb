@@ -6,9 +6,6 @@ class User < ApplicationRecord
          :jwt_authenticatable, :omniauthable, jwt_revocation_strategy: self,
          omniauth_providers: [ :google_oauth2 ]
 
-  validates :first_name, presence: true
-  validates :last_name, presence: true
-
   has_many :user_identities, dependent: :destroy
   has_many :schedules, dependent: :destroy
 
@@ -17,4 +14,9 @@ class User < ApplicationRecord
     class_name: "Schedule"
 
   belongs_to :office, optional: true
+
+  validates :first_name, presence: true
+  validates :last_name, presence: true
+
+  validates :office, presence: true, if: :office_id?
 end
