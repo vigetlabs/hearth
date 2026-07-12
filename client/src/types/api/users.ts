@@ -6,4 +6,6 @@ export type LoginUserRequest = components["schemas"]["login_user_request"];
 
 export type CreateUserRequest = components["schemas"]["create_user_request"];
 
+export type PatchUserRequest = components["schemas"]["patch_user_request"];
+
 export type UserResponse = components["schemas"]["user_response"];
