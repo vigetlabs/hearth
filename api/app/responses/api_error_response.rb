@@ -6,18 +6,16 @@ class ApiErrorResponse
     status:,
     **metadata
   )
-    error = {
-      type: type,
-      code: code,
-      **metadata.compact
-    }
-
     {
       status: {
-        code: Rack::Utils::SYMBOL_TO_STATUS_CODE[status],
+        code: Rack::Utils::SYMBOL_TO_STATUS_CODE.fetch(status),
         message: message
       },
-      error: error
+      error: {
+        type: type,
+        code: code,
+        **metadata.compact
+      }
     }
   end
 
@@ -27,7 +25,7 @@ class ApiErrorResponse
       code: ApiErrorCodes::Validation::INVALID_ATTRIBUTES,
       message: message,
       status: :unprocessable_content,
-      details: details
+      details: details,
     )
   end
 
@@ -36,7 +34,7 @@ class ApiErrorResponse
       type: ApiErrorTypes::AUTHENTICATION,
       code: code,
       message: message,
-      status: :unauthorized
+      status: :unauthorized,
     )
   end
 
@@ -44,19 +42,18 @@ class ApiErrorResponse
     build(
       type: ApiErrorTypes::NOT_FOUND,
       code: ApiErrorCodes::NotFound::RESOURCE_NOT_FOUND,
-      resource: resource,
       message: message,
-      status: :not_found
+      status: :not_found,
+      resource: resource,
     )
   end
 
-  def self.bad_request(code:, message:, field: nil, **metadata)
+  def self.bad_request(code:, message:, **metadata)
     build(
       type: ApiErrorTypes::BAD_REQUEST,
       code: code,
-      status: :bad_request,
       message: message,
-      field: field,
+      status: :bad_request,
       **metadata
     )
   end
