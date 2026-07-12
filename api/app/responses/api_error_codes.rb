@@ -11,4 +11,10 @@ module ApiErrorCodes
   module NotFound
     RESOURCE_NOT_FOUND = "resource_not_found"
   end
+
+  module BadRequest
+    MISSING_PARAMETER = "missing_parameter"
+    MALFORMED_JSON = "malformed_json"
+    INVALID_PARAMETER_FORMAT = "invalid_parameter_format"
+  end
 end

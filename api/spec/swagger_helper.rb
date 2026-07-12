@@ -41,15 +41,14 @@ RSpec.configure do |config|
           validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE,
           authentication_error_response: OpenApi::Schemas::V1::Errors::AUTHENTICATION_ERROR_RESPONSE,
           not_found_error_response: OpenApi::Schemas::V1::Errors::NOT_FOUND_ERROR_RESPONSE,
+          bad_request_error_response: OpenApi::Schemas::V1::Errors::BAD_REQUEST_ERROR_RESPONSE,
 
-          generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
-          generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
+          empty_success_response: OpenApi::Schemas::V1::Generics::EMPTY_SUCCESS_RESPONSE,
 
           schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
           create_schedule_request: OpenApi::Schemas::V1::Schedules::CREATE_SCHEDULE_REQUEST,
           schedule_response: OpenApi::Schemas::V1::Schedules::SCHEDULE_RESPONSE,
           schedules_response: OpenApi::Schemas::V1::Schedules::SCHEDULES_RESPONSE,
-
 
           office: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT,
           office_response: OpenApi::Schemas::V1::Offices::OFFICE_RESPONSE,

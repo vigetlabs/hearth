@@ -29,7 +29,6 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
         run_test!
       end
 
-      # @TODO: Switch to consistent error response
       response "401", "invalid login credentials" do
         schema "$ref" => "#/components/schemas/authentication_error_response"
 
@@ -44,6 +43,13 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
           }
         end
 
+        run_test!
+      end
+
+      response "401", "missing required login parameters" do
+        schema "$ref" => "#/components/schemas/authentication_error_response"
+
+        let(:payload) { {} }
         run_test!
       end
     end
@@ -61,7 +67,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
               required: true
 
       response "200", "logged out user successfully" do
-        schema "$ref" => "#/components/schemas/generic_success_response"
+        schema "$ref" => "#/components/schemas/empty_success_response"
 
         let!(:user) { create(:user) }
 

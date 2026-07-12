@@ -1,7 +1,7 @@
 class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
-  include SerializeUserHelper
-  include ValidationErrorFormatter
+  include Helpers::SerializeUserHelper
+  include Helpers::ValidationErrorFormatterHelper
 
   respond_to :json
 

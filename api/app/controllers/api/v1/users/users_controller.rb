@@ -1,7 +1,7 @@
 class Api::V1::Users::UsersController < ApplicationController
-  include RecordInvalidHandler
+  include Handlers::RecordInvalidHandler
   include ApiResponse
-  include SerializeUserHelper
+  include Helpers::SerializeUserHelper
 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
 

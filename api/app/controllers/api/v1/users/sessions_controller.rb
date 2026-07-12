@@ -1,6 +1,6 @@
 class Api::V1::Users::SessionsController < Devise::SessionsController
   include ApiResponse
-  include SerializeUserHelper
+  include Helpers::SerializeUserHelper
 
   respond_to :json
 

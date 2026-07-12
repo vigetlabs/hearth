@@ -1,6 +1,6 @@
 class Api::V1::Schedules::SchedulesController < ApplicationController
-  include RecordInvalidHandler
-  include RecordNotFoundHandler
+  include Handlers::RecordInvalidHandler
+  include Handlers::RecordNotFoundHandler
   include ApiResponse
 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record

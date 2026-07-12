@@ -4,16 +4,13 @@ class ApiErrorResponse
     code:,
     message:,
     status:,
-    details: nil,
-    resource: nil
+    **metadata
   )
     error = {
       type: type,
-      code: code
+      code: code,
+      **metadata.compact
     }
-
-    error[:details] = details if details.present?
-    error[:resource] = resource if resource.present?
 
     {
       status: {
@@ -50,6 +47,16 @@ class ApiErrorResponse
       resource: resource,
       message: message,
       status: :not_found
+    )
+  end
+
+  def self.bad_request(code:, message:, field: nil)
+    build(
+      type: ApiErrorTypes::BAD_REQUEST,
+      code: code,
+      status: :bad_request,
+      message: message,
+      field: field
     )
   end
 end

@@ -120,4 +120,42 @@ module OpenApi::Schemas::V1::Errors
       }
     }
   }
+
+  BAD_REQUEST_ERROR_RESPONSE = {
+    type: :object,
+    description: "Full response body for malformed request bodies.",
+    required: %w[status error],
+    properties: {
+      status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
+      error: {
+        type: :object,
+        required: %w[type code message],
+        properties: {
+          type: {
+            type: :string,
+            enum: [
+              ApiErrorTypes::BAD_REQUEST
+            ]
+          },
+          code: {
+            type: :string,
+            enum: [
+              ApiErrorCodes::BadRequest::MISSING_PARAMETER,
+              ApiErrorCodes::BadRequest::MALFORMED_JSON,
+              ApiErrorCodes::BadRequest::INVALID_PARAMETER_FORMAT
+            ]
+          },
+          message: {
+            type: :string,
+            example: "The user parameter is required."
+          },
+          field: {
+            type: :string,
+            nullable: true,
+            example: "user"
+          }
+        }
+      }
+    }
+  }
 end
