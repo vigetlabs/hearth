@@ -10,21 +10,4 @@ module ApiResponse
       data: data
     }, status: status
   end
-
-   def error_response(
-    message: "",
-    errors: [],
-    status: :unprocessable_content,
-    type: "",
-    code: ""
-  )
-    render json: ApiErrorResponse.body(
-      message: message,
-      errors: errors,
-      status: status,
-      type: type,
-      code: code
-    ),
-    status: status
-  end
 end
