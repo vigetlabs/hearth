@@ -6,6 +6,7 @@ module RecordNotFoundHandler
 
     field_name = model_class ? model_class.primary_key : "id"
     model_name = exception.model.underscore
+    error_code = ErrorCodeGenerator.resource_not_found(model_name)
 
     # required to match the schema of record_not_found_response
     formatted_error = [
@@ -17,7 +18,9 @@ module RecordNotFoundHandler
 
     error_response(
       message: "Failed to find #{model_name}",
-      errors: formatted_errors
+      errors: formatted_errors,
+      type: ErrorTypeGenerator.not_found_error,
+      code: error_code
     )
   end
 end

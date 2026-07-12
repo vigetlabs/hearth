@@ -19,6 +19,8 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
       error_response(
         message: "User could not be created",
         errors: validation_errors(new_user),
+        type: ErrorTypeGenerator.validation_error,
+        code: ErrorCodeGenerator.invalid_attributes
       )
     end
   end

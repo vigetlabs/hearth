@@ -24,12 +24,16 @@ module ApiResponse
   def error_response(
     message: "",
     errors: [],
-    status: :unprocessable_content
+    status: :unprocessable_content,
+    type: "",
+    code: ""
   )
     render json: ApiErrorResponse.body(
       message: message,
       errors: errors,
-      status: status
+      status: status,
+      type: type,
+      code: code
     ),
     status: status
   end

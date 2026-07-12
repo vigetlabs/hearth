@@ -20,11 +20,55 @@ module OpenApi::Schemas::V1::Errors
   # ERROR_OBJECT is not a complete response body
   ERROR_OBJECT = {
     type: :object,
-    description: "One individual error detail, usually used inside an errors array.",
+    description: "One individual error, usually used inside an errors array.",
     required: %w[field message],
     properties: {
       field: { type: :string },
       message: { type: :string }
+    }
+  }
+
+  # ERROR_TYPE: Error metadata used in the ERROR_METADATA_OBJECT to define the type of error
+  #
+  # This ERROR_TYPE is to allow for discriminant error handling in the frontend by defining the type
+  ERROR_TYPE = {
+    type: :string,
+    description: "Readable custom defined error type.",
+    enum: %w[
+      authentication_error
+      validation_error
+      not_found_error
+    ]
+  }
+
+  # ERROR_CODE: Error metadata used in the ERROR_METADATA_OBJECT to define the code of error
+  #
+  # This ERROR_CODE is to allow for discriminant error handling in the frontend by defining the code
+  ERROR_CODE = {
+    type: :string,
+    description: "Readable custom defined error code.",
+    enum: %w[
+      authentication_required
+      invalid_credentials
+      invalid_attributes
+      user_not_found
+      office_not_found
+      schedule_not_found
+      visit_not_found
+    ]
+  }
+
+  # ERROR_METADATA_OBJECT: Used in a API error response
+  #
+  # This object is to allow for discriminant error handling in the fonrtned by providing more custom
+  # error metadata
+  ERROR_METADATA_OBJECT = {
+    type: :object,
+    description: "One individual error detail signifying the type of error for discriminant error handling.",
+    required: %w[type code],
+    properties: {
+      type: ERROR_TYPE,
+      code: ERROR_CODE
     }
   }
 
@@ -38,6 +82,7 @@ module OpenApi::Schemas::V1::Errors
     required: %w[status errors],
     properties: {
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
+      error: ERROR_METADATA_OBJECT,
       errors: {
         type: :array,
         items: ERROR_OBJECT
