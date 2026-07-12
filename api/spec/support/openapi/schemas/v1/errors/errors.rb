@@ -129,7 +129,7 @@ module OpenApi::Schemas::V1::Errors
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       error: {
         type: :object,
-        required: %w[type code message],
+        required: %w[type code],
         properties: {
           type: {
             type: :string,
@@ -144,10 +144,6 @@ module OpenApi::Schemas::V1::Errors
               ApiErrorCodes::BadRequest::MALFORMED_JSON,
               ApiErrorCodes::BadRequest::INVALID_PARAMETER_FORMAT
             ]
-          },
-          message: {
-            type: :string,
-            example: "The user parameter is required."
           },
           field: {
             type: :string,

@@ -2,6 +2,9 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
   include Helpers::SerializeUserHelper
   include Helpers::ValidationErrorFormatterHelper
+  include Handlers::BadRequestHandler
+
+  rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
 
   respond_to :json
 

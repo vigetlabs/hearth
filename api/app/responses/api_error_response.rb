@@ -50,13 +50,14 @@ class ApiErrorResponse
     )
   end
 
-  def self.bad_request(code:, message:, field: nil)
+  def self.bad_request(code:, message:, field: nil, **metadata)
     build(
       type: ApiErrorTypes::BAD_REQUEST,
       code: code,
       status: :bad_request,
       message: message,
-      field: field
+      field: field,
+      **metadata
     )
   end
 end
