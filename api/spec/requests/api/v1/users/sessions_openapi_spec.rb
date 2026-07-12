@@ -29,6 +29,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
         run_test!
       end
 
+      # @TODO: Switch to consistent error response
       response "401", "invalid login credentials" do
         schema "$ref" => "#/components/schemas/user_devise_invalid_login_response"
 

@@ -11,13 +11,26 @@ module ApiResponse
     }, status: status
   end
 
-  def error_response(message: "", errors: [], status: :unprocessable_content)
-    render json: {
-      status: {
-        code: Rack::Utils::SYMBOL_TO_STATUS_CODE[status],
-        message: message
-      },
-      errors: errors
-    }, status: status
+  # def error_response(message: "", errors: [], status: :unprocessable_content)
+  #   render json: {
+  #     status: {
+  #       code: Rack::Utils::SYMBOL_TO_STATUS_CODE[status],
+  #       message: message
+  #     },
+  #     errors: errors
+  #   }, status: status
+  # end
+
+  def error_response(
+    message: "",
+    errors: [],
+    status: :unprocessable_content
+  )
+    render json: ApiErrorResponse.body(
+      message: message,
+      errors: errors,
+      status: status
+    ),
+    status: status
   end
 end

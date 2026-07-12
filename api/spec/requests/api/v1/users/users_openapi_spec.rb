@@ -31,6 +31,21 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
         required: true,
         schema: { "$ref" => "#/components/schemas/patch_user_request" }
 
+      response "401", "invalid active session" do
+        schema "$ref" => "#/components/schemas/generic_error_response"
+        let(:Cookie) { "jwt_token=not-a-token" }
+        let(:payload) do
+          {
+            user: {
+              first_name: "Updated",
+              last_name: "User"
+            }
+          }
+        end
+
+        run_test!
+      end
+
       response "200", "updated user successfully" do
         schema "$ref" => "#/components/schemas/user_response"
 

@@ -112,14 +112,22 @@ module OpenApi::Schemas::V1::Users
   USER_DEVISE_INVALID_LOGIN_RESPONSE = {
     type: :object,
     description: "Full response body for invalid login request",
-    required: [ "error" ],
+    required: %w[status errors],
     properties: {
-      error: {
-        type: :string,
-        description: "Devise authentication error message",
-        example: "Invalid Email or password."
+      status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
+      errors: {
+        type: :array,
+        items: OpenApi::Schemas::V1::Errors::ERROR_OBJECT
       }
     }
+    # required: [ "error" ],
+    # properties: {
+    #   error: {
+    #     type: :string,
+    #     description: "Devise authentication error message",
+    #     example: "Invalid Email or password."
+    #   }
+    # }
   }
 
   # CREATE_USER_REQUEST: Request body for updating current authenticated user
