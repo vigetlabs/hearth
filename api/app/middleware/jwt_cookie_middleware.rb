@@ -55,7 +55,10 @@ class JwtCookieMiddleware
   def invalid_token_response
     headers = { "Content-Type" => "application/json" }
     Rack::Utils.delete_cookie_header!(headers, "jwt_token", path: "/")
-    body = ApiErrorResponse.authentication()
+    body = ApiErrorResponse.authentication(
+      code: ApiErrorCodes::Authentication::AUTHENTICATION_REQUIRED,
+      message: "You need to sign in before continuing"
+    )
 
     build_rack_response(
       body: body,

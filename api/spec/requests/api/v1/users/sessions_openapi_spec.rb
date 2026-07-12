@@ -31,7 +31,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
 
       # @TODO: Switch to consistent error response
       response "401", "invalid login credentials" do
-        schema "$ref" => "#/components/schemas/user_devise_invalid_login_response"
+        schema "$ref" => "#/components/schemas/authentication_error_response"
 
         let!(:user) { create(:user) }
 
@@ -83,7 +83,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
       end
 
       response "401", "invalid active session" do
-        schema "$ref" => "#/components/schemas/generic_error_response"
+        schema "$ref" => "#/components/schemas/authentication_error_response"
         let(:Cookie) { "jwt_token=not-a-token" }
 
         run_test!

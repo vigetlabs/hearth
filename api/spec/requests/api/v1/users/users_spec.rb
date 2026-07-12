@@ -111,7 +111,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
             headers: auth_headers_for(user),
             as: :json
             json = JSON.parse(response.body)
-            expect(json["errors"]).to be_present
+            expect(json["error"]["details"]).to be_present
         end
       end
     end

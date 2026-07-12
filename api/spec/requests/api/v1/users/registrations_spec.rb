@@ -67,22 +67,22 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
         json = JSON.parse(response.body)
 
         expect(json["status"]["message"]).to eq("User could not be created")
-        expect(json["errors"]).to be_an(Array)
+        error_details = json["error"]["details"]
+        expect(error_details).to be_an(Array)
 
-        expect(json["errors"]).to include(
+        expect(error_details).to include(
           hash_including(
             "field" => "email",
             "message" => "can't be blank"
           )
         )
-        expect(json["errors"]).to include(
+        expect(error_details).to include(
           hash_including(
             "field" => "first_name",
             "message" => "can't be blank"
           )
         )
-
-        expect(json["errors"]).to include(
+        expect(error_details).to include(
           hash_including(
             "field" => "last_name",
             "message" => "can't be blank"

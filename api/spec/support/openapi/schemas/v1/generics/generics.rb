@@ -29,7 +29,7 @@ module OpenApi::Schemas::V1::Generics
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       errors: {
         type: :array,
-        items: OpenApi::Schemas::V1::Errors::ERROR_OBJECT
+        items: OpenApi::Schemas::V1::Errors::FIELD_ERROR
       }
     }
   }

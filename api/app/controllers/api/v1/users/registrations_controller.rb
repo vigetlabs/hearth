@@ -1,6 +1,7 @@
 class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
   include SerializeUserHelper
+  include ValidationErrorFormatter
 
   respond_to :json
 
@@ -16,12 +17,10 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
         status: :created
       )
     else
-      error_response(
+      render json: ApiErrorResponse.validation(
         message: "User could not be created",
-        errors: validation_errors(new_user),
-        type: ErrorTypeGenerator.validation_error,
-        code: ErrorCodeGenerator.invalid_attributes
-      )
+        details: format_validation_errors(new_user)
+      ), status: :unprocessable_content
     end
   end
 

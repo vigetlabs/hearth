@@ -32,7 +32,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
         schema: { "$ref" => "#/components/schemas/patch_user_request" }
 
       response "401", "invalid active session" do
-        schema "$ref" => "#/components/schemas/generic_error_response"
+        schema "$ref" => "#/components/schemas/authentication_error_response"
         let(:Cookie) { "jwt_token=not-a-token" }
         let(:payload) do
           {

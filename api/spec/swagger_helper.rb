@@ -37,9 +37,10 @@ RSpec.configure do |config|
         schemas: {
           status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
 
-          error: OpenApi::Schemas::V1::Errors::ERROR_OBJECT,
-          error_response: OpenApi::Schemas::V1::Errors::ERROR_RESPONSE,
+          field_error: OpenApi::Schemas::V1::Errors::FIELD_ERROR,
           validation_error_response: OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE,
+          authentication_error_response: OpenApi::Schemas::V1::Errors::AUTHENTICATION_ERROR_RESPONSE,
+          not_found_error_response: OpenApi::Schemas::V1::Errors::NOT_FOUND_ERROR_RESPONSE,
 
           generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
           generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
@@ -61,7 +62,6 @@ RSpec.configure do |config|
 
           user: OpenApi::Schemas::V1::Users::USER_OBJECT,
           user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
-          user_devise_invalid_login_response: OpenApi::Schemas::V1::Users::USER_DEVISE_INVALID_LOGIN_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
           login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
           patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST

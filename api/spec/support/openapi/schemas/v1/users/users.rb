@@ -105,31 +105,6 @@ module OpenApi::Schemas::V1::Users
     }
   }
 
-  # USER_DEVISE_INVALID_LOGIN_RESPONSE: Full response body for indicating an unauthorized login
-  #
-  # Use this when this login endpoint rejects invalid credentials. This represents Devise's
-  # default unauthorized response body, not the app's custom ApiResponse error shape
-  USER_DEVISE_INVALID_LOGIN_RESPONSE = {
-    type: :object,
-    description: "Full response body for invalid login request",
-    required: %w[status errors],
-    properties: {
-      status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
-      errors: {
-        type: :array,
-        items: OpenApi::Schemas::V1::Errors::ERROR_OBJECT
-      }
-    }
-    # required: [ "error" ],
-    # properties: {
-    #   error: {
-    #     type: :string,
-    #     description: "Devise authentication error message",
-    #     example: "Invalid Email or password."
-    #   }
-    # }
-  }
-
   # CREATE_USER_REQUEST: Request body for updating current authenticated user
   #
   # Use this as the request body schema for `PATCH /api/v1/users/me`.
