@@ -44,9 +44,6 @@ RSpec.configure do |config|
           generic_success_response: OpenApi::Schemas::V1::Generics::GENERIC_SUCCESS_RESPONSE,
           generic_error_response: OpenApi::Schemas::V1::Generics::GENERIC_ERROR_RESPONSE,
 
-          create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
-          login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
-
           schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
           create_schedule_request: OpenApi::Schemas::V1::Schedules::CREATE_SCHEDULE_REQUEST,
           schedule_response: OpenApi::Schemas::V1::Schedules::SCHEDULE_RESPONSE,
@@ -64,7 +61,10 @@ RSpec.configure do |config|
 
           user: OpenApi::Schemas::V1::Users::USER_OBJECT,
           user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
-          user_devise_invalid_login_response: OpenApi::Schemas::V1::Users::USER_DEVISE_INVALID_LOGIN_RESPONSE
+          user_devise_invalid_login_response: OpenApi::Schemas::V1::Users::USER_DEVISE_INVALID_LOGIN_RESPONSE,
+          create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
+          login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
+          patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST
         }
       }
     }

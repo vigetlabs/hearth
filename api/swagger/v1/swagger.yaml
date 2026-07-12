@@ -118,6 +118,26 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/user_response"
+    patch:
+      summary: Updates user information for current authenticated user
+      tags:
+      - Users
+      security:
+      - cookie_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: updated user successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/user_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/patch_user_request"
+        required: true
 servers:
 - url: https://{defaultHost}
   variables:
@@ -236,54 +256,6 @@ components:
                 type: string
               message:
                 type: string
-    create_user_request:
-      type: object
-      description: Request body for creating a new user account
-      required:
-      - user
-      properties:
-        user:
-          type: object
-          required:
-          - email
-          - first_name
-          - last_name
-          - password
-          - password_confirmation
-          properties:
-            email:
-              type: string
-              format: email
-            first_name:
-              type: string
-            last_name:
-              type: string
-            password:
-              type: string
-              format: password
-            password_confirmation:
-              type: string
-              format: password
-    login_user_request:
-      type: object
-      description: Request body for logging in to a user account.
-      required:
-      - user
-      properties:
-        user:
-          type: object
-          description: Credentials for the user account being authenticated.
-          required:
-          - email
-          - password
-          properties:
-            email:
-              type: string
-              format: email
-            password:
-              type: string
-              format: password
-              writeOnly: true
     schedule:
       type: object
       description: Public schedule data returned by the API.
@@ -1104,3 +1076,73 @@ components:
           type: string
           description: Devise authentication error message
           example: Invalid Email or password.
+    create_user_request:
+      type: object
+      description: Request body for creating a new user account
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          required:
+          - email
+          - first_name
+          - last_name
+          - password
+          - password_confirmation
+          properties:
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+            password:
+              type: string
+              format: password
+            password_confirmation:
+              type: string
+              format: password
+    login_user_request:
+      type: object
+      description: Request body for logging in to a user account.
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          description: Credentials for the user account being authenticated.
+          required:
+          - email
+          - password
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+              format: password
+              writeOnly: true
+    patch_user_request:
+      type: object
+      description: Request body for updating the current user's account information.
+      required:
+      - user
+      additionalProperties: false
+      properties:
+        user:
+          type: object
+          description: User attributes available to be updated.
+          minProperties: 1
+          additionalProperties: false
+          properties:
+            first_name:
+              type: string
+              example: Ryan
+            last_name:
+              type: string
+              example: Dioneda
+            office_id:
+              type: integer
+              example: 1

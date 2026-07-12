@@ -121,4 +121,36 @@ module OpenApi::Schemas::V1::Users
       }
     }
   }
+
+  # CREATE_USER_REQUEST: Request body for updating current authenticated user
+  #
+  # Use this as the request body schema for `PATCH /api/v1/users/me`.
+  PATCH_USER_REQUEST = {
+    type: :object,
+    description: "Request body for updating the current user's account information.",
+    required: %w[user],
+    additionalProperties: false,
+    properties: {
+      user: {
+        type: :object,
+        description: "User attributes available to be updated.",
+        minProperties: 1,
+        additionalProperties: false,
+        properties: {
+          first_name: {
+            type: :string,
+            example: "Ryan"
+          },
+          last_name: {
+            type: :string,
+            example: "Dioneda"
+          },
+          office_id: {
+            type: :integer,
+            example: 1
+          }
+        }
+      }
+    }
+  }
 end
