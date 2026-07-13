@@ -10,13 +10,35 @@ import { DEFAULT_HERO_IMAGE } from "@/components/OfficePicker/heroImage";
 import { useCreateUserMutation } from "@/util/api/mutations/users/createUserMutation";
 import { createUserObjectPayload } from "@/util/api/functions/users";
 
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validateSignupPassword,
+} from "@/util/auth/validation";
+
 import type { CreateUserRequest } from "@/types/api/users";
+
+type FieldErrors = {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  password: string | null;
+};
+
+const NO_ERRORS: FieldErrors = {
+  firstName: null,
+  lastName: null,
+  email: null,
+  password: null,
+};
 
 export default function SignupForm() {
   const [email, setEmail] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
 
   const navigate = useNavigate();
 
@@ -30,8 +52,25 @@ export default function SignupForm() {
     image.src = DEFAULT_HERO_IMAGE;
   }, []);
 
+  function validate(): FieldErrors {
+    return {
+      firstName: validateFirstName(firstName),
+      lastName: validateLastName(lastName),
+      email: validateEmail(email),
+      password: validateSignupPassword(password),
+    };
+  }
+
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const nextErrors = validate();
+    setErrors(nextErrors);
+
+    const hasErrors = Object.values(nextErrors).some((error) => error !== null);
+    if (hasErrors) {
+      return;
+    }
 
     const payload: CreateUserRequest = createUserObjectPayload(
       email,
@@ -50,9 +89,33 @@ export default function SignupForm() {
     });
   }
 
+  function fieldHandlers<K extends keyof FieldErrors>(
+    key: K,
+    setValue: (value: string) => void,
+    validate: (value: string) => string | null,
+  ) {
+    return {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.value);
+        // only re-validate once the field is already in an error state
+        setErrors((prev) =>
+          prev[key] ? { ...prev, [key]: validate(event.target.value) } : prev,
+        );
+      },
+      onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
+        setErrors((prev) => ({ ...prev, [key]: validate(event.target.value) }));
+      },
+    };
+  }
+
   const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
-  const inputClasses =
-    "w-full rounded-lg border border-gray-300 px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:border-gray-500 focus:outline-none";
+  function inputClasses(hasError: boolean): string {
+    const borderClasses = hasError
+      ? "border-error focus:border-error"
+      : "border-gray-300 focus:border-gray-500";
+
+    return `w-full rounded-lg border px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:outline-none ${borderClasses}`;
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -87,10 +150,14 @@ export default function SignupForm() {
               id="first-name"
               type="text"
               placeholder="Enter your name"
-              className={inputClasses}
+              className={inputClasses(errors.firstName !== null)}
+              aria-invalid={errors.firstName !== null}
               value={firstName}
-              onChange={(event) => setFirstName(event.target.value)}
+              {...fieldHandlers("firstName", setFirstName, validateFirstName)}
             />
+            {errors.firstName && (
+              <p className="mt-2 text-sm text-error">{errors.firstName}</p>
+            )}
           </div>
 
           <div>
@@ -101,10 +168,14 @@ export default function SignupForm() {
               id="last-name"
               type="text"
               placeholder="Enter your last name"
-              className={inputClasses}
+              className={inputClasses(errors.lastName !== null)}
+              aria-invalid={errors.lastName !== null}
               value={lastName}
-              onChange={(event) => setLastName(event.target.value)}
+              {...fieldHandlers("lastName", setLastName, validateLastName)}
             />
+            {errors.lastName && (
+              <p className="mt-2 text-sm text-error">{errors.lastName}</p>
+            )}
           </div>
         </div>
 
@@ -116,10 +187,14 @@ export default function SignupForm() {
             id="email"
             type="email"
             placeholder="Enter your email"
-            className={inputClasses}
+            className={inputClasses(errors.email !== null)}
+            aria-invalid={errors.email !== null}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            {...fieldHandlers("email", setEmail, validateEmail)}
           />
+          {errors.email && (
+            <p className="mt-2 text-sm text-error">{errors.email}</p>
+          )}
         </div>
 
         <div className="mt-5">
@@ -130,10 +205,14 @@ export default function SignupForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
-            className={inputClasses}
+            className={inputClasses(errors.password !== null)}
+            aria-invalid={errors.password !== null}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            {...fieldHandlers("password", setPassword, validateSignupPassword)}
           />
+          {errors.password && (
+            <p className="mt-2 text-sm text-error">{errors.password}</p>
+          )}
         </div>
 
         <button

@@ -10,21 +10,52 @@ import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
 import { useLoginUserMutation } from "@/util/api/mutations/users/loginUserMutation";
 import { createUserLoginObjectPayload } from "@/util/api/functions/users";
 
+import {
+  validateEmail,
+  validateRequiredPassword,
+} from "@/util/auth/validation";
+
 import type { LoginUserRequest } from "@/types/api/users";
 
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
+type FieldErrors = {
+  email: string | null;
+  password: string | null;
+};
+
+const NO_ERRORS: FieldErrors = {
+  email: null,
+  password: null,
+};
+
 export default function LoginForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const loginUserMutation = useLoginUserMutation();
 
+  function validate(): FieldErrors {
+    return {
+      email: validateEmail(email),
+      password: validateRequiredPassword(password),
+    };
+  }
+
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const nextErrors = validate();
+    setErrors(nextErrors);
+
+    const hasErrors = Object.values(nextErrors).some((error) => error !== null);
+    if (hasErrors) {
+      return;
+    }
 
     const payload: LoginUserRequest = createUserLoginObjectPayload(
       email,
@@ -42,9 +73,33 @@ export default function LoginForm() {
     });
   }
 
+  function fieldHandlers<K extends keyof FieldErrors>(
+    key: K,
+    setValue: (value: string) => void,
+    validate: (value: string) => string | null,
+  ) {
+    return {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.value);
+        // only re-validate once the field is already in an error state
+        setErrors((prev) =>
+          prev[key] ? { ...prev, [key]: validate(event.target.value) } : prev,
+        );
+      },
+      onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
+        setErrors((prev) => ({ ...prev, [key]: validate(event.target.value) }));
+      },
+    };
+  }
+
   const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
-  const inputClasses =
-    "w-full rounded-lg border border-gray-300 px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:border-gray-500 focus:outline-none";
+  function inputClasses(hasError: boolean): string {
+    const borderClasses = hasError
+      ? "border-error focus:border-error"
+      : "border-gray-300 focus:border-gray-500";
+
+    return `w-full rounded-lg border px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:outline-none ${borderClasses}`;
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -78,10 +133,14 @@ export default function LoginForm() {
             id="email"
             type="email"
             placeholder="Enter your email"
-            className={inputClasses}
+            className={inputClasses(errors.email !== null)}
+            aria-invalid={errors.email !== null}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            {...fieldHandlers("email", setEmail, validateEmail)}
           />
+          {errors.email && (
+            <p className="mt-2 text-sm text-error">{errors.email}</p>
+          )}
         </div>
 
         <div className="mt-5">
@@ -92,10 +151,18 @@ export default function LoginForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
-            className={inputClasses}
+            className={inputClasses(errors.password !== null)}
+            aria-invalid={errors.password !== null}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            {...fieldHandlers(
+              "password",
+              setPassword,
+              validateRequiredPassword,
+            )}
           />
+          {errors.password && (
+            <p className="mt-2 text-sm text-error">{errors.password}</p>
+          )}
         </div>
 
         <button
