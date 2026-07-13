@@ -16,6 +16,7 @@ class Office < ApplicationRecord
 
   validates :state, presence: true
   validates :city, presence: true
+  validates :emoji, presence: true
 
   has_many :users
 
