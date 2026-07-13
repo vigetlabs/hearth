@@ -644,12 +644,14 @@ export interface components {
     office: {
       id: number;
       name: string;
-      /** @example America/Denver */
-      timezone: string;
-      /** @example Colorado */
-      state: string;
       /** @example Boulder */
       city: string;
+      /** @example CO */
+      state: string;
+      /** @example America/Denver */
+      timezone: string;
+      /** @example 🏔️ */
+      emoji: string;
     };
     /** @description Full response body for endpoints that return a single office. */
     office_response: {
@@ -662,12 +664,14 @@ export interface components {
         office: {
           id: number;
           name: string;
-          /** @example America/Denver */
-          timezone: string;
-          /** @example Colorado */
-          state: string;
           /** @example Boulder */
           city: string;
+          /** @example CO */
+          state: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example 🏔️ */
+          emoji: string;
         };
       };
     };
@@ -681,12 +685,14 @@ export interface components {
         offices: {
           id: number;
           name: string;
-          /** @example America/Denver */
-          timezone: string;
-          /** @example Colorado */
-          state: string;
           /** @example Boulder */
           city: string;
+          /** @example CO */
+          state: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example 🏔️ */
+          emoji: string;
         }[];
       };
     };

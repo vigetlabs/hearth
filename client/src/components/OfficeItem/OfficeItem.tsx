@@ -6,18 +6,10 @@ type OfficeItemProps = {
   office: Office;
 };
 
-const OFFICE_EMOJIS: Record<string, string> = {
-  boulder: "🏔️",
-  chattanooga: "🚂",
-  durham: "🌳",
-  "falls church": "🏛️",
-  remote: "🏠",
-};
-
 export default function OfficeItem({ office }: OfficeItemProps) {
   const normalizedName = office.name.toLowerCase();
   const isRemote = normalizedName === "remote";
-  const emoji = OFFICE_EMOJIS[normalizedName] ?? "🏢";
+  const emoji = office.emoji ?? "🏢";
 
   return (
     <RadioGroup.Item
@@ -30,7 +22,7 @@ export default function OfficeItem({ office }: OfficeItemProps) {
         {emoji}
       </span>
 
-      <span className="font-medium">{office.name}</span>
+      <span className="font-medium capitalize">{office.name}</span>
     </RadioGroup.Item>
   );
 }

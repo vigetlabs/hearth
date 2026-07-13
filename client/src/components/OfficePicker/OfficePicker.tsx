@@ -106,6 +106,7 @@ export default function OfficePicker() {
     });
   }
 
+<<<<<<< HEAD
   function handleRemote() {
     // Remote users have no in-office days to pick, so persist the remote office,
     // skip the schedule screen, and drop them straight into the calendar.
