@@ -96,7 +96,7 @@ function groupByStatus(people: PersonStatus[]) {
       title: "In the office",
       status: "confirmed" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "confirmed"),
-      titleClass: "text-gray-900",
+      titleClass: "text-fg",
       defaultOpen: true,
     },
     {
@@ -104,7 +104,7 @@ function groupByStatus(people: PersonStatus[]) {
       title: "Planning",
       status: "maybe" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "maybe"),
-      titleClass: "text-gray-900",
+      titleClass: "text-fg",
       defaultOpen: false,
     },
     {
@@ -112,7 +112,7 @@ function groupByStatus(people: PersonStatus[]) {
       title: "Not going",
       status: "no" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "no"),
-      titleClass: "text-gray-900",
+      titleClass: "text-fg",
       defaultOpen: false,
     },
   ].filter((group) => group.people.length > 0);

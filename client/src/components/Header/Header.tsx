@@ -34,15 +34,15 @@ export default function Header() {
   const triggerLabel = userDisplayName(user);
 
   return (
-    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-10 border-b border-line bg-surface">
       <div className="flex items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-gray-100" />
-          <span className="text-lg font-bold text-gray-900">Hearth</span>
+          <div className="h-9 w-9 rounded-lg bg-surface-muted" />
+          <span className="text-lg font-bold text-fg">Hearth</span>
         </Link>
 
         <DropdownMenu.Root>
-          <DropdownMenu.Trigger className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200 focus:outline-none">
+          <DropdownMenu.Trigger className="flex items-center gap-2 rounded-lg bg-surface-muted px-4 py-2 text-sm font-semibold text-fg hover:bg-surface-strong focus:outline-none">
             {triggerLabel}
             <svg
               width="12"
@@ -65,27 +65,27 @@ export default function Header() {
             <DropdownMenu.Content
               align="end"
               sideOffset={8}
-              className="z-20 min-w-[240px] rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
+              className="z-20 min-w-[240px] rounded-xl border border-line bg-surface p-1.5 shadow-lg"
             >
               <div className="px-3 py-2">
-                <p className="text-sm font-bold text-gray-900">
+                <p className="text-sm font-bold text-fg">
                   {user.first_name} {user.last_name}
                 </p>
-                <p className="text-sm text-gray-400">{user.email}</p>
+                <p className="text-sm text-fg-faint">{user.email}</p>
               </div>
 
-              <DropdownMenu.Separator className="my-1 h-px bg-gray-100" />
+              <DropdownMenu.Separator className="my-1 h-px bg-surface-muted" />
 
               <DropdownMenu.Item
                 onSelect={() => navigate("/users/profile")}
-                className="cursor-pointer rounded-md px-3 py-2 text-sm text-gray-900 outline-none data-[highlighted]:bg-gray-100"
+                className="cursor-pointer rounded-md px-3 py-2 text-sm text-fg outline-none data-[highlighted]:bg-surface-muted"
               >
                 Profile &amp; Settings
               </DropdownMenu.Item>
 
               <DropdownMenu.Item
                 onSelect={handleLogout}
-                className="cursor-pointer rounded-md px-3 py-2 text-sm text-red-600 outline-none data-[highlighted]:bg-red-50"
+                className="cursor-pointer rounded-md px-3 py-2 text-sm text-danger outline-none data-[highlighted]:bg-danger-surface"
               >
                 Log Out
               </DropdownMenu.Item>

@@ -7,7 +7,7 @@ export default function GoogleSsoButton() {
     <button
       type="button"
       onClick={redirectToGoogleSso}
-      className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-semibold text-fg-primary transition-colors hover:bg-gray-50"
+      className="flex w-full items-center justify-center gap-2 rounded-lg border border-line-strong px-4 py-3 font-semibold text-fg transition-colors hover:bg-surface-sunken"
     >
       <GoogleIcon className="h-5 w-5" />
       Continue with Google
