@@ -4,7 +4,21 @@ module OpenApi::Schemas::V1::Visits
     format: :date,
     description: "Calendar date only with no timezone (YYYY-MM-DD)",
     example: "2026-07-10"
-  }.freeze
+  }
+
+  VISITS_USER_SUMMARY = {
+    type: :object,
+    required: %w[
+      id
+      first_name
+      last_name
+    ],
+    properties: {
+      id: { type: :integer },
+      first_name: { type: :string },
+      last_name: { type: :string }
+    }
+  }
 
 
   # VISIT_OBJECT: Public visit object returned by the API
@@ -22,9 +36,7 @@ module OpenApi::Schemas::V1::Visits
     ],
     properties: {
       id: { type: :integer },
-      user: {
-        schema: OpenApi::Schemas::V1::Users::USER_OBJECT
-      },
+      user: VISITS_USER_SUMMARY,
       visit_date: VISIT_DATE,
       created_at: {
         type: :string,

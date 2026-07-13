@@ -767,69 +767,18 @@ components:
         id:
           type: integer
         user:
-          schema:
-            type: object
-            description: Public user account data returned by the API.
-            required:
-            - id
-            - email
-            - first_name
-            - last_name
-            - office_id
-            properties:
-              id:
-                type: integer
-              email:
-                type: string
-                format: email
-              first_name:
-                type: string
-              last_name:
-                type: string
-              office_id:
-                type: integer
-                nullable: true
-              default_schedule:
-                type: object
-                description: Public schedule data returned by the API.
-                required:
-                - id
-                - is_default
-                - monday
-                - tuesday
-                - wednesday
-                - thursday
-                - friday
-                - saturday
-                - sunday
-                properties:
-                  id:
-                    type: integer
-                  is_default:
-                    type: boolean
-                  monday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  tuesday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  wednesday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  thursday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  friday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  saturday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-                  sunday:
-                    type: boolean
-                    description: Whether the user has selected this day in their schedule
-              lab:
-                type: string
+          type: object
+          required:
+          - id
+          - first_name
+          - last_name
+          properties:
+            id:
+              type: integer
+            first_name:
+              type: string
+            last_name:
+              type: string
         visit_date:
           type: string
           format: date
@@ -900,76 +849,18 @@ components:
                 id:
                   type: integer
                 user:
-                  schema:
-                    type: object
-                    description: Public user account data returned by the API.
-                    required:
-                    - id
-                    - email
-                    - first_name
-                    - last_name
-                    - office_id
-                    properties:
-                      id:
-                        type: integer
-                      email:
-                        type: string
-                        format: email
-                      first_name:
-                        type: string
-                      last_name:
-                        type: string
-                      office_id:
-                        type: integer
-                        nullable: true
-                      default_schedule:
-                        type: object
-                        description: Public schedule data returned by the API.
-                        required:
-                        - id
-                        - is_default
-                        - monday
-                        - tuesday
-                        - wednesday
-                        - thursday
-                        - friday
-                        - saturday
-                        - sunday
-                        properties:
-                          id:
-                            type: integer
-                          is_default:
-                            type: boolean
-                          monday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          tuesday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          wednesday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          thursday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          friday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          saturday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                          sunday:
-                            type: boolean
-                            description: Whether the user has selected this day in
-                              their schedule
-                      lab:
-                        type: string
+                  type: object
+                  required:
+                  - id
+                  - first_name
+                  - last_name
+                  properties:
+                    id:
+                      type: integer
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
                 visit_date:
                   type: string
                   format: date
@@ -1020,76 +911,18 @@ components:
                   id:
                     type: integer
                   user:
-                    schema:
-                      type: object
-                      description: Public user account data returned by the API.
-                      required:
-                      - id
-                      - email
-                      - first_name
-                      - last_name
-                      - office_id
-                      properties:
-                        id:
-                          type: integer
-                        email:
-                          type: string
-                          format: email
-                        first_name:
-                          type: string
-                        last_name:
-                          type: string
-                        office_id:
-                          type: integer
-                          nullable: true
-                        default_schedule:
-                          type: object
-                          description: Public schedule data returned by the API.
-                          required:
-                          - id
-                          - is_default
-                          - monday
-                          - tuesday
-                          - wednesday
-                          - thursday
-                          - friday
-                          - saturday
-                          - sunday
-                          properties:
-                            id:
-                              type: integer
-                            is_default:
-                              type: boolean
-                            monday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            tuesday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            wednesday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            thursday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            friday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            saturday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                            sunday:
-                              type: boolean
-                              description: Whether the user has selected this day
-                                in their schedule
-                        lab:
-                          type: string
+                    type: object
+                    required:
+                    - id
+                    - first_name
+                    - last_name
+                    properties:
+                      id:
+                        type: integer
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
                   visit_date:
                     type: string
                     format: date
