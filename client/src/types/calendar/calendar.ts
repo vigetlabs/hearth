@@ -1,3 +1,5 @@
+export type WeekState = "planning" | "confirmed";
+
 export type AttendanceStatus = "confirmed" | "maybe" | "no";
 
 /** One roster member's status for a single day. */

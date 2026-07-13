@@ -13,7 +13,6 @@ import { useOffice } from "@/util/office/useOffice";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
-import { cn } from "@/util/cn";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -228,12 +227,11 @@ export function Calendar({ schedule }: CalendarProps) {
         <div className="relative flex min-h-0 flex-1 flex-col">
           {todayIndex !== -1 && (
             <span
-              className={cn(
-                "pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+              className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 isWeekConfirmed
                   ? "border border-gray-900 bg-white text-gray-900"
-                  : "bg-gray-900 text-white",
-              )}
+                  : "bg-gray-900 text-white"
+              }`}
               style={{
                 left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
               }}
