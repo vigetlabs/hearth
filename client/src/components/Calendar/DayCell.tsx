@@ -68,10 +68,12 @@ export function DayCell({
             key={group.key}
             title={group.title}
             titleClass={group.titleClass}
+            status={group.status}
             people={group.people}
             myName={myName}
             defaultOpen={group.defaultOpen}
             divided={index > 0}
+            locked={locked}
           />
         ))}
       </div>
@@ -92,6 +94,7 @@ function groupByStatus(people: PersonStatus[]) {
     {
       key: "confirmed",
       title: "In the office",
+      status: "confirmed" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "confirmed"),
       titleClass: "text-gray-900",
       defaultOpen: true,
@@ -99,13 +102,15 @@ function groupByStatus(people: PersonStatus[]) {
     {
       key: "planning",
       title: "Planning",
+      status: "maybe" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "maybe"),
-      titleClass: "text-gray-400",
+      titleClass: "text-gray-900",
       defaultOpen: false,
     },
     {
       key: "notGoing",
       title: "Not going",
+      status: "no" as AttendanceStatus,
       people: sorted.filter((person) => person.status === "no"),
       titleClass: "text-gray-900",
       defaultOpen: false,
