@@ -4,5 +4,6 @@ class ScheduleSerializer
              :name,
              :city,
              :state,
-             :timezone
+             :timezone,
+             :emoji
 end

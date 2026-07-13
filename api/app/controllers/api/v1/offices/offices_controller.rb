@@ -8,9 +8,10 @@ class Api::V1::Offices::OfficesController < ApplicationController
       {
         id: office.id,
         name: office.name,
-        timezone: office.timezone,
+        city: office.city,
         state: office.state,
-        city: office.city
+        timezone: office.timezone,
+        emoji: office.emoji
       }
     end
 

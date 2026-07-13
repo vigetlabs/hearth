@@ -618,23 +618,27 @@ components:
       required:
       - id
       - name
-      - timezone
-      - state
       - city
+      - state
+      - timezone
+      - emoji
       properties:
         id:
           type: integer
         name:
           type: string
-        timezone:
-          type: string
-          example: America/Denver
-        state:
-          type: string
-          example: Colorado
         city:
           type: string
           example: Boulder
+        state:
+          type: string
+          example: CO
+        timezone:
+          type: string
+          example: America/Denver
+        emoji:
+          type: string
+          example: "\U0001F3D4️"
     office_response:
       type: object
       description: Full response body for endpoints that return a single office.
@@ -661,23 +665,27 @@ components:
               required:
               - id
               - name
-              - timezone
-              - state
               - city
+              - state
+              - timezone
+              - emoji
               properties:
                 id:
                   type: integer
                 name:
                   type: string
-                timezone:
-                  type: string
-                  example: America/Denver
-                state:
-                  type: string
-                  example: Colorado
                 city:
                   type: string
                   example: Boulder
+                state:
+                  type: string
+                  example: CO
+                timezone:
+                  type: string
+                  example: America/Denver
+                emoji:
+                  type: string
+                  example: "\U0001F3D4️"
     offices_response:
       type: object
       description: Full response body for endpoints that return a single office.
@@ -706,23 +714,27 @@ components:
                 required:
                 - id
                 - name
-                - timezone
-                - state
                 - city
+                - state
+                - timezone
+                - emoji
                 properties:
                   id:
                     type: integer
                   name:
                     type: string
-                  timezone:
-                    type: string
-                    example: America/Denver
-                  state:
-                    type: string
-                    example: Colorado
                   city:
                     type: string
                     example: Boulder
+                  state:
+                    type: string
+                    example: CO
+                  timezone:
+                    type: string
+                    example: America/Denver
+                  emoji:
+                    type: string
+                    example: "\U0001F3D4️"
     visit:
       type: object
       description: Public visit data returned by the API.

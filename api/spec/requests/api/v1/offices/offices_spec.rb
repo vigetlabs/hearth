@@ -8,7 +8,8 @@ RSpec.describe "Api::V1::Offices::Offices", type: :request do
         name: "Boulder",
         city: "Boulder",
         state: "CO",
-        timezone: "America/Denver"
+        timezone: "America/Denver",
+        emoji: "🏔️"
       )
     end
 
@@ -18,7 +19,8 @@ RSpec.describe "Api::V1::Offices::Offices", type: :request do
         name: "Arlington",
         city: "Arlington",
         state: "VA",
-        timezone: "America/New_York"
+        timezone: "America/New_York",
+        emoji: "🏛️"
       )
     end
 
@@ -44,14 +46,16 @@ RSpec.describe "Api::V1::Offices::Offices", type: :request do
             "name" => arlington_office.name,
             "city" => arlington_office.city,
             "state" => arlington_office.state,
-            "timezone" => arlington_office.timezone
+            "timezone" => arlington_office.timezone,
+            "emoji" => arlington_office.emoji
           },
           {
             "id" => boulder_office.id,
             "name" => boulder_office.name,
             "city" => boulder_office.city,
             "state" => boulder_office.state,
-            "timezone" => boulder_office.timezone
+            "timezone" => boulder_office.timezone,
+            "emoji" => boulder_office.emoji
           }
         ]
       )
