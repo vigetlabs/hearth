@@ -77,9 +77,7 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/api_test
-        # @TODO: use the following once schema.rb exists
-        # run: bin/rails db:drop db:create db:schema:load
-        run: bin/rails db:prepare
+        run: bin/rails db:drop db:create db:schema:load
 
       - name: Run tests
         working-directory: api
