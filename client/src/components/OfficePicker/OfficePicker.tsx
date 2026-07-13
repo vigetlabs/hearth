@@ -106,7 +106,6 @@ export default function OfficePicker() {
     });
   }
 
-<<<<<<< HEAD
   function handleRemote() {
     // Remote users have no in-office days to pick, so persist the remote office,
     // skip the schedule screen, and drop them straight into the calendar.
@@ -141,8 +140,7 @@ export default function OfficePicker() {
   // resolves to the same default hero, so it should swap silently.
   const shouldAnimate =
     previousOfficeId !== null &&
-    heroImageFor(previousHeroOfficeId) !==
-      heroImageFor(selectedHeroOfficeId);
+    heroImageFor(previousHeroOfficeId) !== heroImageFor(selectedHeroOfficeId);
 
   if (officesQuery.isPending) {
     return (
@@ -204,9 +202,7 @@ export default function OfficePicker() {
             <button
               type="button"
               onClick={handleContinue}
-              disabled={
-                !selectedOfficeId || updateUserMutation.isPending
-              }
+              disabled={!selectedOfficeId || updateUserMutation.isPending}
               className="mt-8 w-full rounded-full bg-neutral-500 py-3 text-sm font-semibold text-white transition-colors enabled:hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Continue
@@ -242,9 +238,7 @@ export default function OfficePicker() {
             className="office-hero office-hero--exit absolute inset-y-0 -inset-x-10 bg-cover bg-center"
             style={
               {
-                backgroundImage: `url(${heroImageFor(
-                  previousHeroOfficeId,
-                )})`,
+                backgroundImage: `url(${heroImageFor(previousHeroOfficeId)})`,
                 "--slide-sign": direction === "left" ? -1 : 1,
               } as CSSProperties
             }
@@ -263,9 +257,7 @@ export default function OfficePicker() {
           }`}
           style={
             {
-              backgroundImage: `url(${heroImageFor(
-                selectedHeroOfficeId,
-              )})`,
+              backgroundImage: `url(${heroImageFor(selectedHeroOfficeId)})`,
               "--slide-sign": direction === "left" ? -1 : 1,
             } as CSSProperties
           }
