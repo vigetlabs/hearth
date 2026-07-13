@@ -1,18 +1,13 @@
 import { useState } from "react";
 
 import { PersonRow } from "@/components/Calendar/PersonRow";
-import CheckIcon from "@/components/icons/CheckIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import XIcon from "@/components/icons/XIcon";
-import type { AttendanceStatus, PersonStatus } from "@/types/calendar/calendar";
-import { cn } from "@/util/cn";
+import type { PersonStatus } from "@/types/calendar/calendar";
 
 interface AttendanceGroupProps {
   title: string;
   /** Color for the group heading text. */
   titleClass: string;
-  /** Status this group represents, driving the icon to the left of the title. */
-  status: AttendanceStatus;
   people: PersonStatus[];
   /** Display name of the logged-in user, highlighted in the list. */
   myName: string;
@@ -20,20 +15,15 @@ interface AttendanceGroupProps {
   defaultOpen: boolean;
   /** Adds a top divider + spacing; true for every group after the first. */
   divided: boolean;
-  /** Whether the week is confirmed (locked); fills the title icons with the
-      dark scheme used by the confirmed day headers. */
-  locked: boolean;
 }
 
 export function AttendanceGroup({
   title,
   titleClass,
-  status,
   people,
   myName,
   defaultOpen,
   divided,
-  locked,
 }: AttendanceGroupProps) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -43,20 +33,15 @@ export function AttendanceGroup({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className={cn(
-          groupHeader,
-          titleClass,
-          divided ? "mt-1 border-t border-gray-200 pt-2" : "pt-1.5",
-        )}
+        className={`${groupHeader} ${titleClass} ${
+          divided ? "mt-1 border-t border-gray-200 pt-2" : "pt-1.5"
+        }`}
       >
-        <span className="flex items-center gap-2">
-          <TitleMark status={status} locked={locked} />
-          <span>
-            {title} ({people.length})
-          </span>
+        <span>
+          {title} ({people.length})
         </span>
         <ChevronDownIcon
-          className={cn("h-3 w-3 transition-transform", !open && "-rotate-90")}
+          className={`h-3 w-3 transition-transform ${open ? "" : "-rotate-90"}`}
         />
       </button>
 
@@ -71,48 +56,5 @@ export function AttendanceGroup({
   );
 }
 
-/** The status icon shown to the left of a group title. Outlined while planning;
-    filled with a dark scheme once the week is confirmed. */
-function TitleMark({
-  status,
-  locked,
-}: {
-  status: AttendanceStatus;
-  locked: boolean;
-}) {
-  if (status === "maybe") {
-    // Unlocked: a hollow dashed circle. Locked: fill it dark to match the
-    // confirmed day headers, keeping a white dashed ring so it still reads as
-    // the "planning" mark instead of vanishing into a solid dot.
-    return locked ? (
-      <span className={cn(titleMark, "bg-gray-900")}>
-        <span className="h-2 w-2 rounded-full border border-dashed border-white" />
-      </span>
-    ) : (
-      <span className="h-4 w-4 shrink-0 rounded-full border border-dashed border-gray-400" />
-    );
-  }
-
-  const Icon = status === "confirmed" ? CheckIcon : XIcon;
-  const outlineClass =
-    status === "confirmed"
-      ? "border-gray-900 text-gray-900"
-      : "border-gray-400 text-gray-400";
-
-  return (
-    <span
-      className={cn(
-        titleMark,
-        locked ? "bg-gray-900 text-white" : ["border", outlineClass],
-      )}
-    >
-      <Icon className="h-2.5 w-2.5" />
-    </span>
-  );
-}
-
 const groupHeader =
   "flex w-full items-center justify-between px-4 pb-1 text-sm font-bold";
-
-const titleMark =
-  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full";
