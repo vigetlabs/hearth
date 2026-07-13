@@ -68,9 +68,10 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
 
         expect(json["status"]["code"]).to eq(422)
         expect(json["status"]["message"]).to eq("Validation failed.")
-        expect(json["error"]["type"]).to eq(ApiErrorTypes::VALIDATION)
-        expect(json["error"]["code"]).to eq(ApiErrorCodes::Validation::INVALID_ATTRIBUTES)
-        error_details = json["error"]["details"]
+
+        expect(get_error_type(json)).to eq(ApiErrorTypes::VALIDATION)
+        expect(get_error_code(json)).to eq(ApiErrorCodes::Validation::INVALID_ATTRIBUTES)
+        error_details = get_error_details(json)
         expect(error_details).to be_an(Array)
 
         expect(error_details).to include(

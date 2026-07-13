@@ -45,6 +45,7 @@ RSpec.configure do |config|
   ]
   config.include ApiHelper, type: :request
   config.include RequestAuthHelpers, type: :request
+  config.include ErrorHelpers, type: :request
   config.include FactoryBot::Syntax::Methods
   config.include Devise::Test::IntegrationHelpers, type: :request
 
