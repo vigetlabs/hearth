@@ -221,6 +221,25 @@ paths:
             schema:
               "$ref": "#/components/schemas/patch_user_request"
         required: true
+  "/api/v1/visits":
+    post:
+      summary: Creates user visits
+      tags:
+      - Visits
+      parameters: []
+      responses:
+        '201':
+          description: visits created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/visits_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/create_visits_request"
+        required: true
 servers:
 - url: https://{defaultHost}
   variables:
@@ -826,25 +845,28 @@ components:
           format: date-time
           description: Updated-at time in ISO 8601 format
           example: '2026-07-10T13:42:18.123Z'
-    create_visit_request:
+    create_visits_request:
       type: object
       description: Request body for creating a new visit
       required:
-      - visit
+      - visits
       properties:
-        visit:
-          type: object
-          required:
-          - visit_date
-          - office_id
-          properties:
-            visit_date:
-              type: string
-              format: date
-              description: Calendar date only with no timezone (YYYY-MM-DD)
-              example: '2026-07-10'
-            office_id:
-              type: integer
+        visits:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+            - visit_date
+            - office_id
+            properties:
+              visit_date:
+                type: string
+                format: date
+                description: Calendar date only with no timezone (YYYY-MM-DD)
+                example: '2026-07-10'
+              office_id:
+                type: integer
     visit_response:
       type: object
       description: Full response body for endpoints that return a single visit.

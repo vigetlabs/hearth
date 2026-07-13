@@ -41,26 +41,30 @@ module OpenApi::Schemas::V1::Visits
     }
   }
 
-  # CREATE_VISIT_REQUEST: Request body for creating a visit
+  # CREATE_VISITS_REQUEST: Request body for creating a visit
   #
   # Use this as the request body schema for `POST /api/v1/visits`.
   #
   # @NOTE No user information is required in the request payload. The user is associated in the backend level by referring to Devise's
   # `current_user` when creating the visit object.
-  CREATE_VISIT_REQUEST = {
+  CREATE_VISITS_REQUEST = {
     type: :object,
     description: "Request body for creating a new visit",
-    required: %w[visit],
+    required: %w[visits],
     properties: {
-      visit: {
-        type: :object,
-        required: %w[
-          visit_date
-          office_id
-        ],
-        properties: {
-          visit_date: VISIT_DATE,
-          office_id: { type: :integer }
+      visits: {
+        type: :array,
+        minItems: 1,
+        items: {
+          type: :object,
+          required: %w[
+            visit_date
+            office_id
+          ],
+          properties: {
+            visit_date: VISIT_DATE,
+            office_id: { type: :integer }
+          }
         }
       }
     }
