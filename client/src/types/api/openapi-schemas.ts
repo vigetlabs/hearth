@@ -187,13 +187,13 @@ export interface paths {
             "application/json": components["schemas"]["user_response"];
           };
         };
-        /** @description invalid login credentials */
+        /** @description missing required login parameters */
         401: {
           headers: {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["user_devise_invalid_login_response"];
+            "application/json": components["schemas"]["authentication_error_response"];
           };
         };
       };
@@ -232,7 +232,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["generic_success_response"];
+            "application/json": components["schemas"]["empty_success_response"];
           };
         };
         /** @description invalid active session */
@@ -241,7 +241,7 @@ export interface paths {
             [name: string]: unknown;
           };
           content: {
-            "application/json": components["schemas"]["generic_error_response"];
+            "application/json": components["schemas"]["authentication_error_response"];
           };
         };
       };
@@ -284,7 +284,40 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch?: never;
+    /** Updates user information for current authenticated user */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["patch_user_request"];
+        };
+      };
+      responses: {
+        /** @description updated user successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["user_response"];
+          };
+        };
+        /** @description invalid active session */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+      };
+    };
     trace?: never;
   };
 }
@@ -295,17 +328,10 @@ export interface components {
     status: {
       message: string;
     };
-    /** @description One individual error detail, usually used inside an errors array. */
-    error: {
+    /** @description One individual field error, usually used inside an errors array. */
+    field_error: {
       field: string;
       message: string;
-    };
-    /** @description Full response body for a generic API error without field-level details. */
-    error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
     };
     /** @description Full response body for validation errors with field-level details. */
     validation_error_response: {
@@ -313,13 +339,65 @@ export interface components {
       status: {
         message: string;
       };
-      errors: {
-        field: string;
+      error: {
+        /** @enum {string} */
+        type: "validation_error";
+        /** @enum {string} */
+        code: "invalid_attributes";
+        details: {
+          field: string;
+          message: string;
+        }[];
+      };
+    };
+    /** @description Full response body for invalid active sessions. */
+    authentication_error_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
         message: string;
-      }[];
+      };
+      error: {
+        /** @enum {string} */
+        type: "authentication_error";
+        /** @enum {string} */
+        code: "authentication_required" | "invalid_credentials";
+      };
+    };
+    /** @description Full response body for record not found errors. */
+    not_found_error_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      error: {
+        /** @enum {string} */
+        type: "not_found_error";
+        /** @enum {string} */
+        code: "resource_not_found";
+        /** @enum {string} */
+        resource: "user" | "office" | "schedule" | "visit";
+      };
+    };
+    /** @description Full response body for malformed request bodies. */
+    bad_request_error_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      error: {
+        /** @enum {string} */
+        type: "bad_request_error";
+        /** @enum {string} */
+        code:
+          "missing_parameter" | "malformed_json" | "invalid_parameter_format";
+        /** @example The user parameter is required. */
+        message: string;
+        /** @example user */
+        field?: string | null;
+      };
     };
     /** @description Generic success response body */
-    generic_success_response: {
+    empty_success_response: {
       /** @description Shared status metadata returned by API responses. */
       status: {
         message: string;
@@ -330,44 +408,9 @@ export interface components {
        */
       data: unknown;
     };
-    /** @description Generic error response body */
-    generic_error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      errors: {
-        field: string;
-        message: string;
-      }[];
-    };
-    /** @description Request body for creating a new user account */
-    create_user_request: {
-      user: {
-        /** Format: email */
-        email: string;
-        first_name: string;
-        last_name: string;
-        /** Format: password */
-        password: string;
-        /** Format: password */
-        password_confirmation: string;
-      };
-    };
-    /** @description Request body for logging in to a user account. */
-    login_user_request: {
-      /** @description Credentials for the user account being authenticated. */
-      user: {
-        /** Format: email */
-        email: string;
-        /** Format: password */
-        password: string;
-      };
-    };
     /** @description Public schedule data returned by the API. */
     schedule: {
       id: number;
-      office_id?: number;
       is_default: boolean;
       /** @description Whether the user has selected this day in their schedule */
       monday: boolean;
@@ -414,7 +457,6 @@ export interface components {
         /** @description Public schedule data returned by the API. */
         schedule: {
           id: number;
-          office_id?: number;
           is_default: boolean;
           /** @description Whether the user has selected this day in their schedule */
           monday: boolean;
@@ -589,11 +631,10 @@ export interface components {
       email: string;
       first_name: string;
       last_name: string;
-      office_id?: number | null;
+      office_id: number | null;
       /** @description Public schedule data returned by the API. */
       default_schedule?: {
         id: number;
-        office_id?: number;
         is_default: boolean;
         /** @description Whether the user has selected this day in their schedule */
         monday: boolean;
@@ -626,11 +667,10 @@ export interface components {
           email: string;
           first_name: string;
           last_name: string;
-          office_id?: number | null;
+          office_id: number | null;
           /** @description Public schedule data returned by the API. */
           default_schedule?: {
             id: number;
-            office_id?: number;
             is_default: boolean;
             /** @description Whether the user has selected this day in their schedule */
             monday: boolean;
@@ -651,13 +691,40 @@ export interface components {
         };
       };
     };
-    /** @description Full response body for invalid login request */
-    user_devise_invalid_login_response: {
-      /**
-       * @description Devise authentication error message
-       * @example Invalid Email or password.
-       */
-      error: string;
+    /** @description Request body for creating a new user account */
+    create_user_request: {
+      user: {
+        /** Format: email */
+        email: string;
+        first_name: string;
+        last_name: string;
+        /** Format: password */
+        password: string;
+        /** Format: password */
+        password_confirmation: string;
+      };
+    };
+    /** @description Request body for logging in to a user account. */
+    login_user_request: {
+      /** @description Credentials for the user account being authenticated. */
+      user: {
+        /** Format: email */
+        email: string;
+        /** Format: password */
+        password: string;
+      };
+    };
+    /** @description Request body for updating the current user's account information. */
+    patch_user_request: {
+      /** @description User attributes available to be updated. */
+      user: {
+        /** @example Ryan */
+        first_name?: string;
+        /** @example Dioneda */
+        last_name?: string;
+        /** @example 1 */
+        office_id?: number;
+      };
     };
   };
   responses: never;

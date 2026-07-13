@@ -10,14 +10,4 @@ module ApiResponse
       data: data
     }, status: status
   end
-
-  def error_response(message: "", errors: [], status: :unprocessable_content)
-    render json: {
-      status: {
-        code: Rack::Utils::SYMBOL_TO_STATUS_CODE[status],
-        message: message
-      },
-      errors: errors
-    }, status: status
-  end
 end

@@ -1,0 +1,56 @@
+class Api::V1::Schedules::SchedulesController < ApplicationController
+  include Handlers::BadRequestHandler
+  include Handlers::RecordInvalidHandler
+  include Handlers::RecordNotFoundHandler
+  include ApiResponse
+
+  rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
+  rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
+  rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
+
+  before_action :authenticate_user!, only: [ :create, :default ]
+
+  def create
+    new_schedule = current_user.schedules.create!(schedule_params)
+
+    serialized_schedule = ScheduleSerializer
+      .new(new_schedule)
+      .serializable_hash[:data][:attributes]
+
+    data = { schedule: serialized_schedule }
+
+    success_response(
+      data: data,
+      message: "Created schedule successfully",
+      status: :created
+    )
+  end
+
+  def default
+    default_schedule = current_user.default_schedule
+
+    serialized_schedule = ScheduleSerializer
+      .new(default_schedule)
+      .serializable_hash[:data][:attributes]
+
+    data = { schedule: serialized_schedule }
+
+    success_response(
+      data: data,
+      message: "Fetched default schedule successfully",
+    )
+  end
+
+  def schedule_params
+    params.require(:schedule).permit(
+      :is_default,
+      :monday,
+      :tuesday,
+      :wednesday,
+      :thursday,
+      :friday,
+      :saturday,
+      :sunday,
+    )
+  end
+end

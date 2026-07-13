@@ -51,7 +51,6 @@ module OpenApi::Schemas::V1::Schedules
     ],
     properties: {
       id: { type: :integer },
-      office_id: { type: :integer },
       is_default: { type: :boolean },
       **DAY_PROPERTIES
     }

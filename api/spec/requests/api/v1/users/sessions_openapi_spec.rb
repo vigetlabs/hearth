@@ -30,7 +30,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
       end
 
       response "401", "invalid login credentials" do
-        schema "$ref" => "#/components/schemas/user_devise_invalid_login_response"
+        schema "$ref" => "#/components/schemas/authentication_error_response"
 
         let!(:user) { create(:user) }
 
@@ -43,6 +43,13 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
           }
         end
 
+        run_test!
+      end
+
+      response "401", "missing required login parameters" do
+        schema "$ref" => "#/components/schemas/authentication_error_response"
+
+        let(:payload) { {} }
         run_test!
       end
     end
@@ -60,7 +67,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
               required: true
 
       response "200", "logged out user successfully" do
-        schema "$ref" => "#/components/schemas/generic_success_response"
+        schema "$ref" => "#/components/schemas/empty_success_response"
 
         let!(:user) { create(:user) }
 
@@ -82,7 +89,7 @@ RSpec.describe "Api::V1::Users::Sessions", type: :request do
       end
 
       response "401", "invalid active session" do
-        schema "$ref" => "#/components/schemas/generic_error_response"
+        schema "$ref" => "#/components/schemas/authentication_error_response"
         let(:Cookie) { "jwt_token=not-a-token" }
 
         run_test!

@@ -14,28 +14,10 @@ class JwtCookieMiddleware
     begin
       status, headers, response = @app.call(env)
     rescue JWT::DecodeError
-      headers = { "Content-Type" => "application/json" }
-      Rack::Utils.delete_cookie_header!(headers, "jwt_token", path: "/")
-
-      return [
-        401,
-        headers,
-        [
-          {
-            status: {
-              message: "Unauthorized"
-            },
-            errors: [
-              {
-                field: "jwt_token",
-                message: "Invalid or expired token"
-              }
-            ]
-          }.to_json
-        ]
-      ]
+      return invalid_token_response
     end
 
+    # @TODO Refactor in separate helpers for code clarity
     auth_header = headers["Authorization"]
     if auth_header.present? && auth_header.start_with?("Bearer ")
       token = auth_header.split(" ").last
@@ -58,5 +40,30 @@ class JwtCookieMiddleware
     end
 
     [ status, headers, response ]
+  end
+
+  private
+
+  def build_rack_response(body:, status:, headers: {})
+    [
+      Rack::Utils::SYMBOL_TO_STATUS_CODE[status],
+      headers,
+      [ body.to_json ]
+    ]
+  end
+
+  def invalid_token_response
+    headers = { "Content-Type" => "application/json" }
+    Rack::Utils.delete_cookie_header!(headers, "jwt_token", path: "/")
+    body = ApiErrorResponse.authentication(
+      code: ApiErrorCodes::Authentication::AUTHENTICATION_REQUIRED,
+      message: "You need to sign in before continuing"
+    )
+
+    build_rack_response(
+      body: body,
+      status: :unauthorized,
+      headers: headers
+    )
   end
 end

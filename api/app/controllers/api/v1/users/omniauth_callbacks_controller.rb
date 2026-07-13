@@ -1,5 +1,5 @@
 class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  include FrontendPathHelper
+  include Helpers::FrontendPathHelper
 
   def google_oauth2
     auth = request.env["omniauth.auth"]

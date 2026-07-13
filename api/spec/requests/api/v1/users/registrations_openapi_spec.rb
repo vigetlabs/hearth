@@ -7,17 +7,14 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
       consumes "application/json"
       produces "application/json"
 
-      # REQUEST BODY
       parameter name: :payload,
         in: :body,
         required: true,
         schema: { "$ref" => "#/components/schemas/create_user_request" }
 
       response "201", "user created successfully" do
-        # SUCCESS RESPONSE SCHEMA
         schema "$ref" => "#/components/schemas/user_response"
 
-          # INPUT DATA TO TEST `200` CASE
           let(:payload) do
             {
               user: {
@@ -33,8 +30,20 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
           run_test!
       end
 
+      response "400", "missing user parameter" do
+        schema "$ref" => "#/components/schemas/bad_request_error_response"
+
+        let(:payload) do
+          {
+            email: "user@example.com",
+            password: "password"
+          }
+        end
+
+        run_test!
+      end
+
       response "422", "invalid user params" do
-        schema OpenApi::Schemas::V1::Errors::VALIDATION_ERROR_RESPONSE
         schema "$ref" => "#/components/schemas/validation_error_response"
 
         let(:payload) do

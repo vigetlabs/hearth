@@ -4,6 +4,65 @@ info:
   title: Hearth API
   version: v1
 paths:
+  "/api/v1/schedules/default":
+    get:
+      summary: Fetches the current user's default schedule
+      tags:
+      - Schedules
+      security:
+      - cookie_auth: []
+      responses:
+        '200':
+          description: fetched default schedule successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/schedule_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+  "/api/v1/schedules":
+    post:
+      summary: Creates a schedule
+      tags:
+      - Schedules
+      security:
+      - cookie_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: schedule created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/schedule_response"
+        '422':
+          description: invalid schedule parameters
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/validation_error_response"
+        '400':
+          description: missing schedule parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/create_schedule_request"
+        required: true
   "/api/v1/users/auth/google":
     get:
       summary: Starts the Google SSO
@@ -41,6 +100,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/user_response"
+        '400':
+          description: missing user parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
         '422':
           description: invalid user params
           content:
@@ -67,11 +132,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/user_response"
         '401':
-          description: invalid login credentials
+          description: missing required login parameters
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/user_devise_invalid_login_response"
+                "$ref": "#/components/schemas/authentication_error_response"
       requestBody:
         content:
           application/json:
@@ -97,13 +162,13 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/generic_success_response"
+                "$ref": "#/components/schemas/empty_success_response"
         '401':
           description: invalid active session
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/generic_error_response"
+                "$ref": "#/components/schemas/authentication_error_response"
   "/api/v1/users/me":
     get:
       summary: Fetches user information for current authenticated user
@@ -118,6 +183,32 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/user_response"
+    patch:
+      summary: Updates user information for current authenticated user
+      tags:
+      - Users
+      security:
+      - cookie_auth: []
+      parameters: []
+      responses:
+        '401':
+          description: invalid active session
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+        '200':
+          description: updated user successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/user_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/patch_user_request"
+        required: true
 servers:
 - url: https://{defaultHost}
   variables:
@@ -133,9 +224,9 @@ components:
       properties:
         message:
           type: string
-    error:
+    field_error:
       type: object
-      description: One individual error detail, usually used inside an errors array.
+      description: One individual field error, usually used inside an errors array.
       required:
       - field
       - message
@@ -144,27 +235,12 @@ components:
           type: string
         message:
           type: string
-    error_response:
-      type: object
-      description: Full response body for a generic API error without field-level
-        details.
-      required:
-      - status
-      properties:
-        status:
-          type: object
-          description: Shared status metadata returned by API responses.
-          required:
-          - message
-          properties:
-            message:
-              type: string
     validation_error_response:
       type: object
       description: Full response body for validation errors with field-level details.
       required:
       - status
-      - errors
+      - error
       properties:
         status:
           type: object
@@ -174,21 +250,138 @@ components:
           properties:
             message:
               type: string
-        errors:
-          type: array
-          items:
-            type: object
-            description: One individual error detail, usually used inside an errors
-              array.
-            required:
-            - field
-            - message
-            properties:
-              field:
-                type: string
-              message:
-                type: string
-    generic_success_response:
+        error:
+          type: object
+          required:
+          - type
+          - code
+          - details
+          properties:
+            type:
+              type: string
+              enum:
+              - validation_error
+            code:
+              type: string
+              enum:
+              - invalid_attributes
+            details:
+              type: array
+              items:
+                type: object
+                description: One individual field error, usually used inside an errors
+                  array.
+                required:
+                - field
+                - message
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+    authentication_error_response:
+      type: object
+      description: Full response body for invalid active sessions.
+      required:
+      - status
+      - error
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        error:
+          type: object
+          required:
+          - type
+          - code
+          properties:
+            type:
+              type: string
+              enum:
+              - authentication_error
+            code:
+              type: string
+              enum:
+              - authentication_required
+              - invalid_credentials
+    not_found_error_response:
+      type: object
+      description: Full response body for record not found errors.
+      required:
+      - status
+      - error
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        error:
+          type: object
+          required:
+          - type
+          - code
+          - resource
+          properties:
+            type:
+              type: string
+              enum:
+              - not_found_error
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            resource:
+              type: string
+              enum:
+              - user
+              - office
+              - schedule
+              - visit
+    bad_request_error_response:
+      type: object
+      description: Full response body for malformed request bodies.
+      required:
+      - status
+      - error
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        error:
+          type: object
+          required:
+          - type
+          - code
+          properties:
+            type:
+              type: string
+              enum:
+              - bad_request_error
+            code:
+              type: string
+              enum:
+              - missing_parameter
+              - malformed_json
+              - invalid_parameter_format
+            field:
+              type: string
+              nullable: true
+              example: user
+    empty_success_response:
       type: object
       description: Generic success response body
       required:
@@ -207,83 +400,6 @@ components:
           nullable: true
           description: No resource payload is returned for this response
           example:
-    generic_error_response:
-      type: object
-      description: Generic error response body
-      required:
-      - status
-      - errors
-      properties:
-        status:
-          type: object
-          description: Shared status metadata returned by API responses.
-          required:
-          - message
-          properties:
-            message:
-              type: string
-        errors:
-          type: array
-          items:
-            type: object
-            description: One individual error detail, usually used inside an errors
-              array.
-            required:
-            - field
-            - message
-            properties:
-              field:
-                type: string
-              message:
-                type: string
-    create_user_request:
-      type: object
-      description: Request body for creating a new user account
-      required:
-      - user
-      properties:
-        user:
-          type: object
-          required:
-          - email
-          - first_name
-          - last_name
-          - password
-          - password_confirmation
-          properties:
-            email:
-              type: string
-              format: email
-            first_name:
-              type: string
-            last_name:
-              type: string
-            password:
-              type: string
-              format: password
-            password_confirmation:
-              type: string
-              format: password
-    login_user_request:
-      type: object
-      description: Request body for logging in to a user account.
-      required:
-      - user
-      properties:
-        user:
-          type: object
-          description: Credentials for the user account being authenticated.
-          required:
-          - email
-          - password
-          properties:
-            email:
-              type: string
-              format: email
-            password:
-              type: string
-              format: password
-              writeOnly: true
     schedule:
       type: object
       description: Public schedule data returned by the API.
@@ -299,8 +415,6 @@ components:
       - sunday
       properties:
         id:
-          type: integer
-        office_id:
           type: integer
         is_default:
           type: boolean
@@ -402,8 +516,6 @@ components:
               properties:
                 id:
                   type: integer
-                office_id:
-                  type: integer
                 is_default:
                   type: boolean
                 monday:
@@ -464,8 +576,6 @@ components:
                 - sunday
                 properties:
                   id:
-                    type: integer
-                  office_id:
                     type: integer
                   is_default:
                     type: boolean
@@ -620,6 +730,7 @@ components:
             - email
             - first_name
             - last_name
+            - office_id
             properties:
               id:
                 type: integer
@@ -648,8 +759,6 @@ components:
                 - sunday
                 properties:
                   id:
-                    type: integer
-                  office_id:
                     type: integer
                   is_default:
                     type: boolean
@@ -751,6 +860,7 @@ components:
                     - email
                     - first_name
                     - last_name
+                    - office_id
                     properties:
                       id:
                         type: integer
@@ -779,8 +889,6 @@ components:
                         - sunday
                         properties:
                           id:
-                            type: integer
-                          office_id:
                             type: integer
                           is_default:
                             type: boolean
@@ -872,6 +980,7 @@ components:
                       - email
                       - first_name
                       - last_name
+                      - office_id
                       properties:
                         id:
                           type: integer
@@ -900,8 +1009,6 @@ components:
                           - sunday
                           properties:
                             id:
-                              type: integer
-                            office_id:
                               type: integer
                             is_default:
                               type: boolean
@@ -958,6 +1065,7 @@ components:
       - email
       - first_name
       - last_name
+      - office_id
       properties:
         id:
           type: integer
@@ -986,8 +1094,6 @@ components:
           - sunday
           properties:
             id:
-              type: integer
-            office_id:
               type: integer
             is_default:
               type: boolean
@@ -1042,6 +1148,7 @@ components:
               - email
               - first_name
               - last_name
+              - office_id
               properties:
                 id:
                   type: integer
@@ -1070,8 +1177,6 @@ components:
                   - sunday
                   properties:
                     id:
-                      type: integer
-                    office_id:
                       type: integer
                     is_default:
                       type: boolean
@@ -1105,13 +1210,73 @@ components:
                         schedule
                 lab:
                   type: string
-    user_devise_invalid_login_response:
+    create_user_request:
       type: object
-      description: Full response body for invalid login request
+      description: Request body for creating a new user account
       required:
-      - error
+      - user
       properties:
-        error:
-          type: string
-          description: Devise authentication error message
-          example: Invalid Email or password.
+        user:
+          type: object
+          required:
+          - email
+          - first_name
+          - last_name
+          - password
+          - password_confirmation
+          properties:
+            email:
+              type: string
+              format: email
+            first_name:
+              type: string
+            last_name:
+              type: string
+            password:
+              type: string
+              format: password
+            password_confirmation:
+              type: string
+              format: password
+    login_user_request:
+      type: object
+      description: Request body for logging in to a user account.
+      required:
+      - user
+      properties:
+        user:
+          type: object
+          description: Credentials for the user account being authenticated.
+          required:
+          - email
+          - password
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+              format: password
+              writeOnly: true
+    patch_user_request:
+      type: object
+      description: Request body for updating the current user's account information.
+      required:
+      - user
+      additionalProperties: false
+      properties:
+        user:
+          type: object
+          description: User attributes available to be updated.
+          minProperties: 1
+          additionalProperties: false
+          properties:
+            first_name:
+              type: string
+              example: Ryan
+            last_name:
+              type: string
+              example: Dioneda
+            office_id:
+              type: integer
+              example: 1

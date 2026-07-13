@@ -6,7 +6,7 @@ import type {
   LoginUserRequest,
 } from "@/types/api/users";
 
-import type { GenericSuccessResponse } from "@/types/api/generics";
+import type { EmptySuccessResponse } from "@/types/api/generics";
 
 export function createUserObjectPayload(
   email: string,
@@ -67,10 +67,10 @@ export async function getCurrentUser(): Promise<UserResponse> {
   return response;
 }
 
-export async function logoutUser(): Promise<GenericSuccessResponse> {
+export async function logoutUser(): Promise<EmptySuccessResponse> {
   const response = await api
     .delete("/users/logout")
-    .json<GenericSuccessResponse>();
+    .json<EmptySuccessResponse>();
 
   return response;
 }

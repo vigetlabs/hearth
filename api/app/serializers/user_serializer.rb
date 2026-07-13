@@ -3,5 +3,6 @@ class UserSerializer
   attributes :id,
              :email,
              :first_name,
-             :last_name
+             :last_name,
+             :office_id
 end

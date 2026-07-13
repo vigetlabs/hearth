@@ -1,5 +1,5 @@
 class Api::V1::Users::GoogleOauthController < ApplicationController
-  include FrontendPathHelper
+  include Helpers::FrontendPathHelper
 
   def redirect
     redirect_to "/api/v1/users/auth/google_oauth2", allow_other_host: true

@@ -15,6 +15,10 @@ Devise.setup do |config|
     Rails.application.credentials.dig(:google, :google_client_secret),
     scope: "email, profile"
 
+  config.warden do |manager|
+    manager.failure_app = ApiAuthenticationFailure
+  end
+
   config.jwt do |jwt|
     jwt.secret = Rails.application.credentials.dig(:jwt, :devise_jwt_secret_key)
     # jwt.dispatch_requests = [

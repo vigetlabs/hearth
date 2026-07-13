@@ -5,5 +5,6 @@ FactoryBot.define do
     last_name { "Williams" }
     password { "password" }
     password_confirmation { password }
+    association :office
   end
 end
