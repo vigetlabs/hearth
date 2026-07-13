@@ -11,14 +11,14 @@ offices = [
     city: "Boulder",
     state: "CO",
     timezone: "America/Denver",
-    emoji: "🏔️"
+    emoji: "⛰️"
   },
   {
     name: "Falls Church",
     city: "Falls Church",
     state: "VA",
     timezone: "America/New_York",
-    emoji: "🌳"
+    emoji: "🌸"
   },
   {
     name: "Chattanooga",
