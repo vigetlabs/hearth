@@ -37,6 +37,8 @@ Rails.application.routes.draw do
           get :default, action: :default
         end
       end
+
+      resources :offices, only: [ :index ], module: :offices
     end
   end
 end
