@@ -4,6 +4,7 @@ import type {
   CreateUserRequest,
   UserResponse,
   LoginUserRequest,
+  PatchUserRequest,
 } from "@/types/api/users";
 
 import type { EmptySuccessResponse } from "@/types/api/generics";
@@ -71,6 +72,32 @@ export async function logoutUser(): Promise<EmptySuccessResponse> {
   const response = await api
     .delete("/users/logout")
     .json<EmptySuccessResponse>();
+
+  return response;
+}
+
+export function createUpdateUserObjectPayload(
+  first_name?: string,
+  last_name?: string,
+  office_id?: number,
+): PatchUserRequest {
+  return {
+    user: {
+      first_name,
+      last_name,
+      office_id,
+    },
+  };
+}
+
+export async function updateUser(
+  payload: PatchUserRequest,
+): Promise<UserResponse> {
+  const response = await api
+    .patch("/users/me", {
+      json: payload,
+    })
+    .json<UserResponse>();
 
   return response;
 }
