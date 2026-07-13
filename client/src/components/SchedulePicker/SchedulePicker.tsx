@@ -1,15 +1,21 @@
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 
+import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
 import { WEEKDAYS } from "@/types/schedule/schedule";
 import type { Office } from "@/types/office/office";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateDefaultScheduleMutation } from "@/util/api/mutations/schedules/createDefaultScheduleMutation";
+import type { CreateScheduleRequest } from "@/types/api/schedules";
+import { createDefaultScheduleObjectPayload } from "@/util/api/functions/schedules";
+import { generateCurrentUserDefaultScheduleKey } from "@/util/api/keys/scheduleKeys";
 
 export default function SchedulePicker() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const createDefaultScheduleMutation = useCreateDefaultScheduleMutation();
 
-  // The office is handed over from the office picker via router state. If a user
-  // lands here directly (e.g. a refresh), send them back to pick one first.
   const office = (location.state as { office?: Office } | null)?.office;
 
   const [selectedDayIds, setSelectedDayIds] = useState<Set<string>>(new Set());
@@ -18,18 +24,18 @@ export default function SchedulePicker() {
     return <Navigate to="/users/office" replace />;
   }
 
-  // Remote users are routed straight to the calendar and never land here, so a
-  // day must be picked before the schedule can be saved.
   const canSave = selectedDayIds.size > 0;
 
   function toggleDay(dayId: string) {
     setSelectedDayIds((previous) => {
       const next = new Set(previous);
+
       if (next.has(dayId)) {
         next.delete(dayId);
       } else {
         next.add(dayId);
       }
+
       return next;
     });
   }
@@ -37,44 +43,45 @@ export default function SchedulePicker() {
   function handleSave() {
     if (!canSave) return;
 
-    // @TODO: Persist the selected default schedule to the API, then advance the
-    // signup flow.
+    const payload: CreateScheduleRequest =
+      createDefaultScheduleObjectPayload(selectedDayIds);
+    console.log(payload);
+
+    createDefaultScheduleMutation.mutate(payload, {
+      onSuccess: (schedule) => {
+        queryClient.setQueryData(
+          generateCurrentUserDefaultScheduleKey(),
+          schedule,
+        );
+      },
+    });
+
+    // @TODO: Persist the selected default schedule to the API.
     navigate("/users/login");
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center px-6 pt-32">
       <h1 className="text-center text-4xl font-bold text-fg-primary">
-        What days are you usually in the {office.name} office?
+        What days are you usually in the
+        <span className="capitalize"> {office.name} </span>
+        office?
       </h1>
+
       <p className="mt-4 text-center text-lg text-neutral-500">
         This becomes your default each week, and you can always adjust it for a
         specific week later.
       </p>
 
       <div className="mt-14 flex flex-wrap justify-center gap-4">
-        {WEEKDAYS.map((day) => {
-          const isSelected = selectedDayIds.has(day.id);
-
-          return (
-            <button
-              key={day.id}
-              type="button"
-              onClick={() => toggleDay(day.id)}
-              aria-pressed={isSelected}
-              className={`flex h-24 w-28 flex-col items-center justify-center gap-1 rounded-2xl border text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none ${
-                isSelected
-                  ? "border-neutral-500 bg-neutral-100"
-                  : "border-neutral-200"
-              }`}
-            >
-              <span className="text-lg font-bold">{day.label}</span>
-              <span className="text-sm text-neutral-500">
-                {isSelected ? "✓ in office" : "+ add"}
-              </span>
-            </button>
-          );
-        })}
+        {WEEKDAYS.map((day) => (
+          <ScheduleDayItem
+            key={day.id}
+            day={day}
+            isSelected={selectedDayIds.has(day.id)}
+            onToggle={toggleDay}
+          />
+        ))}
       </div>
 
       <button
@@ -91,7 +98,8 @@ export default function SchedulePicker() {
         onClick={() => navigate(-1)}
         className="mt-6 flex items-center gap-1 font-semibold text-neutral-500 hover:text-fg-primary"
       >
-        <span aria-hidden="true">‹</span> Go back
+        <span aria-hidden="true">‹</span>
+        Go back
       </button>
     </div>
   );
