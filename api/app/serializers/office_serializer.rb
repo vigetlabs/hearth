@@ -1,4 +1,4 @@
-class ScheduleSerializer
+class OfficeSerializer
   include JSONAPI::Serializer
   attributes :id,
              :name,
