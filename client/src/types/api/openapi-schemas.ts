@@ -4,6 +4,154 @@
  */
 
 export interface paths {
+  "/api/v1/offices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Fetches all offices */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description offices fetched successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["offices_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/schedules/default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Fetches the current user's default schedule */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description fetched default schedule successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["schedule_response"];
+          };
+        };
+        /** @description authentication required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/schedules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Creates a schedule */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["create_schedule_request"];
+        };
+      };
+      responses: {
+        /** @description schedule created successfully */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["schedule_response"];
+          };
+        };
+        /** @description missing schedule parameter */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+        /** @description authentication required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+        /** @description invalid schedule parameters */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["validation_error_response"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/users/auth/google": {
     parameters: {
       query?: never;
@@ -136,6 +284,15 @@ export interface paths {
           };
           content: {
             "application/json": components["schemas"]["user_response"];
+          };
+        };
+        /** @description missing user parameter */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
           };
         };
         /** @description invalid user params */
@@ -390,8 +547,6 @@ export interface components {
         /** @enum {string} */
         code:
           "missing_parameter" | "malformed_json" | "invalid_parameter_format";
-        /** @example The user parameter is required. */
-        message: string;
         /** @example user */
         field?: string | null;
       };
@@ -489,12 +644,14 @@ export interface components {
     office: {
       id: number;
       name: string;
-      /** @example America/Denver */
-      timezone: string;
-      /** @example Colorado */
-      state: string;
       /** @example Boulder */
       city: string;
+      /** @example CO */
+      state: string;
+      /** @example America/Denver */
+      timezone: string;
+      /** @example 🏔️ */
+      emoji: string;
     };
     /** @description Full response body for endpoints that return a single office. */
     office_response: {
@@ -507,12 +664,14 @@ export interface components {
         office: {
           id: number;
           name: string;
-          /** @example America/Denver */
-          timezone: string;
-          /** @example Colorado */
-          state: string;
           /** @example Boulder */
           city: string;
+          /** @example CO */
+          state: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example 🏔️ */
+          emoji: string;
         };
       };
     };
@@ -523,7 +682,18 @@ export interface components {
         message: string;
       };
       data: {
-        offices: unknown[];
+        offices: {
+          id: number;
+          name: string;
+          /** @example Boulder */
+          city: string;
+          /** @example CO */
+          state: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example 🏔️ */
+          emoji: string;
+        }[];
       };
     };
     /** @description Public visit data returned by the API. */

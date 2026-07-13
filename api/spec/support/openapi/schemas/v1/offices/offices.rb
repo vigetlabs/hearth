@@ -1,31 +1,41 @@
 module OpenApi::Schemas::V1::Offices
   # OFFICE_OBJECT: Public office object returned by the API
   #
-  # This is not a full response body. It only describes the public facing office resource itself
+  # This is not a full response body. It only describes the
+  # public-facing office resource itself.
   OFFICE_OBJECT = {
     type: :object,
     description: "Public office data returned by the API.",
     required: %w[
       id
       name
-      timezone
-      state
       city
+      state
+      timezone
+      emoji
     ],
     properties: {
-      id: { type: :integer },
-      name: { type: :string },
-      timezone: {
-        type: :string,
-        example: "America/Denver"
+      id: {
+        type: :integer
       },
-      state: {
-        type: :string,
-        example: "Colorado"
+      name: {
+        type: :string
       },
       city: {
         type: :string,
         example: "Boulder"
+      },
+      state: {
+        type: :string,
+        example: "CO"
+      },
+      timezone: {
+        type: :string,
+        example: "America/Denver"
+      },
+      emoji: {
+        type: :string,
+        example: "🏔️"
       }
     }
   }
@@ -45,7 +55,7 @@ module OpenApi::Schemas::V1::Offices
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       data: {
         type: :object,
-        required: %(office),
+        required: %w[office],
         properties: {
           office: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT
         }
@@ -65,11 +75,11 @@ module OpenApi::Schemas::V1::Offices
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       data: {
         type: :object,
-        required: %(offices),
+        required: %w[offices],
         properties: {
           offices: {
             type: :array,
-            offices: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT
+            items: OpenApi::Schemas::V1::Offices::OFFICE_OBJECT
           }
         }
       }

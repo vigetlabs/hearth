@@ -4,6 +4,18 @@ info:
   title: Hearth API
   version: v1
 paths:
+  "/api/v1/offices":
+    get:
+      summary: Fetches all offices
+      tags:
+      - Offices
+      responses:
+        '200':
+          description: offices fetched successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/offices_response"
   "/api/v1/schedules/default":
     get:
       summary: Fetches the current user's default schedule
@@ -606,23 +618,27 @@ components:
       required:
       - id
       - name
-      - timezone
-      - state
       - city
+      - state
+      - timezone
+      - emoji
       properties:
         id:
           type: integer
         name:
           type: string
-        timezone:
-          type: string
-          example: America/Denver
-        state:
-          type: string
-          example: Colorado
         city:
           type: string
           example: Boulder
+        state:
+          type: string
+          example: CO
+        timezone:
+          type: string
+          example: America/Denver
+        emoji:
+          type: string
+          example: "\U0001F3D4️"
     office_response:
       type: object
       description: Full response body for endpoints that return a single office.
@@ -640,7 +656,8 @@ components:
               type: string
         data:
           type: object
-          required: office
+          required:
+          - office
           properties:
             office:
               type: object
@@ -648,23 +665,27 @@ components:
               required:
               - id
               - name
-              - timezone
-              - state
               - city
+              - state
+              - timezone
+              - emoji
               properties:
                 id:
                   type: integer
                 name:
                   type: string
-                timezone:
-                  type: string
-                  example: America/Denver
-                state:
-                  type: string
-                  example: Colorado
                 city:
                   type: string
                   example: Boulder
+                state:
+                  type: string
+                  example: CO
+                timezone:
+                  type: string
+                  example: America/Denver
+                emoji:
+                  type: string
+                  example: "\U0001F3D4️"
     offices_response:
       type: object
       description: Full response body for endpoints that return a single office.
@@ -682,33 +703,38 @@ components:
               type: string
         data:
           type: object
-          required: offices
+          required:
+          - offices
           properties:
             offices:
               type: array
-              offices:
+              items:
                 type: object
                 description: Public office data returned by the API.
                 required:
                 - id
                 - name
-                - timezone
-                - state
                 - city
+                - state
+                - timezone
+                - emoji
                 properties:
                   id:
                     type: integer
                   name:
                     type: string
-                  timezone:
-                    type: string
-                    example: America/Denver
-                  state:
-                    type: string
-                    example: Colorado
                   city:
                     type: string
                     example: Boulder
+                  state:
+                    type: string
+                    example: CO
+                  timezone:
+                    type: string
+                    example: America/Denver
+                  emoji:
+                    type: string
+                    example: "\U0001F3D4️"
     visit:
       type: object
       description: Public visit data returned by the API.

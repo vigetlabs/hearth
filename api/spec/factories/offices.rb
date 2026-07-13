@@ -4,5 +4,6 @@ FactoryBot.define do
     timezone { "America/Denver" }
     state { "Colorado" }
     city { "Boulder" }
+    emoji { "🏛️" }
   end
 end
