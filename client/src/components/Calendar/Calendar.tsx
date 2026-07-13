@@ -1,28 +1,34 @@
 import { useState } from "react";
 
 import { DayCell } from "@/components/Calendar/DayCell";
+import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
+import LockIcon from "@/components/icons/LockIcon";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
-import type { EventsByDate } from "@/types/calendar/calendar";
+import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
 import { useOffice } from "@/util/office/useOffice";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
-import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
+import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
 
-const WEEKDAYS_PER_WEEK = 5; // Mon–Fri
+const WEEKDAYS_PER_WEEK = 5;
 
-// A week can straddle two months, so we title it by the month containing its
-// Thursday — the same convention ISO weeks use.
-const THURSDAY_INDEX = 3;
-const monthYearFormat = new Intl.DateTimeFormat(undefined, {
-  month: "long",
-  year: "numeric",
+const EMPTY_DAY: PersonStatus[] = [];
+
+const confirmedCountOf = (day: PersonStatus[]) =>
+  day.filter((person) => person.status === "confirmed").length;
+
+// "Jun 29" / "Jul 3" — combined with the year into a "Jun 29 - Jul 3, 2026"
+// range label for the week navigator.
+const rangeFormat = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
 });
 
 interface CalendarProps {
-  events: EventsByDate;
+  schedule: WeekSchedule;
 }
 
-export function Calendar({ events }: CalendarProps) {
+export function Calendar({ schedule }: CalendarProps) {
   const { office } = useOffice();
   const { user } = useAuth();
   const myName = userDisplayName(user);
@@ -31,112 +37,220 @@ export function Calendar({ events }: CalendarProps) {
   // on a partial week.
   const [focus, setFocus] = useState(() => startOfWeek(new Date()));
   // Local attendance so toggling yourself in/out of a day updates the grid.
-  const [attendance, setAttendance] = useState<EventsByDate>(events);
+  const [attendance, setAttendance] = useState<WeekSchedule>(schedule);
+  // Weeks the user has confirmed, keyed by their Monday. A week starts in the
+  // planning state and moves to confirmed via the "Confirm Week" button.
+  const [confirmedWeeks, setConfirmedWeeks] = useState<Set<string>>(new Set());
 
   const days: Date[] = [];
   for (let day = 0; day < WEEKDAYS_PER_WEEK; day++) {
     days.push(addDays(focus, day));
   }
 
+  const weekKey = toDateKey(focus);
+  const isWeekConfirmed = confirmedWeeks.has(weekKey);
+  // Whether the focused week is the one containing today, so we can hide the
+  // "Jump to today" shortcut when it would be a no-op.
+  const isCurrentWeek = weekKey === toDateKey(startOfWeek(new Date()));
+
   const goPrev = () => setFocus((f) => addDays(f, -7));
   const goNext = () => setFocus((f) => addDays(f, 7));
   const goToday = () => setFocus(startOfWeek(new Date()));
 
+  const confirmWeek = () =>
+    setConfirmedWeeks((prev) => new Set(prev).add(weekKey));
+
+  const unlockWeek = () =>
+    setConfirmedWeeks((prev) => {
+      const next = new Set(prev);
+      next.delete(weekKey);
+      return next;
+    });
+
   function toggleMine(key: string) {
     if (!myName) return;
     setAttendance((prev) => {
-      const list = prev[key] ?? [];
-      const nextList = list.includes(myName)
-        ? list.filter((name) => name !== myName)
-        : [...list, myName];
-      return { ...prev, [key]: nextList };
+      const day = prev[key] ?? EMPTY_DAY;
+      const mine = day.find((person) => person.name === myName);
+      const nextDay: PersonStatus[] = mine
+        ? day.map((person) =>
+            person.name === myName
+              ? {
+                  ...person,
+                  status: person.status === "confirmed" ? "no" : "confirmed",
+                }
+              : person,
+          )
+        : [{ name: myName, status: "confirmed" }, ...day];
+      return { ...prev, [key]: nextDay };
     });
   }
 
   const gridColumns = {
     gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
-    // A single `1fr` row lets the day columns stretch to fill the card, which is
-    // now sized to 90% of the space below the header.
     gridTemplateRows: "1fr",
   };
 
-  const monthTitle = monthYearFormat.format(days[THURSDAY_INDEX]);
+  const rangeLabel = `${rangeFormat.format(days[0])} - ${rangeFormat.format(
+    days[WEEKDAYS_PER_WEEK - 1],
+  )}, ${days[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
-  // Remote has no in-office schedule, so the weekly grid doesn't apply — hide it
-  // and the week navigation, leaving only the office title and switcher.
+  // The week's busiest confirmed day determines the hot spot.
+  const counts = days.map((day) =>
+    confirmedCountOf(attendance[toDateKey(day)] ?? EMPTY_DAY),
+  );
+  const maxCount = Math.max(0, ...counts);
+
+  // The hot spot is the day with the most confirmed people. Ties break by the
+  // most still-planning ("maybe") people; if days remain tied, all of them show.
+  const planningCounts = days.map(
+    (day) =>
+      (attendance[toDateKey(day)] ?? EMPTY_DAY).filter(
+        (person) => person.status === "maybe",
+      ).length,
+  );
+  const hotSpotDays = new Set<number>();
+  if (maxCount > 0) {
+    const topConfirmed = counts
+      .map((_, i) => i)
+      .filter((i) => counts[i] === maxCount);
+    const maxPlanning = Math.max(...topConfirmed.map((i) => planningCounts[i]));
+    topConfirmed
+      .filter((i) => planningCounts[i] === maxPlanning)
+      .forEach((i) => hotSpotDays.add(i));
+  }
+
+  const today = new Date();
+  const todayIndex = days.findIndex((day) => isSameDay(day, today));
+
   const isRemote = office.id === "remote";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between pb-5">
-        <div className="flex items-center gap-3">
-          <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
-            {office.name}
-            <span aria-hidden="true">{office.emoji}</span>
-          </h2>
+      <div className="flex items-center gap-3 pb-5">
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
+          {office.name}
+          <span aria-hidden="true">{office.emoji}</span>
+        </h2>
 
-          <OfficeSwitcher />
-        </div>
-
-        {!isRemote && (
-          <div className="flex items-center gap-4">
-            <button onClick={goToday} className={navButton}>
-              jump to today
-            </button>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goPrev}
-                className={arrowButton}
-                aria-label="Previous week"
-              >
-                ‹
-              </button>
-              <span className="min-w-[8.5rem] text-center text-base font-bold text-gray-900">
-                {monthTitle}
-              </span>
-              <button
-                onClick={goNext}
-                className={arrowButton}
-                aria-label="Next week"
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        )}
+        <OfficeSwitcher />
       </div>
+
+      {!isRemote && (
+        <div className="flex items-center gap-4 pb-5">
+          <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+            <button
+              onClick={goPrev}
+              className={arrowButton}
+              aria-label="Previous week"
+            >
+              <ChevronDownIcon className="h-3.5 w-3.5 rotate-90" />
+            </button>
+            <span className="px-2 text-sm font-bold text-gray-900">
+              {rangeLabel}
+            </span>
+            <button
+              onClick={goNext}
+              className={arrowButton}
+              aria-label="Next week"
+            >
+              <ChevronDownIcon className="h-3.5 w-3.5 -rotate-90" />
+            </button>
+          </div>
+
+          {!isCurrentWeek && (
+            <button onClick={goToday} className={todayButton}>
+              Jump to today
+            </button>
+          )}
+
+          <div className="h-6 w-px bg-gray-300" />
+
+          <p className="text-sm text-gray-500">
+            {isWeekConfirmed ? (
+              <span className="font-bold text-gray-900">Confirmed.</span>
+            ) : (
+              <>
+                <span className="font-bold text-gray-900">Planning.</span> Yet
+                to be confirmed
+              </>
+            )}
+          </p>
+
+          {isWeekConfirmed ? (
+            <button onClick={unlockWeek} className={unlockButton}>
+              <LockIcon className="h-3.5 w-3.5" />
+              Unlock schedule
+            </button>
+          ) : (
+            <button onClick={confirmWeek} className={confirmButton}>
+              Confirm Week
+            </button>
+          )}
+        </div>
+      )}
 
       {isRemote ? (
         <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-gray-200 px-6 text-center text-sm text-gray-500">
           Remote has no weekly office schedule.
         </div>
       ) : (
-        <div
-          className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
-          style={gridColumns}
-        >
-          {days.map((day) => {
-            const key = toDateKey(day);
-            const names = attendance[key] ?? [];
-            return (
-              <DayCell
-                key={key}
-                date={day}
-                names={names}
-                myName={myName}
-                isMine={names.includes(myName)}
-                onToggleMine={() => toggleMine(key)}
-              />
-            );
-          })}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {todayIndex !== -1 && (
+            <span
+              className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-900 px-2.5 py-0.5 text-xs font-semibold text-white"
+              style={{
+                left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
+              }}
+            >
+              Today
+            </span>
+          )}
+
+          <div
+            className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
+            style={gridColumns}
+          >
+            {days.map((day, i) => {
+              const key = toDateKey(day);
+              const dayData = attendance[key] ?? EMPTY_DAY;
+              const count = counts[i];
+              return (
+                <DayCell
+                  key={key}
+                  date={day}
+                  people={dayData}
+                  myName={myName}
+                  isMine={dayData.some(
+                    (person) =>
+                      person.name === myName && person.status === "confirmed",
+                  )}
+                  confirmedCount={count}
+                  total={dayData.length}
+                  fill={dayData.length > 0 ? count / dayData.length : 0}
+                  isHotSpot={hotSpotDays.has(i)}
+                  locked={isWeekConfirmed}
+                  onToggleMine={() => toggleMine(key)}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-const navButton =
-  "rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100";
-
 const arrowButton =
-  "flex h-7 w-7 items-center justify-center rounded-md text-lg text-gray-600 hover:bg-gray-100";
+  "flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50";
+
+const pillButton =
+  "rounded-full border border-gray-900 bg-white px-5 py-2 text-sm text-gray-900 hover:bg-gray-50";
+
+const todayButton = `${pillButton} font-semibold`;
+
+const confirmButton = `ml-auto ${pillButton} font-bold`;
+
+// Once confirmed, the schedule is locked; this reverts the week to planning.
+const unlockButton =
+  "ml-auto flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-sm font-bold text-white hover:bg-gray-800";
