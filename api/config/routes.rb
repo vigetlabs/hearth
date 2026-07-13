@@ -32,7 +32,11 @@ Rails.application.routes.draw do
         get "/failure", to: "users/google_oauth#failure"
       end
 
-      resources :schedules, only: [ :create ], module: :schedules
+      resources :schedules, only: [ :create ], module: :schedules do
+        collection do
+          get :default, action: :default
+        end
+      end
     end
   end
 end

@@ -1,6 +1,34 @@
 require "swagger_helper"
 
 RSpec.describe "Api::V1::Schedules::Schedules", type: :request do
+  path "/api/v1/schedules/default" do
+    get "Fetches the current user's default schedule" do
+      tags "Schedules"
+      produces "application/json"
+      security [ cookie_auth: [] ]
+
+      response "200", "fetched default schedule successfully" do
+        schema "$ref" => "#/components/schemas/schedule_response"
+
+        let!(:user) { create(:user) }
+        let!(:def_schedule) { create(:schedule, user: user) }
+
+        before do
+          sign_in user
+        end
+
+        run_test!
+      end
+
+      response "401", "authentication required" do
+        schema "$ref" =>
+          "#/components/schemas/authentication_error_response"
+
+          run_test!
+      end
+    end
+  end
+
   path "/api/v1/schedules" do
     post "Creates a schedule" do
       tags "Schedules"

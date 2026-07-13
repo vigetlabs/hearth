@@ -4,6 +4,26 @@ info:
   title: Hearth API
   version: v1
 paths:
+  "/api/v1/schedules/default":
+    get:
+      summary: Fetches the current user's default schedule
+      tags:
+      - Schedules
+      security:
+      - cookie_auth: []
+      responses:
+        '200':
+          description: fetched default schedule successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/schedule_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
   "/api/v1/schedules":
     post:
       summary: Creates a schedule
