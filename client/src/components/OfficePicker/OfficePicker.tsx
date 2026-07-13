@@ -1,36 +1,79 @@
 import { useNavigate } from "react-router";
 import { useState, type CSSProperties } from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { RadioGroup } from "radix-ui";
 
-import { OFFICES } from "@/types/office/office";
+import OfficeItem from "@/components/OfficeItem/OfficeItem";
+import type { Office } from "@/types/api/offices";
+import type { PatchUserRequest } from "@/types/api/users";
+import { createUpdateUserObjectPayload } from "@/util/api/functions/users";
+import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
+import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
+import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 
 import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
 
 import "./OfficePicker.css";
 
-// The dedicated "fully remote" button below the grid stands in for the remote
-// option, so the cards only cover the physical offices.
-const OFFICE_CARDS = OFFICES.filter((office) => office.id !== "remote");
-
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");
+
   // The image showing before the current selection, kept mounted so it can play
   // its exit animation. `null` means nothing has been picked yet (initial mount,
   // no transition to animate).
   const [previousOfficeId, setPreviousOfficeId] = useState<string | null>(null);
+
   // Which way the pair slides: "left" when the new card sits left of the old.
   const [direction, setDirection] = useState<"left" | "right">("right");
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const officesQuery = useOfficesQuery();
+  const updateUserMutation = useUpdateUserMutation();
+
+  const offices = officesQuery.data ?? [];
+
+  // The dedicated "fully remote" button below the grid stands in for the remote
+  // option, so the cards only cover the physical offices.
+  const officeCards = offices.filter(
+    (office) => office.name.toLowerCase() !== "remote",
+  );
+
+  function heroIdForOffice(office: Office): string {
+    return office.name.toLowerCase().trim().replaceAll(" ", "-");
+  }
+
+  function findOffice(officeId: string | null): Office | undefined {
+    if (!officeId) return undefined;
+
+    return offices.find((office) => String(office.id) === officeId);
+  }
+
+  function heroIdForOfficeId(officeId: string | null): string {
+    const office = findOffice(officeId);
+
+    return office ? heroIdForOffice(office) : DEFAULT_HERO_OFFICE_ID;
+  }
 
   function handleSelectOffice(newOfficeId: string) {
-    // Compare grid positions (OFFICE_CARDS order == left-to-right order) to pick
+    // Compare grid positions (officeCards order == left-to-right order) to pick
     // the slide direction. Fall back to the default hero's slot when nothing was
     // selected yet, since that's the image currently on screen.
-    const oldOfficeId = selectedOfficeId || DEFAULT_HERO_OFFICE_ID;
-    const oldIndex = OFFICE_CARDS.findIndex((o) => o.id === oldOfficeId);
-    const newIndex = OFFICE_CARDS.findIndex((o) => o.id === newOfficeId);
+    const defaultOfficeIndex = officeCards.findIndex(
+      (office) => heroIdForOffice(office) === DEFAULT_HERO_OFFICE_ID,
+    );
+
+    const oldIndex = selectedOfficeId
+      ? officeCards.findIndex(
+          (office) => String(office.id) === selectedOfficeId,
+        )
+      : defaultOfficeIndex;
+
+    const newIndex = officeCards.findIndex(
+      (office) => String(office.id) === newOfficeId,
+    );
 
     setDirection(newIndex < oldIndex ? "left" : "right");
     setPreviousOfficeId(selectedOfficeId);
@@ -40,28 +83,83 @@ export default function OfficePicker() {
   function handleContinue() {
     if (!selectedOfficeId) return;
 
-    // @TODO: Persist the selected default office to the API.
-    const selectedOffice = OFFICES.find(
-      (office) => office.id === selectedOfficeId,
+    const selectedOffice = findOffice(selectedOfficeId);
+
+    if (!selectedOffice) return;
+
+    const payload: PatchUserRequest = createUpdateUserObjectPayload(
+      undefined,
+      undefined,
+      selectedOffice.id,
     );
 
-    // Advance to the schedule screen, passing the office along so it can tailor
-    // its heading.
-    navigate("/users/schedule", { state: { office: selectedOffice } });
+    updateUserMutation.mutate(payload, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: generateCurrentUserKey(),
+        });
+
+        navigate("/users/schedule", {
+          state: { office: selectedOffice },
+        });
+      },
+    });
   }
 
   function handleRemote() {
-    // Remote users have no in-office days to pick, so skip the schedule screen
-    // and drop them straight into the calendar.
-    navigate("/calendar");
+    // Remote users have no in-office days to pick, so persist the remote office,
+    // skip the schedule screen, and drop them straight into the calendar.
+    const remoteOffice = offices.find(
+      (office) => office.name.toLowerCase() === "remote",
+    );
+
+    if (!remoteOffice) return;
+
+    const payload: PatchUserRequest = createUpdateUserObjectPayload(
+      undefined,
+      undefined,
+      remoteOffice.id,
+    );
+
+    updateUserMutation.mutate(payload, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: generateCurrentUserKey(),
+        });
+
+        navigate("/calendar");
+      },
+    });
   }
+
+  const selectedHeroOfficeId = heroIdForOfficeId(selectedOfficeId);
+  const previousHeroOfficeId = heroIdForOfficeId(previousOfficeId);
 
   // Only play the crossfade when the hero image actually changes. Picking Falls
   // Church from the initial (unselected) state is a real selection change but
   // resolves to the same default hero, so it should swap silently.
   const shouldAnimate =
     previousOfficeId !== null &&
-    heroImageFor(previousOfficeId) !== heroImageFor(selectedOfficeId);
+    heroImageFor(previousHeroOfficeId) !==
+      heroImageFor(selectedHeroOfficeId);
+
+  if (officesQuery.isPending) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
+        <p className="text-lg text-neutral-500">Loading offices...</p>
+      </div>
+    );
+  }
+
+  if (officesQuery.isError) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
+        <p className="text-lg text-neutral-500">
+          Unable to load offices. Please try again.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -90,22 +188,14 @@ export default function OfficePicker() {
               <p className="text-sm font-semibold text-fg-primary">
                 What's your primary office?
               </p>
+
               <p className="mt-1 text-sm text-neutral-500">
                 Pick the one you visit the most, even if you're mostly remote.
               </p>
 
               <div className="mt-5 grid grid-cols-4 gap-3">
-                {OFFICE_CARDS.map((office) => (
-                  <RadioGroup.Item
-                    key={office.id}
-                    value={office.id}
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 p-3 text-center text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none data-[state=checked]:border-neutral-500 data-[state=checked]:bg-neutral-100"
-                  >
-                    <span className="text-2xl" aria-hidden="true">
-                      {office.emoji}
-                    </span>
-                    <span className="text-xs font-medium">{office.name}</span>
-                  </RadioGroup.Item>
+                {officeCards.map((office) => (
+                  <OfficeItem key={office.id} office={office} />
                 ))}
               </div>
             </RadioGroup.Root>
@@ -113,7 +203,9 @@ export default function OfficePicker() {
             <button
               type="button"
               onClick={handleContinue}
-              disabled={!selectedOfficeId}
+              disabled={
+                !selectedOfficeId || updateUserMutation.isPending
+              }
               className="mt-8 w-full rounded-full bg-neutral-500 py-3 text-sm font-semibold text-white transition-colors enabled:hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Continue
@@ -122,7 +214,8 @@ export default function OfficePicker() {
             <button
               type="button"
               onClick={handleRemote}
-              className="mt-3 w-full rounded-full border border-neutral-300 py-3 text-sm font-semibold text-fg-primary transition-colors hover:border-neutral-400 hover:bg-neutral-50"
+              disabled={updateUserMutation.isPending}
+              className="mt-3 w-full rounded-full border border-neutral-300 py-3 text-sm font-semibold text-fg-primary transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               No home office. I'm fully remote.
             </button>
@@ -148,7 +241,9 @@ export default function OfficePicker() {
             className="office-hero office-hero--exit absolute inset-y-0 -inset-x-10 bg-cover bg-center"
             style={
               {
-                backgroundImage: `url(${heroImageFor(previousOfficeId)})`,
+                backgroundImage: `url(${heroImageFor(
+                  previousHeroOfficeId,
+                )})`,
                 "--slide-sign": direction === "left" ? -1 : 1,
               } as CSSProperties
             }
@@ -167,7 +262,9 @@ export default function OfficePicker() {
           }`}
           style={
             {
-              backgroundImage: `url(${heroImageFor(selectedOfficeId)})`,
+              backgroundImage: `url(${heroImageFor(
+                selectedHeroOfficeId,
+              )})`,
               "--slide-sign": direction === "left" ? -1 : 1,
             } as CSSProperties
           }
@@ -181,8 +278,12 @@ export default function OfficePicker() {
         display:none images are still loaded by the browser.
       */}
       <div className="hidden" aria-hidden="true">
-        {OFFICE_CARDS.map((office) => (
-          <img key={office.id} src={heroImageFor(office.id)} alt="" />
+        {officeCards.map((office) => (
+          <img
+            key={office.id}
+            src={heroImageFor(heroIdForOffice(office))}
+            alt=""
+          />
         ))}
       </div>
     </div>

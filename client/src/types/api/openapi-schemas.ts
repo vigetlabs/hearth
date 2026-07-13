@@ -4,6 +4,42 @@
  */
 
 export interface paths {
+  "/api/v1/offices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Fetches all offices */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description offices fetched successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["offices_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/schedules/default": {
     parameters: {
       query?: never;
@@ -642,7 +678,16 @@ export interface components {
         message: string;
       };
       data: {
-        offices: unknown[];
+        offices: {
+          id: number;
+          name: string;
+          /** @example America/Denver */
+          timezone: string;
+          /** @example Colorado */
+          state: string;
+          /** @example Boulder */
+          city: string;
+        }[];
       };
     };
     /** @description Public visit data returned by the API. */
