@@ -4,6 +4,45 @@ info:
   title: Hearth API
   version: v1
 paths:
+  "/api/v1/schedules":
+    post:
+      summary: Creates a schedule
+      tags:
+      - Schedules
+      security:
+      - cookie_auth: []
+      parameters: []
+      responses:
+        '201':
+          description: schedule created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/schedule_response"
+        '422':
+          description: invalid schedule parameters
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/validation_error_response"
+        '400':
+          description: missing schedule parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/create_schedule_request"
+        required: true
   "/api/v1/users/auth/google":
     get:
       summary: Starts the Google SSO
@@ -41,6 +80,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/user_response"
+        '400':
+          description: missing user parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
         '422':
           description: invalid user params
           content:
@@ -301,7 +346,6 @@ components:
           required:
           - type
           - code
-          - message
           properties:
             type:
               type: string
@@ -313,9 +357,6 @@ components:
               - missing_parameter
               - malformed_json
               - invalid_parameter_format
-            message:
-              type: string
-              example: The user parameter is required.
             field:
               type: string
               nullable: true
