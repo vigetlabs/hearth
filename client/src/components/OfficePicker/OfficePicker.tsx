@@ -55,6 +55,7 @@ export default function OfficePicker() {
     });
   }
 
+  //@TODO: Make this more effecitive / concise
   if (officesQuery.isPending) {
     return (
       <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
