@@ -4,6 +4,8 @@ import { useState } from "react";
 import { WEEKDAYS } from "@/types/schedule/schedule";
 import type { Office } from "@/types/office/office";
 
+import { heroImageFor } from "@/components/OfficePicker/heroImage";
+
 export default function SchedulePicker() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -18,10 +20,6 @@ export default function SchedulePicker() {
     return <Navigate to="/users/office" replace />;
   }
 
-  // Remote users are routed straight to the calendar and never land here, so a
-  // day must be picked before the schedule can be saved.
-  const canSave = selectedDayIds.size > 0;
-
   function toggleDay(dayId: string) {
     setSelectedDayIds((previous) => {
       const next = new Set(previous);
@@ -35,64 +33,87 @@ export default function SchedulePicker() {
   }
 
   function handleSave() {
-    if (!canSave) return;
-
     // @TODO: Persist the selected default schedule to the API, then advance the
     // signup flow.
     navigate("/users/login");
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center px-6 pt-32">
-      <h1 className="text-center text-4xl font-bold text-fg-primary">
-        What days are you usually in the {office.name} office?
-      </h1>
-      <p className="mt-4 text-center text-lg text-neutral-500">
-        This becomes your default each week, and you can always adjust it for a
-        specific week later.
-      </p>
+    <div className="flex h-screen overflow-hidden">
+      <div className="flex w-full flex-col px-8 py-8 lg:w-[55%] lg:px-16">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 self-start text-sm font-semibold text-neutral-500 hover:text-fg-primary"
+        >
+          <span aria-hidden="true">‹</span> Go back
+        </button>
 
-      <div className="mt-14 flex flex-wrap justify-center gap-4">
-        {WEEKDAYS.map((day) => {
-          const isSelected = selectedDayIds.has(day.id);
+        <div className="flex flex-1 flex-col items-center justify-center py-12">
+          <div className="w-full max-w-md">
+            <h1 className="text-3xl leading-snug font-bold text-fg-primary">
+              What days are you usually in the{" "}
+              <span className="text-neutral-400">{office.name}</span> office?
+            </h1>
 
-          return (
+            <div className="mt-10">
+              <p className="text-sm font-semibold text-fg-primary">
+                Pick your usual in-office days
+              </p>
+              <p className="mt-1 text-sm text-neutral-500">
+                This becomes your default each week, but you can always adjust
+                it for a specific week later.
+              </p>
+
+              <div className="mt-5 grid grid-cols-5 gap-3">
+                {WEEKDAYS.map((day) => {
+                  const isSelected = selectedDayIds.has(day.id);
+
+                  return (
+                    <button
+                      key={day.id}
+                      type="button"
+                      onClick={() => toggleDay(day.id)}
+                      aria-pressed={isSelected}
+                      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border p-3 text-center text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none ${
+                        isSelected
+                          ? "border-neutral-500 bg-neutral-100"
+                          : "border-neutral-200"
+                      }`}
+                    >
+                      <span className="text-sm font-bold">{day.label}</span>
+                      <span
+                        className="text-xs text-neutral-500"
+                        aria-hidden="true"
+                      >
+                        {isSelected ? "✓" : "+"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <button
-              key={day.id}
               type="button"
-              onClick={() => toggleDay(day.id)}
-              aria-pressed={isSelected}
-              className={`flex h-24 w-28 flex-col items-center justify-center gap-1 rounded-2xl border text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none ${
-                isSelected
-                  ? "border-neutral-500 bg-neutral-100"
-                  : "border-neutral-200"
-              }`}
+              onClick={handleSave}
+              className="mt-8 w-full rounded-full bg-neutral-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-600"
             >
-              <span className="text-lg font-bold">{day.label}</span>
-              <span className="text-sm text-neutral-500">
-                {isSelected ? "✓ in office" : "+ add"}
-              </span>
+              {selectedDayIds.size > 0 ? "Save schedule" : "Skip for now"}
             </button>
-          );
-        })}
+          </div>
+        </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={!canSave}
-        className="mt-12 w-full rounded-full bg-neutral-500 py-4 text-lg font-semibold text-white transition-colors enabled:hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
+      <div
+        className="relative hidden overflow-hidden bg-neutral-200 lg:block lg:w-[45%]"
+        aria-hidden="true"
       >
-        Save schedule
-      </button>
-
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="mt-6 flex items-center gap-1 font-semibold text-neutral-500 hover:text-fg-primary"
-      >
-        <span aria-hidden="true">‹</span> Go back
-      </button>
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroImageFor(office.id)})` }}
+        />
+      </div>
     </div>
   );
 }
