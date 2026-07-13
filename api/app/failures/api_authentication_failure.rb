@@ -13,7 +13,7 @@ class ApiAuthenticationFailure < Devise::FailureApp
   private
 
   def authentication_error_code
-    attempted_login? ? "invalid_credentials" : "authentication_required"
+    attempted_login? ? ApiErrorCodes::Authentication::INVALID_CREDENTIALS : ApiErrorCodes::Authentication::AUTHENTICATION_REQUIRED
   end
 
   def attempted_login?

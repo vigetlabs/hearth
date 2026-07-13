@@ -66,7 +66,10 @@ RSpec.describe "Api::V1::Users::Registrations", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         json = JSON.parse(response.body)
 
-        expect(json["status"]["message"]).to eq("User could not be created")
+        expect(json["status"]["code"]).to eq(422)
+        expect(json["status"]["message"]).to eq("Validation failed.")
+        expect(json["error"]["type"]).to eq(ApiErrorTypes::VALIDATION)
+        expect(json["error"]["code"]).to eq(ApiErrorCodes::Validation::INVALID_ATTRIBUTES)
         error_details = json["error"]["details"]
         expect(error_details).to be_an(Array)
 

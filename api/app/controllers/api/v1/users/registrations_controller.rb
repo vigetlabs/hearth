@@ -2,29 +2,24 @@ class Api::V1::Users::RegistrationsController < Devise::RegistrationsController
   include ApiResponse
   include Helpers::SerializeUserHelper
   include Helpers::ValidationErrorFormatterHelper
+  include Handlers::RecordInvalidHandler
   include Handlers::BadRequestHandler
 
+  rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
 
   respond_to :json
 
   def create
-    new_user = User.new(sign_up_params)
+    new_user = User.create!(sign_up_params)
 
-    if new_user.save
-      user = serialize_user(new_user)
-      data = { user: user }
-      success_response(
-        data: data,
-        message: "User created successfully",
-        status: :created
-      )
-    else
-      render json: ApiErrorResponse.validation(
-        message: "User could not be created",
-        details: format_validation_errors(new_user)
-      ), status: :unprocessable_content
-    end
+    data = { user: serialize_user(new_user) }
+
+    success_response(
+      data: data,
+      message: "User created successfully",
+      status: :created
+    )
   end
 
   private
