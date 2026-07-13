@@ -40,7 +40,7 @@ export default function CalendarPage() {
   const weekStart = startOfWeek(new Date());
   const sampleSchedule: WeekSchedule = {
     [toDateKey(weekStart)]: day({
-      [me]: "confirmed",
+      [me]: "maybe",
       "Jackson F": "confirmed",
       "Abby S": "confirmed",
       "Laura L": "confirmed",
@@ -48,7 +48,7 @@ export default function CalendarPage() {
       "Riley K": "maybe",
     }),
     [toDateKey(addDays(weekStart, 1))]: day({
-      [me]: "confirmed",
+      [me]: "maybe",
       "Jackson F": "confirmed",
       "Blair C": "confirmed",
       "Laura L": "maybe",
@@ -61,7 +61,7 @@ export default function CalendarPage() {
       "Sam P": "maybe",
     }),
     [toDateKey(addDays(weekStart, 3))]: day({
-      [me]: "confirmed",
+      [me]: "maybe",
       "Natalie D": "confirmed",
       "Tommy B": "confirmed",
       "Laura L": "confirmed",
@@ -82,9 +82,6 @@ export default function CalendarPage() {
   };
 
   return (
-    // `flex-1` fills the space below the sticky header; `overflow-hidden` keeps
-    // the page pinned to the viewport so it can't scroll or overscroll. The
-    // `py-8` leaves breathing room above and below the calendar card.
     <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
         <Calendar schedule={sampleSchedule} />

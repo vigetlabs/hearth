@@ -4,7 +4,11 @@ import { DayCell } from "@/components/Calendar/DayCell";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import LockIcon from "@/components/icons/LockIcon";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
-import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
+import type {
+  AttendanceStatus,
+  PersonStatus,
+  WeekSchedule,
+} from "@/types/calendar/calendar";
 import { useOffice } from "@/util/office/useOffice";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
@@ -33,8 +37,6 @@ export function Calendar({ schedule }: CalendarProps) {
   const { user } = useAuth();
   const myName = userDisplayName(user);
 
-  // `focus` is always the Monday of the visible week, so navigation never lands
-  // on a partial week.
   const [focus, setFocus] = useState(() => startOfWeek(new Date()));
   // Local attendance so toggling yourself in/out of a day updates the grid.
   const [attendance, setAttendance] = useState<WeekSchedule>(schedule);
@@ -57,31 +59,59 @@ export function Calendar({ schedule }: CalendarProps) {
   const goNext = () => setFocus((f) => addDays(f, 7));
   const goToday = () => setFocus(startOfWeek(new Date()));
 
-  const confirmWeek = () =>
-    setConfirmedWeeks((prev) => new Set(prev).add(weekKey));
+  // Rewrite your own selected days for the focused week when it moves between
+  // planning and confirmed: a day you've picked reads as "maybe" (Planning)
+  // while planning and "confirmed" (In the office) once the week is locked in.
+  // Days you're out of ("no") are left alone.
+  function setMineForWeek(selectedStatus: AttendanceStatus) {
+    if (!myName) return;
+    setAttendance((prev) => {
+      const next = { ...prev };
+      for (const date of days) {
+        const key = toDateKey(date);
+        const day = prev[key];
+        if (!day) continue;
+        const mine = day.find((person) => person.name === myName);
+        if (!mine || mine.status === "no") continue;
+        next[key] = day.map((person) =>
+          person.name === myName
+            ? { ...person, status: selectedStatus }
+            : person,
+        );
+      }
+      return next;
+    });
+  }
 
-  const unlockWeek = () =>
+  const confirmWeek = () => {
+    setConfirmedWeeks((prev) => new Set(prev).add(weekKey));
+    setMineForWeek("confirmed");
+  };
+
+  const unlockWeek = () => {
     setConfirmedWeeks((prev) => {
       const next = new Set(prev);
       next.delete(weekKey);
       return next;
     });
+    setMineForWeek("maybe");
+  };
 
+  // While planning, picking a day marks you as "maybe" so you show up under
+  // Planning; unpicking drops you to "no" (Not going). Confirming the week
+  // later promotes your picks to "confirmed" (see confirmWeek).
   function toggleMine(key: string) {
     if (!myName) return;
     setAttendance((prev) => {
       const day = prev[key] ?? EMPTY_DAY;
       const mine = day.find((person) => person.name === myName);
+      const selected = mine ? mine.status !== "no" : false;
+      const nextStatus: AttendanceStatus = selected ? "no" : "maybe";
       const nextDay: PersonStatus[] = mine
         ? day.map((person) =>
-            person.name === myName
-              ? {
-                  ...person,
-                  status: person.status === "confirmed" ? "no" : "confirmed",
-                }
-              : person,
+            person.name === myName ? { ...person, status: nextStatus } : person,
           )
-        : [{ name: myName, status: "confirmed" }, ...day];
+        : [{ name: myName, status: nextStatus }, ...day];
       return { ...prev, [key]: nextDay };
     });
   }
@@ -95,7 +125,6 @@ export function Calendar({ schedule }: CalendarProps) {
     days[WEEKDAYS_PER_WEEK - 1],
   )}, ${days[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
-  // The week's busiest confirmed day determines the hot spot.
   const counts = days.map((day) =>
     confirmedCountOf(attendance[toDateKey(day)] ?? EMPTY_DAY),
   );
@@ -198,7 +227,11 @@ export function Calendar({ schedule }: CalendarProps) {
         <div className="relative flex min-h-0 flex-1 flex-col">
           {todayIndex !== -1 && (
             <span
-              className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-900 px-2.5 py-0.5 text-xs font-semibold text-white"
+              className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                isWeekConfirmed
+                  ? "border border-gray-900 bg-white text-gray-900"
+                  : "bg-gray-900 text-white"
+              }`}
               style={{
                 left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
               }}
@@ -223,7 +256,7 @@ export function Calendar({ schedule }: CalendarProps) {
                   myName={myName}
                   isMine={dayData.some(
                     (person) =>
-                      person.name === myName && person.status === "confirmed",
+                      person.name === myName && person.status !== "no",
                   )}
                   confirmedCount={count}
                   total={dayData.length}
