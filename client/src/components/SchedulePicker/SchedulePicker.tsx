@@ -1,14 +1,21 @@
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 
+import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
 import { WEEKDAYS } from "@/types/schedule/schedule";
 import type { Office } from "@/types/office/office";
-
 import { heroImageFor } from "@/components/OfficePicker/heroImage";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateDefaultScheduleMutation } from "@/util/api/mutations/schedules/createDefaultScheduleMutation";
+import type { CreateScheduleRequest } from "@/types/api/schedules";
+import { createDefaultScheduleObjectPayload } from "@/util/api/functions/schedules";
+import { generateCurrentUserDefaultScheduleKey } from "@/util/api/keys/scheduleKeys";
 
 export default function SchedulePicker() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const createDefaultScheduleMutation = useCreateDefaultScheduleMutation();
 
   // The office is handed over from the office picker via router state. If a user
   // lands here directly (e.g. a refresh), send them back to pick one first.
@@ -19,6 +26,8 @@ export default function SchedulePicker() {
   if (!office) {
     return <Navigate to="/users/office" replace />;
   }
+
+  const canSave = selectedDayIds.size > 0;
 
   function toggleDay(dayId: string) {
     setSelectedDayIds((previous) => {
@@ -33,8 +42,22 @@ export default function SchedulePicker() {
   }
 
   function handleSave() {
-    // @TODO: Persist the selected default schedule to the API, then advance the
-    // signup flow.
+    if (!canSave) return;
+
+    const payload: CreateScheduleRequest =
+      createDefaultScheduleObjectPayload(selectedDayIds);
+    console.log(payload);
+
+    createDefaultScheduleMutation.mutate(payload, {
+      onSuccess: (schedule) => {
+        queryClient.setQueryData(
+          generateCurrentUserDefaultScheduleKey(),
+          schedule,
+        );
+      },
+    });
+
+    // @TODO: Persist the selected default schedule to the API.
     navigate("/users/login");
   }
 
