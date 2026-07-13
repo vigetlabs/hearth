@@ -1,11 +1,9 @@
 class Api::V1::Schedules::SchedulesController < ApplicationController
   include Handlers::BadRequestHandler
   include Handlers::RecordInvalidHandler
-  include Handlers::RecordNotFoundHandler
   include ApiResponse
 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
-  rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
 
   before_action :authenticate_user!, only: [ :create ]
