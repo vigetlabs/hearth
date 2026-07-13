@@ -78,8 +78,7 @@ export default function OfficePicker() {
           <div className="w-full max-w-md">
             <h1 className="text-3xl leading-snug font-bold text-fg-primary">
               <span className="text-neutral-400">Hearth</span> shows you who's
-              around in your primary office each day, so you can time your
-              visits right
+              in your office every day, so you can time your visits right
             </h1>
 
             <RadioGroup.Root
@@ -89,7 +88,7 @@ export default function OfficePicker() {
               className="mt-10"
             >
               <p className="text-sm font-semibold text-fg-primary">
-                Which office is your primary?
+                What's your primary office?
               </p>
               <p className="mt-1 text-sm text-neutral-500">
                 Pick the one you visit the most, even if you're mostly remote.
