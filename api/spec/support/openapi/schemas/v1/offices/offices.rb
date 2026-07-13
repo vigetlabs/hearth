@@ -65,7 +65,7 @@ module OpenApi::Schemas::V1::Offices
       status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
       data: {
         type: :object,
-        required: %(offices),
+        required: %w[offices],
         properties: {
           offices: {
             type: :array,
