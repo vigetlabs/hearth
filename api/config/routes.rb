@@ -39,6 +39,8 @@ Rails.application.routes.draw do
       end
 
       resources :offices, only: [ :index ], module: :offices
+
+      resources :visits, only: [ :create ], module: :visits
     end
   end
 end
