@@ -82,7 +82,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-gray-50">
+    <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
         <Calendar schedule={sampleSchedule} />
       </div>

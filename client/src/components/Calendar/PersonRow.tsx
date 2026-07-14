@@ -1,5 +1,4 @@
 import type { AttendanceStatus, PersonStatus } from "@/types/calendar/calendar";
-import { cn } from "@/util/cn";
 
 interface PersonRowProps {
   person: PersonStatus;
@@ -14,17 +13,15 @@ export function PersonRow({ person, myName }: PersonRowProps) {
   return (
     <li className="flex items-center gap-2 px-4 py-1.5">
       <span
-        className={cn(
-          "truncate text-sm",
-          nameClass(status),
-          isMe && "font-medium",
-        )}
+        className={`truncate text-sm ${nameClass(status)} ${
+          isMe ? "font-medium" : ""
+        }`}
         title={name}
       >
         {name}
       </span>
       {isMe && (
-        <span className="shrink-0 text-xs font-medium text-gray-400">
+        <span className="shrink-0 text-xs font-medium text-fg-faint">
           (you)
         </span>
       )}
@@ -33,7 +30,7 @@ export function PersonRow({ person, myName }: PersonRowProps) {
 }
 
 function nameClass(status: AttendanceStatus): string {
-  if (status === "confirmed") return "text-gray-900";
-  if (status === "maybe") return "text-gray-500";
-  return "text-gray-400 line-through";
+  if (status === "confirmed") return "text-fg";
+  if (status === "maybe") return "text-fg-subtle";
+  return "text-fg-faint line-through";
 }

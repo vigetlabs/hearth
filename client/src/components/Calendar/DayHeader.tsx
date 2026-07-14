@@ -1,7 +1,6 @@
 import CheckIcon from "@/components/icons/CheckIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
 import PlusIcon from "@/components/icons/PlusIcon";
-import { cn } from "@/util/cn";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -56,23 +55,20 @@ function PlanningHeader({
           ? "You're planning this day — remove yourself"
           : "Add yourself to this day"
       }
-      className={cn(
-        headerBase,
-        "border-b border-gray-200 transition-colors disabled:cursor-not-allowed",
-        isMine ? "bg-gray-200 hover:bg-gray-300" : "bg-white hover:bg-gray-100",
-      )}
+      className={`${headerBase} border-b border-line transition-colors disabled:cursor-not-allowed ${
+        isMine
+          ? "bg-surface-strong hover:bg-line-strong"
+          : "bg-surface hover:bg-surface-muted"
+      }`}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          weekdayClass="text-gray-900"
-          dateNumClass="text-gray-500"
+          weekdayClass="text-fg"
+          dateNumClass="text-fg-subtle"
         />
         <span
-          className={cn(
-            iconCircle,
-            "border-dashed border-gray-400 text-gray-700",
-          )}
+          className={`${iconCircle} border-dashed border-line-faint text-fg-strong`}
           aria-hidden="true"
         >
           {isMine ? (
@@ -85,18 +81,18 @@ function PlanningHeader({
 
       <ProgressBar
         fill={fill}
-        trackClass="bg-gray-300"
-        barClass={isHotSpot ? "bg-gray-900" : "bg-gray-500"}
+        trackClass="bg-line-strong"
+        barClass={isHotSpot ? "bg-strong" : "bg-fill"}
       />
 
       <span className="mt-2 flex flex-wrap items-center gap-2">
         <ConfirmedCount
           confirmedCount={confirmedCount}
           total={total}
-          countClass="text-gray-600"
-          emptyClass="text-gray-400"
+          countClass="text-fg-muted"
+          emptyClass="text-fg-faint"
         />
-        {isHotSpot && <HotSpotBadge className="bg-gray-900 text-white" />}
+        {isHotSpot && <HotSpotBadge className="bg-strong text-fg-inverse" />}
       </span>
     </button>
   );
@@ -113,26 +109,23 @@ function ConfirmedHeader({
 }: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
   return (
     <div
-      className={cn(
-        headerBase,
-        "border-b",
+      className={`${headerBase} border-b ${
         isMine
-          ? "border-gray-800 bg-gray-900 text-white"
-          : "border-gray-200 bg-gray-200 text-gray-900",
-      )}
+          ? "border-strong-hover bg-strong text-fg-inverse"
+          : "border-line bg-surface-strong text-fg"
+      }`}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          dateNumClass={isMine ? "text-gray-300" : "text-gray-500"}
+          dateNumClass={isMine ? "text-fg-inverse-muted" : "text-fg-subtle"}
         />
         <span
-          className={cn(
-            iconCircle,
+          className={`${iconCircle} ${
             isMine
-              ? "border-white text-white"
-              : "border-gray-900 text-gray-900",
-          )}
+              ? "border-fg-inverse text-fg-inverse"
+              : "border-strong text-fg"
+          }`}
           aria-hidden="true"
         >
           {isMine ? (
@@ -145,23 +138,21 @@ function ConfirmedHeader({
 
       <ProgressBar
         fill={fill}
-        trackClass={isMine ? "bg-white/25" : "bg-gray-300"}
-        barClass={
-          isMine ? "bg-white" : isHotSpot ? "bg-gray-900" : "bg-gray-500"
-        }
+        trackClass={isMine ? "bg-white/25" : "bg-line-strong"}
+        barClass={isMine ? "bg-white" : isHotSpot ? "bg-strong" : "bg-fill"}
       />
 
       <span className="mt-2 flex flex-wrap items-center gap-2">
         <ConfirmedCount
           confirmedCount={confirmedCount}
           total={total}
-          countClass={isMine ? "text-gray-200" : "text-gray-600"}
-          emptyClass={isMine ? "text-gray-300" : "text-gray-400"}
+          countClass={isMine ? "text-fg-inverse-muted" : "text-fg-muted"}
+          emptyClass={isMine ? "text-fg-inverse-muted" : "text-fg-faint"}
         />
         {isHotSpot && (
           <HotSpotBadge
             className={
-              isMine ? "bg-white text-gray-900" : "bg-gray-900 text-white"
+              isMine ? "bg-surface text-fg" : "bg-strong text-fg-inverse"
             }
           />
         )}
@@ -181,12 +172,10 @@ function DayDateLabel({
 }) {
   return (
     <span className="block">
-      <span className={cn("block text-xl font-bold", weekdayClass)}>
+      <span className={`block text-xl font-bold ${weekdayClass}`}>
         {weekdayFormat.format(date)}
       </span>
-      <span className={cn("block text-sm", dateNumClass)}>
-        {date.getDate()}
-      </span>
+      <span className={`block text-sm ${dateNumClass}`}>{date.getDate()}</span>
     </span>
   );
 }
@@ -202,13 +191,10 @@ function ProgressBar({
 }) {
   return (
     <span
-      className={cn(
-        "mt-4 block h-1.5 overflow-hidden rounded-full",
-        trackClass,
-      )}
+      className={`mt-4 block h-1.5 overflow-hidden rounded-full ${trackClass}`}
     >
       <span
-        className={cn("block h-full rounded-full", barClass)}
+        className={`block h-full rounded-full ${barClass}`}
         style={{ width: `${Math.round(fill * 100)}%` }}
       />
     </span>
@@ -227,11 +213,11 @@ function ConfirmedCount({
   emptyClass: string;
 }) {
   return confirmedCount > 0 ? (
-    <span className={cn("whitespace-nowrap text-xs", countClass)}>
+    <span className={`whitespace-nowrap text-xs ${countClass}`}>
       {confirmedCount}/{total} confirmed
     </span>
   ) : (
-    <span className={cn("whitespace-nowrap text-xs", emptyClass)}>
+    <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
       No confirmed plans yet
     </span>
   );
@@ -239,7 +225,7 @@ function ConfirmedCount({
 
 function HotSpotBadge({ className }: { className: string }) {
   return (
-    <span className={cn(hotSpotBadge, className)}>
+    <span className={`${hotSpotBadge} ${className}`}>
       Hot spot
       <span aria-hidden="true">🔥</span>
     </span>

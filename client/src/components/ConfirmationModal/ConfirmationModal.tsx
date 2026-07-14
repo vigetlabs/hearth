@@ -1,8 +1,6 @@
 import { useRef } from "react";
 import { AlertDialog } from "radix-ui";
 
-import { cn } from "@/util/cn";
-
 interface ConfirmationModalProps {
   open: boolean;
   title: string;
@@ -46,34 +44,31 @@ export default function ConfirmationModal({
     }
   }
 
-  const confirmClasses = cn(
-    "rounded-lg px-4 py-2 text-sm font-medium focus:outline-none",
-    destructive
-      ? "bg-red-600 text-white hover:bg-red-700"
-      : "bg-gray-900 text-white hover:bg-gray-800",
-  );
+  const confirmClasses = destructive
+    ? "bg-danger text-fg-inverse hover:bg-danger-hover"
+    : "bg-strong text-fg-inverse hover:bg-strong-hover";
 
   return (
     <AlertDialog.Root open={open} onOpenChange={handleOpenChange}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/40" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-40 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl focus:outline-none">
-          <AlertDialog.Title className="text-lg font-bold text-gray-900">
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-40 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-surface p-6 shadow-xl focus:outline-none">
+          <AlertDialog.Title className="text-lg font-bold text-fg">
             {title}
           </AlertDialog.Title>
-          <AlertDialog.Description className="mt-2 text-sm text-gray-600">
+          <AlertDialog.Description className="mt-2 text-sm text-fg-muted">
             {description}
           </AlertDialog.Description>
 
           <div className="mt-6 flex justify-end gap-3">
-            <AlertDialog.Cancel className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none">
+            <AlertDialog.Cancel className="rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-fg hover:bg-surface-sunken focus:outline-none">
               {cancelLabel}
             </AlertDialog.Cancel>
             <AlertDialog.Action
               onClick={() => {
                 confirmingRef.current = true;
               }}
-              className={confirmClasses}
+              className={`rounded-lg px-4 py-2 text-sm font-medium focus:outline-none ${confirmClasses}`}
             >
               {confirmLabel}
             </AlertDialog.Action>

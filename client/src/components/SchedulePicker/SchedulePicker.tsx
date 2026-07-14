@@ -71,7 +71,7 @@ export default function SchedulePicker() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 self-start text-sm font-semibold text-neutral-500 hover:text-fg-primary"
+          className="flex items-center gap-1 self-start text-sm font-semibold text-fg-subtle hover:text-fg"
         >
           <span aria-hidden="true">‹</span>
           Go back
@@ -79,18 +79,18 @@ export default function SchedulePicker() {
 
         <div className="flex flex-1 flex-col items-center justify-center py-12">
           <div className="w-full max-w-md">
-            <h1 className="text-3xl leading-snug font-bold text-fg-primary">
+            <h1 className="text-3xl leading-snug font-bold text-fg">
               What days are you usually in the{" "}
-              <span className="text-neutral-400 capitalize">{office.name}</span>{" "}
+              <span className="text-fg-faint capitalize">{office.name}</span>{" "}
               office?
             </h1>
 
             <div className="mt-10">
-              <p className="text-sm font-semibold text-fg-primary">
+              <p className="text-sm font-semibold text-fg">
                 Pick your usual in-office days
               </p>
 
-              <p className="mt-1 text-sm text-neutral-500">
+              <p className="mt-1 text-sm text-fg-subtle">
                 This becomes your default each week, but you can always adjust
                 it for a specific week later.
               </p>
@@ -111,7 +111,7 @@ export default function SchedulePicker() {
               type="button"
               onClick={handleSave}
               disabled={!canSave || createDefaultScheduleMutation.isPending}
-              className="mt-8 w-full rounded-full bg-neutral-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-8 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createDefaultScheduleMutation.isPending
                 ? "Saving..."
@@ -124,7 +124,7 @@ export default function SchedulePicker() {
       </div>
 
       <div
-        className="relative hidden overflow-hidden bg-neutral-200 lg:block lg:w-[45%]"
+        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[45%]"
         aria-hidden="true"
       >
         <div

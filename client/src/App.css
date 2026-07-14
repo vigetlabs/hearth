@@ -1,6 +1,75 @@
 @import "tailwindcss";
 
+/*
+  ============================================================================
+  Color source of truth.
+
+  Every app color lives here as a semantic token. Components reference these
+  via Tailwind utilities (e.g. `text-fg`, `bg-surface`, `border-line`) rather
+  than raw palette shades like `text-gray-900`, so a color can be retuned
+  app-wide by editing a single value below.
+
+  Values mirror Tailwind's gray ramp (as used in the Calendar view) plus the
+  red/green/blue feedback colors, so the app looks the same today — override
+  any value to change it everywhere.
+
+  Not tokenized on purpose: brand logo colors (GoogleIcon/SlackIcon) and pure
+  black/white alpha overlays (e.g. `bg-black/40`, `bg-white/25`), which are
+  effects rather than palette colors.
+  ============================================================================
+*/
 @theme {
-  --color-fg-primary: #020403;
+  /* Foreground — text & icons */
+  --color-fg: oklch(21% 0.034 264.665); /* gray-900 — primary text, headings */
+  --color-fg-strong: oklch(37.3% 0.034 259.733); /* gray-700 — weighted icons */
+  --color-fg-muted: oklch(44.6% 0.03 256.802); /* gray-600 — secondary text */
+  --color-fg-subtle: oklch(55.1% 0.027 264.364); /* gray-500 — tertiary text */
+  --color-fg-faint: oklch(
+    70.7% 0.022 261.325
+  ); /* gray-400 — placeholder, disabled */
+  --color-fg-inverse: #fff; /* text/icons on dark surfaces */
+  --color-fg-inverse-muted: oklch(
+    87.2% 0.01 258.338
+  ); /* gray-300 — muted text on dark */
+
+  /* Surfaces — backgrounds */
+  --color-surface: #fff; /* cards, header, menus, inputs */
+  --color-surface-sunken: oklch(
+    98.5% 0.002 247.839
+  ); /* gray-50 — page bg, subtle hover */
+  --color-surface-muted: oklch(
+    96.7% 0.003 264.542
+  ); /* gray-100 — chips, wells, hover */
+  --color-surface-strong: oklch(
+    92.8% 0.006 264.531
+  ); /* gray-200 — selected / raised */
+
+  /* Lines — borders & dividers */
+  --color-line: oklch(
+    92.8% 0.006 264.531
+  ); /* gray-200 — default borders, dividers */
+  --color-line-strong: oklch(
+    87.2% 0.01 258.338
+  ); /* gray-300 — input borders, tracks */
+  --color-line-faint: oklch(
+    70.7% 0.022 261.325
+  ); /* gray-400 — dashed/decorative */
+
+  /* Emphasis — dark accent for primary actions, active cells, badges */
+  --color-strong: oklch(21% 0.034 264.665); /* gray-900 */
+  --color-strong-hover: oklch(27.8% 0.033 256.848); /* gray-800 */
+
+  /* Fill — mid-weight filled buttons (auth & onboarding CTAs) */
+  --color-fill: oklch(55.1% 0.027 264.364); /* gray-500 */
+  --color-fill-hover: oklch(44.6% 0.03 256.802); /* gray-600 */
+
+  /* Feedback & links */
+  --color-success: oklch(62.7% 0.194 149.214); /* green-600 */
+  --color-danger: oklch(57.7% 0.245 27.325); /* red-600 */
+  --color-danger-hover: oklch(50.5% 0.213 27.518); /* red-700 */
+  --color-danger-surface: oklch(97.1% 0.013 17.38); /* red-50 */
+  --color-link: oklch(54.6% 0.245 262.881); /* blue-600 */
+
+  /* Form validation error (existing brand red) */
   --color-error: #df3530;
 }

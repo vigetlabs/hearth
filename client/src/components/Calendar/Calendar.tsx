@@ -13,7 +13,6 @@ import { useOffice } from "@/util/office/useOffice";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
-import { cn } from "@/util/cn";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -156,9 +155,9 @@ export function Calendar({ schedule }: CalendarProps) {
   const isRemote = office.id === "remote";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm">
       <div className="flex items-center gap-3 pb-5">
-        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900">
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-fg">
           {office.name}
           <span aria-hidden="true">{office.emoji}</span>
         </h2>
@@ -168,7 +167,7 @@ export function Calendar({ schedule }: CalendarProps) {
 
       {!isRemote && (
         <div className="flex items-center gap-4 pb-5">
-          <div className="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+          <div className="flex items-center gap-1 rounded-full bg-surface-muted p-1">
             <button
               onClick={goPrev}
               className={arrowButton}
@@ -176,9 +175,7 @@ export function Calendar({ schedule }: CalendarProps) {
             >
               <ChevronDownIcon className="h-3.5 w-3.5 rotate-90" />
             </button>
-            <span className="px-2 text-sm font-bold text-gray-900">
-              {rangeLabel}
-            </span>
+            <span className="px-2 text-sm font-bold text-fg">{rangeLabel}</span>
             <button
               onClick={goNext}
               className={arrowButton}
@@ -194,15 +191,15 @@ export function Calendar({ schedule }: CalendarProps) {
             </button>
           )}
 
-          <div className="h-6 w-px bg-gray-300" />
+          <div className="h-6 w-px bg-line-strong" />
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-fg-subtle">
             {isWeekConfirmed ? (
-              <span className="font-bold text-gray-900">Confirmed.</span>
+              <span className="font-bold text-fg">Confirmed.</span>
             ) : (
               <>
-                <span className="font-bold text-gray-900">Planning.</span> Yet
-                to be confirmed
+                <span className="font-bold text-fg">Planning.</span> Yet to be
+                confirmed
               </>
             )}
           </p>
@@ -221,19 +218,18 @@ export function Calendar({ schedule }: CalendarProps) {
       )}
 
       {isRemote ? (
-        <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-gray-200 px-6 text-center text-sm text-gray-500">
+        <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-line px-6 text-center text-sm text-fg-subtle">
           Remote has no weekly office schedule.
         </div>
       ) : (
         <div className="relative flex min-h-0 flex-1 flex-col">
           {todayIndex !== -1 && (
             <span
-              className={cn(
-                "pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+              className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                 isWeekConfirmed
-                  ? "border border-gray-900 bg-white text-gray-900"
-                  : "bg-gray-900 text-white",
-              )}
+                  ? "border border-strong bg-surface text-fg"
+                  : "bg-strong text-fg-inverse"
+              }`}
               style={{
                 left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
               }}
@@ -243,7 +239,7 @@ export function Calendar({ schedule }: CalendarProps) {
           )}
 
           <div
-            className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-gray-200 divide-x divide-gray-200"
+            className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-line divide-x divide-line"
             style={gridColumns}
           >
             {days.map((day, i) => {
@@ -277,10 +273,10 @@ export function Calendar({ schedule }: CalendarProps) {
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50";
+  "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-fg-strong shadow-sm hover:bg-surface-sunken";
 
 const pillButton =
-  "rounded-full border border-gray-900 bg-white px-5 py-2 text-sm text-gray-900 hover:bg-gray-50";
+  "rounded-full border border-strong bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
 
 const todayButton = `${pillButton} font-semibold`;
 
@@ -288,4 +284,4 @@ const confirmButton = `ml-auto ${pillButton} font-bold`;
 
 // Once confirmed, the schedule is locked; this reverts the week to planning.
 const unlockButton =
-  "ml-auto flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-sm font-bold text-white hover:bg-gray-800";
+  "ml-auto flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover";

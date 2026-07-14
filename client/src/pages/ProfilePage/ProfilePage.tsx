@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useBlocker } from "react-router";
 
 import { useAuth } from "@/util/auth/useAuth";
-import { cn } from "@/util/cn";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
 
@@ -116,28 +115,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-surface-muted">
       <form onSubmit={handleSave} className="mx-auto max-w-3xl px-6 py-8">
         <Link
           to="/"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center gap-1 text-sm text-fg-subtle hover:text-fg-strong"
         >
           <span aria-hidden="true">‹</span> Go back
         </Link>
 
-        <h1 className="mt-2 mb-8 text-3xl font-bold text-gray-900">
+        <h1 className="mt-2 mb-8 text-3xl font-bold text-fg">
           Profile &amp; Settings
         </h1>
 
         <div className="space-y-6">
-          <section className="rounded-2xl bg-white p-8">
-            <h2 className="mb-6 text-xl font-bold text-gray-900">Profile</h2>
+          <section className="rounded-2xl bg-surface p-8">
+            <h2 className="mb-6 text-xl font-bold text-fg">Profile</h2>
 
             <div className="space-y-5">
               <div>
                 <label
                   htmlFor="name"
-                  className="mb-1.5 block text-sm font-semibold text-gray-900"
+                  className="mb-1.5 block text-sm font-semibold text-fg"
                 >
                   Name
                 </label>
@@ -146,17 +145,17 @@ export default function ProfilePage() {
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-gray-500 focus:outline-none"
+                  className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-gray-900"
+                  className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-fg"
                 >
                   Email
-                  <LockIcon className="h-3.5 w-3.5 text-gray-400" />
+                  <LockIcon className="h-3.5 w-3.5 text-fg-faint" />
                 </label>
                 <input
                   id="email"
@@ -165,9 +164,9 @@ export default function ProfilePage() {
                   readOnly
                   disabled
                   aria-describedby="email-help"
-                  className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-gray-500 focus:outline-none"
+                  className="w-full cursor-not-allowed rounded-lg border border-line bg-surface-muted px-4 py-2.5 text-fg-subtle focus:outline-none"
                 />
-                <p id="email-help" className="mt-1.5 text-xs text-gray-500">
+                <p id="email-help" className="mt-1.5 text-xs text-fg-subtle">
                   Your email is managed through your Google account and can't be
                   changed.
                 </p>
@@ -175,10 +174,8 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-8">
-            <h2 className="mb-6 text-xl font-bold text-gray-900">
-              Default Office
-            </h2>
+          <section className="rounded-2xl bg-surface p-8">
+            <h2 className="mb-6 text-xl font-bold text-fg">Default Office</h2>
 
             <div className="flex flex-wrap gap-4">
               {OFFICES.map((office) => {
@@ -190,13 +187,13 @@ export default function ProfilePage() {
                     key={office.id}
                     type="button"
                     onClick={() => setSelectedOffice(office.id)}
-                    className={cn(
-                      "flex h-28 w-32 flex-col items-center justify-center gap-3 rounded-xl border text-sm text-gray-900 transition-colors",
-                      isRemote ? "border-dashed" : "border-solid",
+                    className={`flex h-28 w-32 flex-col items-center justify-center gap-3 rounded-xl border text-sm text-fg transition-colors ${
+                      isRemote ? "border-dashed" : "border-solid"
+                    } ${
                       isSelected
-                        ? "border-gray-400 bg-gray-100"
-                        : "border-gray-200 bg-white hover:bg-gray-50",
-                    )}
+                        ? "border-line-faint bg-surface-muted"
+                        : "border-line bg-surface hover:bg-surface-sunken"
+                    }`}
                   >
                     <span className="text-2xl" aria-hidden="true">
                       {office.emoji}
@@ -208,10 +205,8 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-8">
-            <h2 className="mb-6 text-xl font-bold text-gray-900">
-              Default Schedule
-            </h2>
+          <section className="rounded-2xl bg-surface p-8">
+            <h2 className="mb-6 text-xl font-bold text-fg">Default Schedule</h2>
 
             <div className="flex flex-wrap gap-3">
               {WEEKDAYS.map((day) => {
@@ -222,20 +217,17 @@ export default function ProfilePage() {
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
-                    className={cn(
-                      "flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors",
+                    className={`flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors ${
                       isIn
-                        ? "border-gray-300 bg-gray-100"
-                        : "border-gray-200 bg-white hover:bg-gray-50",
-                    )}
+                        ? "border-line-strong bg-surface-muted"
+                        : "border-line bg-surface hover:bg-surface-sunken"
+                    }`}
                   >
-                    <span className="text-sm font-bold text-gray-900">
-                      {day}
-                    </span>
+                    <span className="text-sm font-bold text-fg">{day}</span>
                     {isIn ? (
-                      <span className="text-xs text-gray-600">✓ in office</span>
+                      <span className="text-xs text-fg-muted">✓ in office</span>
                     ) : (
-                      <span className="text-xs text-gray-400">+ add</span>
+                      <span className="text-xs text-fg-faint">+ add</span>
                     )}
                   </button>
                 );
@@ -247,15 +239,15 @@ export default function ProfilePage() {
         <div className="mt-6 flex items-center justify-end gap-4">
           <span role="status" aria-live="polite" className="text-sm">
             {!isDirty && saveFeedback === "saved" && (
-              <span className="text-green-600">✓ Changes saved</span>
+              <span className="text-success">✓ Changes saved</span>
             )}
             {!isDirty && saveFeedback === "no-changes" && (
-              <span className="text-gray-500">No changes to save</span>
+              <span className="text-fg-subtle">No changes to save</span>
             )}
           </span>
           <button
             type="submit"
-            className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50"
+            className="rounded-lg border border-line-strong bg-surface px-5 py-2.5 text-sm font-medium text-fg hover:bg-surface-sunken"
           >
             Save Changes
           </button>

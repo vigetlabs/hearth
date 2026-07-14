@@ -16,13 +16,13 @@ export default function ScheduleDayItem({
       type="button"
       onClick={() => onToggle(day.id)}
       aria-pressed={isSelected}
-      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border p-3 text-center text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none ${
-        isSelected ? "border-neutral-500 bg-neutral-100" : "border-neutral-200"
+      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border p-3 text-center text-fg transition-colors hover:border-line-faint focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none ${
+        isSelected ? "border-fill bg-surface-muted" : "border-line"
       }`}
     >
       <span className="text-sm font-bold">{day.label}</span>
 
-      <span className="text-xs text-neutral-500" aria-hidden="true">
+      <span className="text-xs text-fg-subtle" aria-hidden="true">
         {isSelected ? "✓" : "+"}
       </span>
     </button>
