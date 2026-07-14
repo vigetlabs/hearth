@@ -1,8 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
-import SlackIcon from "@/components/icons/SlackIcon";
-
 import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
 
 import { DEFAULT_HERO_IMAGE } from "@/components/OfficePicker/heroImage";
@@ -10,13 +8,41 @@ import { DEFAULT_HERO_IMAGE } from "@/components/OfficePicker/heroImage";
 import { useCreateUserMutation } from "@/util/api/mutations/users/createUserMutation";
 import { createUserObjectPayload } from "@/util/api/functions/users";
 
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validateSignupPassword,
+} from "@/util/auth/validation";
+
+import {
+  createFieldHandlers,
+  labelClasses,
+  inputClasses,
+} from "@/util/forms/formFieldHandlers";
+
 import type { CreateUserRequest } from "@/types/api/users";
+
+interface FieldErrors {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  password: string | null;
+}
+
+const NO_ERRORS: FieldErrors = {
+  firstName: null,
+  lastName: null,
+  email: null,
+  password: null,
+};
 
 export default function SignupForm() {
   const [email, setEmail] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
 
   const navigate = useNavigate();
 
@@ -30,8 +56,25 @@ export default function SignupForm() {
     image.src = DEFAULT_HERO_IMAGE;
   }, []);
 
+  function validate(): FieldErrors {
+    return {
+      firstName: validateFirstName(firstName),
+      lastName: validateLastName(lastName),
+      email: validateEmail(email),
+      password: validateSignupPassword(password),
+    };
+  }
+
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const nextErrors = validate();
+    setErrors(nextErrors);
+
+    const hasErrors = Object.values(nextErrors).some((error) => error !== null);
+    if (hasErrors) {
+      return;
+    }
 
     const payload: CreateUserRequest = createUserObjectPayload(
       email,
@@ -50,9 +93,7 @@ export default function SignupForm() {
     });
   }
 
-  const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
-  const inputClasses =
-    "w-full rounded-lg border border-gray-300 px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:border-gray-500 focus:outline-none";
+  const fieldHandlers = createFieldHandlers(setErrors);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -62,15 +103,6 @@ export default function SignupForm() {
 
       <form onSubmit={handleSubmit} className="mt-8">
         <GoogleSsoButton />
-
-        <button
-          type="button"
-          // @TODO: Wire up Slack OAuth
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-semibold text-fg-primary transition-colors hover:bg-gray-50"
-        >
-          <SlackIcon className="h-5 w-5" />
-          Continue with Slack
-        </button>
 
         <div className="my-6 flex items-center gap-4">
           <span className="h-px flex-1 bg-gray-300" />
@@ -87,10 +119,14 @@ export default function SignupForm() {
               id="first-name"
               type="text"
               placeholder="Enter your name"
-              className={inputClasses}
+              className={inputClasses(errors.firstName !== null)}
+              aria-invalid={errors.firstName !== null}
               value={firstName}
-              onChange={(event) => setFirstName(event.target.value)}
+              {...fieldHandlers("firstName", setFirstName, validateFirstName)}
             />
+            {errors.firstName && (
+              <p className="mt-2 text-sm text-error">{errors.firstName}</p>
+            )}
           </div>
 
           <div>
@@ -101,10 +137,14 @@ export default function SignupForm() {
               id="last-name"
               type="text"
               placeholder="Enter your last name"
-              className={inputClasses}
+              className={inputClasses(errors.lastName !== null)}
+              aria-invalid={errors.lastName !== null}
               value={lastName}
-              onChange={(event) => setLastName(event.target.value)}
+              {...fieldHandlers("lastName", setLastName, validateLastName)}
             />
+            {errors.lastName && (
+              <p className="mt-2 text-sm text-error">{errors.lastName}</p>
+            )}
           </div>
         </div>
 
@@ -116,10 +156,14 @@ export default function SignupForm() {
             id="email"
             type="email"
             placeholder="Enter your email"
-            className={inputClasses}
+            className={inputClasses(errors.email !== null)}
+            aria-invalid={errors.email !== null}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            {...fieldHandlers("email", setEmail, validateEmail)}
           />
+          {errors.email && (
+            <p className="mt-2 text-sm text-error">{errors.email}</p>
+          )}
         </div>
 
         <div className="mt-5">
@@ -130,10 +174,14 @@ export default function SignupForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
-            className={inputClasses}
+            className={inputClasses(errors.password !== null)}
+            aria-invalid={errors.password !== null}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            {...fieldHandlers("password", setPassword, validateSignupPassword)}
           />
+          {errors.password && (
+            <p className="mt-2 text-sm text-error">{errors.password}</p>
+          )}
         </div>
 
         <button

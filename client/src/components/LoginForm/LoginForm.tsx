@@ -3,28 +3,63 @@ import { useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import SlackIcon from "@/components/icons/SlackIcon";
-
 import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
 
 import { useLoginUserMutation } from "@/util/api/mutations/users/loginUserMutation";
 import { createUserLoginObjectPayload } from "@/util/api/functions/users";
 
+import {
+  validateEmail,
+  validateRequiredPassword,
+} from "@/util/auth/validation";
+
+import {
+  createFieldHandlers,
+  labelClasses,
+  inputClasses,
+} from "@/util/forms/formFieldHandlers";
+
 import type { LoginUserRequest } from "@/types/api/users";
 
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
+interface FieldErrors {
+  email: string | null;
+  password: string | null;
+}
+
+const NO_ERRORS: FieldErrors = {
+  email: null,
+  password: null,
+};
+
 export default function LoginForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const loginUserMutation = useLoginUserMutation();
 
+  function validate(): FieldErrors {
+    return {
+      email: validateEmail(email),
+      password: validateRequiredPassword(password),
+    };
+  }
+
   function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const nextErrors = validate();
+    setErrors(nextErrors);
+
+    const hasErrors = Object.values(nextErrors).some((error) => error !== null);
+    if (hasErrors) {
+      return;
+    }
 
     const payload: LoginUserRequest = createUserLoginObjectPayload(
       email,
@@ -42,9 +77,7 @@ export default function LoginForm() {
     });
   }
 
-  const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
-  const inputClasses =
-    "w-full rounded-lg border border-gray-300 px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:border-gray-500 focus:outline-none";
+  const fieldHandlers = createFieldHandlers(setErrors);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -54,15 +87,6 @@ export default function LoginForm() {
 
       <form onSubmit={handleSubmit} className="mt-8">
         <GoogleSsoButton />
-
-        <button
-          type="button"
-          // @TODO: Wire up Slack OAuth
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-semibold text-fg-primary transition-colors hover:bg-gray-50"
-        >
-          <SlackIcon className="h-5 w-5" />
-          Continue with Slack
-        </button>
 
         <div className="my-6 flex items-center gap-4">
           <span className="h-px flex-1 bg-gray-300" />
@@ -78,10 +102,14 @@ export default function LoginForm() {
             id="email"
             type="email"
             placeholder="Enter your email"
-            className={inputClasses}
+            className={inputClasses(errors.email !== null)}
+            aria-invalid={errors.email !== null}
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            {...fieldHandlers("email", setEmail, validateEmail)}
           />
+          {errors.email && (
+            <p className="mt-2 text-sm text-error">{errors.email}</p>
+          )}
         </div>
 
         <div className="mt-5">
@@ -92,10 +120,18 @@ export default function LoginForm() {
             id="password"
             type="password"
             placeholder="Enter your password"
-            className={inputClasses}
+            className={inputClasses(errors.password !== null)}
+            aria-invalid={errors.password !== null}
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            {...fieldHandlers(
+              "password",
+              setPassword,
+              validateRequiredPassword,
+            )}
           />
+          {errors.password && (
+            <p className="mt-2 text-sm text-error">{errors.password}</p>
+          )}
         </div>
 
         <button
