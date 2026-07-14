@@ -1,8 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 
-import SlackIcon from "@/components/icons/SlackIcon";
-
 import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
 
 import { DEFAULT_HERO_IMAGE } from "@/components/OfficePicker/heroImage";
@@ -17,14 +15,20 @@ import {
   validateSignupPassword,
 } from "@/util/auth/validation";
 
+import {
+  createFieldHandlers,
+  labelClasses,
+  inputClasses,
+} from "@/util/forms/formFieldHandlers";
+
 import type { CreateUserRequest } from "@/types/api/users";
 
-type FieldErrors = {
+interface FieldErrors {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
   password: string | null;
-};
+}
 
 const NO_ERRORS: FieldErrors = {
   firstName: null,
@@ -89,33 +93,7 @@ export default function SignupForm() {
     });
   }
 
-  function fieldHandlers<K extends keyof FieldErrors>(
-    key: K,
-    setValue: (value: string) => void,
-    validate: (value: string) => string | null,
-  ) {
-    return {
-      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.value);
-        // only re-validate once the field is already in an error state
-        setErrors((prev) =>
-          prev[key] ? { ...prev, [key]: validate(event.target.value) } : prev,
-        );
-      },
-      onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
-        setErrors((prev) => ({ ...prev, [key]: validate(event.target.value) }));
-      },
-    };
-  }
-
-  const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
-  function inputClasses(hasError: boolean): string {
-    const borderClasses = hasError
-      ? "border-error focus:border-error"
-      : "border-gray-300 focus:border-gray-500";
-
-    return `w-full rounded-lg border px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:outline-none ${borderClasses}`;
-  }
+  const fieldHandlers = createFieldHandlers(setErrors);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -125,15 +103,6 @@ export default function SignupForm() {
 
       <form onSubmit={handleSubmit} className="mt-8">
         <GoogleSsoButton />
-
-        <button
-          type="button"
-          // @TODO: Wire up Slack OAuth
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-semibold text-fg-primary transition-colors hover:bg-gray-50"
-        >
-          <SlackIcon className="h-5 w-5" />
-          Continue with Slack
-        </button>
 
         <div className="my-6 flex items-center gap-4">
           <span className="h-px flex-1 bg-gray-300" />

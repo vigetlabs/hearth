@@ -74,7 +74,7 @@ RSpec.describe UserIdentity, type: :model do
 
         different_provider_identity = build(
           :user_identity,
-          provider: "slack",
+          provider: "microsoft",
           provider_uid: "12345"
         )
 
