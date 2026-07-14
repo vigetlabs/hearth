@@ -6,6 +6,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
       tags "Visits"
       consumes "application/json"
       produces "application/json"
+      security [ cookie_auth: [] ]
 
       parameter name: :payload,
         in: :body,
@@ -34,6 +35,21 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             ]
           }
         end
+
+        run_test!
+      end
+
+      response "400", "missing visits parameter" do
+        schema "$ref" =>
+          "#/components/schemas/bad_request_error_response"
+
+        let!(:user) { create(:user) }
+
+        before do
+          sign_in user
+        end
+
+        let(:payload) { {} }
 
         run_test!
       end
