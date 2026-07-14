@@ -1,5 +1,10 @@
 class Api::V1::Visits::VisitsController < ApplicationController
   include ApiResponse
+  include Handlers::RecordInvalidHandler
+  include Handlers::BadRequestHandler
+
+  rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
+  rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
 
   before_action :authenticate_user!, only: [ :create ]
 

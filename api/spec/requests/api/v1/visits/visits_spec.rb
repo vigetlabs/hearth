@@ -2,11 +2,9 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
   describe "POST /visits" do
-    let(:office) { create(:office) }
-    let(:user) { create(:user) }
-    let(:headers) { auth_headers_for(user) }
-
-    let(:valid_params) do
+    let!(:office) { create(:office) }
+    let!(:user) { create(:user) }
+    let(:params) do
       {
         visits: [
           {
@@ -20,50 +18,133 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         ]
       }
     end
+    let(:headers) { auth_headers_for(user) }
 
     subject(:create_visits) do
       post api_path("/visits"),
-        params: valid_params,
+        params: params,
         headers: headers,
         as: :json
     end
 
-    context "with valid params" do
-      it "creates the visits" do
-        expect { create_visits }
-          .to change(Visit, :count).by(2)
+    context "when the user is authorized" do
+      context "with valid parameters" do
+        it "creates the visits" do
+          expect { create_visits }
+            .to change(Visit, :count).by(2)
+        end
+
+        it "creates the visits for the authenticated user" do
+          create_visits
+
+          created_visits = user.visits.order(:visit_date)
+
+          expect(created_visits.pluck(:visit_date)).to eq(
+            [
+              Date.new(2026, 7, 13),
+              Date.new(2026, 7, 14)
+            ]
+          )
+        end
+
+        it "associates the visits with the requested office" do
+          create_visits
+
+          expect(user.visits.pluck(:office_id))
+            .to contain_exactly(office.id, office.id)
+        end
+
+        it "returns a created response" do
+          create_visits
+
+          expect(response).to have_http_status(:created)
+        end
+
+        it "returns JSON" do
+          create_visits
+
+          expect(response.media_type).to eq("application/json")
+        end
       end
 
-      it "creates the visits for the authenticated user" do
-        create_visits
+      context "with invalid parameters" do
+        let(:params) do
+          {
+            visits: [
+              {
+                office_id: office.id.to_s,
+                visit_date: nil
+              },
+              {
+                office_id: office.id.to_s,
+                visit_date: nil
+              }
+            ]
+          }
+        end
 
-        created_visits = user.visits.order(:visit_date)
+        it "does not create visits" do
+          expect { create_visits }
+            .not_to change(Visit, :count)
+        end
 
-        expect(created_visits.pluck(:visit_date)).to eq(
-          [
-            Date.new(2026, 7, 13),
-            Date.new(2026, 7, 14)
-          ]
-        )
+        it "returns an unprocessable content response" do
+          create_visits
+          expect(response).to have_http_status(:unprocessable_content)
+        end
+
+        it "returns a validation error" do
+          create_visits
+
+          json = JSON.parse(response.body)
+          expect(json).to include(
+            "status" => include(
+              "code" => 422
+            ),
+            "error" => include(
+              "type" => ApiErrorTypes::VALIDATION,
+              "code" => ApiErrorCodes::Validation::INVALID_ATTRIBUTES
+            )
+          )
+        end
+
+        it "includes details for the invalid field" do
+          create_visits
+
+          json = JSON.parse(response.body)
+          details = get_error_details(json)
+          expect(details).to include(
+            hash_including("field" => "visit_date")
+          )
+        end
       end
 
-      it "associates the visits with the requested office" do
-        create_visits
+      context "when the visits parameter is missing" do
+        let(:params) { {} }
 
-        expect(user.visits.pluck(:office_id))
-          .to contain_exactly(office.id, office.id)
-      end
+        it "does not create a schedule" do
+          expect { create_visits }
+            .not_to change(Schedule, :count)
+        end
 
-      it "returns a created response" do
-        create_visits
+        it "returns a bad request response" do
+          create_visits
+          expect(response).to have_http_status(:bad_request)
+        end
 
-        expect(response).to have_http_status(:created)
-      end
-
-      it "returns JSON" do
-        create_visits
-
-        expect(response.media_type).to eq("application/json")
+        it "returns a bad request error" do
+          create_visits
+          json = JSON.parse(response.body)
+          expect(json).to include(
+            "status" => include(
+              "code" => 400
+            ),
+            "error" => include(
+              "type" => ApiErrorTypes::BAD_REQUEST,
+              "code" => ApiErrorCodes::BadRequest::MISSING_PARAMETER
+            )
+          )
+        end
       end
     end
   end
