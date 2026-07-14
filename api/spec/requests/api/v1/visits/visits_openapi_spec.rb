@@ -53,6 +53,35 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
 
         run_test!
       end
+
+      response "422", "invalid visits parameters" do
+        schema "$ref" =>
+          "#/components/schemas/validation_error_response"
+
+        let!(:user) { create(:user) }
+        let!(:office) { create(:office) }
+
+        before do
+          sign_in user
+        end
+
+        let(:payload) do
+          {
+            visits: [
+              {
+                office_id: office.id,
+                vist_date: nil
+              },
+              {
+                office_id: office.id,
+                vist_date: nil
+              }
+            ]
+          }
+        end
+
+        run_test!
+      end
     end
   end
 end
