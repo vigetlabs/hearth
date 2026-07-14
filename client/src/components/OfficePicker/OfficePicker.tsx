@@ -146,7 +146,7 @@ export default function OfficePicker() {
   if (officesQuery.isPending) {
     return (
       <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-        <p className="text-lg text-neutral-500">Loading offices...</p>
+        <p className="text-lg text-fg-subtle">Loading offices...</p>
       </div>
     );
   }
@@ -154,7 +154,7 @@ export default function OfficePicker() {
   if (officesQuery.isError) {
     return (
       <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-        <p className="text-lg text-neutral-500">
+        <p className="text-lg text-fg-subtle">
           Unable to load offices. Please try again.
         </p>
       </div>
@@ -167,16 +167,16 @@ export default function OfficePicker() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 self-start text-sm font-semibold text-neutral-500 hover:text-fg-primary"
+          className="flex items-center gap-1 self-start text-sm font-semibold text-fg-subtle hover:text-fg"
         >
           <span aria-hidden="true">‹</span> Go back
         </button>
 
         <div className="flex flex-1 flex-col items-center justify-center py-12">
           <div className="w-full max-w-md">
-            <h1 className="text-3xl leading-snug font-bold text-fg-primary">
-              <span className="text-neutral-400">Hearth</span> shows you who's
-              in your office every day, so you can time your visits right
+            <h1 className="text-3xl leading-snug font-bold text-fg">
+              <span className="text-fg-faint">Hearth</span> shows you who's in
+              your office every day, so you can time your visits right
             </h1>
 
             <RadioGroup.Root
@@ -185,11 +185,11 @@ export default function OfficePicker() {
               aria-label="Which office is your primary?"
               className="mt-10"
             >
-              <p className="text-sm font-semibold text-fg-primary">
+              <p className="text-sm font-semibold text-fg">
                 What's your primary office?
               </p>
 
-              <p className="mt-1 text-sm text-neutral-500">
+              <p className="mt-1 text-sm text-fg-subtle">
                 Pick the one you visit the most, even if you're mostly remote.
               </p>
 
@@ -204,7 +204,7 @@ export default function OfficePicker() {
               type="button"
               onClick={handleContinue}
               disabled={!selectedOfficeId || updateUserMutation.isPending}
-              className="mt-8 w-full rounded-full bg-neutral-500 py-3 text-sm font-semibold text-white transition-colors enabled:hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-8 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               Continue
             </button>
@@ -213,7 +213,7 @@ export default function OfficePicker() {
               type="button"
               onClick={handleRemote}
               disabled={updateUserMutation.isPending}
-              className="mt-3 w-full rounded-full border border-neutral-300 py-3 text-sm font-semibold text-fg-primary transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-3 w-full rounded-full border border-line-strong py-3 text-sm font-semibold text-fg transition-colors hover:border-line-faint hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-60"
             >
               No home office. I'm fully remote.
             </button>
@@ -222,7 +222,7 @@ export default function OfficePicker() {
       </div>
 
       <div
-        className="relative hidden overflow-hidden bg-neutral-200 lg:block lg:w-[45%]"
+        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[45%]"
         aria-hidden="true"
       >
         {/*

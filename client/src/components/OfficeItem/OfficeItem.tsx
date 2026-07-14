@@ -14,9 +14,9 @@ export default function OfficeItem({ office }: OfficeItemProps) {
   return (
     <RadioGroup.Item
       value={String(office.id)}
-      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border text-fg-primary transition-colors hover:border-neutral-400 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none data-[state=checked]:border-neutral-500 data-[state=checked]:bg-neutral-100 ${
+      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border text-fg transition-colors hover:border-line-faint focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none data-[state=checked]:border-fill data-[state=checked]:bg-surface-muted ${
         isRemote ? "border-dashed" : "border-solid"
-      } border-neutral-200`}
+      } border-line`}
     >
       <span className="text-3xl" aria-hidden="true">
         {emoji}

@@ -97,17 +97,15 @@ export default function SignupForm() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
-      <h1 className="text-center text-4xl font-bold text-fg-primary">
-        Sign up
-      </h1>
+      <h1 className="text-center text-4xl font-bold text-fg">Sign up</h1>
 
       <form onSubmit={handleSubmit} className="mt-8">
         <GoogleSsoButton />
 
         <div className="my-6 flex items-center gap-4">
-          <span className="h-px flex-1 bg-gray-300" />
-          <span className="text-sm text-gray-500">or</span>
-          <span className="h-px flex-1 bg-gray-300" />
+          <span className="h-px flex-1 bg-line-strong" />
+          <span className="text-sm text-fg-subtle">or</span>
+          <span className="h-px flex-1 bg-line-strong" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -187,7 +185,7 @@ export default function SignupForm() {
         <button
           type="submit"
           disabled={createUserMutation.isPending}
-          className="mt-8 w-full rounded-lg bg-gray-500 px-4 py-4 font-bold text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-70"
+          className="mt-8 w-full rounded-lg bg-fill px-4 py-4 font-bold text-fg-inverse transition-colors hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-70"
         >
           {createUserMutation.isPending ? "Creating account..." : "Sign up"}
         </button>
@@ -199,9 +197,9 @@ export default function SignupForm() {
         )}
       </form>
 
-      <p className="mt-6 text-center text-fg-primary">
+      <p className="mt-6 text-center text-fg">
         Already have an account?{" "}
-        <Link to="/users/login" className="text-blue-600 underline">
+        <Link to="/users/login" className="text-link underline">
           Sign in
         </Link>
       </p>

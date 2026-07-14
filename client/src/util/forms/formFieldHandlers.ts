@@ -23,12 +23,12 @@ export function createFieldHandlers<
   };
 }
 
-export const labelClasses = "mb-2 block text-sm font-bold text-fg-primary";
+export const labelClasses = "mb-2 block text-sm font-bold text-fg";
 
 export function inputClasses(hasError: boolean): string {
   const borderClasses = hasError
     ? "border-error focus:border-error"
-    : "border-gray-300 focus:border-gray-500";
+    : "border-line-strong focus:border-fill";
 
-  return `w-full rounded-lg border px-4 py-3 text-fg-primary placeholder:text-gray-400 focus:outline-none ${borderClasses}`;
+  return `w-full rounded-lg border px-4 py-3 text-fg placeholder:text-fg-faint focus:outline-none ${borderClasses}`;
 }
