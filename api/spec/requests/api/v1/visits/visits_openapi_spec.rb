@@ -32,6 +32,32 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           sign_in user
         end
       end
+
+      response "400", "invalid query parameters" do
+        schema "$ref" =>
+          "#/components/schemas/bad_request_error_response"
+
+        let(:user) { create(:user) }
+
+        before do
+          sign_in user
+        end
+
+        let(:date) { "invalid-date" }
+        let(:view) { "year" }
+
+        run_test!
+      end
+
+      response "401", "authentication required" do
+        schema "$ref" =>
+          "#/components/schemas/authentication_error_response"
+
+        let(:date) { "2026-07-15" }
+        let(:view) { "week" }
+
+        run_test!
+      end
     end
 
 
