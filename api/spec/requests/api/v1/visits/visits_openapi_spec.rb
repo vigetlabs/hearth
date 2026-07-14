@@ -54,6 +54,29 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         run_test!
       end
 
+      response "401", "authentication required" do
+        schema "$ref" =>
+          "#/components/schemas/authentication_error_response"
+
+        let(:office) { create(:office) }
+        let(:payload) do
+          {
+            visits: [
+              {
+                visit_date: "2026-07-13",
+                office_id: office.id
+              },
+              {
+                visit_date: "2026-07-14",
+                office_id: office.id
+              }
+            ]
+          }
+        end
+
+        run_test!
+      end
+
       response "422", "invalid visits parameters" do
         schema "$ref" =>
           "#/components/schemas/validation_error_response"
