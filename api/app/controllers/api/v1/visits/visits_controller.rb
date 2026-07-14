@@ -11,7 +11,12 @@ class Api::V1::Visits::VisitsController < ApplicationController
   def create
     visits = Visit.transaction do
       visits_params.map do |attributes|
-        current_user.visits.create!(attributes)
+        visit = current_user.visits.find_or_initialize_by(
+          visit_date: attributes[:visit_date]
+        )
+
+        visit.update!(office_id: attributes[:office_id])
+        visit
       end
     end
 

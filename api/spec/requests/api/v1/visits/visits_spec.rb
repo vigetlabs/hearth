@@ -31,41 +31,77 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
 
     context "when the user is authenticated" do
       context "with valid parameters" do
-        it "creates the visits" do
-          expect { create_visits }
-            .to change(Visit, :count).by(2)
+        context "when no visits exist for the requested dates" do
+          it "creates the visits" do
+            expect { create_visits }
+              .to change(Visit, :count).by(2)
+          end
+
+          it "creates the visits for the authenticated user" do
+            create_visits
+
+            created_visits = user.visits.order(:visit_date)
+
+            expect(created_visits.pluck(:visit_date)).to eq(
+              [
+                Date.new(2026, 7, 13),
+                Date.new(2026, 7, 14)
+              ]
+            )
+          end
+
+          it "associates the visits with the requested office" do
+            create_visits
+
+            expect(user.visits.pluck(:office_id))
+              .to contain_exactly(office.id, office.id)
+          end
+
+          it "returns a created response" do
+            create_visits
+
+            expect(response).to have_http_status(:created)
+          end
+
+          it "returns JSON" do
+            create_visits
+
+            expect(response.media_type).to eq("application/json")
+          end
         end
 
-        it "creates the visits for the authenticated user" do
-          create_visits
+        context "when a visit already exists for a requested date" do
+          let!(:existing_visit) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-13"
+            )
+          end
 
-          created_visits = user.visits.order(:visit_date)
+          let!(:new_office) { create(:office) }
 
-          expect(created_visits.pluck(:visit_date)).to eq(
-            [
-              Date.new(2026, 7, 13),
-              Date.new(2026, 7, 14)
-            ]
-          )
-        end
+          let(:params) do
+            {
+              visits: [
+                {
+                  office_id: new_office.id,
+                  visit_date: "2026-07-13"
+                }
+              ]
+            }
+          end
 
-        it "associates the visits with the requested office" do
-          create_visits
+          it "does not create another visit" do
+            expect { create_visits }
+              .not_to change(Visit, :count)
+          end
 
-          expect(user.visits.pluck(:office_id))
-            .to contain_exactly(office.id, office.id)
-        end
-
-        it "returns a created response" do
-          create_visits
-
-          expect(response).to have_http_status(:created)
-        end
-
-        it "returns JSON" do
-          create_visits
-
-          expect(response.media_type).to eq("application/json")
+          it "updates the existing visit's office" do
+            create_visits
+            expect(existing_visit.reload.office).to eq(new_office)
+          end
         end
       end
 
