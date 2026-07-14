@@ -31,8 +31,6 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         before do
           sign_in user
         end
-
-        run_test!
       end
     end
 

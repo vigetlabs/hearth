@@ -87,7 +87,7 @@ class Api::V1::Visits::VisitsController < ApplicationController
 
 
   def calendar_view
-    view = params[:view].presence || "view"
+    view = params[:view].presence || "week"
     view if CALENDAR_VIEWS.include?(view)
     # @NOTE: Add bad request raise here + handler
   end

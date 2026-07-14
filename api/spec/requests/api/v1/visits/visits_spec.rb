@@ -1,6 +1,134 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
+  describe "GET /visits" do
+    let!(:user) { create(:user) }
+    let!(:office) { create(:office) }
+    let(:headers) { auth_headers_for(user) }
+
+    let(:query_params) do
+      {
+        date: "2026-07-15",
+        view: "week"
+      }
+    end
+
+    subject(:get_visits) do
+      get api_path("/visits"),
+        params: query_params,
+        headers: headers
+    end
+
+    context "when the user is authenticated" do
+      context "with invalid query parameters" do
+        let(:query_params) do
+          {
+            date: 2026-07-16
+          }
+        end
+      end
+
+      context "with valid query parameters" do
+        context "when visits exist in the requested week" do
+          let!(:visits_in_range) do
+            [
+              create(
+                :visit,
+                user: user,
+                office: office,
+                visit_date: "2026-07-15"
+              ),
+              create(
+                :visit,
+                user: user,
+                office: office,
+                visit_date: "2026-07-16"
+              )
+            ]
+          end
+
+          it "returns the visits" do
+            get_visits
+            expect(response).to have_http_status(:ok)
+            json = JSON.parse(response.body)
+            visits = json["data"]["visits"]
+
+            expect(visits).to contain_exactly(
+              hash_including(
+                "id" => visits_in_range[0].id,
+                "visit_date" => "2026-07-15"
+              ),
+              hash_including(
+                "id" => visits_in_range[1].id,
+                "visit_date" => "2026-07-16"
+              )
+            )
+          end
+        end
+
+        context "when visits exist outside the requested week" do
+          let!(:visit_outside_range) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-25"
+            )
+          end
+
+          it "does not return those visits" do
+            get_visits
+            json = JSON.parse(response.body)
+            visit_id = json["data"]["visits"]
+            expect(visit_id).not_to include(visit_outside_range.id)
+          end
+        end
+
+        context "when another user has visits in the requested week" do
+          let!(:another_users_visit) do
+            create(
+              :visit,
+              office: office,
+              visit_date: "2026-07-16"
+            )
+          end
+
+          let!(:users_vist) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-16"
+            )
+          end
+
+          it "returns all visits" do
+            get_visits
+            json = JSON.parse(response.body)
+            visits = json["data"]["visits"]
+
+            expect(visits).to contain_exactly(
+              hash_including(
+                "id" => another_users_visit.id,
+                "visit_date" => "2026-07-16",
+                "user" => hash_including(
+                  "id" => another_users_visit.user.id
+                )
+              ),
+              hash_including(
+                "id" => users_vist.id,
+                "visit_date" => "2026-07-16",
+                "user" => hash_including(
+                  "id" => user.id
+                )
+              )
+            )
+          end
+        end
+      end
+    end
+  end
+
   describe "POST /visits" do
     let!(:office) { create(:office) }
     let!(:user) { create(:user) }
