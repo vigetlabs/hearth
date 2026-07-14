@@ -5,6 +5,7 @@ class Api::V1::Visits::VisitsController < ApplicationController
 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
+  rescue_from ActionController::BadRequest, with: :handle_bad_request
 
   before_action :authenticate_user!, only: [ :create, :index ]
 
@@ -88,7 +89,7 @@ class Api::V1::Visits::VisitsController < ApplicationController
 
   def calendar_view
     view = params[:view].presence || "week"
-    view if CALENDAR_VIEWS.include?(view)
-    # @NOTE: Add bad request raise here + handler
+    return view if CALENDAR_VIEWS.include?(view)
+    raise ActionController::BadRequest, "Invalid calendar view"
   end
 end

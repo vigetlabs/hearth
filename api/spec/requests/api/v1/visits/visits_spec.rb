@@ -20,11 +20,78 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
     end
 
     context "when the user is authenticated" do
-      context "with invalid query parameters" do
+      context "with an invalid date format" do
         let(:query_params) do
           {
-            date: 2026-07-16
+            date: "not-a-date",
+            view: "week"
           }
+        end
+
+        it "returns a bad request response" do
+          get_visits
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it "returns the invalid-date message" do
+          get_visits
+          json = JSON.parse(response.body)
+          msg = get_error_message(json)
+          expect(msg).to eq("Invalid date")
+        end
+      end
+
+      context "with a non-existent date" do
+        let(:query_params) do
+          {
+            date: "2026-02-80",
+            view: "week"
+          }
+        end
+
+        it "returns a bad request response" do
+          get_visits
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it "returns the invalid-date message" do
+          get_visits
+          json = JSON.parse(response.body)
+          msg = get_error_message(json)
+          expect(msg).to eq("Invalid date")
+        end
+
+        it "returns the bad request api error code" do
+          get_visits
+          json = JSON.parse(response.body)
+          expect(get_error_code(json)).to eq(ApiErrorCodes::BadRequest::BAD_REQUEST)
+        end
+
+        it "returns the bad request api error code" do
+          get_visits
+          json = JSON.parse(response.body)
+          expect(get_error_type(json)).to eq(ApiErrorTypes::BAD_REQUEST)
+        end
+      end
+
+      context "when the calendar view is invalid" do
+        let(:query_params) do
+          {
+            date: "2026-07-15",
+            view: "month"
+          }
+        end
+
+        it "returns a bad request response" do
+          get_visits
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it "returns the invalid-view message" do
+          get_visits
+          json = JSON.parse(response.body)
+          msg = get_error_message(json)
+          expect(msg).to eq("Invalid calendar view")
         end
       end
 
