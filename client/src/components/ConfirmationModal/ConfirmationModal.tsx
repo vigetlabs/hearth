@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { AlertDialog } from "radix-ui";
 
+import { cn } from "@/util/cn";
+
 interface ConfirmationModalProps {
   open: boolean;
   title: string;
@@ -44,9 +46,12 @@ export default function ConfirmationModal({
     }
   }
 
-  const confirmClasses = destructive
-    ? "bg-red-600 text-white hover:bg-red-700"
-    : "bg-gray-900 text-white hover:bg-gray-800";
+  const confirmClasses = cn(
+    "rounded-lg px-4 py-2 text-sm font-medium focus:outline-none",
+    destructive
+      ? "bg-red-600 text-white hover:bg-red-700"
+      : "bg-gray-900 text-white hover:bg-gray-800",
+  );
 
   return (
     <AlertDialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -68,7 +73,7 @@ export default function ConfirmationModal({
               onClick={() => {
                 confirmingRef.current = true;
               }}
-              className={`rounded-lg px-4 py-2 text-sm font-medium focus:outline-none ${confirmClasses}`}
+              className={confirmClasses}
             >
               {confirmLabel}
             </AlertDialog.Action>

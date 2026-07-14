@@ -1,5 +1,9 @@
-/**
- * Events are stored keyed by `YYYY-MM-DD` (see `toDateKey`) so a cell can look
- * up its names in O(1). Each day holds zero or more names.
- */
-export type EventsByDate = Record<string, string[]>;
+export type AttendanceStatus = "confirmed" | "maybe" | "no";
+
+/** One roster member's status for a single day. */
+export interface PersonStatus {
+  name: string;
+  status: AttendanceStatus;
+}
+
+export type WeekSchedule = Record<string, PersonStatus[]>;
