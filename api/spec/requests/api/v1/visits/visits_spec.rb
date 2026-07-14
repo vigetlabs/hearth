@@ -4,6 +4,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
   describe "POST /visits" do
     let!(:office) { create(:office) }
     let!(:user) { create(:user) }
+
     let(:params) do
       {
         visits: [
@@ -18,6 +19,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         ]
       }
     end
+
     let(:headers) { auth_headers_for(user) }
 
     subject(:create_visits) do
@@ -27,7 +29,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         as: :json
     end
 
-    context "when the user is authorized" do
+    context "when the user is authenticated" do
       context "with valid parameters" do
         it "creates the visits" do
           expect { create_visits }
@@ -72,11 +74,11 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           {
             visits: [
               {
-                office_id: office.id.to_s,
+                office_id: office.id,
                 visit_date: nil
               },
               {
-                office_id: office.id.to_s,
+                office_id: office.id,
                 visit_date: nil
               }
             ]
@@ -90,6 +92,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
 
         it "returns an unprocessable content response" do
           create_visits
+
           expect(response).to have_http_status(:unprocessable_content)
         end
 
@@ -97,6 +100,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           create_visits
 
           json = JSON.parse(response.body)
+
           expect(json).to include(
             "status" => include(
               "code" => 422
@@ -113,6 +117,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
 
           json = JSON.parse(response.body)
           details = get_error_details(json)
+
           expect(details).to include(
             hash_including("field" => "visit_date")
           )
@@ -122,19 +127,22 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
       context "when the visits parameter is missing" do
         let(:params) { {} }
 
-        it "does not create a schedule" do
+        it "does not create visits" do
           expect { create_visits }
-            .not_to change(Schedule, :count)
+            .not_to change(Visit, :count)
         end
 
         it "returns a bad request response" do
           create_visits
+
           expect(response).to have_http_status(:bad_request)
         end
 
-        it "returns a bad request error" do
+        it "returns a missing parameter error" do
           create_visits
+
           json = JSON.parse(response.body)
+
           expect(json).to include(
             "status" => include(
               "code" => 400
@@ -145,6 +153,36 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             )
           )
         end
+      end
+    end
+
+    context "when the user is not authenticated" do
+      let(:headers) { {} }
+
+      it "does not create visits" do
+        expect { create_visits }
+          .not_to change(Visit, :count)
+      end
+
+      it "returns an unauthorized response" do
+        create_visits
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns an authentication error" do
+        create_visits
+
+        json = JSON.parse(response.body)
+
+        expect(json).to include(
+          "status" => include(
+            "code" => 401
+          ),
+          "error" => include(
+            "type" => ApiErrorTypes::AUTHENTICATION
+          )
+        )
       end
     end
   end
