@@ -74,6 +74,43 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         end
       end
 
+      context "when no query params" do
+        let(:query_params) { {} }
+
+        let!(:visits_in_range) do
+          [
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-15"
+            ),
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-16"
+            )
+          ]
+        end
+
+        let!(:visit_out_range) do
+          create(
+            :visit,
+            user: user,
+            office: office,
+            visit_date: "2026-07-22"
+          )
+        end
+
+        it "uses the current date and week view defaults" do
+          get_visits
+          expect(response).to have_http_status(:ok)
+          json = JSON.parse(response.body)
+          expect(json["data"]["visits"].size).to eq(2)
+        end
+      end
+
       context "when the calendar view is invalid" do
         let(:query_params) do
           {
