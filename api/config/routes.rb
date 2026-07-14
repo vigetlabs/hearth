@@ -40,7 +40,7 @@ Rails.application.routes.draw do
 
       resources :offices, only: [ :index ], module: :offices
 
-      resources :visits, only: [ :create ], module: :visits
+      resources :visits, only: [ :create, :index ], module: :visits
     end
   end
 end

@@ -2,6 +2,41 @@ require "swagger_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
   path "/api/v1/visits" do
+    get "Retrieves visits for a calendar range" do
+      tags "Visits"
+      produces "application/json"
+      security [ cookie_auth: [] ]
+
+      parameter name: :date,
+        in: :query,
+        required: false,
+        schema: { "$ref" => "#/components/schemas/visit_date" },
+        description: "Anchor date for the calendar range. Defaults to the current date."
+
+      parameter name: :view,
+        in: :query,
+        required: false,
+        schema: {
+          type: :string,
+          enum: %w[week],
+          default: "week"
+        },
+        description: "Calendar view used to calculate the returned range."
+
+      response "200", "visits fetched successfully" do
+        schema "$ref" => "#/components/schemas/visits_response"
+
+        let(:user) { create(:user) }
+
+        before do
+          sign_in user
+        end
+
+        run_test!
+      end
+    end
+
+
     post "Creates user visits"  do
       tags "Visits"
       consumes "application/json"
