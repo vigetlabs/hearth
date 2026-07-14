@@ -222,6 +222,41 @@ paths:
               "$ref": "#/components/schemas/patch_user_request"
         required: true
   "/api/v1/visits":
+    get:
+      summary: Retrieves visits for a calendar range
+      tags:
+      - Visits
+      security:
+      - cookie_auth: []
+      parameters:
+      - name: date
+        in: query
+        required: false
+        schema:
+          "$ref": "#/components/schemas/visit_date"
+        description: Anchor date for the calendar range. Defaults to the current date.
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - week
+          default: week
+        description: Calendar view used to calculate the returned range.
+      responses:
+        '400':
+          description: invalid query parameters
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
     post:
       summary: Creates user visits
       tags:
@@ -425,6 +460,7 @@ components:
             code:
               type: string
               enum:
+              - bad_request
               - missing_parameter
               - malformed_json
               - invalid_parameter_format
