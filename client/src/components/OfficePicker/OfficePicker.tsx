@@ -11,6 +11,7 @@ import { createUpdateUserObjectPayload } from "@/util/api/functions/users";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
+import { cn } from "@/util/cn";
 
 import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
 
@@ -252,9 +253,10 @@ export default function OfficePicker() {
         */}
         <div
           key={`curr-${selectedOfficeId}`}
-          className={`office-hero absolute inset-y-0 -inset-x-10 bg-cover bg-center ${
-            shouldAnimate ? "office-hero--enter" : ""
-          }`}
+          className={cn(
+            "office-hero absolute inset-y-0 -inset-x-10 bg-cover bg-center",
+            shouldAnimate && "office-hero--enter",
+          )}
           style={
             {
               backgroundImage: `url(${heroImageFor(selectedHeroOfficeId)})`,

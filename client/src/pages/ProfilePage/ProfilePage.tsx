@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useBlocker } from "react-router";
 
 import { useAuth } from "@/util/auth/useAuth";
+import { cn } from "@/util/cn";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
 
@@ -189,13 +190,13 @@ export default function ProfilePage() {
                     key={office.id}
                     type="button"
                     onClick={() => setSelectedOffice(office.id)}
-                    className={`flex h-28 w-32 flex-col items-center justify-center gap-3 rounded-xl border text-sm text-gray-900 transition-colors ${
-                      isRemote ? "border-dashed" : "border-solid"
-                    } ${
+                    className={cn(
+                      "flex h-28 w-32 flex-col items-center justify-center gap-3 rounded-xl border text-sm text-gray-900 transition-colors",
+                      isRemote ? "border-dashed" : "border-solid",
                       isSelected
                         ? "border-gray-400 bg-gray-100"
-                        : "border-gray-200 bg-white hover:bg-gray-50"
-                    }`}
+                        : "border-gray-200 bg-white hover:bg-gray-50",
+                    )}
                   >
                     <span className="text-2xl" aria-hidden="true">
                       {office.emoji}
@@ -221,11 +222,12 @@ export default function ProfilePage() {
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
-                    className={`flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors ${
+                    className={cn(
+                      "flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors",
                       isIn
                         ? "border-gray-300 bg-gray-100"
-                        : "border-gray-200 bg-white hover:bg-gray-50"
-                    }`}
+                        : "border-gray-200 bg-white hover:bg-gray-50",
+                    )}
                   >
                     <span className="text-sm font-bold text-gray-900">
                       {day}

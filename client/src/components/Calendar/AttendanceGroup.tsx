@@ -5,6 +5,7 @@ import CheckIcon from "@/components/icons/CheckIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import XIcon from "@/components/icons/XIcon";
 import type { AttendanceStatus, PersonStatus } from "@/types/calendar/calendar";
+import { cn } from "@/util/cn";
 
 interface AttendanceGroupProps {
   title: string;
@@ -42,9 +43,11 @@ export function AttendanceGroup({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className={`${groupHeader} ${titleClass} ${
-          divided ? "mt-1 border-t border-gray-200 pt-2" : "pt-1.5"
-        }`}
+        className={cn(
+          groupHeader,
+          titleClass,
+          divided ? "mt-1 border-t border-gray-200 pt-2" : "pt-1.5",
+        )}
       >
         <span className="flex items-center gap-2">
           <TitleMark status={status} locked={locked} />
@@ -53,7 +56,7 @@ export function AttendanceGroup({
           </span>
         </span>
         <ChevronDownIcon
-          className={`h-3 w-3 transition-transform ${open ? "" : "-rotate-90"}`}
+          className={cn("h-3 w-3 transition-transform", !open && "-rotate-90")}
         />
       </button>
 
@@ -82,7 +85,7 @@ function TitleMark({
     // confirmed day headers, keeping a white dashed ring so it still reads as
     // the "planning" mark instead of vanishing into a solid dot.
     return locked ? (
-      <span className={`${titleMark} bg-gray-900`}>
+      <span className={cn(titleMark, "bg-gray-900")}>
         <span className="h-2 w-2 rounded-full border border-dashed border-white" />
       </span>
     ) : (
@@ -98,9 +101,10 @@ function TitleMark({
 
   return (
     <span
-      className={`${titleMark} ${
-        locked ? "bg-gray-900 text-white" : `border ${outlineClass}`
-      }`}
+      className={cn(
+        titleMark,
+        locked ? "bg-gray-900 text-white" : ["border", outlineClass],
+      )}
     >
       <Icon className="h-2.5 w-2.5" />
     </span>

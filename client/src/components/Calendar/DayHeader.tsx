@@ -1,6 +1,7 @@
 import CheckIcon from "@/components/icons/CheckIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
 import PlusIcon from "@/components/icons/PlusIcon";
+import { cn } from "@/util/cn";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -55,9 +56,11 @@ function PlanningHeader({
           ? "You're planning this day — remove yourself"
           : "Add yourself to this day"
       }
-      className={`${headerBase} border-b border-gray-200 transition-colors disabled:cursor-not-allowed ${
-        isMine ? "bg-gray-200 hover:bg-gray-300" : "bg-white hover:bg-gray-100"
-      }`}
+      className={cn(
+        headerBase,
+        "border-b border-gray-200 transition-colors disabled:cursor-not-allowed",
+        isMine ? "bg-gray-200 hover:bg-gray-300" : "bg-white hover:bg-gray-100",
+      )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
@@ -66,7 +69,10 @@ function PlanningHeader({
           dateNumClass="text-gray-500"
         />
         <span
-          className={`${iconCircle} border-dashed border-gray-400 text-gray-700`}
+          className={cn(
+            iconCircle,
+            "border-dashed border-gray-400 text-gray-700",
+          )}
           aria-hidden="true"
         >
           {isMine ? (
@@ -107,11 +113,13 @@ function ConfirmedHeader({
 }: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
   return (
     <div
-      className={`${headerBase} border-b ${
+      className={cn(
+        headerBase,
+        "border-b",
         isMine
           ? "border-gray-800 bg-gray-900 text-white"
-          : "border-gray-200 bg-gray-200 text-gray-900"
-      }`}
+          : "border-gray-200 bg-gray-200 text-gray-900",
+      )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
@@ -119,9 +127,12 @@ function ConfirmedHeader({
           dateNumClass={isMine ? "text-gray-300" : "text-gray-500"}
         />
         <span
-          className={`${iconCircle} ${
-            isMine ? "border-white text-white" : "border-gray-900 text-gray-900"
-          }`}
+          className={cn(
+            iconCircle,
+            isMine
+              ? "border-white text-white"
+              : "border-gray-900 text-gray-900",
+          )}
           aria-hidden="true"
         >
           {isMine ? (
@@ -170,10 +181,12 @@ function DayDateLabel({
 }) {
   return (
     <span className="block">
-      <span className={`block text-xl font-bold ${weekdayClass}`}>
+      <span className={cn("block text-xl font-bold", weekdayClass)}>
         {weekdayFormat.format(date)}
       </span>
-      <span className={`block text-sm ${dateNumClass}`}>{date.getDate()}</span>
+      <span className={cn("block text-sm", dateNumClass)}>
+        {date.getDate()}
+      </span>
     </span>
   );
 }
@@ -189,10 +202,13 @@ function ProgressBar({
 }) {
   return (
     <span
-      className={`mt-4 block h-1.5 overflow-hidden rounded-full ${trackClass}`}
+      className={cn(
+        "mt-4 block h-1.5 overflow-hidden rounded-full",
+        trackClass,
+      )}
     >
       <span
-        className={`block h-full rounded-full ${barClass}`}
+        className={cn("block h-full rounded-full", barClass)}
         style={{ width: `${Math.round(fill * 100)}%` }}
       />
     </span>
@@ -211,11 +227,11 @@ function ConfirmedCount({
   emptyClass: string;
 }) {
   return confirmedCount > 0 ? (
-    <span className={`whitespace-nowrap text-xs ${countClass}`}>
+    <span className={cn("whitespace-nowrap text-xs", countClass)}>
       {confirmedCount}/{total} confirmed
     </span>
   ) : (
-    <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
+    <span className={cn("whitespace-nowrap text-xs", emptyClass)}>
       No confirmed plans yet
     </span>
   );
@@ -223,7 +239,7 @@ function ConfirmedCount({
 
 function HotSpotBadge({ className }: { className: string }) {
   return (
-    <span className={`${hotSpotBadge} ${className}`}>
+    <span className={cn(hotSpotBadge, className)}>
       Hot spot
       <span aria-hidden="true">🔥</span>
     </span>

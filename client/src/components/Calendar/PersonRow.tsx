@@ -1,4 +1,5 @@
 import type { AttendanceStatus, PersonStatus } from "@/types/calendar/calendar";
+import { cn } from "@/util/cn";
 
 interface PersonRowProps {
   person: PersonStatus;
@@ -13,9 +14,11 @@ export function PersonRow({ person, myName }: PersonRowProps) {
   return (
     <li className="flex items-center gap-2 px-4 py-1.5">
       <span
-        className={`truncate text-sm ${nameClass(status)} ${
-          isMe ? "font-medium" : ""
-        }`}
+        className={cn(
+          "truncate text-sm",
+          nameClass(status),
+          isMe && "font-medium",
+        )}
         title={name}
       >
         {name}
