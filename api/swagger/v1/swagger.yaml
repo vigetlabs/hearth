@@ -226,6 +226,8 @@ paths:
       summary: Creates user visits
       tags:
       - Visits
+      security:
+      - cookie_auth: []
       parameters: []
       responses:
         '201':
@@ -234,6 +236,24 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/visits_response"
+        '400':
+          description: missing visits parameter
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+        '422':
+          description: invalid visits parameters
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/validation_error_response"
       requestBody:
         content:
           application/json:
