@@ -850,6 +850,11 @@ components:
           format: date-time
           description: Updated-at time in ISO 8601 format
           example: '2026-07-10T13:42:18.123Z'
+    visit_date:
+      type: string
+      format: date
+      description: Calendar date only with no timezone (YYYY-MM-DD)
+      example: '2026-07-10'
     create_visits_request:
       type: object
       description: Request body for creating a new visit
