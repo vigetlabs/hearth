@@ -1,14 +1,6 @@
-import { AttendanceGroup } from "@/components/Calendar/AttendanceGroup";
 import { DayHeader } from "@/components/Calendar/DayHeader";
-import type { AttendanceStatus, PersonStatus } from "@/types/calendar/calendar";
-
-// Confirmed, then planning (maybe), then not going (no); names sort
-// alphabetically within each status.
-const STATUS_ORDER: Record<AttendanceStatus, number> = {
-  confirmed: 0,
-  maybe: 1,
-  no: 2,
-};
+import { DayRoster } from "@/components/Calendar/DayRoster";
+import type { PersonStatus } from "@/types/calendar/calendar";
 
 interface DayCellProps {
   date: Date;
@@ -46,13 +38,11 @@ export function DayCell({
   locked,
   onToggleMine,
 }: DayCellProps) {
-  const groups = groupByStatus(people);
-
   return (
     <div className="flex h-full min-h-0 flex-col">
       <DayHeader
         date={date}
-        isMine={isMine}
+        isSelected={isMine}
         confirmedCount={confirmedCount}
         total={total}
         fill={fill}
@@ -62,58 +52,7 @@ export function DayCell({
         onToggleMine={onToggleMine}
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto py-2">
-        {groups.map((group, index) => (
-          <AttendanceGroup
-            key={group.key}
-            title={group.title}
-            titleClass={group.titleClass}
-            status={group.status}
-            people={group.people}
-            myName={myName}
-            defaultOpen={group.defaultOpen}
-            divided={index > 0}
-            locked={locked}
-          />
-        ))}
-      </div>
+      <DayRoster people={people} myName={myName} />
     </div>
   );
-}
-
-/** Partition a day's roster into the display groups, each sorted by status then
-    name, dropping any group that has no people. */
-function groupByStatus(people: PersonStatus[]) {
-  const sorted = [...people].sort(
-    (a, b) =>
-      STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
-      a.name.localeCompare(b.name),
-  );
-
-  return [
-    {
-      key: "confirmed",
-      title: "In the office",
-      status: "confirmed" as AttendanceStatus,
-      people: sorted.filter((person) => person.status === "confirmed"),
-      titleClass: "text-fg",
-      defaultOpen: true,
-    },
-    {
-      key: "planning",
-      title: "Planning",
-      status: "maybe" as AttendanceStatus,
-      people: sorted.filter((person) => person.status === "maybe"),
-      titleClass: "text-fg",
-      defaultOpen: false,
-    },
-    {
-      key: "notGoing",
-      title: "Not going",
-      status: "no" as AttendanceStatus,
-      people: sorted.filter((person) => person.status === "no"),
-      titleClass: "text-fg",
-      defaultOpen: false,
-    },
-  ].filter((group) => group.people.length > 0);
 }

@@ -1,13 +1,13 @@
+import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
-import PlusIcon from "@/components/icons/PlusIcon";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
 interface DayHeaderProps {
   date: Date;
   /** Whether the logged-in user has selected this day. */
-  isMine: boolean;
+  isSelected: boolean;
   /** How many people are confirmed this day. */
   confirmedCount: number;
   /** Total office roster size, the denominator for the confirmed count. */
@@ -36,7 +36,7 @@ export function DayHeader({ locked, ...props }: DayHeaderProps) {
 /** Interactive header shown while the week is still being planned. */
 function PlanningHeader({
   date,
-  isMine,
+  isSelected,
   confirmedCount,
   total,
   fill,
@@ -49,14 +49,14 @@ function PlanningHeader({
       type="button"
       onClick={onToggleMine}
       disabled={!myName}
-      aria-pressed={isMine}
+      aria-pressed={isSelected}
       aria-label={
-        isMine
+        isSelected
           ? "You're planning this day — remove yourself"
           : "Add yourself to this day"
       }
       className={`${headerBase} border-b border-line transition-colors disabled:cursor-not-allowed ${
-        isMine
+        isSelected
           ? "bg-surface-strong hover:bg-line-strong"
           : "bg-surface hover:bg-surface-muted"
       }`}
@@ -67,16 +67,11 @@ function PlanningHeader({
           weekdayClass="text-fg"
           dateNumClass="text-fg-subtle"
         />
-        <span
-          className={`${iconCircle} border-dashed border-line-faint text-fg-strong`}
-          aria-hidden="true"
-        >
-          {isMine ? (
-            <CheckIcon className="h-3.5 w-3.5" />
-          ) : (
-            <PlusIcon className="h-3.5 w-3.5" />
-          )}
-        </span>
+        <StatusIcon
+          size="lg"
+          variant="dashed"
+          mark={isSelected ? "confirmed-yes" : "add"}
+        />
       </span>
 
       <ProgressBar
@@ -101,7 +96,7 @@ function PlanningHeader({
 /** Read-only header shown once the week is confirmed (locked). */
 function ConfirmedHeader({
   date,
-  isMine,
+  isSelected,
   confirmedCount,
   total,
   fill,
@@ -110,7 +105,7 @@ function ConfirmedHeader({
   return (
     <div
       className={`${headerBase} border-b ${
-        isMine
+        isSelected
           ? "border-strong-hover bg-strong text-fg-inverse"
           : "border-line bg-surface-strong text-fg"
       }`}
@@ -118,17 +113,17 @@ function ConfirmedHeader({
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          dateNumClass={isMine ? "text-fg-inverse-muted" : "text-fg-subtle"}
+          dateNumClass={isSelected ? "text-fg-inverse-muted" : "text-fg-subtle"}
         />
         <span
           className={`${iconCircle} ${
-            isMine
+            isSelected
               ? "border-fg-inverse text-fg-inverse"
               : "border-strong text-fg"
           }`}
           aria-hidden="true"
         >
-          {isMine ? (
+          {isSelected ? (
             <CheckIcon className="h-3.5 w-3.5" />
           ) : (
             <MinusIcon className="h-3.5 w-3.5" />
@@ -138,21 +133,21 @@ function ConfirmedHeader({
 
       <ProgressBar
         fill={fill}
-        trackClass={isMine ? "bg-white/25" : "bg-line-strong"}
-        barClass={isMine ? "bg-white" : isHotSpot ? "bg-strong" : "bg-fill"}
+        trackClass={isSelected ? "bg-white/25" : "bg-line-strong"}
+        barClass={isSelected ? "bg-white" : isHotSpot ? "bg-strong" : "bg-fill"}
       />
 
       <span className="mt-2 flex flex-wrap items-center gap-2">
         <ConfirmedCount
           confirmedCount={confirmedCount}
           total={total}
-          countClass={isMine ? "text-fg-inverse-muted" : "text-fg-muted"}
-          emptyClass={isMine ? "text-fg-inverse-muted" : "text-fg-faint"}
+          countClass={isSelected ? "text-fg-inverse-muted" : "text-fg-muted"}
+          emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
         />
         {isHotSpot && (
           <HotSpotBadge
             className={
-              isMine ? "bg-surface text-fg" : "bg-strong text-fg-inverse"
+              isSelected ? "bg-surface text-fg" : "bg-strong text-fg-inverse"
             }
           />
         )}

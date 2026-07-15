@@ -9,7 +9,8 @@ import type {
   PersonStatus,
   WeekSchedule,
 } from "@/types/calendar/calendar";
-import { useOffice } from "@/util/office/useOffice";
+import { isInOffice } from "@/types/calendar/calendar";
+import type { Office } from "@/types/api/offices";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
@@ -19,7 +20,7 @@ const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: PersonStatus[] = [];
 
 const confirmedCountOf = (day: PersonStatus[]) =>
-  day.filter((person) => person.status === "confirmed").length;
+  day.filter((person) => person.status === "confirmed-yes").length;
 
 // "Jun 29" / "Jul 3" — combined with the year into a "Jun 29 - Jul 3, 2026"
 // range label for the week navigator.
@@ -30,10 +31,11 @@ const rangeFormat = new Intl.DateTimeFormat(undefined, {
 
 interface CalendarProps {
   schedule: WeekSchedule;
+  office: Office;
+  setOffice: (office: Office) => void;
 }
 
-export function Calendar({ schedule }: CalendarProps) {
-  const { office } = useOffice();
+export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   const { user } = useAuth();
   const myName = userDisplayName(user);
 
@@ -59,11 +61,11 @@ export function Calendar({ schedule }: CalendarProps) {
   const goNext = () => setFocus((f) => addDays(f, 7));
   const goToday = () => setFocus(startOfWeek(new Date()));
 
-  // Rewrite your own selected days for the focused week when it moves between
-  // planning and confirmed: a day you've picked reads as "maybe" (Planning)
-  // while planning and "confirmed" (In the office) once the week is locked in.
-  // Days you're out of ("no") are left alone.
-  function setMineForWeek(selectedStatus: AttendanceStatus) {
+  // Rewrite your own statuses for the focused week when it moves between planning
+  // and confirmed, preserving the in/out axis: while planning, days read as
+  // "planning-yes" (Planning) or "planning-no" (Not going); once locked in they
+  // become "confirmed-yes" (In the office) or "confirmed-no" (Confirmed out).
+  function setMineConfirmed(confirmed: boolean) {
     if (!myName) return;
     setAttendance((prev) => {
       const next = { ...prev };
@@ -72,11 +74,18 @@ export function Calendar({ schedule }: CalendarProps) {
         const day = prev[key];
         if (!day) continue;
         const mine = day.find((person) => person.name === myName);
-        if (!mine || mine.status === "no") continue;
+        if (!mine) continue;
+        const inOffice = isInOffice(mine.status);
+        const nextStatus: AttendanceStatus = confirmed
+          ? inOffice
+            ? "confirmed-yes"
+            : "confirmed-no"
+          : inOffice
+            ? "planning-yes"
+            : "planning-no";
+        if (nextStatus === mine.status) continue;
         next[key] = day.map((person) =>
-          person.name === myName
-            ? { ...person, status: selectedStatus }
-            : person,
+          person.name === myName ? { ...person, status: nextStatus } : person,
         );
       }
       return next;
@@ -85,7 +94,7 @@ export function Calendar({ schedule }: CalendarProps) {
 
   const confirmWeek = () => {
     setConfirmedWeeks((prev) => new Set(prev).add(weekKey));
-    setMineForWeek("confirmed");
+    setMineConfirmed(true);
   };
 
   const unlockWeek = () => {
@@ -94,19 +103,21 @@ export function Calendar({ schedule }: CalendarProps) {
       next.delete(weekKey);
       return next;
     });
-    setMineForWeek("maybe");
+    setMineConfirmed(false);
   };
 
-  // While planning, picking a day marks you as "maybe" so you show up under
-  // Planning; unpicking drops you to "no" (Not going). Confirming the week
-  // later promotes your picks to "confirmed" (see confirmWeek).
+  // While planning, picking a day marks you as "planning-yes" so you show up
+  // under Planning; unpicking drops you to "planning-no" (Not going). Confirming
+  // the week later promotes your picks to "confirmed-yes" (see confirmWeek).
   function toggleMine(key: string) {
     if (!myName) return;
     setAttendance((prev) => {
       const day = prev[key] ?? EMPTY_DAY;
       const mine = day.find((person) => person.name === myName);
-      const selected = mine ? mine.status !== "no" : false;
-      const nextStatus: AttendanceStatus = selected ? "no" : "maybe";
+      const selected = mine ? mine.status !== "planning-no" : false;
+      const nextStatus: AttendanceStatus = selected
+        ? "planning-no"
+        : "planning-yes";
       const nextDay: PersonStatus[] = mine
         ? day.map((person) =>
             person.name === myName ? { ...person, status: nextStatus } : person,
@@ -131,11 +142,11 @@ export function Calendar({ schedule }: CalendarProps) {
   const maxCount = Math.max(0, ...counts);
 
   // The hot spot is the day with the most confirmed people. Ties break by the
-  // most still-planning ("maybe") people; if days remain tied, all of them show.
+  // most still-planning ("planning-yes") people; if days remain tied, all show.
   const planningCounts = days.map(
     (day) =>
       (attendance[toDateKey(day)] ?? EMPTY_DAY).filter(
-        (person) => person.status === "maybe",
+        (person) => person.status === "planning-yes",
       ).length,
   );
   const hotSpotDays = new Set<number>();
@@ -152,7 +163,7 @@ export function Calendar({ schedule }: CalendarProps) {
   const today = new Date();
   const todayIndex = days.findIndex((day) => isSameDay(day, today));
 
-  const isRemote = office.id === "remote";
+  const isRemote = office.name.toLowerCase() === "remote";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm">
@@ -162,12 +173,12 @@ export function Calendar({ schedule }: CalendarProps) {
           <span aria-hidden="true">{office.emoji}</span>
         </h2>
 
-        <OfficeSwitcher />
+        <OfficeSwitcher office={office} setOffice={setOffice} />
       </div>
 
       {!isRemote && (
         <div className="flex items-center gap-4 pb-5">
-          <div className="flex items-center gap-1 rounded-full bg-surface-muted p-1">
+          <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
             <button
               onClick={goPrev}
               className={arrowButton}
@@ -254,7 +265,7 @@ export function Calendar({ schedule }: CalendarProps) {
                   myName={myName}
                   isMine={dayData.some(
                     (person) =>
-                      person.name === myName && person.status !== "no",
+                      person.name === myName && isInOffice(person.status),
                   )}
                   confirmedCount={count}
                   total={dayData.length}

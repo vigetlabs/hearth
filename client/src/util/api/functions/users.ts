@@ -9,6 +9,10 @@ import type {
 
 import type { EmptySuccessResponse } from "@/types/api/generics";
 import type { ScheduleAttributes } from "@/types/api/schedules";
+import {
+  mockUsersResponse,
+  type MockUsersResponse,
+} from "@/util/api/mock/users";
 
 export function createUserObjectPayload(
   email: string,
@@ -67,6 +71,13 @@ export async function getCurrentUser(): Promise<UserResponse> {
   const response = await api.get("/users/me").json<UserResponse>();
 
   return response;
+}
+
+// The roster endpoint isn't built on the API yet, so this resolves the mock in
+// the real response shape. Swapping in `api.get("/users").json<...>()` later
+// touches nothing outside this function.
+export async function getUsers(): Promise<MockUsersResponse> {
+  return Promise.resolve(mockUsersResponse);
 }
 
 export async function logoutUser(): Promise<EmptySuccessResponse> {

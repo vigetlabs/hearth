@@ -1,90 +1,78 @@
+import { useState } from "react";
+
 import { Calendar } from "@/components/Calendar/Calendar";
-import type {
-  AttendanceStatus,
-  PersonStatus,
-  WeekSchedule,
-} from "@/types/calendar/calendar";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
-import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
+import { useOfficesQuery } from "@/util/api/queries/officeQueries";
+import { useRosterQuery } from "@/util/api/queries/userQueries";
+import { useVisitsQuery } from "@/util/api/queries/visitQueries";
+import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
+import { addDays, startOfWeek } from "@/util/dates/date";
+import type { Office } from "@/types/api/offices";
 
-// The office roster is the same every day; only each person's status changes.
-const ROSTER = [
-  "Jackson F",
-  "Abby S",
-  "Natalie D",
-  "Tommy B",
-  "Laura L",
-  "Blair C",
-  "Jeremy F",
-  "Sam P",
-  "Riley K",
-  "Morgan T",
-];
-
-// Per-day status overrides by name; anyone not listed defaults to "no".
-type Overrides = Record<string, AttendanceStatus>;
+const WEEKDAYS_PER_WEEK = 5;
 
 export default function CalendarPage() {
   const { user } = useAuth();
   const me = userDisplayName(user);
 
-  // The logged-in user is part of the roster too (the day cell sorts everyone
-  // by status and name, so order here doesn't matter).
-  const roster = me ? [me, ...ROSTER] : ROSTER;
+  const officesQuery = useOfficesQuery();
+  const rosterQuery = useRosterQuery();
+  const visitsQuery = useVisitsQuery();
 
-  function day(overrides: Overrides): PersonStatus[] {
-    return roster.map((name) => ({ name, status: overrides[name] ?? "no" }));
-  }
+  // The office the user has explicitly switched to. Null means "follow the
+  // default" — the user's home office, falling back to the first office the API
+  // returns. Held in component state only; resets on a full page load.
+  const [selectedOfficeId, setSelectedOfficeId] = useState<number | null>(null);
+
+  const offices = officesQuery.data ?? [];
+  const defaultOffice =
+    offices.find((option) => option.id === user?.office_id) ??
+    offices[0] ??
+    null;
+  const office =
+    offices.find((option) => option.id === selectedOfficeId) ?? defaultOffice;
+
+  const setOffice = (next: Office) => setSelectedOfficeId(next.id);
 
   const weekStart = startOfWeek(new Date());
-  const sampleSchedule: WeekSchedule = {
-    [toDateKey(weekStart)]: day({
-      [me]: "maybe",
-      "Jackson F": "confirmed",
-      "Abby S": "confirmed",
-      "Laura L": "confirmed",
-      "Natalie D": "maybe",
-      "Riley K": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 1))]: day({
-      [me]: "maybe",
-      "Jackson F": "confirmed",
-      "Blair C": "confirmed",
-      "Laura L": "maybe",
-      "Sam P": "maybe",
-      "Morgan T": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 2))]: day({
-      "Natalie D": "maybe",
-      "Riley K": "maybe",
-      "Sam P": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 3))]: day({
-      [me]: "maybe",
-      "Natalie D": "confirmed",
-      "Tommy B": "confirmed",
-      "Laura L": "confirmed",
-      "Blair C": "confirmed",
-      "Jeremy F": "confirmed",
-      "Abby S": "confirmed",
-      "Sam P": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 4))]: day({
-      "Blair C": "confirmed",
-      "Tommy B": "confirmed",
-      "Laura L": "confirmed",
-      "Abby S": "confirmed",
-      "Jeremy F": "confirmed",
-      "Jackson F": "maybe",
-      "Riley K": "maybe",
-    }),
-  };
+  const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
+    addDays(weekStart, i),
+  );
+
+  if (!office || rosterQuery.isPending || visitsQuery.isPending) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-surface-sunken">
+        <p className="text-lg text-fg-subtle">Loading calendar...</p>
+      </div>
+    );
+  }
+
+  if (officesQuery.isError || rosterQuery.isError || visitsQuery.isError) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-surface-sunken">
+        <p className="text-lg text-fg-subtle">
+          Unable to load the calendar. Please try again.
+        </p>
+      </div>
+    );
+  }
+
+  const schedule = seedSelf(
+    buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
+    me,
+    weekDates,
+  );
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
-        <Calendar schedule={sampleSchedule} />
+        <Calendar
+          schedule={schedule}
+          office={office}
+          setOffice={setOffice}
+          key={office.id}
+        />
       </div>
     </div>
   );
