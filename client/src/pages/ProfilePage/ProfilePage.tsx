@@ -15,6 +15,7 @@ import type { Schedule } from "@/types/api/schedules";
 import { WEEKDAYS } from "@/types/schedule/schedule";
 import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
 import { buildScheduleAttributes } from "@/util/api/functions/schedules";
+import { cn } from "@/util/cn";
 
 interface FormSnapshot {
   firstName: string;
@@ -39,6 +40,8 @@ function areDaySetsEqual(first: Set<string>, second: Set<string>) {
 }
 
 export default function ProfilePage() {
+  const officeItemClassName = cn("min-w-32");
+
   const { user } = useAuth();
 
   const queryClient = useQueryClient();
@@ -48,7 +51,6 @@ export default function ProfilePage() {
 
   const updateUserMutation = useUpdateUserMutation();
 
-  console.log(user.default_schedule);
   const initialSelectedDayIds: Set<string> = user.default_schedule
     ? getSelectedDayIds(user.default_schedule)
     : new Set<string>();
@@ -251,6 +253,7 @@ export default function ProfilePage() {
                 showRemoteOption={true}
                 selectedOfficeId={selectedOfficeId}
                 handleSelectOffice={setSelectedOfficeId}
+                officeItemClassName={officeItemClassName}
               />
             </div>
           </section>

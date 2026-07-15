@@ -1,12 +1,14 @@
 import { RadioGroup } from "radix-ui";
 import OfficeItem from "../OfficeItem/OfficeItem";
 import type { Office } from "@/types/api/offices";
+import { cn } from "@/util/cn";
 
-interface ShowHomeProps {
+interface OfficeOptionsProps {
   offices: Office[];
   showRemoteOption: boolean;
   selectedOfficeId: string;
   handleSelectOffice?: (newOfficeId: string) => void;
+  officeItemClassName?: string;
 }
 
 export default function OfficeOptions({
@@ -14,12 +16,18 @@ export default function OfficeOptions({
   showRemoteOption = false,
   selectedOfficeId,
   handleSelectOffice,
-}: ShowHomeProps) {
+  officeItemClassName,
+}: OfficeOptionsProps) {
   const visibleOfficeButtons = showRemoteOption
     ? offices
     : offices.filter(
         (office: Office) => office.name.toLowerCase() !== "remote",
       );
+
+  const officeClasses = cn(
+    "mt-5 grid gap-3",
+    showRemoteOption ? "grid-cols-5" : "grid-cols-4",
+  );
 
   return (
     <RadioGroup.Root
@@ -28,9 +36,13 @@ export default function OfficeOptions({
       aria-label="Which office is your primary?"
       className=""
     >
-      <div className="mt-5 grid grid-cols-4 gap-3">
+      <div className={officeClasses}>
         {visibleOfficeButtons.map((office: Office) => (
-          <OfficeItem key={office.id} office={office} />
+          <OfficeItem
+            key={office.id}
+            office={office}
+            className={officeItemClassName}
+          />
         ))}
       </div>
     </RadioGroup.Root>
