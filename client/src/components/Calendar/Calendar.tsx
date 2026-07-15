@@ -11,8 +11,6 @@ import type {
 } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";
 import type { Office } from "@/types/api/offices";
-import { useAuth } from "@/util/auth/useAuth";
-import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
 
 const WEEKDAYS_PER_WEEK = 5;
@@ -33,11 +31,15 @@ interface CalendarProps {
   schedule: WeekSchedule;
   office: Office;
   setOffice: (office: Office) => void;
+  displayName: string;
 }
 
-export function Calendar({ schedule, office, setOffice }: CalendarProps) {
-  const { user } = useAuth();
-  const myName = userDisplayName(user);
+export function Calendar({
+  schedule,
+  office,
+  setOffice,
+  displayName
+}: CalendarProps) {
 
   const [focus, setFocus] = useState(() => startOfWeek(new Date()));
   // Local attendance so toggling yourself in/out of a day updates the grid.
@@ -57,23 +59,31 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   // "Jump to today" shortcut when it would be a no-op.
   const isCurrentWeek = weekKey === toDateKey(startOfWeek(new Date()));
 
-  const goPrev = () => setFocus((f) => addDays(f, -7));
-  const goNext = () => setFocus((f) => addDays(f, 7));
-  const goToday = () => setFocus(startOfWeek(new Date()));
+  function goPrevWeek(): void {
+    setFocus((curDate) => addDays(curDate, -7));
+  }
+
+  function goNextWeek(): void {
+    setFocus((curDate) => addDays(curDate, 7));
+  }
+
+  function goToday(): void {
+    setFocus(() => startOfWeek(new Date));
+  }
 
   // Rewrite your own statuses for the focused week when it moves between planning
   // and confirmed, preserving the in/out axis: while planning, days read as
   // "planning-yes" (Planning) or "planning-no" (Not going); once locked in they
   // become "confirmed-yes" (In the office) or "confirmed-no" (Confirmed out).
   function setMineConfirmed(confirmed: boolean) {
-    if (!myName) return;
+    if (!displayName) return;
     setAttendance((prev) => {
       const next = { ...prev };
       for (const date of days) {
         const key = toDateKey(date);
         const day = prev[key];
         if (!day) continue;
-        const mine = day.find((person) => person.name === myName);
+        const mine = day.find((person) => person.name === displayName);
         if (!mine) continue;
         const inOffice = isInOffice(mine.status);
         const nextStatus: AttendanceStatus = confirmed
@@ -85,7 +95,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
             : "planning-no";
         if (nextStatus === mine.status) continue;
         next[key] = day.map((person) =>
-          person.name === myName ? { ...person, status: nextStatus } : person,
+          person.name === displayName ? { ...person, status: nextStatus } : person,
         );
       }
       return next;
@@ -110,19 +120,19 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   // under Planning; unpicking drops you to "planning-no" (Not going). Confirming
   // the week later promotes your picks to "confirmed-yes" (see confirmWeek).
   function toggleMine(key: string) {
-    if (!myName) return;
+    if (!displayName) return;
     setAttendance((prev) => {
       const day = prev[key] ?? EMPTY_DAY;
-      const mine = day.find((person) => person.name === myName);
+      const mine = day.find((person) => person.name === displayName);
       const selected = mine ? mine.status !== "planning-no" : false;
       const nextStatus: AttendanceStatus = selected
         ? "planning-no"
         : "planning-yes";
       const nextDay: PersonStatus[] = mine
         ? day.map((person) =>
-            person.name === myName ? { ...person, status: nextStatus } : person,
+            person.name === displayName ? { ...person, status: nextStatus } : person,
           )
-        : [{ name: myName, status: nextStatus }, ...day];
+        : [{ name: displayName, status: nextStatus }, ...day];
       return { ...prev, [key]: nextDay };
     });
   }
@@ -139,6 +149,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   const counts = days.map((day) =>
     confirmedCountOf(attendance[toDateKey(day)] ?? EMPTY_DAY),
   );
+
   const maxCount = Math.max(0, ...counts);
 
   // The hot spot is the day with the most confirmed people. Ties break by the
@@ -180,7 +191,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
         <div className="flex items-center gap-4 pb-5">
           <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
             <button
-              onClick={goPrev}
+              onClick={goPrevWeek}
               className={arrowButton}
               aria-label="Previous week"
             >
@@ -188,7 +199,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
             </button>
             <span className="px-2 text-sm font-bold text-fg">{rangeLabel}</span>
             <button
-              onClick={goNext}
+              onClick={goNextWeek}
               className={arrowButton}
               aria-label="Next week"
             >
@@ -255,6 +266,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
           >
             {days.map((day, i) => {
               const key = toDateKey(day);
+              console.log(key);
               const dayData = attendance[key] ?? EMPTY_DAY;
               const count = counts[i];
               return (
@@ -262,10 +274,10 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
                   key={key}
                   date={day}
                   people={dayData}
-                  myName={myName}
+                  myName={displayName}
                   isMine={dayData.some(
                     (person) =>
-                      person.name === myName && isInOffice(person.status),
+                      person.name === displayName && isInOffice(person.status),
                   )}
                   confirmedCount={count}
                   total={dayData.length}

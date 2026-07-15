@@ -9,12 +9,15 @@ import { useVisitsQuery } from "@/util/api/queries/visitQueries";
 import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
 import { addDays, startOfWeek } from "@/util/dates/date";
 import type { Office } from "@/types/api/offices";
+import type { Schedule } from "@/types/api/schedules";
 
 const WEEKDAYS_PER_WEEK = 5;
 
 export default function CalendarPage() {
   const { user } = useAuth();
-  const me = userDisplayName(user);
+  const displayName = userDisplayName(user);
+  const defaultSchedule: Schedule = user.default_schedule;
+  console.log(defaultSchedule);
 
   const officesQuery = useOfficesQuery();
   const rosterQuery = useRosterQuery();
@@ -60,7 +63,7 @@ export default function CalendarPage() {
 
   const schedule = seedSelf(
     buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
-    me,
+    displayName,
     weekDates,
   );
 
@@ -72,6 +75,7 @@ export default function CalendarPage() {
           office={office}
           setOffice={setOffice}
           key={office.id}
+          displayName={displayName}
         />
       </div>
     </div>
