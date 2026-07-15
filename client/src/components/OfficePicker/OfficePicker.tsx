@@ -2,9 +2,6 @@ import { useNavigate } from "react-router";
 import { useState, type CSSProperties } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { RadioGroup } from "radix-ui";
-
-import OfficeItem from "@/components/OfficeItem/OfficeItem";
 import type { Office } from "@/types/api/offices";
 import type { PatchUserRequest } from "@/types/api/users";
 import { createUpdateUserObjectPayload } from "@/util/api/functions/users";
@@ -16,6 +13,7 @@ import { cn } from "@/util/cn";
 import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
 
 import "./OfficePicker.css";
+import OfficeOptions from "../OfficeOptions/OfficeOptions";
 
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");
@@ -179,12 +177,7 @@ export default function OfficePicker() {
               your office every day, so you can time your visits right
             </h1>
 
-            <RadioGroup.Root
-              value={selectedOfficeId}
-              onValueChange={handleSelectOffice}
-              aria-label="Which office is your primary?"
-              className="mt-10"
-            >
+            <div className="mt-10">
               <p className="text-sm font-semibold text-fg">
                 What's your primary office?
               </p>
@@ -192,13 +185,15 @@ export default function OfficePicker() {
               <p className="mt-1 text-sm text-fg-subtle">
                 Pick the one you visit the most, even if you're mostly remote.
               </p>
+            </div>
 
-              <div className="mt-5 grid grid-cols-4 gap-3">
-                {officeCards.map((office) => (
-                  <OfficeItem key={office.id} office={office} />
-                ))}
-              </div>
-            </RadioGroup.Root>
+            <div className="mt-10">
+              <OfficeOptions
+                offices={offices}
+                showRemoteOption={false}
+                handleSelectOffice={handleSelectOffice}
+              />
+            </div>
 
             <button
               type="button"
