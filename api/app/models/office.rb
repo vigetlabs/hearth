@@ -19,6 +19,7 @@ class Office < ApplicationRecord
   validates :emoji, presence: true
 
   has_many :users
+  has_many :visits, dependent: :destroy
 
   def normalize_location_fields
     self.name = name&.squish&.downcase

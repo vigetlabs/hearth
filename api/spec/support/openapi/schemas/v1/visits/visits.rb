@@ -4,7 +4,21 @@ module OpenApi::Schemas::V1::Visits
     format: :date,
     description: "Calendar date only with no timezone (YYYY-MM-DD)",
     example: "2026-07-10"
-  }.freeze
+  }
+
+  VISITS_USER_SUMMARY = {
+    type: :object,
+    required: %w[
+      id
+      first_name
+      last_name
+    ],
+    properties: {
+      id: { type: :integer },
+      first_name: { type: :string },
+      last_name: { type: :string }
+    }
+  }
 
 
   # VISIT_OBJECT: Public visit object returned by the API
@@ -22,9 +36,7 @@ module OpenApi::Schemas::V1::Visits
     ],
     properties: {
       id: { type: :integer },
-      user: {
-        schema: OpenApi::Schemas::V1::Users::USER_OBJECT
-      },
+      user: VISITS_USER_SUMMARY,
       visit_date: VISIT_DATE,
       created_at: {
         type: :string,
@@ -41,26 +53,30 @@ module OpenApi::Schemas::V1::Visits
     }
   }
 
-  # CREATE_VISIT_REQUEST: Request body for creating a visit
+  # CREATE_VISITS_REQUEST: Request body for creating a visit
   #
   # Use this as the request body schema for `POST /api/v1/visits`.
   #
   # @NOTE No user information is required in the request payload. The user is associated in the backend level by referring to Devise's
   # `current_user` when creating the visit object.
-  CREATE_VISIT_REQUEST = {
+  CREATE_VISITS_REQUEST = {
     type: :object,
     description: "Request body for creating a new visit",
-    required: %w[visit],
+    required: %w[visits],
     properties: {
-      visit: {
-        type: :object,
-        required: %w[
-          visit_date
-          office_id
-        ],
-        properties: {
-          visit_date: VISIT_DATE,
-          office_id: { type: :integer }
+      visits: {
+        type: :array,
+        minItems: 1,
+        items: {
+          type: :object,
+          required: %w[
+            visit_date
+            office_id
+          ],
+          properties: {
+            visit_date: VISIT_DATE,
+            office_id: { type: :integer }
+          }
         }
       }
     }

@@ -10,4 +10,8 @@ module ErrorHelpers
   def get_error_details(json)
     json["error"]["details"]
   end
+
+  def get_error_message(json)
+    json["status"]["message"]
+  end
 end

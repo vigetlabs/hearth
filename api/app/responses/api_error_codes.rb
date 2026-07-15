@@ -13,6 +13,7 @@ module ApiErrorCodes
   end
 
   module BadRequest
+    BAD_REQUEST = "bad_request"
     MISSING_PARAMETER = "missing_parameter"
     MALFORMED_JSON = "malformed_json"
     INVALID_PARAMETER_FORMAT = "invalid_parameter_format"

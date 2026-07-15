@@ -140,6 +140,7 @@ module OpenApi::Schemas::V1::Errors
           code: {
             type: :string,
             enum: [
+              ApiErrorCodes::BadRequest::BAD_REQUEST,
               ApiErrorCodes::BadRequest::MISSING_PARAMETER,
               ApiErrorCodes::BadRequest::MALFORMED_JSON,
               ApiErrorCodes::BadRequest::INVALID_PARAMETER_FORMAT
