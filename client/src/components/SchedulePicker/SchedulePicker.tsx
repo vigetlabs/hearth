@@ -9,8 +9,9 @@ import type { CreateScheduleRequest } from "@/types/api/schedules";
 import type { Office } from "@/types/api/offices";
 import { WEEKDAYS } from "@/types/schedule/schedule";
 import { createDefaultScheduleObjectPayload } from "@/util/api/functions/schedules";
-import { generateCurrentUserDefaultScheduleKey } from "@/util/api/keys/scheduleKeys";
 import { useCreateDefaultScheduleMutation } from "@/util/api/mutations/schedules/createDefaultScheduleMutation";
+import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
+import type { User } from "@/types/api/users";
 
 export default function SchedulePicker() {
   const location = useLocation();
@@ -55,11 +56,9 @@ export default function SchedulePicker() {
 
     createDefaultScheduleMutation.mutate(payload, {
       onSuccess: (schedule) => {
-        queryClient.setQueryData(
-          generateCurrentUserDefaultScheduleKey(),
-          schedule,
+        queryClient.setQueryData(generateCurrentUserKey(), (user: User) =>
+          user ? { ...user, default_schedule: schedule } : user,
         );
-
         navigate("/users/login");
       },
     });

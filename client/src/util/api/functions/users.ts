@@ -8,6 +8,7 @@ import type {
 } from "@/types/api/users";
 
 import type { EmptySuccessResponse } from "@/types/api/generics";
+import type { ScheduleAttributes } from "@/types/api/schedules";
 
 export function createUserObjectPayload(
   email: string,
@@ -80,12 +81,14 @@ export function createUpdateUserObjectPayload(
   first_name?: string,
   last_name?: string,
   office_id?: number,
+  default_schedule?: ScheduleAttributes,
 ): PatchUserRequest {
   return {
     user: {
       first_name,
       last_name,
       office_id,
+      default_schedule,
     },
   };
 }

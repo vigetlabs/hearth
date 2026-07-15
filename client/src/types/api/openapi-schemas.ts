@@ -477,6 +477,107 @@ export interface paths {
     };
     trace?: never;
   };
+  "/api/v1/visits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieves visits for a calendar range */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Anchor date for the calendar range. Defaults to the current date. */
+          date?: components["schemas"]["visit_date"];
+          /** @description Calendar view used to calculate the returned range. */
+          view?: "week";
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description invalid query parameters */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+        /** @description authentication required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Creates user visits */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["create_visits_request"];
+        };
+      };
+      responses: {
+        /** @description visits created successfully */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["visits_response"];
+          };
+        };
+        /** @description missing visits parameter */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+        /** @description authentication required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+        /** @description invalid visits parameters */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["validation_error_response"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -546,7 +647,10 @@ export interface components {
         type: "bad_request_error";
         /** @enum {string} */
         code:
-          "missing_parameter" | "malformed_json" | "invalid_parameter_format";
+          | "bad_request"
+          | "missing_parameter"
+          | "malformed_json"
+          | "invalid_parameter_format";
         /** @example user */
         field?: string | null;
       };
@@ -566,6 +670,23 @@ export interface components {
     /** @description Public schedule data returned by the API. */
     schedule: {
       id: number;
+      is_default: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      monday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      tuesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      wednesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      thursday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      friday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      saturday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      sunday: boolean;
+    };
+    schedule_attributes: {
       is_default: boolean;
       /** @description Whether the user has selected this day in their schedule */
       monday: boolean;
@@ -637,7 +758,24 @@ export interface components {
         message: string;
       };
       data: {
-        schedules: unknown[];
+        schedules: {
+          id: number;
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        }[];
       };
     };
     /** @description Public office data returned by the API. */
@@ -699,7 +837,11 @@ export interface components {
     /** @description Public visit data returned by the API. */
     visit: {
       id: number;
-      user: unknown;
+      user: {
+        id: number;
+        first_name: string;
+        last_name: string;
+      };
       /**
        * Format: date
        * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -719,9 +861,15 @@ export interface components {
        */
       updated_at: string;
     };
+    /**
+     * Format: date
+     * @description Calendar date only with no timezone (YYYY-MM-DD)
+     * @example 2026-07-10
+     */
+    visit_date: string;
     /** @description Request body for creating a new visit */
-    create_visit_request: {
-      visit: {
+    create_visits_request: {
+      visits: {
         /**
          * Format: date
          * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -729,7 +877,7 @@ export interface components {
          */
         visit_date: string;
         office_id: number;
-      };
+      }[];
     };
     /** @description Full response body for endpoints that return a single visit. */
     visit_response: {
@@ -741,7 +889,11 @@ export interface components {
         /** @description Public visit data returned by the API. */
         visit: {
           id: number;
-          user: unknown;
+          user: {
+            id: number;
+            first_name: string;
+            last_name: string;
+          };
           /**
            * Format: date
            * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -772,7 +924,11 @@ export interface components {
       data: {
         visits: {
           id: number;
-          user: unknown;
+          user: {
+            id: number;
+            first_name: string;
+            last_name: string;
+          };
           /**
            * Format: date
            * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -802,7 +958,6 @@ export interface components {
       first_name: string;
       last_name: string;
       office_id: number | null;
-      /** @description Public schedule data returned by the API. */
       default_schedule?: {
         id: number;
         is_default: boolean;
@@ -820,7 +975,7 @@ export interface components {
         saturday: boolean;
         /** @description Whether the user has selected this day in their schedule */
         sunday: boolean;
-      };
+      } | null;
       lab?: string;
     };
     /** @description Full response body for endpoints that return one user. */
@@ -838,7 +993,6 @@ export interface components {
           first_name: string;
           last_name: string;
           office_id: number | null;
-          /** @description Public schedule data returned by the API. */
           default_schedule?: {
             id: number;
             is_default: boolean;
@@ -856,7 +1010,7 @@ export interface components {
             saturday: boolean;
             /** @description Whether the user has selected this day in their schedule */
             sunday: boolean;
-          };
+          } | null;
           lab?: string;
         };
       };
@@ -894,6 +1048,23 @@ export interface components {
         last_name?: string;
         /** @example 1 */
         office_id?: number;
+        default_schedule?: {
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        };
       };
     };
   };

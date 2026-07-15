@@ -15,6 +15,19 @@ module OpenApi::Schemas::V1::Schedules
       description: "Whether the user has selected this day in their schedule"
     }
   end
+
+  SCHEDULE_ATTRIBUTES = {
+    type: :object,
+    required: [
+      "is_default",
+      *DAYS
+    ],
+    properties: {
+      is_default: { type: :boolean },
+      **DAY_PROPERTIES
+    }
+  }
+
   # CREATE_USER_REQUEST: Request body for creating a schedule
   #
   # Use this as the request body schema for `POST /api/v1/schedules`
@@ -23,17 +36,7 @@ module OpenApi::Schemas::V1::Schedules
     description: "Request body for creating a new schedule",
     required: %w[schedule],
     properties: {
-      schedule: {
-        type: :object,
-        required: [
-          "is_default",
-          *DAYS
-        ],
-        properties: {
-          is_default: { type: :boolean },
-          **DAY_PROPERTIES
-        }
-      }
+      schedule: SCHEDULE_ATTRIBUTES
     }
   }
 
@@ -92,7 +95,7 @@ module OpenApi::Schemas::V1::Schedules
         properties: {
           schedules: {
             type: :array,
-            schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
+            items: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
           }
         }
       }

@@ -526,6 +526,41 @@ components:
         sunday:
           type: boolean
           description: Whether the user has selected this day in their schedule
+    schedule_attributes:
+      type: object
+      required:
+      - is_default
+      - monday
+      - tuesday
+      - wednesday
+      - thursday
+      - friday
+      - saturday
+      - sunday
+      properties:
+        is_default:
+          type: boolean
+        monday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        tuesday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        wednesday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        thursday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        friday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        saturday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        sunday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
     create_schedule_request:
       type: object
       description: Request body for creating a new schedule
@@ -648,7 +683,7 @@ components:
           properties:
             schedules:
               type: array
-              schedule:
+              items:
                 type: object
                 description: Public schedule data returned by the API.
                 required:
@@ -850,6 +885,11 @@ components:
           format: date-time
           description: Updated-at time in ISO 8601 format
           example: '2026-07-10T13:42:18.123Z'
+    visit_date:
+      type: string
+      format: date
+      description: Calendar date only with no timezone (YYYY-MM-DD)
+      example: '2026-07-10'
     create_visits_request:
       type: object
       description: Request body for creating a new visit
@@ -1017,44 +1057,46 @@ components:
           type: integer
           nullable: true
         default_schedule:
-          type: object
-          description: Public schedule data returned by the API.
-          required:
-          - id
-          - is_default
-          - monday
-          - tuesday
-          - wednesday
-          - thursday
-          - friday
-          - saturday
-          - sunday
-          properties:
-            id:
-              type: integer
-            is_default:
-              type: boolean
-            monday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            tuesday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            wednesday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            thursday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            friday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            saturday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
-            sunday:
-              type: boolean
-              description: Whether the user has selected this day in their schedule
+          nullable: true
+          allOf:
+          - type: object
+            description: Public schedule data returned by the API.
+            required:
+            - id
+            - is_default
+            - monday
+            - tuesday
+            - wednesday
+            - thursday
+            - friday
+            - saturday
+            - sunday
+            properties:
+              id:
+                type: integer
+              is_default:
+                type: boolean
+              monday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              tuesday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              wednesday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              thursday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              friday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              saturday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
+              sunday:
+                type: boolean
+                description: Whether the user has selected this day in their schedule
         lab:
           type: string
     user_response:
@@ -1100,51 +1142,53 @@ components:
                   type: integer
                   nullable: true
                 default_schedule:
-                  type: object
-                  description: Public schedule data returned by the API.
-                  required:
-                  - id
-                  - is_default
-                  - monday
-                  - tuesday
-                  - wednesday
-                  - thursday
-                  - friday
-                  - saturday
-                  - sunday
-                  properties:
-                    id:
-                      type: integer
-                    is_default:
-                      type: boolean
-                    monday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    tuesday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    wednesday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    thursday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    friday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    saturday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
-                    sunday:
-                      type: boolean
-                      description: Whether the user has selected this day in their
-                        schedule
+                  nullable: true
+                  allOf:
+                  - type: object
+                    description: Public schedule data returned by the API.
+                    required:
+                    - id
+                    - is_default
+                    - monday
+                    - tuesday
+                    - wednesday
+                    - thursday
+                    - friday
+                    - saturday
+                    - sunday
+                    properties:
+                      id:
+                        type: integer
+                      is_default:
+                        type: boolean
+                      monday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      tuesday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      wednesday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      thursday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      friday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      saturday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
+                      sunday:
+                        type: boolean
+                        description: Whether the user has selected this day in their
+                          schedule
                 lab:
                   type: string
     create_user_request:
@@ -1217,3 +1261,38 @@ components:
             office_id:
               type: integer
               example: 1
+            default_schedule:
+              type: object
+              required:
+              - is_default
+              - monday
+              - tuesday
+              - wednesday
+              - thursday
+              - friday
+              - saturday
+              - sunday
+              properties:
+                is_default:
+                  type: boolean
+                monday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                tuesday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                wednesday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                thursday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                friday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                saturday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
+                sunday:
+                  type: boolean
+                  description: Whether the user has selected this day in their schedule
