@@ -686,6 +686,23 @@ export interface components {
       /** @description Whether the user has selected this day in their schedule */
       sunday: boolean;
     };
+    schedule_attributes: {
+      is_default: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      monday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      tuesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      wednesday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      thursday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      friday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      saturday: boolean;
+      /** @description Whether the user has selected this day in their schedule */
+      sunday: boolean;
+    };
     /** @description Request body for creating a new schedule */
     create_schedule_request: {
       schedule: {
@@ -741,7 +758,24 @@ export interface components {
         message: string;
       };
       data: {
-        schedules: unknown[];
+        schedules: {
+          id: number;
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        }[];
       };
     };
     /** @description Public office data returned by the API. */
@@ -924,7 +958,6 @@ export interface components {
       first_name: string;
       last_name: string;
       office_id: number | null;
-      /** @description Public schedule data returned by the API. */
       default_schedule?: {
         id: number;
         is_default: boolean;
@@ -942,7 +975,7 @@ export interface components {
         saturday: boolean;
         /** @description Whether the user has selected this day in their schedule */
         sunday: boolean;
-      };
+      } | null;
       lab?: string;
     };
     /** @description Full response body for endpoints that return one user. */
@@ -960,7 +993,6 @@ export interface components {
           first_name: string;
           last_name: string;
           office_id: number | null;
-          /** @description Public schedule data returned by the API. */
           default_schedule?: {
             id: number;
             is_default: boolean;
@@ -978,7 +1010,7 @@ export interface components {
             saturday: boolean;
             /** @description Whether the user has selected this day in their schedule */
             sunday: boolean;
-          };
+          } | null;
           lab?: string;
         };
       };
@@ -1016,6 +1048,23 @@ export interface components {
         last_name?: string;
         /** @example 1 */
         office_id?: number;
+        default_schedule?: {
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        };
       };
     };
   };

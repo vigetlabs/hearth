@@ -137,7 +137,7 @@ module OpenApi::Schemas::V1::Users
             type: :integer,
             example: 1
           },
-          default_schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
+          default_schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_ATTRIBUTES
         }
       }
     }

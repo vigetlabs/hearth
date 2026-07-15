@@ -526,6 +526,41 @@ components:
         sunday:
           type: boolean
           description: Whether the user has selected this day in their schedule
+    schedule_attributes:
+      type: object
+      required:
+      - is_default
+      - monday
+      - tuesday
+      - wednesday
+      - thursday
+      - friday
+      - saturday
+      - sunday
+      properties:
+        is_default:
+          type: boolean
+        monday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        tuesday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        wednesday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        thursday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        friday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        saturday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
+        sunday:
+          type: boolean
+          description: Whether the user has selected this day in their schedule
     create_schedule_request:
       type: object
       description: Request body for creating a new schedule
@@ -648,7 +683,7 @@ components:
           properties:
             schedules:
               type: array
-              schedule:
+              items:
                 type: object
                 description: Public schedule data returned by the API.
                 required:
@@ -1228,9 +1263,7 @@ components:
               example: 1
             default_schedule:
               type: object
-              description: Public schedule data returned by the API.
               required:
-              - id
               - is_default
               - monday
               - tuesday
@@ -1240,8 +1273,6 @@ components:
               - saturday
               - sunday
               properties:
-                id:
-                  type: integer
                 is_default:
                   type: boolean
                 monday:

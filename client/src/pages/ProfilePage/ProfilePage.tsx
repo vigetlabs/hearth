@@ -4,63 +4,88 @@ import { Link, useBlocker } from "react-router";
 import { useAuth } from "@/util/auth/useAuth";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
-
-const OFFICES = [
-  { id: "boulder", name: "Boulder", emoji: "⛰️" },
-  { id: "falls-church", name: "Falls Church", emoji: "🌸" },
-  { id: "chattanooga", name: "Chattanooga", emoji: "🚂" },
-  { id: "durham", name: "Durham", emoji: "🐂" },
-  { id: "remote", name: "Remote", emoji: "🏡", remote: true },
-] as const;
-
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
-type Weekday = (typeof WEEKDAYS)[number];
-
-const DEFAULT_OFFICE = "boulder";
-const DEFAULT_SCHEDULE: Record<Weekday, boolean> = {
-  Mon: true,
-  Tue: true,
-  Wed: false,
-  Thu: true,
-  Fri: false,
-};
+import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
+import { useOfficesQuery } from "@/util/api/queries/officeQueries";
+import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
+import type { PatchUserRequest } from "@/types/api/users";
+import { createUpdateUserObjectPayload } from "@/util/api/functions/users";
+import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Schedule } from "@/types/api/schedules";
+import { WEEKDAYS } from "@/types/schedule/schedule";
+import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
+import { buildScheduleAttributes } from "@/util/api/functions/schedules";
 
 interface FormSnapshot {
-  name: string;
-  selectedOffice: string;
-  inOffice: Record<Weekday, boolean>;
+  firstName: string;
+  lastName: string;
+  selectedOfficeId: string;
+  selectedDayIds: Set<string>;
+}
+
+function getSelectedDayIds(schedule: Schedule): Set<string> {
+  return new Set(
+    WEEKDAYS.filter((day) => schedule[day.id as keyof Schedule] === true).map(
+      (day) => day.id,
+    ),
+  );
+}
+
+function areDaySetsEqual(first: Set<string>, second: Set<string>) {
+  if (first.size !== second.size) {
+    return false;
+  }
+  return [...first].every((value) => second.has(value));
 }
 
 export default function ProfilePage() {
   const { user } = useAuth();
 
-  const [name, setName] = useState(
-    user ? `${user.first_name} ${user.last_name}` : "",
-  );
-  // Email is tied to the user's Google account and can't be edited here, so it
-  // stays out of the form state (and the dirty/save logic) entirely.
-  const email = user?.email ?? "";
-  const [selectedOffice, setSelectedOffice] = useState<string>(DEFAULT_OFFICE);
-  const [inOffice, setInOffice] =
-    useState<Record<Weekday, boolean>>(DEFAULT_SCHEDULE);
+  const queryClient = useQueryClient();
 
-  // Transient feedback shown next to the Save button after a save attempt.
+  const officesQuery = useOfficesQuery();
+  const offices = officesQuery.data ?? [];
+
+  const updateUserMutation = useUpdateUserMutation();
+
+  console.log(user.default_schedule);
+  const initialSelectedDayIds: Set<string> = user.default_schedule
+    ? getSelectedDayIds(user.default_schedule)
+    : new Set<string>();
+
+  const [firstName, setFirstName] = useState<string>(
+    user ? `${user.first_name}` : "",
+  );
+  const [lastName, setLastName] = useState<string>(
+    user ? `${user.last_name}` : "",
+  );
+
+  const email = user?.email ?? "";
+
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>(
+    String(user.office_id),
+  );
+
+  const [selectedDayIds, setSelectedDayIds] = useState<Set<string>>(
+    initialSelectedDayIds,
+  );
+
   const [saveFeedback, setSaveFeedback] = useState<
     "saved" | "no-changes" | null
   >(null);
 
-  // The last saved state; the form is "dirty" whenever the live values diverge
-  // from this. Saving re-baselines it, clearing the dirty flag.
   const [savedSnapshot, setSavedSnapshot] = useState<FormSnapshot>({
-    name: user ? `${user.first_name} ${user.last_name}` : "",
-    selectedOffice: DEFAULT_OFFICE,
-    inOffice: DEFAULT_SCHEDULE,
+    firstName: firstName,
+    lastName: lastName,
+    selectedOfficeId: selectedOfficeId,
+    selectedDayIds: new Set(initialSelectedDayIds),
   });
 
   const isDirty =
-    name !== savedSnapshot.name ||
-    selectedOffice !== savedSnapshot.selectedOffice ||
-    WEEKDAYS.some((day) => inOffice[day] !== savedSnapshot.inOffice[day]);
+    firstName !== savedSnapshot.firstName ||
+    lastName !== savedSnapshot.lastName ||
+    selectedOfficeId !== savedSnapshot.selectedOfficeId ||
+    !areDaySetsEqual(selectedDayIds, savedSnapshot.selectedDayIds);
 
   // Intercept in-app navigation (Go back, the logo, the header menu) while there
   // are unsaved changes so we can confirm before leaving.
@@ -78,7 +103,6 @@ export default function ProfilePage() {
 
     function handleBeforeUnload(event: BeforeUnloadEvent) {
       event.preventDefault();
-      event.returnValue = "";
     }
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -97,21 +121,47 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, [saveFeedback]);
 
-  function toggleDay(day: Weekday) {
-    setInOffice((prev) => ({ ...prev, [day]: !prev[day] }));
+  function toggleDay(dayId: string) {
+    setSelectedDayIds((previousDayIds) => {
+      const nextDayIds = new Set(previousDayIds);
+
+      if (nextDayIds.has(dayId)) {
+        nextDayIds.delete(dayId);
+      } else {
+        nextDayIds.add(dayId);
+      }
+
+      return nextDayIds;
+    });
   }
 
-  function handleSave(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleSave(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
 
     if (!isDirty) {
       setSaveFeedback("no-changes");
       return;
     }
 
-    // @TODO: Persist profile changes once an update endpoint exists.
-    setSavedSnapshot({ name, selectedOffice, inOffice });
-    setSaveFeedback("saved");
+    const payload: PatchUserRequest = createUpdateUserObjectPayload(
+      firstName,
+      lastName,
+      Number(selectedOfficeId),
+      buildScheduleAttributes(selectedDayIds),
+    );
+
+    updateUserMutation.mutate(payload, {
+      onSuccess: async (updatedUser) => {
+        queryClient.setQueryData(generateCurrentUserKey(), updatedUser);
+        setSavedSnapshot({
+          firstName,
+          lastName,
+          selectedOfficeId,
+          selectedDayIds,
+        });
+        setSaveFeedback("saved");
+      },
+    });
   }
 
   return (
@@ -133,20 +183,38 @@ export default function ProfilePage() {
             <h2 className="mb-6 text-xl font-bold text-fg">Profile</h2>
 
             <div className="space-y-5">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="mb-1.5 block text-sm font-semibold text-fg"
-                >
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
-                />
+              <div className="flex flex-row gap-5 w-full">
+                <div className="flex flex-col flex-1">
+                  <label
+                    htmlFor="firstName"
+                    className="mb-1.5 block text-sm font-semibold text-fg"
+                  >
+                    First Name
+                  </label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-col flex-1">
+                  <label
+                    htmlFor="lastName"
+                    className="mb-1.5 block text-sm font-semibold text-fg"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
@@ -178,30 +246,12 @@ export default function ProfilePage() {
             <h2 className="mb-6 text-xl font-bold text-fg">Default Office</h2>
 
             <div className="flex flex-wrap gap-4">
-              {OFFICES.map((office) => {
-                const isSelected = selectedOffice === office.id;
-                const isRemote = "remote" in office && office.remote;
-
-                return (
-                  <button
-                    key={office.id}
-                    type="button"
-                    onClick={() => setSelectedOffice(office.id)}
-                    className={`flex h-28 w-32 flex-col items-center justify-center gap-3 rounded-xl border text-sm text-fg transition-colors ${
-                      isRemote ? "border-dashed" : "border-solid"
-                    } ${
-                      isSelected
-                        ? "border-line-faint bg-surface-muted"
-                        : "border-line bg-surface hover:bg-surface-sunken"
-                    }`}
-                  >
-                    <span className="text-2xl" aria-hidden="true">
-                      {office.emoji}
-                    </span>
-                    <span>{office.name}</span>
-                  </button>
-                );
-              })}
+              <OfficeOptions
+                offices={offices}
+                showRemoteOption={true}
+                selectedOfficeId={selectedOfficeId}
+                handleSelectOffice={setSelectedOfficeId}
+              />
             </div>
           </section>
 
@@ -209,29 +259,14 @@ export default function ProfilePage() {
             <h2 className="mb-6 text-xl font-bold text-fg">Default Schedule</h2>
 
             <div className="flex flex-wrap gap-3">
-              {WEEKDAYS.map((day) => {
-                const isIn = inOffice[day];
-
-                return (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => toggleDay(day)}
-                    className={`flex h-20 w-24 flex-col items-center justify-center gap-1.5 rounded-xl border transition-colors ${
-                      isIn
-                        ? "border-line-strong bg-surface-muted"
-                        : "border-line bg-surface hover:bg-surface-sunken"
-                    }`}
-                  >
-                    <span className="text-sm font-bold text-fg">{day}</span>
-                    {isIn ? (
-                      <span className="text-xs text-fg-muted">✓ in office</span>
-                    ) : (
-                      <span className="text-xs text-fg-faint">+ add</span>
-                    )}
-                  </button>
-                );
-              })}
+              {WEEKDAYS.map((day) => (
+                <ScheduleDayItem
+                  key={day.id}
+                  day={day}
+                  isSelected={selectedDayIds.has(day.id)}
+                  onToggle={toggleDay}
+                />
+              ))}
             </div>
           </section>
         </div>

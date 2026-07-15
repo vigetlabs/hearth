@@ -46,6 +46,7 @@ RSpec.configure do |config|
           empty_success_response: OpenApi::Schemas::V1::Generics::EMPTY_SUCCESS_RESPONSE,
 
           schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
+          schedule_attributes: OpenApi::Schemas::V1::Schedules::SCHEDULE_ATTRIBUTES,
           create_schedule_request: OpenApi::Schemas::V1::Schedules::CREATE_SCHEDULE_REQUEST,
           schedule_response: OpenApi::Schemas::V1::Schedules::SCHEDULE_RESPONSE,
           schedules_response: OpenApi::Schemas::V1::Schedules::SCHEDULES_RESPONSE,
