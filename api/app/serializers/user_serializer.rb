@@ -4,5 +4,6 @@ class UserSerializer
              :email,
              :first_name,
              :last_name,
-             :office_id
+             :office_id,
+             :default_schedule
 end

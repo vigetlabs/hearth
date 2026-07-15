@@ -23,7 +23,12 @@ module OpenApi::Schemas::V1::Users
         type: :integer,
         nullable: true
       },
-      default_schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT,
+      default_schedule: {
+        nullable: true,
+        allOf: [
+          OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
+        ]
+      },
       lab: { type: :string }
     }
   }
@@ -131,7 +136,8 @@ module OpenApi::Schemas::V1::Users
           office_id: {
             type: :integer,
             example: 1
-          }
+          },
+          default_schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
         }
       }
     }
