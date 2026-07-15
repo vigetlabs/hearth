@@ -42,7 +42,7 @@ export function DayCell({
     <div className="flex h-full min-h-0 flex-col">
       <DayHeader
         date={date}
-        isMine={isMine}
+        isSelected={isMine}
         confirmedCount={confirmedCount}
         total={total}
         fill={fill}

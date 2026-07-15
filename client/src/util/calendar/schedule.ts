@@ -53,13 +53,10 @@ export function buildWeekSchedule(
       );
 
       let status: AttendanceStatus;
-      if (visit) {
-        status = visit.is_confirmed ? "confirmed-yes" : "planning-yes";
-      } else if (user.default_schedule?.[weekday]) {
+      if (visit?.is_confirmed) status = "confirmed-yes";
+      else if (visit || user.default_schedule?.[weekday])
         status = "planning-yes";
-      } else {
-        status = "planning-no";
-      }
+      else status = "planning-no";
 
       return { name: displayName(user), status };
     });
