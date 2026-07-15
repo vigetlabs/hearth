@@ -13,7 +13,7 @@ import { cn } from "@/util/cn";
 import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
 
 import "./OfficePicker.css";
-import OfficeOptions from "../OfficeOptions/OfficeOptions";
+import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
 
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");
