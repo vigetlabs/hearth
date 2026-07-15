@@ -191,6 +191,7 @@ export default function OfficePicker() {
               <OfficeOptions
                 offices={offices}
                 showRemoteOption={false}
+                selectedOfficeId={selectedOfficeId}
                 handleSelectOffice={handleSelectOffice}
               />
             </div>

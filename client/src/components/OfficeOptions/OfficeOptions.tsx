@@ -1,36 +1,30 @@
 import { RadioGroup } from "radix-ui";
-import { useState } from "react";
 import OfficeItem from "../OfficeItem/OfficeItem";
 import type { Office } from "@/types/api/offices";
 
 interface ShowHomeProps {
   offices: Office[];
   showRemoteOption: boolean;
+  selectedOfficeId: string;
   handleSelectOffice?: (newOfficeId: string) => void;
 }
 
 export default function OfficeOptions({
   offices,
-  showRemoteOption,
+  showRemoteOption = false,
+  selectedOfficeId,
   handleSelectOffice,
 }: ShowHomeProps) {
-  const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");
-
   const visibleOfficeButtons = showRemoteOption
     ? offices
     : offices.filter(
         (office: Office) => office.name.toLowerCase() !== "remote",
       );
 
-  function handleValueChange(newOfficeId: string) {
-    setSelectedOfficeId(newOfficeId);
-    handleSelectOffice?.(newOfficeId);
-  }
-
   return (
     <RadioGroup.Root
       value={selectedOfficeId}
-      onValueChange={handleValueChange}
+      onValueChange={handleSelectOffice}
       aria-label="Which office is your primary?"
       className=""
     >
