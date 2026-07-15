@@ -93,5 +93,7 @@ test:
 production:
   <<: *default
   database: api_production
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
   username: api
   password: <%= ENV["API_DATABASE_PASSWORD"] %>
