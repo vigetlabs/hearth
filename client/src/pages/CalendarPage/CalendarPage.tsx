@@ -1,90 +1,44 @@
 import { Calendar } from "@/components/Calendar/Calendar";
-import type {
-  AttendanceStatus,
-  PersonStatus,
-  WeekSchedule,
-} from "@/types/calendar/calendar";
+import {
+  mockOfficeId,
+  officeSchedule,
+} from "@/pages/CalendarPage/officeSchedules";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
+import { useOffice } from "@/util/office/useOffice";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 
-// The office roster is the same every day; only each person's status changes.
-const ROSTER = [
-  "Jackson F",
-  "Abby S",
-  "Natalie D",
-  "Tommy B",
-  "Laura L",
-  "Blair C",
-  "Jeremy F",
-  "Sam P",
-  "Riley K",
-  "Morgan T",
-];
-
-// Per-day status overrides by name; anyone not listed defaults to "no".
-type Overrides = Record<string, AttendanceStatus>;
+const WEEKDAYS_PER_WEEK = 5;
 
 export default function CalendarPage() {
   const { user } = useAuth();
+  const { office } = useOffice();
   const me = userDisplayName(user);
 
-  // The logged-in user is part of the roster too (the day cell sorts everyone
-  // by status and name, so order here doesn't matter).
-  const roster = me ? [me, ...ROSTER] : ROSTER;
-
-  function day(overrides: Overrides): PersonStatus[] {
-    return roster.map((name) => ({ name, status: overrides[name] ?? "no" }));
-  }
-
   const weekStart = startOfWeek(new Date());
-  const sampleSchedule: WeekSchedule = {
-    [toDateKey(weekStart)]: day({
-      [me]: "maybe",
-      "Jackson F": "confirmed",
-      "Abby S": "confirmed",
-      "Laura L": "confirmed",
-      "Natalie D": "maybe",
-      "Riley K": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 1))]: day({
-      [me]: "maybe",
-      "Jackson F": "confirmed",
-      "Blair C": "confirmed",
-      "Laura L": "maybe",
-      "Sam P": "maybe",
-      "Morgan T": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 2))]: day({
-      "Natalie D": "maybe",
-      "Riley K": "maybe",
-      "Sam P": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 3))]: day({
-      [me]: "maybe",
-      "Natalie D": "confirmed",
-      "Tommy B": "confirmed",
-      "Laura L": "confirmed",
-      "Blair C": "confirmed",
-      "Jeremy F": "confirmed",
-      "Abby S": "confirmed",
-      "Sam P": "maybe",
-    }),
-    [toDateKey(addDays(weekStart, 4))]: day({
-      "Blair C": "confirmed",
-      "Tommy B": "confirmed",
-      "Laura L": "confirmed",
-      "Abby S": "confirmed",
-      "Jeremy F": "confirmed",
-      "Jackson F": "maybe",
-      "Riley K": "maybe",
-    }),
-  };
+  const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
+    addDays(weekStart, i),
+  );
+
+  const schedule = officeSchedule(mockOfficeId(office.id), weekDates);
+
+  // The logged-in user is part of the roster too: seed them into each day as
+  // "out" so they show up and can toggle themselves in. The day cell sorts
+  // everyone by status and name, so order here doesn't matter.
+  if (me) {
+    for (const date of weekDates) {
+      const key = toDateKey(date);
+      const day = schedule[key] ?? [];
+      if (!day.some((person) => person.name === me)) {
+        schedule[key] = [{ name: me, status: "planning-no" }, ...day];
+      }
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
-        <Calendar schedule={sampleSchedule} />
+        <Calendar schedule={schedule} key={office.id} />
       </div>
     </div>
   );

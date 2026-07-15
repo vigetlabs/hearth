@@ -1,6 +1,6 @@
+import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
-import PlusIcon from "@/components/icons/PlusIcon";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -67,16 +67,11 @@ function PlanningHeader({
           weekdayClass="text-fg"
           dateNumClass="text-fg-subtle"
         />
-        <span
-          className={`${iconCircle} border-dashed border-line-faint text-fg-strong`}
-          aria-hidden="true"
-        >
-          {isMine ? (
-            <CheckIcon className="h-3.5 w-3.5" />
-          ) : (
-            <PlusIcon className="h-3.5 w-3.5" />
-          )}
-        </span>
+        <StatusIcon
+          size="lg"
+          variant="dashed"
+          mark={isMine ? "confirmed-yes" : "add"}
+        />
       </span>
 
       <ProgressBar
