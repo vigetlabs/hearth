@@ -2,14 +2,24 @@ import { Fragment } from "react";
 import { DropdownMenu } from "radix-ui";
 
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import { OFFICES } from "@/types/office/office";
-import { useOffice } from "@/util/office/useOffice";
+import type { Office } from "@/types/api/offices";
+import { useOfficesQuery } from "@/util/api/queries/officeQueries";
+
+interface OfficeSwitcherProps {
+  office: Office;
+  setOffice: (office: Office) => void;
+}
 
 // A dropdown of the other offices, anchored below the "Switch office" trigger.
 // Styled as a white rounded card with one row per office, divided by hairlines.
-export default function OfficeSwitcher() {
-  const { office, setOffice } = useOffice();
-  const others = OFFICES.filter((option) => option.id !== office.id);
+export default function OfficeSwitcher({
+  office,
+  setOffice,
+}: OfficeSwitcherProps) {
+  const officesQuery = useOfficesQuery();
+  const others = (officesQuery.data ?? []).filter(
+    (option) => option.id !== office.id,
+  );
 
   return (
     <DropdownMenu.Root>

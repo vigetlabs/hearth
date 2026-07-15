@@ -1,44 +1,78 @@
+import { useState } from "react";
+
 import { Calendar } from "@/components/Calendar/Calendar";
-import {
-  mockOfficeId,
-  officeSchedule,
-} from "@/pages/CalendarPage/officeSchedules";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
-import { useOffice } from "@/util/office/useOffice";
-import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
+import { useOfficesQuery } from "@/util/api/queries/officeQueries";
+import { useRosterQuery } from "@/util/api/queries/userQueries";
+import { useVisitsQuery } from "@/util/api/queries/visitQueries";
+import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
+import { addDays, startOfWeek } from "@/util/dates/date";
+import type { Office } from "@/types/api/offices";
 
 const WEEKDAYS_PER_WEEK = 5;
 
 export default function CalendarPage() {
   const { user } = useAuth();
-  const { office } = useOffice();
   const me = userDisplayName(user);
+
+  const officesQuery = useOfficesQuery();
+  const rosterQuery = useRosterQuery();
+  const visitsQuery = useVisitsQuery();
+
+  // The office the user has explicitly switched to. Null means "follow the
+  // default" — the user's home office, falling back to the first office the API
+  // returns. Held in component state only; resets on a full page load.
+  const [selectedOfficeId, setSelectedOfficeId] = useState<number | null>(null);
+
+  const offices = officesQuery.data ?? [];
+  const defaultOffice =
+    offices.find((option) => option.id === user?.office_id) ??
+    offices[0] ??
+    null;
+  const office =
+    offices.find((option) => option.id === selectedOfficeId) ?? defaultOffice;
+
+  const setOffice = (next: Office) => setSelectedOfficeId(next.id);
 
   const weekStart = startOfWeek(new Date());
   const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
     addDays(weekStart, i),
   );
 
-  const schedule = officeSchedule(mockOfficeId(office.id), weekDates);
-
-  // The logged-in user is part of the roster too: seed them into each day as
-  // "out" so they show up and can toggle themselves in. The day cell sorts
-  // everyone by status and name, so order here doesn't matter.
-  if (me) {
-    for (const date of weekDates) {
-      const key = toDateKey(date);
-      const day = schedule[key] ?? [];
-      if (!day.some((person) => person.name === me)) {
-        schedule[key] = [{ name: me, status: "planning-no" }, ...day];
-      }
-    }
+  if (!office || rosterQuery.isPending || visitsQuery.isPending) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-surface-sunken">
+        <p className="text-lg text-fg-subtle">Loading calendar...</p>
+      </div>
+    );
   }
+
+  if (officesQuery.isError || rosterQuery.isError || visitsQuery.isError) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-surface-sunken">
+        <p className="text-lg text-fg-subtle">
+          Unable to load the calendar. Please try again.
+        </p>
+      </div>
+    );
+  }
+
+  const schedule = seedSelf(
+    buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
+    me,
+    weekDates,
+  );
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
-        <Calendar schedule={schedule} key={office.id} />
+        <Calendar
+          schedule={schedule}
+          office={office}
+          setOffice={setOffice}
+          key={office.id}
+        />
       </div>
     </div>
   );

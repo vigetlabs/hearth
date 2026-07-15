@@ -1,5 +1,4 @@
 import AuthProvider from "@/components/AuthProvider/AuthProvider";
-import OfficeProvider from "@/components/OfficeProvider/OfficeProvider";
 import Header from "@/components/Header/Header";
 
 interface LayoutProps {
@@ -9,12 +8,10 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <AuthProvider>
-      <OfficeProvider>
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          {children}
-        </div>
-      </OfficeProvider>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        {children}
+      </div>
     </AuthProvider>
   );
 }

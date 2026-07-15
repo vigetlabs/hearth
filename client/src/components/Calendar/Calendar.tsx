@@ -10,7 +10,7 @@ import type {
   WeekSchedule,
 } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";
-import { useOffice } from "@/util/office/useOffice";
+import type { Office } from "@/types/api/offices";
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
 import { addDays, isSameDay, startOfWeek, toDateKey } from "@/util/dates/date";
@@ -31,10 +31,11 @@ const rangeFormat = new Intl.DateTimeFormat(undefined, {
 
 interface CalendarProps {
   schedule: WeekSchedule;
+  office: Office;
+  setOffice: (office: Office) => void;
 }
 
-export function Calendar({ schedule }: CalendarProps) {
-  const { office } = useOffice();
+export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   const { user } = useAuth();
   const myName = userDisplayName(user);
 
@@ -162,7 +163,7 @@ export function Calendar({ schedule }: CalendarProps) {
   const today = new Date();
   const todayIndex = days.findIndex((day) => isSameDay(day, today));
 
-  const isRemote = office.id === "remote";
+  const isRemote = office.name.toLowerCase() === "remote";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm">
@@ -172,7 +173,7 @@ export function Calendar({ schedule }: CalendarProps) {
           <span aria-hidden="true">{office.emoji}</span>
         </h2>
 
-        <OfficeSwitcher />
+        <OfficeSwitcher office={office} setOffice={setOffice} />
       </div>
 
       {!isRemote && (
