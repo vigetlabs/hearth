@@ -1,0 +1,122 @@
+name: build_and_deploy
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "staging | production"
+        required: true
+        default: staging
+
+jobs:
+  set_env:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_env: ${{ steps.set.outputs.deploy_env }}
+      api_url: ${{ steps.set.outputs.api_url }}
+    steps:
+      - id: set
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            deploy_env="${{ inputs.env }}"
+          else
+            case "${{ github.ref_name }}" in
+              main)       deploy_env="staging" ;;
+              production) deploy_env="production" ;;
+              *) echo "Unknown branch: ${{ github.ref_name }}"; exit 1 ;;
+            esac
+          fi
+
+          case "$deploy_env" in
+            staging)    api_url="https://api.staging.hearth.vigetx.com" ;;
+            production) api_url="https://api.hearth.vigetx.com" ;;
+            *) echo "Unknown env: $deploy_env"; exit 1 ;;
+          esac
+
+          echo "deploy_env=$deploy_env" >> "$GITHUB_OUTPUT"
+          echo "api_url=$api_url"       >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: set_env
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      DEPLOY_ENV: ${{ needs.set_env.outputs.deploy_env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.2.1
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push API image to ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api
+          file: ./api/Dockerfile.prod
+          platforms: linux/amd64
+          push: true
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_API }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_API }}:${{ env.DEPLOY_ENV }}
+
+      - name: Build, tag, and push UI image to ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            VITE_API_URL=${{ needs.set_env.outputs.api_url }}
+          cache-from: type=gha,scope=ui
+          cache-to: type=gha,mode=max,scope=ui
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_UI }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_UI }}:${{ env.DEPLOY_ENV }}
+
+  deploy:
+    needs:
+      - set_env
+      - build
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set_env.outputs.deploy_env }}
+    env:
+      DEPLOY_ENV: ${{ needs.set_env.outputs.deploy_env }}
+    steps:
+      - name: Setup SSH keys and known_hosts
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p -m 700 ~/.ssh
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.DEPLOY_KEY }}"
+          ssh-keyscan ${{ vars.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh deploy@${{ vars.HOST }} "set -e; \
+            cd /var/www/hearth/${DEPLOY_ENV}; \
+            printf 'APP_IMAGE_TAG=%s\nUI_IMAGE_TAG=%s\n' '${{ github.sha }}' '${{ github.sha }}' > .env; \
+            docker compose pull; \
+            docker compose run --rm app ./bin/rails db:prepare; \
+            docker compose up -d --remove-orphans"
