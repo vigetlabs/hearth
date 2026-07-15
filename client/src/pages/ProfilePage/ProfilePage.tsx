@@ -261,7 +261,7 @@ export default function ProfilePage() {
           <section className="rounded-2xl bg-surface p-8">
             <h2 className="mb-6 text-xl font-bold text-fg">Default Schedule</h2>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-5 gap-3">
               {WEEKDAYS.map((day) => (
                 <ScheduleDayItem
                   key={day.id}
