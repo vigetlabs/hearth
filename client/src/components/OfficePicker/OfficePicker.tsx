@@ -111,10 +111,8 @@ export default function OfficePicker() {
           queryKey: generateCurrentUserKey(),
         });
 
-        // Remote users have no in-office days to pick, so skip the schedule
-        // screen and drop them straight into the calendar.
         if (isRemote) {
-          navigate("/calendar");
+          navigate("/remote");
           return;
         }
 

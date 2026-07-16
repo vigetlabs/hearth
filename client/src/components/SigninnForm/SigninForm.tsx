@@ -3,9 +3,8 @@ import Logo from "@/components/Logo/Logo";
 
 export default function SigninForm() {
   return (
-    <div className="flex w-full max-w-md flex-col items-center text-center">
-      <Logo className="h-16 w-16" />
-      <span className="mt-3 text-2xl font-bold text-fg">Hearth</span>
+    <div className="flex w-full max-w-[520px] flex-col items-center text-center">
+      <Logo className="h-28 w-28" />
 
       <h1 className="mt-16 text-4xl font-bold text-fg sm:text-5xl">
         Welcome to Hearth

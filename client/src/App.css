@@ -20,6 +20,11 @@
   ============================================================================
 */
 @theme {
+  /* Typography — app-wide sans font */
+  --font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
   /* Foreground — text & icons */
   --color-fg: #171717; /* primary text, headings, dark pills */
   --color-fg-strong: #262626; /* weighted icons */
