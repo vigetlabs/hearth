@@ -46,7 +46,6 @@ export default function CalendarPage() {
   );
 
   const officeRoster = useOfficeRosterQuery(activeOfficeId);
-  console.log(officeRoster.data);
 
   if (!office || officeRoster.isPending || visitsQuery.isPending) {
     return (
@@ -73,7 +72,8 @@ export default function CalendarPage() {
   );
   // const schedule = {}
 
-  console.log("The schedule for this week: ", schedule);
+  console.log("The schedule for", activeOfficeId);
+  console.log(`The schedule for this week`, schedule);
 
   function getActiveOffice() {
     return (

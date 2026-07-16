@@ -25,7 +25,7 @@ export function useCurrentUserQuery() {
 
 export function useOfficeRosterQuery(office_id: number) {
   return useQuery<User[] | null, Error>({
-    queryKey: generateOfficesUsersKey(),
+    queryKey: generateOfficesUsersKey(office_id),
     queryFn: async () => {
       const response = await getUsers(office_id);
       return response.data.users;

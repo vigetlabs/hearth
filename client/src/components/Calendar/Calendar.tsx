@@ -42,6 +42,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   const [focus, setFocus] = useState(() => startOfWeek(new Date()));
   // Local attendance so toggling yourself in/out of a day updates the grid.
   const [attendance, setAttendance] = useState<WeekSchedule>(schedule);
+
   // Weeks the user has confirmed, keyed by their Monday. A week starts in the
   // planning state and moves to confirmed via the "Confirm Week" button.
   const [confirmedWeeks, setConfirmedWeeks] = useState<Set<string>>(new Set());
