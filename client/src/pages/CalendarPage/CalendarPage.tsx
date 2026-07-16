@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { Calendar } from "@/components/Calendar/Calendar";
 import { useAuth } from "@/util/auth/useAuth";
 // import { userDisplayName } from "@/util/auth/displayName";
@@ -9,13 +7,41 @@ import { useVisitsQuery } from "@/util/api/queries/visitQueries";
 // import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
 import { startOfWeek, toDateKey } from "@/util/dates/date";
 import type { Office } from "@/types/api/offices";
+import { useSearchParams } from "react-router";
 
 // const WEEKDAYS_PER_WEEK = 5;
-const VIEW = "week";
+
+// function findActiveOffice(offices: Office[], activeOfficeId: string) {
+//   offices.find((option) => option.id === activeOfficeId)
+// }
 
 export default function CalendarPage() {
   const { user } = useAuth();
   // const me = userDisplayName(user);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const officeIdParam: string = searchParams.get("office");
+
+  const activeOfficeId: number = officeIdParam
+    ? Number(officeIdParam)
+    : (user?.office_id ?? undefined);
+
+  const visitsQuery = useVisitsQuery({
+    date: toDateKey(startOfWeek(new Date())),
+    view: "week",
+    office_id: activeOfficeId,
+  });
+  console.log(visitsQuery.data);
+
+  const officesQuery = useOfficesQuery();
+  const offices = officesQuery.data ?? [];
+
+  const defaultOffice =
+    offices.find((option) => option.id === user?.office_id) ??
+    offices[0] ??
+    null;
+
+  const office: Office = getActiveOffice();
 
   const weekStart = startOfWeek(new Date());
   // const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
@@ -24,29 +50,7 @@ export default function CalendarPage() {
 
   console.log("Date: ", weekStart.toISOString().split("T")[0]);
 
-  const officesQuery = useOfficesQuery();
   const rosterQuery = useRosterQuery();
-  const visitsQuery = useVisitsQuery({
-    date: toDateKey(weekStart),
-    view: VIEW,
-  });
-
-  console.log("Data: ", visitsQuery.data);
-
-  // The office the user has explicitly switched to. Null means "follow the
-  // default" — the user's home office, falling back to the first office the API
-  // returns. Held in component state only; resets on a full page load.
-  const [selectedOfficeId, setSelectedOfficeId] = useState<number | null>(null);
-
-  const offices = officesQuery.data ?? [];
-  const defaultOffice =
-    offices.find((option) => option.id === user?.office_id) ??
-    offices[0] ??
-    null;
-  const office =
-    offices.find((option) => option.id === selectedOfficeId) ?? defaultOffice;
-
-  const setOffice = (next: Office) => setSelectedOfficeId(next.id);
 
   if (!office || rosterQuery.isPending || visitsQuery.isPending) {
     return (
@@ -73,13 +77,25 @@ export default function CalendarPage() {
   // );
   const schedule = {};
 
+  function getActiveOffice() {
+    return (
+      offices.find((office) => office.id === activeOfficeId) ?? defaultOffice
+    );
+  }
+
+  function changeOffice(nextOffice: Office) {
+    setSearchParams({
+      office: String(nextOffice.id),
+    });
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
         <Calendar
           schedule={schedule}
           office={office}
-          setOffice={setOffice}
+          setOffice={changeOffice}
           key={office.id}
         />
       </div>

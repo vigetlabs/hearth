@@ -487,11 +487,13 @@ export interface paths {
     /** Retrieves visits for a calendar range */
     get: {
       parameters: {
-        query?: {
+        query: {
           /** @description Anchor date for the calendar range. Defaults to the current date. */
           date?: components["schemas"]["visit_date"];
           /** @description Calendar view used to calculate the returned range. */
           view?: "week";
+          /** @description ID of the office whose visits should be returned. */
+          office_id: number;
         };
         header?: never;
         path?: never;

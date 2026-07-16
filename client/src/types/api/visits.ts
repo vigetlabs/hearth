@@ -11,4 +11,5 @@ export type VisitsResponse = components["schemas"]["visits_response"];
 export interface GetVisitsParams {
   date?: string;
   view?: "week";
+  office_id: number;
 }
