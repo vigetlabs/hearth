@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useNavigate } from "react-router";
 
 import type { Office } from "@/types/api/offices";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
@@ -11,6 +12,7 @@ function heroIdForOffice(office: Office): string {
 }
 
 export default function RemotePage() {
+  const navigate = useNavigate();
   const officesQuery = useOfficesQuery();
 
   const offices = officesQuery.data ?? [];
@@ -30,8 +32,7 @@ export default function RemotePage() {
           <p className="mt-3 max-w-4xl text-sm leading-relaxed text-fg-muted">
             This is your portal for traveling, visiting, or passing through one
             of <span className="font-bold text-fg">Viget</span> offices. Pick a
-            location to see who's planning to be there each week, and when you
-            need to add your own visit so they can see you're coming too.
+            location to see who's in the office or schedule your next visit.
           </p>
 
           <div className="mt-10 grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -39,7 +40,7 @@ export default function RemotePage() {
               <button
                 key={office.id}
                 type="button"
-                onClick={() => {}}
+                onClick={() => navigate("/calendar")}
                 className="relative capitalize flex min-h-[16rem] flex-col justify-between rounded-2xl bg-surface-strong bg-cover bg-center p-4 text-left shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                 style={
                   {

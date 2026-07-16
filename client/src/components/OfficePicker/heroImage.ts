@@ -5,7 +5,7 @@ export const DEFAULT_HERO_OFFICE_ID = "falls-church";
 
 export function heroImageFor(officeId: string) {
   const id = officeId || DEFAULT_HERO_OFFICE_ID;
-  return `/images/office-signup/${id}-hero.webp`;
+  return `/images/office/${id}-hero.webp`;
 }
 
 // The hero shown on first mount, before any office is picked. Exported so the
