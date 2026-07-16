@@ -1040,6 +1040,42 @@ export interface components {
         };
       };
     };
+    /** @description Full response body for endpoints that return multiple users. */
+    users_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        users: {
+          id: number;
+          /** Format: email */
+          email: string;
+          first_name: string;
+          last_name: string;
+          office_id: number | null;
+          default_schedule?: {
+            id: number;
+            is_default: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            monday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            tuesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            wednesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            thursday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            friday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            saturday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            sunday: boolean;
+          } | null;
+          lab?: string;
+        }[];
+      };
+    };
     /** @description Request body for creating a new user account */
     create_user_request: {
       user: {

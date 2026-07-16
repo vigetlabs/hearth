@@ -2,8 +2,36 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::Users::Users", type: :request do
   let(:office) { create(:office) }
+
   let(:user) { create(:user, office: office) }
   let(:headers) { auth_headers_for(user) }
+
+  describe "GET /users" do
+    let!(:users) { create_list(:user, 3, office: office) }
+    let(:query_params) do
+      {
+        office_id: office.id
+      }
+    end
+
+    subject(:get_office_roster) do
+      get api_path("/users"),
+        params: query_params,
+        headers: headers
+    end
+    context "when the user is authenticated" do
+      context "with valid query parmeters" do
+        it "returns all of the users associated with the requested office" do
+          get_office_roster
+          json = JSON.parse(response.body)
+
+          returned_users = json["data"]["users"]
+          expect(returned_users.length).to eq(4)
+          expect(returned_users.pluck("office_id")).to all(eq(office.id))
+        end
+      end
+    end
+  end
 
   describe "PATCH /users/me" do
     context "when the user is not authorized" do

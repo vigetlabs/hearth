@@ -3,9 +3,25 @@ class Api::V1::Users::UsersController < ApplicationController
   include ApiResponse
   include Helpers::SerializeUserHelper
 
+  # @TODO ADD TESTS FOR HANDLING BAD REQUEST
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
 
   before_action :authenticate_user!
+
+  def index
+   users = User
+     .where(office_id: roster_office_id)
+     .order(:first_name, :last_name)
+
+   serialized_users = serialize_users(users)
+
+   data = { users: serialized_users }
+
+   success_response(
+     data: data,
+     message: "Fetched users by office successfully"
+   )
+  end
 
   def update
     ActiveRecord::Base.transaction do
@@ -55,5 +71,11 @@ class Api::V1::Users::UsersController < ApplicationController
         :sunday
       ]
     )
+  end
+
+  def roster_office_id
+    Integer(params.require(:office_id), 10)
+  rescue ArgumentError, TypeError
+    raise ActionController::BadRequest, "Invalid office ID"
   end
 end

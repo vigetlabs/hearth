@@ -17,11 +17,10 @@ require "simplecov"
 
 SimpleCov.start "rails" do
   enable_coverage :branch
-
+  cover "{app,lib}/**/*.rb"
   skip "/spec/"
   skip "/config/"
   skip "/db/"
-  track_files "{app,lib}/**/*.rb"
 end
 
 RSpec.configure do |config|

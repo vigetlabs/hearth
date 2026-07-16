@@ -2,12 +2,14 @@ import { Calendar } from "@/components/Calendar/Calendar";
 import { useAuth } from "@/util/auth/useAuth";
 // import { userDisplayName } from "@/util/auth/displayName";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
-import { useRosterQuery } from "@/util/api/queries/userQueries";
+import { useOfficeRosterQuery } from "@/util/api/queries/userQueries";
 import { useVisitsQuery } from "@/util/api/queries/visitQueries";
 // import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
 import { startOfWeek, toDateKey } from "@/util/dates/date";
 import type { Office } from "@/types/api/offices";
 import { useSearchParams } from "react-router";
+// import type { WeekSchedule } from "@/types/calendar/calendar";
+// import { buildWeekSchedule } from "@/util/calendar/schedule";
 
 // const WEEKDAYS_PER_WEEK = 5;
 
@@ -31,7 +33,6 @@ export default function CalendarPage() {
     view: "week",
     office_id: activeOfficeId,
   });
-  console.log(visitsQuery.data);
 
   const officesQuery = useOfficesQuery();
   const offices = officesQuery.data ?? [];
@@ -43,16 +44,15 @@ export default function CalendarPage() {
 
   const office: Office = getActiveOffice();
 
-  const weekStart = startOfWeek(new Date());
+  // const weekStart = startOfWeek(new Date());
   // const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
   //   addDays(weekStart, i),
   // );
 
-  console.log("Date: ", weekStart.toISOString().split("T")[0]);
+  const officeRoster = useOfficeRosterQuery(activeOfficeId);
+  console.log(officeRoster.data);
 
-  const rosterQuery = useRosterQuery();
-
-  if (!office || rosterQuery.isPending || visitsQuery.isPending) {
+  if (!office || officeRoster.isPending || visitsQuery.isPending) {
     return (
       <div className="flex flex-1 items-center justify-center bg-surface-sunken">
         <p className="text-lg text-fg-subtle">Loading calendar...</p>
@@ -60,7 +60,7 @@ export default function CalendarPage() {
     );
   }
 
-  if (officesQuery.isError || rosterQuery.isError || visitsQuery.isError) {
+  if (officesQuery.isError || officeRoster.isError || visitsQuery.isError) {
     return (
       <div className="flex flex-1 items-center justify-center bg-surface-sunken">
         <p className="text-lg text-fg-subtle">
@@ -70,11 +70,12 @@ export default function CalendarPage() {
     );
   }
 
-  // const schedule = seedSelf(
-  //   buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
-  //   me,
+  // const schedule: WeekSchedule = buildWeekSchedule(
+  //   officeRosterQuery.data,
+  //   visitsQuery.data,
   //   weekDates,
-  // );
+  //   activeOfficeId
+  // )
   const schedule = {};
 
   function getActiveOffice() {
