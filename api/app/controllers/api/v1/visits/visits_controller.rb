@@ -15,7 +15,10 @@ class Api::V1::Visits::VisitsController < ApplicationController
     range = date_range
 
     visits = Visit
-      .where(visit_date: range)
+      .where(
+        visit_date: range,
+        office_id: calendar_office_id
+      )
       .order(:visit_date)
 
     serialized_visits = VisitSerializer
@@ -62,6 +65,12 @@ class Api::V1::Visits::VisitsController < ApplicationController
     params.require(:visits).map do |visit_params|
       visit_params.permit(:office_id, :visit_date)
     end
+  end
+
+  def calendar_office_id
+    Integer(params.require(:office_id), 10)
+  rescue ArgumentError, TypeError
+    raise ActionController::BadRequest, "Invalid office ID"
   end
 
   def date_range

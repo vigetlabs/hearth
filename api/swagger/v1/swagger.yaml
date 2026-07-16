@@ -244,6 +244,12 @@ paths:
           - week
           default: week
         description: Calendar view used to calculate the returned range.
+      - name: office_id
+        in: query
+        required: true
+        schema:
+          type: integer
+        description: ID of the office whose visits should be returned.
       responses:
         '400':
           description: invalid query parameters

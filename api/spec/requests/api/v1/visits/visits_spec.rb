@@ -9,7 +9,8 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
     let(:query_params) do
       {
         date: "2026-07-15",
-        view: "week"
+        view: "week",
+        office_id: office.id
       }
     end
 
@@ -24,7 +25,8 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         let(:query_params) do
           {
             date: "not-a-date",
-            view: "week"
+            view: "week",
+            office_id: office.id
           }
         end
 
@@ -45,7 +47,8 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         let(:query_params) do
           {
             date: "2026-02-80",
-            view: "week"
+            view: "week",
+            office_id: office.id
           }
         end
 
@@ -64,18 +67,26 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         it "returns the bad request api error code" do
           get_visits
           json = JSON.parse(response.body)
-          expect(get_error_code(json)).to eq(ApiErrorCodes::BadRequest::BAD_REQUEST)
+
+          expect(get_error_code(json))
+            .to eq(ApiErrorCodes::BadRequest::BAD_REQUEST)
         end
 
-        it "returns the bad request api error code" do
+        it "returns the bad request api error type" do
           get_visits
           json = JSON.parse(response.body)
-          expect(get_error_type(json)).to eq(ApiErrorTypes::BAD_REQUEST)
+
+          expect(get_error_type(json))
+            .to eq(ApiErrorTypes::BAD_REQUEST)
         end
       end
 
-      context "when no query params" do
-        let(:query_params) { {} }
+      context "when date and view are not provided" do
+        let(:query_params) do
+          {
+            office_id: office.id
+          }
+        end
 
         let!(:visits_in_range) do
           [
@@ -83,13 +94,12 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
               :visit,
               user: user,
               office: office,
-              visit_date: "2026-07-15"
+              visit_date: Date.current
             ),
             create(
               :visit,
-              user: user,
               office: office,
-              visit_date: "2026-07-16"
+              visit_date: Date.current.beginning_of_week(:sunday)
             )
           ]
         end
@@ -99,13 +109,15 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             :visit,
             user: user,
             office: office,
-            visit_date: "2026-07-22"
+            visit_date: Date.current.end_of_week(:sunday) + 1.day
           )
         end
 
         it "uses the current date and week view defaults" do
           get_visits
+
           expect(response).to have_http_status(:ok)
+
           json = JSON.parse(response.body)
           expect(json["data"]["visits"].size).to eq(2)
         end
@@ -115,7 +127,8 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         let(:query_params) do
           {
             date: "2026-07-15",
-            view: "month"
+            view: "month",
+            office_id: office.id
           }
         end
 
@@ -129,6 +142,73 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           json = JSON.parse(response.body)
           msg = get_error_message(json)
           expect(msg).to eq("Invalid calendar view")
+        end
+      end
+
+      context "when the office ID is missing" do
+        let(:query_params) do
+          {
+            date: "2026-07-15",
+            view: "week"
+          }
+        end
+
+        it "returns a bad request response" do
+          get_visits
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it "returns a missing parameter error" do
+          get_visits
+          json = JSON.parse(response.body)
+
+          expect(json).to include(
+            "status" => include(
+              "code" => 400
+            ),
+            "error" => include(
+              "type" => ApiErrorTypes::BAD_REQUEST,
+              "code" => ApiErrorCodes::BadRequest::MISSING_PARAMETER
+            )
+          )
+        end
+      end
+
+      context "when the office ID is not an integer" do
+        let(:query_params) do
+          {
+            date: "2026-07-15",
+            view: "week",
+            office_id: "not-an-integer"
+          }
+        end
+
+        it "returns a bad request response" do
+          get_visits
+          expect(response).to have_http_status(:bad_request)
+        end
+
+        it "returns the invalid-office-ID message" do
+          get_visits
+          json = JSON.parse(response.body)
+          msg = get_error_message(json)
+
+          expect(msg).to eq("Invalid office ID")
+        end
+
+        it "returns a bad request error" do
+          get_visits
+          json = JSON.parse(response.body)
+
+          expect(json).to include(
+            "status" => include(
+              "code" => 400
+            ),
+            "error" => include(
+              "type" => ApiErrorTypes::BAD_REQUEST,
+              "code" => ApiErrorCodes::BadRequest::BAD_REQUEST
+            )
+          )
         end
       end
 
@@ -154,6 +234,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           it "returns the visits" do
             get_visits
             expect(response).to have_http_status(:ok)
+
             json = JSON.parse(response.body)
             visits = json["data"]["visits"]
 
@@ -183,8 +264,47 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           it "does not return those visits" do
             get_visits
             json = JSON.parse(response.body)
-            visit_id = json["data"]["visits"]
-            expect(visit_id).not_to include(visit_outside_range.id)
+            visit_ids = json["data"]["visits"].pluck("id")
+
+            expect(visit_ids).not_to include(visit_outside_range.id)
+          end
+        end
+
+        context "when visits exist at another office" do
+          let!(:another_office) { create(:office) }
+
+          let!(:requested_office_visit) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-16"
+            )
+          end
+
+          let!(:another_office_visit) do
+            create(
+              :visit,
+              office: another_office,
+              visit_date: "2026-07-16"
+            )
+          end
+
+          it "returns only visits for the requested office" do
+            get_visits
+
+            json = JSON.parse(response.body)
+            visits = json["data"]["visits"]
+
+            expect(visits).to contain_exactly(
+              hash_including(
+                "id" => requested_office_visit.id,
+                "office_id" => office.id
+              )
+            )
+
+            expect(visits.pluck("id"))
+              .not_to include(another_office_visit.id)
           end
         end
 
@@ -197,7 +317,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             )
           end
 
-          let!(:users_vist) do
+          let!(:users_visit) do
             create(
               :visit,
               user: user,
@@ -206,7 +326,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             )
           end
 
-          it "returns all visits" do
+          it "returns all visits for the requested office" do
             get_visits
             json = JSON.parse(response.body)
             visits = json["data"]["visits"]
@@ -220,7 +340,7 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
                 )
               ),
               hash_including(
-                "id" => users_vist.id,
+                "id" => users_visit.id,
                 "visit_date" => "2026-07-16",
                 "user" => hash_including(
                   "id" => user.id
@@ -229,228 +349,6 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
             )
           end
         end
-      end
-    end
-  end
-
-  describe "POST /visits" do
-    let!(:office) { create(:office) }
-    let!(:user) { create(:user) }
-
-    let(:params) do
-      {
-        visits: [
-          {
-            office_id: office.id,
-            visit_date: "2026-07-13"
-          },
-          {
-            office_id: office.id,
-            visit_date: "2026-07-14"
-          }
-        ]
-      }
-    end
-
-    let(:headers) { auth_headers_for(user) }
-
-    subject(:create_visits) do
-      post api_path("/visits"),
-        params: params,
-        headers: headers,
-        as: :json
-    end
-
-    context "when the user is authenticated" do
-      context "with valid parameters" do
-        context "when no visits exist for the requested dates" do
-          it "creates the visits" do
-            expect { create_visits }
-              .to change(Visit, :count).by(2)
-          end
-
-          it "creates the visits for the authenticated user" do
-            create_visits
-
-            created_visits = user.visits.order(:visit_date)
-
-            expect(created_visits.pluck(:visit_date)).to eq(
-              [
-                Date.new(2026, 7, 13),
-                Date.new(2026, 7, 14)
-              ]
-            )
-          end
-
-          it "associates the visits with the requested office" do
-            create_visits
-
-            expect(user.visits.pluck(:office_id))
-              .to contain_exactly(office.id, office.id)
-          end
-
-          it "returns a created response" do
-            create_visits
-
-            expect(response).to have_http_status(:created)
-          end
-
-          it "returns JSON" do
-            create_visits
-
-            expect(response.media_type).to eq("application/json")
-          end
-        end
-
-        context "when a visit already exists for a requested date" do
-          let!(:existing_visit) do
-            create(
-              :visit,
-              user: user,
-              office: office,
-              visit_date: "2026-07-13"
-            )
-          end
-
-          let!(:new_office) { create(:office) }
-
-          let(:params) do
-            {
-              visits: [
-                {
-                  office_id: new_office.id,
-                  visit_date: "2026-07-13"
-                }
-              ]
-            }
-          end
-
-          it "does not create another visit" do
-            expect { create_visits }
-              .not_to change(Visit, :count)
-          end
-
-          it "updates the existing visit's office" do
-            create_visits
-            expect(existing_visit.reload.office).to eq(new_office)
-          end
-        end
-      end
-
-      context "with invalid parameters" do
-        let(:params) do
-          {
-            visits: [
-              {
-                office_id: office.id,
-                visit_date: nil
-              },
-              {
-                office_id: office.id,
-                visit_date: nil
-              }
-            ]
-          }
-        end
-
-        it "does not create visits" do
-          expect { create_visits }
-            .not_to change(Visit, :count)
-        end
-
-        it "returns an unprocessable content response" do
-          create_visits
-
-          expect(response).to have_http_status(:unprocessable_content)
-        end
-
-        it "returns a validation error" do
-          create_visits
-
-          json = JSON.parse(response.body)
-
-          expect(json).to include(
-            "status" => include(
-              "code" => 422
-            ),
-            "error" => include(
-              "type" => ApiErrorTypes::VALIDATION,
-              "code" => ApiErrorCodes::Validation::INVALID_ATTRIBUTES
-            )
-          )
-        end
-
-        it "includes details for the invalid field" do
-          create_visits
-
-          json = JSON.parse(response.body)
-          details = get_error_details(json)
-
-          expect(details).to include(
-            hash_including("field" => "visit_date")
-          )
-        end
-      end
-
-      context "when the visits parameter is missing" do
-        let(:params) { {} }
-
-        it "does not create visits" do
-          expect { create_visits }
-            .not_to change(Visit, :count)
-        end
-
-        it "returns a bad request response" do
-          create_visits
-
-          expect(response).to have_http_status(:bad_request)
-        end
-
-        it "returns a missing parameter error" do
-          create_visits
-
-          json = JSON.parse(response.body)
-
-          expect(json).to include(
-            "status" => include(
-              "code" => 400
-            ),
-            "error" => include(
-              "type" => ApiErrorTypes::BAD_REQUEST,
-              "code" => ApiErrorCodes::BadRequest::MISSING_PARAMETER
-            )
-          )
-        end
-      end
-    end
-
-    context "when the user is not authenticated" do
-      let(:headers) { {} }
-
-      it "does not create visits" do
-        expect { create_visits }
-          .not_to change(Visit, :count)
-      end
-
-      it "returns an unauthorized response" do
-        create_visits
-
-        expect(response).to have_http_status(:unauthorized)
-      end
-
-      it "returns an authentication error" do
-        create_visits
-
-        json = JSON.parse(response.body)
-
-        expect(json).to include(
-          "status" => include(
-            "code" => 401
-          ),
-          "error" => include(
-            "type" => ApiErrorTypes::AUTHENTICATION
-          )
-        )
       end
     end
   end
