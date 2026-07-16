@@ -862,7 +862,18 @@ export interface components {
        * @example 2026-07-10T13:42:18.123Z
        */
       updated_at: string;
+      /**
+       * @description The visit's current status
+       * @enum {string}
+       */
+      status: "planned" | "confirmed";
+      office_id: number;
     };
+    /**
+     * @description The visit's current status
+     * @enum {string}
+     */
+    visit_status: "planned" | "confirmed";
     /**
      * Format: date
      * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -914,6 +925,12 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
+          /**
+           * @description The visit's current status
+           * @enum {string}
+           */
+          status: "planned" | "confirmed";
+          office_id: number;
         };
       };
     };
@@ -949,6 +966,12 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
+          /**
+           * @description The visit's current status
+           * @enum {string}
+           */
+          status: "planned" | "confirmed";
+          office_id: number;
         }[];
       };
     };

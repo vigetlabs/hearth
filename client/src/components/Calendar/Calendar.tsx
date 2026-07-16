@@ -112,26 +112,28 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
     setMineConfirmed(false);
   };
 
+  function toggleMine() {}
+
   // While planning, picking a day marks you as "planning-yes" so you show up
   // under Planning; unpicking drops you to "planning-no" (Not going). Confirming
   // the week later promotes your picks to "confirmed-yes" (see confirmWeek).
-  function toggleMine(key: string) {
-    if (!myName) return;
-    setAttendance((prev) => {
-      const day = prev[key] ?? EMPTY_DAY;
-      const mine = day.find((person) => person.name === myName);
-      const selected = mine ? mine.status !== "planning-no" : false;
-      const nextStatus: AttendanceStatus = selected
-        ? "planning-no"
-        : "planning-yes";
-      const nextDay: PersonStatus[] = mine
-        ? day.map((person) =>
-            person.name === myName ? { ...person, status: nextStatus } : person,
-          )
-        : [{ name: myName, status: nextStatus }, ...day];
-      return { ...prev, [key]: nextDay };
-    });
-  }
+  // function toggleMine(key: string) {
+  //   if (!myName) return;
+  //   setAttendance((prev) => {
+  //     const day = prev[key] ?? EMPTY_DAY;
+  //     const mine = day.find((person) => person.name === myName);
+  //     const selected = mine ? mine.status !== "planning-no" : false;
+  //     const nextStatus: AttendanceStatus = selected
+  //       ? "planning-no"
+  //       : "planning-yes";
+  //     const nextDay: PersonStatus[] = mine
+  //       ? day.map((person) =>
+  //           person.name === myName ? { ...person, status: nextStatus } : person,
+  //         )
+  //       : [{ name: myName, status: nextStatus }, ...day];
+  //     return { ...prev, [key]: nextDay };
+  //   });
+  // }
 
   const gridColumns = {
     gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
@@ -278,7 +280,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
                   fill={dayData.length > 0 ? count / dayData.length : 0}
                   isHotSpot={hotSpotDays.has(i)}
                   locked={isWeekConfirmed}
-                  onToggleMine={() => toggleMine(key)}
+                  onToggleMine={toggleMine}
                 />
               );
             })}

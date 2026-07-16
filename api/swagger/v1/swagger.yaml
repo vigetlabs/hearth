@@ -861,6 +861,7 @@ components:
       - created_at
       - updated_at
       - status
+      - office_id
       properties:
         id:
           type: integer
@@ -898,6 +899,8 @@ components:
           - planned
           - confirmed
           description: The visit's current status
+        office_id:
+          type: integer
     visit_status:
       type: string
       enum:
@@ -961,6 +964,7 @@ components:
               - created_at
               - updated_at
               - status
+              - office_id
               properties:
                 id:
                   type: integer
@@ -998,6 +1002,8 @@ components:
                   - planned
                   - confirmed
                   description: The visit's current status
+                office_id:
+                  type: integer
     visits_response:
       type: object
       description: Full response body for endpoints that return a single visit.
@@ -1030,6 +1036,7 @@ components:
                 - created_at
                 - updated_at
                 - status
+                - office_id
                 properties:
                   id:
                     type: integer
@@ -1067,6 +1074,8 @@ components:
                     - planned
                     - confirmed
                     description: The visit's current status
+                  office_id:
+                    type: integer
     user:
       type: object
       description: Public user account data returned by the API.

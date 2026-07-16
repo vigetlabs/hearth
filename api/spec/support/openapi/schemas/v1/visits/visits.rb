@@ -39,6 +39,7 @@ module OpenApi::Schemas::V1::Visits
       created_at
       updated_at
       status
+      office_id
     ],
     properties: {
       id: { type: :integer },
@@ -56,7 +57,8 @@ module OpenApi::Schemas::V1::Visits
         description: "Updated-at time in ISO 8601 format",
         example: "2026-07-10T13:42:18.123Z"
       },
-      status: VISIT_STATUS
+      status: VISIT_STATUS,
+      office_id: { type: :integer }
     }
   }
 
