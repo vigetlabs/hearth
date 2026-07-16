@@ -80,6 +80,10 @@ slack-schedule:
 slack-send-now:
   cd services/slack-bot && node --env-file=.env src/send_now.ts
 
+# Slack bot: nudge one person by email with the weekly DM
+slack-send-nudge email:
+  cd services/slack-bot && node --env-file=.env src/send_nudge.ts {{email}}
+
 # Slack bot: interactivity endpoint for the Edit Schedule button (needs ngrok)
 slack-server:
   cd services/slack-bot && node --env-file=.env src/server.ts

@@ -11,7 +11,9 @@ Runs on Node 24's native TypeScript support — no build step, no compiler.
 1. Create an app at <https://api.slack.com/apps> → **From scratch**, and pick
    your workspace. (One app per environment is a good pattern.)
 2. **OAuth & Permissions → Bot Token Scopes**, add:
-   `chat:write`, `im:write`, `users:read`, `usergroups:read`.
+   `chat:write`, `im:write`, `users:read`, `users:read.email`,
+   `usergroups:read`. (`users:read.email` is only needed by `send-nudge`, which
+   looks a person up by email.)
 3. Click **Install to Workspace** and authorize. Copy the **Bot User OAuth
    Token** (`xoxb-…`) from the top of that page.
 4. **Basic Information → App Credentials**, copy the **Signing Secret**.
@@ -20,7 +22,7 @@ Runs on Node 24's native TypeScript support — no build step, no compiler.
    `usergroups.list`.
 
 The **Signing Secret** is only needed for the optional interactivity endpoint
-(see the bottom of this file); the three DM triggers just need the bot token.
+(see the bottom of this file); the DM triggers just need the bot token.
 
 ## Configuration
 
@@ -56,6 +58,8 @@ Each piece is small and testable in isolation:
 | `src/send_prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both `schedule` and `send-now` |
 | `src/scheduler.ts` | Friday cron entry point (`schedule`) |
 | `src/send_now.ts` | Manual group-send entry point (`send-now`) |
+| `src/nudge.ts` | Find one active member by email → DM them the prompt. Shared runner for `send-nudge` |
+| `src/send_nudge.ts` | Manual single-person-by-email entry point (`send-nudge`) |
 | `src/send-demo.ts` | Single-user entry point (`send-demo`) |
 | `src/verify.ts` + `src/server.ts` | Interactivity endpoint: signature verification, opens the modal, persists submissions |
 
@@ -64,9 +68,9 @@ in Slack itself. At send time the bot resolves the group live and drops any
 member whose account is deactivated, a bot, or a guest (`deleted` / `is_bot` /
 `is_restricted`) — so the list is always current without a database.
 
-## The three DM triggers
+## The DM triggers
 
-All three send the **same** message (built by `src/prompt.ts`). They differ only
+They all send the **same** message (built by `src/prompt.ts`). They differ only
 in *when* they fire and *who* receives it.
 
 ### 1. `npm run schedule` — automatic, weekly
@@ -107,12 +111,29 @@ npm run send-demo -- U0XXXXXXX
 npm run send-demo
 ```
 
+### 4. `npm run send-nudge -- <email>` — manual, one person by email
+
+Finds the **one** active workspace member whose Slack profile email matches and
+DMs them the prompt — for poking someone who hasn't confirmed yet. Resolves the
+same active-member pool as `send-now`, so a deactivated/guest account won't be
+nudged. The email match is case-insensitive; exits non-zero (without sending) if
+no active member has that email.
+
+```bash
+npm run send-nudge -- someone@viget.com
+# Nudged U0XXXXXXX: ok.
+```
+
+Needs the `users:read.email` bot scope (see step 2) so emails come back on
+`users.list`.
+
 ### Which one do I want?
 
 | Goal | Use |
 | --- | --- |
 | The real weekly Friday DM | `schedule` |
 | Send the weekly DM to the group right now | `send-now` |
+| Poke one specific person (by email) who hasn't confirmed | `send-nudge` |
 | Check my setup by DMing just myself | `send-demo` |
 
 ## The Edit Schedule button & interactivity
