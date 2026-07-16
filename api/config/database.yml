@@ -90,6 +90,15 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+staging:
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_DB", "hearth_staging") %>
+  database: api_production
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  username: api
+  password: <%= ENV["API_DATABASE_PASSWORD"] %>
+
 production:
   <<: *default
   database: api_production
