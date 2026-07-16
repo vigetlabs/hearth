@@ -56,6 +56,7 @@ RSpec.configure do |config|
           offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE,
 
           visit: OpenApi::Schemas::V1::Visits::VISIT_OBJECT,
+          visit_status: OpenApi::Schemas::V1::Visits::VISIT_STATUS,
           visit_date: OpenApi::Schemas::V1::Visits::VISIT_DATE,
           create_visits_request: OpenApi::Schemas::V1::Visits::CREATE_VISITS_REQUEST,
           visit_response: OpenApi::Schemas::V1::Visits::VISIT_RESPONSE,

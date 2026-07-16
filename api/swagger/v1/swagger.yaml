@@ -897,7 +897,13 @@ components:
           enum:
           - planned
           - confirmed
-          description: The confirmation status of the visit
+          description: The visit's current status
+    visit_status:
+      type: string
+      enum:
+      - planned
+      - confirmed
+      description: The visit's current status
     visit_date:
       type: string
       format: date
@@ -991,7 +997,7 @@ components:
                   enum:
                   - planned
                   - confirmed
-                  description: The confirmation status of the visit
+                  description: The visit's current status
     visits_response:
       type: object
       description: Full response body for endpoints that return a single visit.
@@ -1060,7 +1066,7 @@ components:
                     enum:
                     - planned
                     - confirmed
-                    description: The confirmation status of the visit
+                    description: The visit's current status
     user:
       type: object
       description: Public user account data returned by the API.
