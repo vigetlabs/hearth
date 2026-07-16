@@ -9,7 +9,7 @@ RSpec.describe "Api::V1::Users::OmniauthCallbacks", type: :request do
       response "302", "sets the JWT cookie and redirects to the frontend profile" do
         run_test! do |response|
           expect(response).to redirect_to(
-            "#{Rails.application.credentials.dig(:google, :frontend_url)}/users/office"
+            "http://localhost:5173/users/office"
           )
 
           expect(response.cookies["jwt_token"]).to be_present

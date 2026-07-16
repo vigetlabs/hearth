@@ -25,7 +25,7 @@ RSpec.describe "Api::V1::Users::GoogleOauth", type: :request do
       response "302", "redirects to the frontend with an error path in URL" do
         run_test! do |response|
           expect(response).to redirect_to(
-            "#{Rails.application.credentials.dig(:google, :frontend_url)}/users/login?error=sso_failed"
+            "http://localhost:5173/users/login?error=sso_failed"
           )
         end
       end
