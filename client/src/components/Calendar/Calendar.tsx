@@ -57,9 +57,15 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
   // "Jump to today" shortcut when it would be a no-op.
   const isCurrentWeek = weekKey === toDateKey(startOfWeek(new Date()));
 
-  const goPrev = () => setFocus((f) => addDays(f, -7));
-  const goNext = () => setFocus((f) => addDays(f, 7));
-  const goToday = () => setFocus(startOfWeek(new Date()));
+  function goPrevWeek(): void {
+    setFocus((curDate) => addDays(curDate, -7));
+  }
+  function goNextWeek(): void {
+    setFocus((curDate) => addDays(curDate, 7));
+  }
+  function goToday(): void {
+    setFocus(startOfWeek(new Date()));
+  }
 
   // Rewrite your own statuses for the focused week when it moves between planning
   // and confirmed, preserving the in/out axis: while planning, days read as
@@ -180,7 +186,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
         <div className="flex items-center gap-4 pb-5">
           <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
             <button
-              onClick={goPrev}
+              onClick={goPrevWeek}
               className={arrowButton}
               aria-label="Previous week"
             >
@@ -188,7 +194,7 @@ export function Calendar({ schedule, office, setOffice }: CalendarProps) {
             </button>
             <span className="px-2 text-sm font-bold text-fg">{rangeLabel}</span>
             <button
-              onClick={goNext}
+              onClick={goNextWeek}
               className={arrowButton}
               aria-label="Next week"
             >
