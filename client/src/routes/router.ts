@@ -11,6 +11,7 @@ import SchedulePickerPage from "@/pages/SchedulePickerPage/SchedulePickerPage";
 import LoginPage from "@/pages/LoginPage/LoginPage";
 import ProfilePage from "@/pages/ProfilePage/ProfilePage";
 import CalendarPage from "@/pages/CalendarPage/CalendarPage";
+import RemotePage from "@/pages/RemotePage/RemotePage";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
       {
         path: "calendar",
         children: [{ index: true, Component: CalendarPage }],
+      },
+      {
+        path: "remote",
+        Component: RemotePage,
       },
     ],
   },
