@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
+import Logo from "@/components/Logo/Logo";
+
 import { useAuth } from "@/util/auth/useAuth";
 import { userDisplayName } from "@/util/auth/displayName";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
@@ -26,7 +28,7 @@ export default function Header() {
         await queryClient.invalidateQueries({
           queryKey: generateCurrentUserKey(),
         });
-        navigate("/users/login");
+        navigate("/users/signin");
       },
     });
   }
@@ -37,7 +39,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 border-b border-line bg-surface">
       <div className="flex items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-surface-muted" />
+          <Logo className="h-9 w-9" />
           <span className="text-lg font-bold text-fg">Hearth</span>
         </Link>
 

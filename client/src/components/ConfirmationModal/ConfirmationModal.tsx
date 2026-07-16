@@ -44,24 +44,35 @@ export default function ConfirmationModal({
     }
   }
 
+  // In the non-destructive case the confirm and cancel buttons swap styling, so
+  // the confirm button reads as the softer/secondary choice.
   const confirmClasses = destructive
     ? "bg-danger text-fg-inverse hover:bg-danger-hover"
-    : "bg-strong text-fg-inverse hover:bg-strong-hover";
+    : "border border-line-strong bg-surface text-fg hover:bg-surface-sunken";
+
+  const cancelClasses = destructive
+    ? "bg-surface hover:bg-surface-sunken"
+    : "bg-surface-muted hover:bg-surface-strong";
 
   return (
     <AlertDialog.Root open={open} onOpenChange={handleOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-30 bg-black/40" />
+        <AlertDialog.Overlay
+          className="fixed inset-0 z-30 bg-black/40"
+          onClick={onCancel}
+        />
         <AlertDialog.Content className="fixed left-1/2 top-1/2 z-40 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-surface p-6 shadow-xl focus:outline-none">
-          <AlertDialog.Title className="text-lg font-bold text-fg">
+          <AlertDialog.Title className="text-center text-xl font-bold text-fg">
             {title}
           </AlertDialog.Title>
-          <AlertDialog.Description className="mt-2 text-sm text-fg-muted">
+          <AlertDialog.Description className="mt-3 text-center text-base text-fg-muted">
             {description}
           </AlertDialog.Description>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <AlertDialog.Cancel className="rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-fg hover:bg-surface-sunken focus:outline-none">
+          <div className="mt-8 flex justify-center gap-3">
+            <AlertDialog.Cancel
+              className={`rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-fg focus:outline-none ${cancelClasses}`}
+            >
               {cancelLabel}
             </AlertDialog.Cancel>
             <AlertDialog.Action
