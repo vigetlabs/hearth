@@ -5,17 +5,13 @@ import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useOfficeRosterQuery } from "@/util/api/queries/userQueries";
 import { useVisitsQuery } from "@/util/api/queries/visitQueries";
 // import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
-import { startOfWeek, toDateKey } from "@/util/dates/date";
+import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 import type { Office } from "@/types/api/offices";
 import { useSearchParams } from "react-router";
-// import type { WeekSchedule } from "@/types/calendar/calendar";
-// import { buildWeekSchedule } from "@/util/calendar/schedule";
+import type { WeekSchedule } from "@/types/calendar/calendar";
+import { buildWeekSchedule } from "@/util/calendar/schedule";
 
-// const WEEKDAYS_PER_WEEK = 5;
-
-// function findActiveOffice(offices: Office[], activeOfficeId: string) {
-//   offices.find((option) => option.id === activeOfficeId)
-// }
+const WEEKDAYS_PER_WEEK = 5;
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -44,10 +40,10 @@ export default function CalendarPage() {
 
   const office: Office = getActiveOffice();
 
-  // const weekStart = startOfWeek(new Date());
-  // const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
-  //   addDays(weekStart, i),
-  // );
+  const weekStart = startOfWeek(new Date());
+  const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
+    addDays(weekStart, i),
+  );
 
   const officeRoster = useOfficeRosterQuery(activeOfficeId);
   console.log(officeRoster.data);
@@ -70,13 +66,14 @@ export default function CalendarPage() {
     );
   }
 
-  // const schedule: WeekSchedule = buildWeekSchedule(
-  //   officeRosterQuery.data,
-  //   visitsQuery.data,
-  //   weekDates,
-  //   activeOfficeId
-  // )
-  const schedule = {};
+  const schedule: WeekSchedule = buildWeekSchedule(
+    officeRoster.data,
+    visitsQuery.data,
+    weekDates,
+  );
+  // const schedule = {}
+
+  console.log("The schedule for this week: ", schedule);
 
   function getActiveOffice() {
     return (
