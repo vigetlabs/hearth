@@ -251,6 +251,72 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           end
         end
 
+        context "when visits have different statuses" do
+          let!(:planned_visit) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-15",
+              status: "planned"
+            )
+          end
+
+          let!(:confirmed_visit) do
+            create(
+              :visit,
+              user: user,
+              office: office,
+              visit_date: "2026-07-16",
+              status: "confirmed"
+            )
+          end
+
+          it "returns the planned status" do
+            get_visits
+
+            json = JSON.parse(response.body)
+            visit = json["data"]["visits"].find do |item|
+              item["id"] == planned_visit.id
+            end
+
+            expect(visit).to include(
+              "status" => "planned"
+            )
+          end
+
+          it "returns the confirmed status" do
+            get_visits
+
+            json = JSON.parse(response.body)
+            visit = json["data"]["visits"].find do |item|
+              item["id"] == confirmed_visit.id
+            end
+
+            expect(visit).to include(
+              "status" => "confirmed"
+            )
+          end
+
+          it "returns each visit with its corresponding status" do
+            get_visits
+
+            json = JSON.parse(response.body)
+            visits = json["data"]["visits"]
+
+            expect(visits).to contain_exactly(
+              hash_including(
+                "id" => planned_visit.id,
+                "status" => "planned"
+              ),
+              hash_including(
+                "id" => confirmed_visit.id,
+                "status" => "confirmed"
+              )
+            )
+          end
+        end
+
         context "when visits exist outside the requested week" do
           let!(:visit_outside_range) do
             create(
