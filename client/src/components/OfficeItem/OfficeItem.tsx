@@ -5,7 +5,7 @@ import { cn } from "@/util/cn";
 
 interface OfficeItemProps {
   office: Office;
-  className: string;
+  className?: string;
 }
 
 export default function OfficeItem({ office, className }: OfficeItemProps) {
@@ -14,11 +14,14 @@ export default function OfficeItem({ office, className }: OfficeItemProps) {
   const emoji = office.emoji ?? "🏢";
 
   const itemClasses = cn(
-    "flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-line text-fg transition-colors",
-    "hover:border-line-faint",
+    "flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-line-faint text-fg transition-colors",
+    "hover:border-fill",
     "focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none",
-    "data-[state=checked]:border-fill data-[state=checked]:bg-surface-muted",
-    isRemote ? "border-dashed" : "border-solid",
+    "data-[state=checked]:border-2 data-[state=checked]:border-line-selected data-[state=checked]:bg-surface-muted",
+    "data-[state=checked]:hover:border-fill",
+    isRemote
+      ? "border-dashed data-[state=checked]:border-solid"
+      : "border-solid",
     className,
   );
 

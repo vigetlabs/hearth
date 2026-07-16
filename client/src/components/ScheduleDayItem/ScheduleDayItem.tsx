@@ -4,26 +4,31 @@ type ScheduleDayItemProps = {
   day: Weekday;
   isSelected: boolean;
   onToggle: (dayId: string) => void;
+  disabled?: boolean;
 };
 
 export default function ScheduleDayItem({
   day,
   isSelected,
   onToggle,
+  disabled = false,
 }: ScheduleDayItemProps) {
   return (
     <button
       type="button"
       onClick={() => onToggle(day.id)}
+      disabled={disabled}
       aria-pressed={isSelected}
-      className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border p-3 text-center text-fg transition-colors hover:border-line-faint focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none ${
-        isSelected ? "border-fill bg-surface-muted" : "border-line"
+      className={`flex aspect-[2/1] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl p-3 text-center text-fg transition-colors hover:border-fill focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none disabled:cursor-not-allowed ${
+        isSelected
+          ? "border-2 border-line-selected bg-surface-muted"
+          : "border border-line-faint"
       }`}
     >
-      <span className="text-sm font-bold">{day.label}</span>
+      <span className="text-xl font-bold">{day.label}</span>
 
       <span className="text-xs text-fg-subtle" aria-hidden="true">
-        {isSelected ? "✓" : "+"}
+        {isSelected ? "✓ in office" : "+ add"}
       </span>
     </button>
   );
