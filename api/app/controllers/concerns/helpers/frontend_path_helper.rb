@@ -5,7 +5,7 @@ module Helpers
     private
 
     def frontend_url
-      Rails.application.credentials.dig(:google, :frontend_url)
+      Rails.configuration.x.frontend_url
     end
 
     def frontend_path(path)
