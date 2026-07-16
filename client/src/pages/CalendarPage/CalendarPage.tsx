@@ -2,23 +2,36 @@ import { useState } from "react";
 
 import { Calendar } from "@/components/Calendar/Calendar";
 import { useAuth } from "@/util/auth/useAuth";
-import { userDisplayName } from "@/util/auth/displayName";
+// import { userDisplayName } from "@/util/auth/displayName";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useRosterQuery } from "@/util/api/queries/userQueries";
 import { useVisitsQuery } from "@/util/api/queries/visitQueries";
-import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
-import { addDays, startOfWeek } from "@/util/dates/date";
+// import { buildWeekSchedule, seedSelf } from "@/util/calendar/schedule";
+import { startOfWeek, toDateKey } from "@/util/dates/date";
 import type { Office } from "@/types/api/offices";
 
-const WEEKDAYS_PER_WEEK = 5;
+// const WEEKDAYS_PER_WEEK = 5;
+const VIEW = "week";
 
 export default function CalendarPage() {
   const { user } = useAuth();
-  const me = userDisplayName(user);
+  // const me = userDisplayName(user);
+
+  const weekStart = startOfWeek(new Date());
+  // const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
+  //   addDays(weekStart, i),
+  // );
+
+  console.log("Date: ", weekStart.toISOString().split("T")[0]);
 
   const officesQuery = useOfficesQuery();
   const rosterQuery = useRosterQuery();
-  const visitsQuery = useVisitsQuery();
+  const visitsQuery = useVisitsQuery({
+    date: toDateKey(weekStart),
+    view: VIEW,
+  });
+
+  console.log("Data: ", visitsQuery.data);
 
   // The office the user has explicitly switched to. Null means "follow the
   // default" — the user's home office, falling back to the first office the API
@@ -34,11 +47,6 @@ export default function CalendarPage() {
     offices.find((option) => option.id === selectedOfficeId) ?? defaultOffice;
 
   const setOffice = (next: Office) => setSelectedOfficeId(next.id);
-
-  const weekStart = startOfWeek(new Date());
-  const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, i) =>
-    addDays(weekStart, i),
-  );
 
   if (!office || rosterQuery.isPending || visitsQuery.isPending) {
     return (
@@ -58,11 +66,12 @@ export default function CalendarPage() {
     );
   }
 
-  const schedule = seedSelf(
-    buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
-    me,
-    weekDates,
-  );
+  // const schedule = seedSelf(
+  //   buildWeekSchedule(rosterQuery.data, visitsQuery.data, weekDates, office.id),
+  //   me,
+  //   weekDates,
+  // );
+  const schedule = {};
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">

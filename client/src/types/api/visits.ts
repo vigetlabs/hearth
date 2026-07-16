@@ -7,3 +7,8 @@ export type CreateVisitRequest = components["schemas"]["create_visits_request"];
 export type VisitResponse = components["schemas"]["visit_response"];
 
 export type VisitsResponse = components["schemas"]["visits_response"];
+
+export interface GetVisitsParams {
+  date?: string;
+  view?: "week";
+}
