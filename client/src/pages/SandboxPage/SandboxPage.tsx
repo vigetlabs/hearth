@@ -3,6 +3,7 @@ import { RadioGroup } from "radix-ui";
 
 import Loader from "@/components/Loader/Loader";
 import OfficeItem from "@/components/OfficeItem/OfficeItem";
+import OfficeSwitcherMenu from "@/components/OfficeSwitcherMenu/OfficeSwitcherMenu";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import {
   StatusIcon,
@@ -82,6 +83,13 @@ export default function SandboxPage() {
             <OfficeItem key={office.id} office={office} className="" />
           ))}
         </RadioGroup.Root>
+      </Demo>
+
+      <Demo title="OfficeSwitcherMenu">
+        <OfficeSwitcherMenu
+          offices={SAMPLE_OFFICES}
+          onSelect={(office) => console.log("switch to", office.name)}
+        />
       </Demo>
 
       <Demo title="ConfirmationModal">
