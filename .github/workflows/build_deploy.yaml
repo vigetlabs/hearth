@@ -32,8 +32,8 @@ jobs:
           fi
 
           case "$deploy_env" in
-            staging)    api_url="https://api.staging.hearth.vigetx.com" ;;
-            production) api_url="https://api.hearth.vigetx.com" ;;
+            staging)    api_url="https://api.staging.hearth.vigetx.com/api/v1" ;;
+            production) api_url="https://api.hearth.vigetx.com/api/v1" ;;
             *) echo "Unknown env: $deploy_env"; exit 1 ;;
           esac
 
