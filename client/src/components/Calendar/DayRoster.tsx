@@ -12,8 +12,7 @@ import type { PersonStatus } from "@/types/calendar/calendar";
 interface DayRosterProps {
   /** The full office roster with each person's status for this day. */
   people: PersonStatus[];
-  /** Display name of the logged-in user, highlighted in the list. */
-  myName: string;
+  myUserId: number;
 }
 
 type Tab = "in" | "out";
@@ -21,7 +20,7 @@ type Tab = "in" | "out";
 /** Replaces the per-status dropdowns with a two-way toggle: one side lists
     everyone in the office (split into confirmed vs. still-planning), the other
     lists everyone who's out. */
-export function DayRoster({ people, myName }: DayRosterProps) {
+export function DayRoster({ people, myUserId }: DayRosterProps) {
   const confirmed = people
     .filter((person) => person.status === "confirmed-yes")
     .sort(byName);
@@ -61,9 +60,9 @@ export function DayRoster({ people, myName }: DayRosterProps) {
               <RosterSection title="Confirmed in office">
                 {confirmed.map((person) => (
                   <RosterRow
-                    key={person.name}
+                    key={person.userId}
                     person={person}
-                    myName={myName}
+                    myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="solid"
                   />
@@ -74,9 +73,9 @@ export function DayRoster({ people, myName }: DayRosterProps) {
               <RosterSection title="Planning to be in office">
                 {planning.map((person) => (
                   <RosterRow
-                    key={person.name}
+                    key={person.userId}
                     person={person}
-                    myName={myName}
+                    myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="outline"
                     muted
@@ -95,9 +94,9 @@ export function DayRoster({ people, myName }: DayRosterProps) {
             <RosterSection title="Confirmed out">
               {confirmedOut.map((person) => (
                 <RosterRow
-                  key={person.name}
+                  key={person.userId}
                   person={person}
-                  myName={myName}
+                  myUserId={myUserId}
                   mark="confirmed-no"
                   variant="solid"
                 />
@@ -108,9 +107,9 @@ export function DayRoster({ people, myName }: DayRosterProps) {
             <RosterSection title="Planning to be out">
               {plannedOut.map((person) => (
                 <RosterRow
-                  key={person.name}
+                  key={person.userId}
                   person={person}
-                  myName={myName}
+                  myUserId={myUserId}
                   mark="planning-no"
                   variant="outline"
                   muted
@@ -171,20 +170,20 @@ function RosterSection({
 
 function RosterRow({
   person,
-  myName,
+  myUserId,
   mark,
   variant,
   muted = false,
   nudgeable = false,
 }: {
   person: PersonStatus;
-  myName: string;
+  myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;
   muted?: boolean;
   nudgeable?: boolean;
 }) {
-  const isMe = person.name === myName;
+  const isMe = person.userId === myUserId;
 
   return (
     <li className="flex items-center gap-2 py-1.5">

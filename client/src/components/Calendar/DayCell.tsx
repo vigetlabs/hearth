@@ -6,8 +6,7 @@ interface DayCellProps {
   date: Date;
   /** The full office roster with each person's status for this day. */
   people: PersonStatus[];
-  /** Display name of the logged-in user, highlighted in the list. */
-  myName: string;
+  myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */
   isMine: boolean;
@@ -29,7 +28,7 @@ interface DayCellProps {
 export function DayCell({
   date,
   people,
-  myName,
+  myUserId,
   isMine,
   confirmedCount,
   total,
@@ -48,11 +47,11 @@ export function DayCell({
         fill={fill}
         isHotSpot={isHotSpot}
         locked={locked}
-        myName={myName}
+        myUserId={myUserId}
         onToggleMine={onToggleMine}
       />
 
-      <DayRoster people={people} myName={myName} />
+      <DayRoster people={people} myUserId={myUserId} />
     </div>
   );
 }

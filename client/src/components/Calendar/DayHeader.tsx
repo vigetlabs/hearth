@@ -19,8 +19,7 @@ interface DayHeaderProps {
   /** Whether the week is confirmed (locked). Swaps the interactive header for a
       read-only "confirmed" one. */
   locked: boolean;
-  /** Display name of the logged-in user; empty disables the toggle. */
-  myName: string;
+  myUserId: number;
   /** Toggle the logged-in user in/out of the office for this day. */
   onToggleMine: () => void;
 }
@@ -41,14 +40,14 @@ function PlanningHeader({
   total,
   fill,
   isHotSpot,
-  myName,
+  myUserId,
   onToggleMine,
 }: Omit<DayHeaderProps, "locked">) {
   return (
     <button
       type="button"
       onClick={onToggleMine}
-      disabled={!myName}
+      disabled={!myUserId}
       aria-pressed={isSelected}
       aria-label={
         isSelected

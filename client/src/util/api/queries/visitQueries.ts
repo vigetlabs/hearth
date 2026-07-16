@@ -6,7 +6,11 @@ import type { GetVisitsParams, Visit } from "@/types/api/visits";
 
 export function useVisitsQuery({ date, view, office_id }: GetVisitsParams) {
   return useQuery<Visit[]>({
-    queryKey: generateVisitsKey(),
+    queryKey: generateVisitsKey({
+      date,
+      view,
+      office_id,
+    }),
     queryFn: async () => {
       const response = await getVisits({
         date,
