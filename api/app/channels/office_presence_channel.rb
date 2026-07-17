@@ -1,6 +1,6 @@
 class OfficePresenceChannel < ApplicationCable::Channel
   def subscribed
-    @office = Office.find(params[:office_id])
+    @office = find_office
 
     return reject unless @office
     return reject unless allowed_to_view?
