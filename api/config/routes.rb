@@ -19,7 +19,7 @@ Rails.application.routes.draw do
       get "health", to: "health#show"
 
 
-      resources :users, only: [], module: :users do
+      resources :users, only: [ :index ], module: :users do
         collection do
           get :me
           patch :me, action: :update

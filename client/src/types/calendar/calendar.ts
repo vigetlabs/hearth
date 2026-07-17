@@ -11,6 +11,7 @@ export const isInOffice = (status: AttendanceStatus) =>
 
 /** One roster member's status for a single day. */
 export interface PersonStatus {
+  userId: number;
   name: string;
   status: AttendanceStatus;
 }

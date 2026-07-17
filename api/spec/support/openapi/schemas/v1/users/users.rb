@@ -104,7 +104,30 @@ module OpenApi::Schemas::V1::Users
         type: :object,
         required: %w[user],
         properties: {
-          user: OpenApi::Schemas::V1::Users::USER_OBJECT
+          user: USER_OBJECT
+        }
+      }
+    }
+  }
+
+  # USERS_RESPONSE: Full response body for returning multiple users
+  #
+  # Use this when an endpoint returns multiple users wrapped in the standard API response response structure. Examples
+  # include successful querying users by office id to build office roster
+  USERS_RESPONSE = {
+    type: :object,
+    description: "Full response body for endpoints that return multiple users.",
+    required: %w[status data],
+    properties: {
+      status: OpenApi::Schemas::V1::Statuses::STATUS_OBJECT,
+      data: {
+        type: :object,
+        required: %w[users],
+        properties: {
+          users: {
+            type: :array,
+            items: USER_OBJECT
+          }
         }
       }
     }

@@ -1,16 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { MockVisit } from "@/util/api/mock/visits";
 import { generateVisitsKey } from "../keys/visitKeys";
 import { getVisits } from "../functions/visits";
+import type { GetVisitsParams, Visit } from "@/types/api/visits";
 
-// Every office's visits for the sample week. `buildWeekSchedule` filters them
-// down to the office in view.
-export function useVisitsQuery() {
-  return useQuery<MockVisit[]>({
-    queryKey: generateVisitsKey(),
+export function useVisitsQuery({ date, view, office_id }: GetVisitsParams) {
+  return useQuery<Visit[]>({
+    queryKey: generateVisitsKey({
+      date,
+      view,
+      office_id,
+    }),
     queryFn: async () => {
-      const response = await getVisits();
+      const response = await getVisits({
+        date,
+        view,
+        office_id,
+      });
       return response.data.visits;
     },
   });

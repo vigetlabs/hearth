@@ -20,6 +20,11 @@ module OpenApi::Schemas::V1::Visits
     }
   }
 
+  VISIT_STATUS = {
+    type: :string,
+    enum: %w[planned confirmed],
+    description: "The visit's current status"
+  }
 
   # VISIT_OBJECT: Public visit object returned by the API
   #
@@ -33,6 +38,8 @@ module OpenApi::Schemas::V1::Visits
       visit_date
       created_at
       updated_at
+      status
+      office_id
     ],
     properties: {
       id: { type: :integer },
@@ -49,7 +56,9 @@ module OpenApi::Schemas::V1::Visits
         format: :"date-time",
         description: "Updated-at time in ISO 8601 format",
         example: "2026-07-10T13:42:18.123Z"
-      }
+      },
+      status: VISIT_STATUS,
+      office_id: { type: :integer }
     }
   }
 

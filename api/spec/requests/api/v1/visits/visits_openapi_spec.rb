@@ -23,10 +23,22 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         },
         description: "Calendar view used to calculate the returned range."
 
+      parameter name: :office_id,
+        in: :query,
+        required: true,
+        schema: {
+          type: :integer
+        },
+        description: "ID of the office whose visits should be returned."
+
       response "200", "visits fetched successfully" do
         schema "$ref" => "#/components/schemas/visits_response"
 
         let(:user) { create(:user) }
+        let(:office) { create(:office) }
+        let(:office_id) { office.id }
+        let(:date) { "2026-07-15" }
+        let(:view) { "week" }
 
         before do
           sign_in user
@@ -38,13 +50,14 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
           "#/components/schemas/bad_request_error_response"
 
         let(:user) { create(:user) }
+        let(:office) { create(:office) }
+        let(:office_id) { office.id }
+        let(:date) { "invalid-date" }
+        let(:view) { "year" }
 
         before do
           sign_in user
         end
-
-        let(:date) { "invalid-date" }
-        let(:view) { "year" }
 
         run_test!
       end
@@ -53,6 +66,8 @@ RSpec.describe "Api::V1::Visits::Visits", type: :request do
         schema "$ref" =>
           "#/components/schemas/authentication_error_response"
 
+        let(:office) { create(:office) }
+        let(:office_id) { office.id }
         let(:date) { "2026-07-15" }
         let(:view) { "week" }
 

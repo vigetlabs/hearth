@@ -24,6 +24,9 @@ api/tmp/storage/*
 !api/tmp/storage/
 !api/tmp/storage/.keep
 
+# Ignore spec coverage files
+api/coverage/
+
 # Ignore master key for decrypting credentials and more.
 api/config/master.key
 

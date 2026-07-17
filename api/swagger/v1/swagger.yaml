@@ -244,6 +244,12 @@ paths:
           - week
           default: week
         description: Calendar view used to calculate the returned range.
+      - name: office_id
+        in: query
+        required: true
+        schema:
+          type: integer
+        description: ID of the office whose visits should be returned.
       responses:
         '400':
           description: invalid query parameters
@@ -854,6 +860,8 @@ components:
       - visit_date
       - created_at
       - updated_at
+      - status
+      - office_id
       properties:
         id:
           type: integer
@@ -885,6 +893,20 @@ components:
           format: date-time
           description: Updated-at time in ISO 8601 format
           example: '2026-07-10T13:42:18.123Z'
+        status:
+          type: string
+          enum:
+          - planned
+          - confirmed
+          description: The visit's current status
+        office_id:
+          type: integer
+    visit_status:
+      type: string
+      enum:
+      - planned
+      - confirmed
+      description: The visit's current status
     visit_date:
       type: string
       format: date
@@ -941,6 +963,8 @@ components:
               - visit_date
               - created_at
               - updated_at
+              - status
+              - office_id
               properties:
                 id:
                   type: integer
@@ -972,6 +996,14 @@ components:
                   format: date-time
                   description: Updated-at time in ISO 8601 format
                   example: '2026-07-10T13:42:18.123Z'
+                status:
+                  type: string
+                  enum:
+                  - planned
+                  - confirmed
+                  description: The visit's current status
+                office_id:
+                  type: integer
     visits_response:
       type: object
       description: Full response body for endpoints that return a single visit.
@@ -1003,6 +1035,8 @@ components:
                 - visit_date
                 - created_at
                 - updated_at
+                - status
+                - office_id
                 properties:
                   id:
                     type: integer
@@ -1034,6 +1068,14 @@ components:
                     format: date-time
                     description: Updated-at time in ISO 8601 format
                     example: '2026-07-10T13:42:18.123Z'
+                  status:
+                    type: string
+                    enum:
+                    - planned
+                    - confirmed
+                    description: The visit's current status
+                  office_id:
+                    type: integer
     user:
       type: object
       description: Public user account data returned by the API.
@@ -1191,6 +1233,100 @@ components:
                           schedule
                 lab:
                   type: string
+    users_response:
+      type: object
+      description: Full response body for endpoints that return multiple users.
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          type: object
+          required:
+          - users
+          properties:
+            users:
+              type: array
+              items:
+                type: object
+                description: Public user account data returned by the API.
+                required:
+                - id
+                - email
+                - first_name
+                - last_name
+                - office_id
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                    format: email
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+                  office_id:
+                    type: integer
+                    nullable: true
+                  default_schedule:
+                    nullable: true
+                    allOf:
+                    - type: object
+                      description: Public schedule data returned by the API.
+                      required:
+                      - id
+                      - is_default
+                      - monday
+                      - tuesday
+                      - wednesday
+                      - thursday
+                      - friday
+                      - saturday
+                      - sunday
+                      properties:
+                        id:
+                          type: integer
+                        is_default:
+                          type: boolean
+                        monday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        tuesday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        wednesday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        thursday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        friday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        saturday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                        sunday:
+                          type: boolean
+                          description: Whether the user has selected this day in their
+                            schedule
+                  lab:
+                    type: string
     create_user_request:
       type: object
       description: Request body for creating a new user account

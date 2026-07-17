@@ -56,6 +56,7 @@ RSpec.configure do |config|
           offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE,
 
           visit: OpenApi::Schemas::V1::Visits::VISIT_OBJECT,
+          visit_status: OpenApi::Schemas::V1::Visits::VISIT_STATUS,
           visit_date: OpenApi::Schemas::V1::Visits::VISIT_DATE,
           create_visits_request: OpenApi::Schemas::V1::Visits::CREATE_VISITS_REQUEST,
           visit_response: OpenApi::Schemas::V1::Visits::VISIT_RESPONSE,
@@ -63,6 +64,7 @@ RSpec.configure do |config|
 
           user: OpenApi::Schemas::V1::Users::USER_OBJECT,
           user_response: OpenApi::Schemas::V1::Users::USER_RESPONSE,
+          users_response: OpenApi::Schemas::V1::Users::USERS_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
           login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
           patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST

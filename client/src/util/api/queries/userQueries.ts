@@ -1,9 +1,10 @@
-import { generateCurrentUserKey, generateUsersKey } from "../keys/userKeys";
+import { generateCurrentUserKey } from "../keys/userKeys";
 import { HTTPError } from "ky";
 import { useQuery } from "@tanstack/react-query";
 import { getCurrentUser, getUsers } from "../functions/users";
 
 import type { User } from "@/types/api/users";
+import { generateOfficesUsersKey } from "../keys/officeKeys";
 
 export function useCurrentUserQuery() {
   return useQuery<User | null, Error>({
@@ -22,13 +23,11 @@ export function useCurrentUserQuery() {
   });
 }
 
-// The full roster across every office. `buildWeekSchedule` narrows it to the
-// office currently in view.
-export function useRosterQuery() {
-  return useQuery<User[]>({
-    queryKey: generateUsersKey(),
+export function useOfficeRosterQuery(office_id: number) {
+  return useQuery<User[] | null, Error>({
+    queryKey: generateOfficesUsersKey(office_id),
     queryFn: async () => {
-      const response = await getUsers();
+      const response = await getUsers(office_id);
       return response.data.users;
     },
   });

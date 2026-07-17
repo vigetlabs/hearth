@@ -487,11 +487,13 @@ export interface paths {
     /** Retrieves visits for a calendar range */
     get: {
       parameters: {
-        query?: {
+        query: {
           /** @description Anchor date for the calendar range. Defaults to the current date. */
           date?: components["schemas"]["visit_date"];
           /** @description Calendar view used to calculate the returned range. */
           view?: "week";
+          /** @description ID of the office whose visits should be returned. */
+          office_id: number;
         };
         header?: never;
         path?: never;
@@ -860,7 +862,18 @@ export interface components {
        * @example 2026-07-10T13:42:18.123Z
        */
       updated_at: string;
+      /**
+       * @description The visit's current status
+       * @enum {string}
+       */
+      status: "planned" | "confirmed";
+      office_id: number;
     };
+    /**
+     * @description The visit's current status
+     * @enum {string}
+     */
+    visit_status: "planned" | "confirmed";
     /**
      * Format: date
      * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -912,6 +925,12 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
+          /**
+           * @description The visit's current status
+           * @enum {string}
+           */
+          status: "planned" | "confirmed";
+          office_id: number;
         };
       };
     };
@@ -947,6 +966,12 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
+          /**
+           * @description The visit's current status
+           * @enum {string}
+           */
+          status: "planned" | "confirmed";
+          office_id: number;
         }[];
       };
     };
@@ -1013,6 +1038,42 @@ export interface components {
           } | null;
           lab?: string;
         };
+      };
+    };
+    /** @description Full response body for endpoints that return multiple users. */
+    users_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        users: {
+          id: number;
+          /** Format: email */
+          email: string;
+          first_name: string;
+          last_name: string;
+          office_id: number | null;
+          default_schedule?: {
+            id: number;
+            is_default: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            monday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            tuesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            wednesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            thursday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            friday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            saturday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            sunday: boolean;
+          } | null;
+          lab?: string;
+        }[];
       };
     };
     /** @description Request body for creating a new user account */
