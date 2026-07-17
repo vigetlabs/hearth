@@ -5,6 +5,7 @@ class OfficePresence < ApplicationRecord
   belongs_to :office, optional: true
 
   validates :connection_id, presence: true
+  validates :last_seen_at, presence: true
 
   validates :connection_id,
     uniqueness: {
