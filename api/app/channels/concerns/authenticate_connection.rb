@@ -1,0 +1,11 @@
+module AuthenticateConnection
+  extend ActiveSupport::Concern
+
+  def find_verified_user
+    if verified_user = env["warden"].authenticate(scope: :user)
+      verified_user
+    else
+      reject_unauthorized_connection
+    end
+  end
+end

@@ -11,6 +11,8 @@ import {
 } from "@/components/Calendar/StatusIcon";
 import type { Office } from "@/types/api/offices";
 
+import { useOfficePresence } from "@/util/cable/useOfficePresence";
+
 // A dev-only gallery for eyeballing components in isolation. Add a <Demo> block
 // per component/state you want to see. This page is only mounted in dev (see the
 // route in routes/router.ts), so it never ships to production.
@@ -49,6 +51,9 @@ const STATUS_VARIANTS: StatusVariant[] = ["outline", "solid", "dashed"];
 export default function SandboxPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpenWarning, setModalOpenWarning] = useState(false);
+
+  const selectedOfficeId = 1;
+  const presentUsers = useOfficePresence(selectedOfficeId);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -118,6 +123,24 @@ export default function SandboxPage() {
           onConfirm={() => setModalOpenWarning(false)}
           onCancel={() => setModalOpenWarning(false)}
         />
+      </Demo>
+
+      <Demo title="Live users">
+        <div>
+          <h2>Viewing this office</h2>
+
+          {presentUsers.length === 0 ? (
+            <p>No users currently viewing this office.</p>
+          ) : (
+            <ul>
+              {presentUsers.map((user) => (
+                <li key={user.id}>
+                  {user.first_name} {user.last_name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </Demo>
     </div>
   );
