@@ -167,7 +167,7 @@ export function Calendar({
         {days.map((day, index) => {
           const key = toDateKey(day);
           const dayData = attendance[key] ?? EMPTY_DAY;
-          const confirmedCount = counts[index];
+          const visitorCount = counts[index];
 
           return (
             <DayCell
@@ -179,9 +179,8 @@ export function Calendar({
                 (person) =>
                   person.userId === user.id && isInOffice(person.status),
               )}
-              confirmedCount={confirmedCount}
+              visitorCount={visitorCount}
               total={dayData.length}
-              fill={dayData.length > 0 ? confirmedCount / dayData.length : 0}
               isHotSpot={hotSpotDays.has(index)}
               locked={locked}
               onToggleMine={() => toggleMine(key)}

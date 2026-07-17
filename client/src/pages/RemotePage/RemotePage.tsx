@@ -24,9 +24,9 @@ export default function RemotePage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-surface-sunken">
+    <div className="flex flex-1 flex-col bg-surface-muted">
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-8">
-        <div className="flex flex-1 flex-col rounded-3xl bg-surface px-8 py-10 shadow-sm sm:px-12 sm:py-12">
+        <div className="flex flex-1 flex-col rounded-3xl bg-surface px-8 py-10 shadow-[0px_11.42px_34.26px_0px_#0000000F] sm:px-12 sm:py-12">
           <h1 className="text-2xl font-bold text-fg">Remote 🏡</h1>
 
           <p className="mt-3 max-w-4xl text-sm leading-relaxed text-fg-muted">
