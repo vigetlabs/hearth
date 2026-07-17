@@ -1,5 +1,6 @@
 import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
+import FlameIcon from "@/components/icons/FlameIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
@@ -8,12 +9,8 @@ interface DayHeaderProps {
   date: Date;
   /** Whether the logged-in user has selected this day. */
   isSelected: boolean;
-  /** How many people are confirmed this day. */
-  confirmedCount: number;
-  /** Total office roster size, the denominator for the confirmed count. */
-  total: number;
-  /** Confirmed headcount as a 0–1 fraction of the office roster. */
-  fill: number;
+  /** How many visitors from other offices are in that day */
+  visitorCount: number;
   /** Whether this is the week's busiest day (the "hot spot"). */
   isHotSpot: boolean;
   /** Whether the week is confirmed (locked). Swaps the interactive header for a
@@ -36,9 +33,7 @@ export function DayHeader({ locked, ...props }: DayHeaderProps) {
 function PlanningHeader({
   date,
   isSelected,
-  confirmedCount,
-  total,
-  fill,
+  visitorCount,
   isHotSpot,
   myUserId,
   onToggleMine,
@@ -73,21 +68,13 @@ function PlanningHeader({
         />
       </span>
 
-      <ProgressBar
-        fill={fill}
-        trackClass="bg-line-strong"
-        barClass={isHotSpot ? "bg-strong" : "bg-fill"}
+      <BadgeStack
+        visitorCount={visitorCount}
+        isHotSpot={isHotSpot}
+        visitorClass="bg-strong text-fg-inverse"
+        emptyClass="text-fg-faint"
+        hotSpotClass="bg-strong text-fg-inverse"
       />
-
-      <span className="mt-2 flex flex-wrap items-center gap-2">
-        <ConfirmedCount
-          confirmedCount={confirmedCount}
-          total={total}
-          countClass="text-fg-muted"
-          emptyClass="text-fg-faint"
-        />
-        {isHotSpot && <HotSpotBadge className="bg-strong text-fg-inverse" />}
-      </span>
     </button>
   );
 }
@@ -96,9 +83,7 @@ function PlanningHeader({
 function ConfirmedHeader({
   date,
   isSelected,
-  confirmedCount,
-  total,
-  fill,
+  visitorCount,
   isHotSpot,
 }: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
   return (
@@ -130,27 +115,13 @@ function ConfirmedHeader({
         </span>
       </span>
 
-      <ProgressBar
-        fill={fill}
-        trackClass={isSelected ? "bg-white/25" : "bg-line-strong"}
-        barClass={isSelected ? "bg-white" : isHotSpot ? "bg-strong" : "bg-fill"}
+      <BadgeStack
+        visitorCount={visitorCount}
+        isHotSpot={isHotSpot}
+        visitorClass="bg-surface text-fg"
+        emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
+        hotSpotClass="bg-surface text-fg"
       />
-
-      <span className="mt-2 flex flex-wrap items-center gap-2">
-        <ConfirmedCount
-          confirmedCount={confirmedCount}
-          total={total}
-          countClass={isSelected ? "text-fg-inverse-muted" : "text-fg-muted"}
-          emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
-        />
-        {isHotSpot && (
-          <HotSpotBadge
-            className={
-              isSelected ? "bg-surface text-fg" : "bg-strong text-fg-inverse"
-            }
-          />
-        )}
-      </span>
     </div>
   );
 }
@@ -174,54 +145,43 @@ function DayDateLabel({
   );
 }
 
-function ProgressBar({
-  fill,
-  trackClass,
-  barClass,
-}: {
-  fill: number;
-  trackClass: string;
-  barClass: string;
-}) {
-  return (
-    <span
-      className={`mt-4 block h-1.5 overflow-hidden rounded-full ${trackClass}`}
-    >
-      <span
-        className={`block h-full rounded-full ${barClass}`}
-        style={{ width: `${Math.round(fill * 100)}%` }}
-      />
-    </span>
-  );
-}
-
-function ConfirmedCount({
-  confirmedCount,
-  total,
-  countClass,
+/** The stacked badge area beneath the date. Both rows are always rendered as
+    fixed-height slots so every header is the same height regardless of which
+    badges are present — matching the tallest case (both badges shown). */
+function BadgeStack({
+  visitorCount,
+  isHotSpot,
+  visitorClass,
   emptyClass,
+  hotSpotClass,
 }: {
-  confirmedCount: number;
-  total: number;
-  countClass: string;
+  visitorCount: number;
+  isHotSpot: boolean;
+  visitorClass: string;
   emptyClass: string;
+  hotSpotClass: string;
 }) {
-  return confirmedCount > 0 ? (
-    <span className={`whitespace-nowrap text-xs ${countClass}`}>
-      {confirmedCount}/{total} confirmed
-    </span>
-  ) : (
-    <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
-      No confirmed plans yet
-    </span>
-  );
-}
-
-function HotSpotBadge({ className }: { className: string }) {
   return (
-    <span className={`${hotSpotBadge} ${className}`}>
-      Hot spot
-      <span aria-hidden="true">🔥</span>
+    <span className="mt-2 flex flex-col items-start gap-2">
+      <span className={badgeSlot}>
+        {visitorCount > 0 ? (
+          <span className={`${badge} ${visitorClass}`}>
+            {visitorCount} visitors
+          </span>
+        ) : (
+          <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
+            No confirmed plans yet
+          </span>
+        )}
+      </span>
+      <span className={badgeSlot}>
+        {isHotSpot && (
+          <span className={`${badge} ${hotSpotClass}`}>
+            Most confirmed
+            <FlameIcon className="h-2.5 w-2.5" />
+          </span>
+        )}
+      </span>
     </span>
   );
 }
@@ -231,5 +191,8 @@ const headerBase = "block w-full shrink-0 px-4 pb-3 pt-4 text-left";
 const iconCircle =
   "flex h-7 w-7 items-center justify-center rounded-full border";
 
-const hotSpotBadge =
+const badge =
   "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide";
+
+/** Fixed-height row so an absent badge still reserves its vertical space. */
+const badgeSlot = "flex h-5 items-center";

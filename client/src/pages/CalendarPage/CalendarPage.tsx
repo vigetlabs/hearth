@@ -89,12 +89,12 @@ export default function CalendarPage() {
   const office =
     offices.find((office) => office.id === activeOfficeId) ?? defaultOffice;
 
-  const officeRosterQuery = useOfficeRosterQuery(activeOfficeId);
+  const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
 
   const visitsQuery = useVisitsQuery({
     date: toDateKey(focusedWeekStartDate),
     view: "week",
-    office_id: activeOfficeId,
+    office_id: activeOfficeId ?? 1,
   });
 
   const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
@@ -180,6 +180,10 @@ export default function CalendarPage() {
     return <div>No office is available</div>;
   }
 
+  if (!user) {
+    return <div>No user is available</div>;
+  }
+
   const schedule: WeekSchedule = buildWeekSchedule(
     officeRosterQuery.data ?? [],
     visitsQuery.data ?? [],
@@ -194,11 +198,11 @@ export default function CalendarPage() {
   )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-surface-sunken">
-      <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-6 py-8">
-        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-surface p-6 shadow-sm">
+    <div className="flex flex-1 flex-col overflow-hidden bg-surface-muted">
+      <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
+        <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
           <div className="flex items-center gap-3 pb-5">
-            <h2 className="flex items-center gap-2 text-2xl font-bold text-fg">
+            <h2 className="flex items-center gap-2 text-2xl capitalize font-bold text-fg">
               {office.name}
               <span aria-hidden="true">{office.emoji}</span>
             </h2>
@@ -238,7 +242,7 @@ export default function CalendarPage() {
                 </button>
               )}
 
-              <div className="h-6 w-px bg-line-strong" />
+              <div className="h-6 w-px bg-line" />
 
               <p className="text-sm text-fg-subtle">
                 {isWeekConfirmed ? (
@@ -258,7 +262,7 @@ export default function CalendarPage() {
                   className={unlockButton}
                 >
                   <LockIcon className="h-3.5 w-3.5" />
-                  Unlock schedule
+                  Unlock Week
                 </button>
               ) : (
                 <button
@@ -286,14 +290,16 @@ export default function CalendarPage() {
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-fg-strong shadow-sm hover:bg-surface-sunken";
+  "flex h-8 w-8 items-center justify-center text-fg-strong hover:text-fg";
 
 const pillButton =
-  "rounded-full border border-strong bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
+  "rounded-full border border-line bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
 
 const todayButton = `${pillButton} font-semibold`;
 
-const confirmButton = `ml-auto ${pillButton} font-bold`;
+const darkPillButton =
+  "flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover";
 
-const unlockButton =
-  "ml-auto flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover";
+const confirmButton = `ml-auto ${darkPillButton}`;
+
+const unlockButton = `ml-auto ${darkPillButton}`;

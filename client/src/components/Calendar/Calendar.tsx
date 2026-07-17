@@ -158,7 +158,7 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-line divide-x divide-line"
+        className="grid min-h-0 flex-1 overflow-hidden rounded-xl border border-line divide-x divide-line"
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",
@@ -167,7 +167,10 @@ export function Calendar({
         {days.map((day, index) => {
           const key = toDateKey(day);
           const dayData = attendance[key] ?? EMPTY_DAY;
-          const confirmedCount = counts[index];
+
+          // TODO: Show visitor count for this day (people from other offices)
+          // right now we just show confirmed count for current office
+          const visitorCount = counts[index];
 
           return (
             <DayCell
@@ -179,9 +182,8 @@ export function Calendar({
                 (person) =>
                   person.userId === user.id && isInOffice(person.status),
               )}
-              confirmedCount={confirmedCount}
+              visitorCount={visitorCount}
               total={dayData.length}
-              fill={dayData.length > 0 ? confirmedCount / dayData.length : 0}
               isHotSpot={hotSpotDays.has(index)}
               locked={locked}
               onToggleMine={() => toggleMine(key)}

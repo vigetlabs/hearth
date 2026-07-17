@@ -11,11 +11,9 @@ interface DayCellProps {
       week is open, "in the office" once it's confirmed. */
   isMine: boolean;
   /** How many people are confirmed this day. */
-  confirmedCount: number;
+  visitorCount: number;
   /** Total office roster size, the denominator for the confirmed count. */
   total: number;
-  /** Confirmed headcount as a 0–1 fraction of the office roster. */
-  fill: number;
   /** Whether this is the week's busiest day (the "hot spot"). */
   isHotSpot: boolean;
   /** Whether the week is confirmed (locked). Swaps the interactive header for a
@@ -30,9 +28,7 @@ export function DayCell({
   people,
   myUserId,
   isMine,
-  confirmedCount,
-  total,
-  fill,
+  visitorCount,
   isHotSpot,
   locked,
   onToggleMine,
@@ -42,16 +38,14 @@ export function DayCell({
       <DayHeader
         date={date}
         isSelected={isMine}
-        confirmedCount={confirmedCount}
-        total={total}
-        fill={fill}
+        visitorCount={visitorCount}
         isHotSpot={isHotSpot}
         locked={locked}
         myUserId={myUserId}
         onToggleMine={onToggleMine}
       />
 
-      <DayRoster people={people} myUserId={myUserId} />
+      <DayRoster date={date} people={people} myUserId={myUserId} />
     </div>
   );
 }
