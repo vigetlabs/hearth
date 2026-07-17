@@ -10,21 +10,24 @@ interface OfficeSwitcherProps {
   setOffice: (office: Office) => void;
 }
 
-// A dropdown of the other offices, anchored below the "Switch office" trigger.
-// Styled as a white rounded card with one row per office, divided by hairlines.
+// A dropdown of the other offices, anchored below the "View offices" trigger.
+// The open card is one row per office divided by hairlines. Switching here is
+// for viewing another office's schedule — it doesn't change the user's default
+// office.
 export default function OfficeSwitcher({
   office,
   setOffice,
 }: OfficeSwitcherProps) {
   const officesQuery = useOfficesQuery();
   const others = (officesQuery.data ?? []).filter(
-    (option) => option.id !== office.id,
+    (option) =>
+      option.id !== office.id && option.name.toLowerCase() !== "remote",
   );
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm text-fg-muted hover:text-fg focus:outline-none">
-        Switch office
+      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm capitalize text-fg-muted hover:text-fg focus:outline-none">
+        view offices
         <ChevronDownIcon className="h-3 w-3" />
       </DropdownMenu.Trigger>
 
@@ -32,21 +35,21 @@ export default function OfficeSwitcher({
         <DropdownMenu.Content
           align="start"
           sideOffset={8}
-          className="z-40 w-64 rounded-[20px] bg-surface p-2 shadow-xl ring-1 ring-black/5"
+          className="z-40 w-52 overflow-hidden rounded-2xl bg-surface shadow-xl ring-1 ring-black/5"
         >
-          {others.map((option, i) => (
+          {others.map((option, index) => (
             <Fragment key={option.id}>
-              {i > 0 && (
-                <DropdownMenu.Separator className="mx-2 h-px bg-line" />
-              )}
+              {index > 0 && <DropdownMenu.Separator className="h-px bg-line" />}
               <DropdownMenu.Item
                 onSelect={() => setOffice(option)}
-                className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-fg outline-none data-[highlighted]:bg-surface-muted"
+                className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-left outline-none data-[highlighted]:bg-surface-muted"
               >
                 <span className="text-lg" aria-hidden="true">
                   {option.emoji}
                 </span>
-                {option.name}
+                <span className="text-base capitalize text-fg">
+                  {option.name}
+                </span>
               </DropdownMenu.Item>
             </Fragment>
           ))}

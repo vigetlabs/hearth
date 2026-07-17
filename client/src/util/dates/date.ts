@@ -34,3 +34,8 @@ export function startOfWeek(date: Date): Date {
 export function isSameDay(a: Date, b: Date): boolean {
   return toDateKey(a) === toDateKey(b);
 }
+
+/** True when `date` falls on a calendar day after today (local time). */
+export function isFuture(date: Date, today: Date = new Date()): boolean {
+  return toDateKey(date) > toDateKey(today);
+}

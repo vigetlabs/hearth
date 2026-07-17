@@ -9,7 +9,7 @@ interface DayHeaderProps {
   date: Date;
   /** Whether the logged-in user has selected this day. */
   isSelected: boolean;
-  /** How many people are confirmed this day. */
+  /** How many visitors from other offices are in that day */
   visitorCount: number;
   /** Whether this is the week's busiest day (the "hot spot"). */
   isHotSpot: boolean;
@@ -68,14 +68,13 @@ function PlanningHeader({
         />
       </span>
 
-      <span className="mt-2 flex flex-wrap items-center gap-2">
-        <VisitorCount
-          visitorCount={visitorCount}
-          className="bg-strong text-fg-inverse"
-          emptyClass="text-fg-faint"
-        />
-        {isHotSpot && <HotSpotBadge className="bg-strong text-fg-inverse" />}
-      </span>
+      <BadgeStack
+        visitorCount={visitorCount}
+        isHotSpot={isHotSpot}
+        visitorClass="bg-strong text-fg-inverse"
+        emptyClass="text-fg-faint"
+        hotSpotClass="bg-strong text-fg-inverse"
+      />
     </button>
   );
 }
@@ -116,14 +115,13 @@ function ConfirmedHeader({
         </span>
       </span>
 
-      <span className="mt-2 flex flex-wrap items-center gap-2">
-        <VisitorCount
-          visitorCount={visitorCount}
-          className="bg-surface text-fg"
-          emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
-        />
-        {isHotSpot && <HotSpotBadge className="bg-surface text-fg" />}
-      </span>
+      <BadgeStack
+        visitorCount={visitorCount}
+        isHotSpot={isHotSpot}
+        visitorClass="bg-surface text-fg"
+        emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
+        hotSpotClass="bg-surface text-fg"
+      />
     </div>
   );
 }
@@ -147,29 +145,43 @@ function DayDateLabel({
   );
 }
 
-function VisitorCount({
+/** The stacked badge area beneath the date. Both rows are always rendered as
+    fixed-height slots so every header is the same height regardless of which
+    badges are present — matching the tallest case (both badges shown). */
+function BadgeStack({
   visitorCount,
+  isHotSpot,
+  visitorClass,
   emptyClass,
-  className,
+  hotSpotClass,
 }: {
   visitorCount: number;
+  isHotSpot: boolean;
+  visitorClass: string;
   emptyClass: string;
-  className: string;
+  hotSpotClass: string;
 }) {
-  return visitorCount > 0 ? (
-    <span className={`${badge} ${className}`}>{visitorCount} visitors</span>
-  ) : (
-    <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
-      No confirmed plans yet
-    </span>
-  );
-}
-
-function HotSpotBadge({ className }: { className: string }) {
   return (
-    <span className={`${badge} ${className}`}>
-      Most confirmed
-      <FlameIcon className="h-2.5 w-2.5" />
+    <span className="mt-2 flex flex-col items-start gap-2">
+      <span className={badgeSlot}>
+        {visitorCount > 0 ? (
+          <span className={`${badge} ${visitorClass}`}>
+            {visitorCount} visitors
+          </span>
+        ) : (
+          <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
+            No confirmed plans yet
+          </span>
+        )}
+      </span>
+      <span className={badgeSlot}>
+        {isHotSpot && (
+          <span className={`${badge} ${hotSpotClass}`}>
+            Most confirmed
+            <FlameIcon className="h-2.5 w-2.5" />
+          </span>
+        )}
+      </span>
     </span>
   );
 }
@@ -181,3 +193,6 @@ const iconCircle =
 
 const badge =
   "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide";
+
+/** Fixed-height row so an absent badge still reserves its vertical space. */
+const badgeSlot = "flex h-5 items-center";

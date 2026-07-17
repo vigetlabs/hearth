@@ -45,7 +45,7 @@ export function DayCell({
         onToggleMine={onToggleMine}
       />
 
-      <DayRoster people={people} myUserId={myUserId} />
+      <DayRoster date={date} people={people} myUserId={myUserId} />
     </div>
   );
 }
