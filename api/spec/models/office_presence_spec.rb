@@ -53,5 +53,50 @@ RSpec.describe OfficePresence, type: :model do
         expect(office_presence).not_to be_valid
       end
     end
+
+    context "when connection_id already exists for the same user and office" do
+      it "is invalid" do
+        office_presence.save!
+
+        duplicate_presence = build(
+          :office_presence,
+          user: office_presence.user,
+          office: office_presence.office,
+          connection_id: office_presence.connection_id
+        )
+
+        expect(duplicate_presence).not_to be_valid
+        expect(duplicate_presence.errors[:connection_id]).to include(
+          "has already been taken"
+        )
+      end
+    end
+
+    context "when the connection_id exists for a different office" do
+      it "is valid" do
+        office_presence.save!
+
+        other_presence = build(
+          :office_presence,
+          user: office_presence.user,
+          connection_id: office_presence.connection_id
+        )
+        expect(other_presence).to be_valid
+      end
+    end
+
+    context "when the connection_id exists for a different user" do
+      it "is valid" do
+        office_presence.save!
+
+        presence = build(
+          :office_presence,
+          user: create(:user),
+          office: office_presence.office,
+          connection_id: office_presence.connection_id
+        )
+        expect(presence).to be_valid
+      end
+    end
   end
 end
