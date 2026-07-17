@@ -20,6 +20,11 @@
   ============================================================================
 */
 @theme {
+  /* Typography — app-wide sans font */
+  --font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
   /* Foreground — text & icons */
   --color-fg: #171717; /* primary text, headings, dark pills */
   --color-fg-strong: #262626; /* weighted icons */
@@ -39,6 +44,7 @@
   --color-line: #e0e0e3; /* default borders, dividers */
   --color-line-strong: #bfbfbf; /* input borders, progress tracks */
   --color-line-faint: #b0b0b0; /* dashed / decorative */
+  --color-line-selected: #9d9d9d; /* selected (unhovered) item border */
 
   /* Emphasis — dark accent for primary actions, active cells, badges */
   --color-strong: #171717;

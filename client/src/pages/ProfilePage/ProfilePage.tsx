@@ -39,6 +39,10 @@ function areDaySetsEqual(first: Set<string>, second: Set<string>) {
   return [...first].every((value) => second.has(value));
 }
 
+const sectionClassName = cn(
+  "rounded-3xl bg-surface px-14 py-8 shadow-[0px_11.42px_34.26px_0px_#0000000F]",
+);
+
 export default function ProfilePage() {
   const officeItemClassName = cn("min-w-32");
 
@@ -51,7 +55,7 @@ export default function ProfilePage() {
 
   const updateUserMutation = useUpdateUserMutation();
 
-  const initialSelectedDayIds: Set<string> = user.default_schedule
+  const initialSelectedDayIds: Set<string> = user?.default_schedule
     ? getSelectedDayIds(user.default_schedule)
     : new Set<string>();
 
@@ -65,8 +69,13 @@ export default function ProfilePage() {
   const email = user?.email ?? "";
 
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>(
-    String(user.office_id),
+    user ? String(user.office_id) : "",
   );
+
+  const selectedOffice = offices.find(
+    (office) => String(office.id) === selectedOfficeId,
+  );
+  const isRemoteSelected = selectedOffice?.name.toLowerCase() === "remote";
 
   const [selectedDayIds, setSelectedDayIds] = useState<Set<string>>(
     initialSelectedDayIds,
@@ -168,7 +177,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-surface-muted">
-      <form onSubmit={handleSave} className="mx-auto max-w-3xl px-6 py-8">
+      <form onSubmit={handleSave} className="mx-auto max-w-[1032px] px-6 py-8">
         <Link
           to="/"
           className="inline-flex items-center gap-1 text-sm text-fg-subtle hover:text-fg-strong"
@@ -181,8 +190,8 @@ export default function ProfilePage() {
         </h1>
 
         <div className="space-y-6">
-          <section className="rounded-2xl bg-surface p-8">
-            <h2 className="mb-6 text-xl font-bold text-fg">Profile</h2>
+          <section className={sectionClassName}>
+            <h2 className="mb-6 text-2xl font-bold text-fg">Profile</h2>
 
             <div className="space-y-5">
               <div className="flex flex-row gap-5 w-full">
@@ -244,10 +253,14 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl bg-surface p-8">
-            <h2 className="mb-6 text-xl font-bold text-fg">Default Office</h2>
+          <section className={sectionClassName}>
+            <h2 className="mb-1 text-2xl font-bold text-fg">Default Office</h2>
+            <p className="mb-6 text-sm text-fg-subtle">
+              Remote means no home office. Use the Remote View to browse offices
+              when you plan to visit one.
+            </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="w-full">
               <OfficeOptions
                 offices={offices}
                 showRemoteOption={true}
@@ -258,16 +271,29 @@ export default function ProfilePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl bg-surface p-8">
-            <h2 className="mb-6 text-xl font-bold text-fg">Default Schedule</h2>
+          <section className={sectionClassName}>
+            <h2 className="mb-1 text-2xl font-bold text-fg">
+              Default Schedule
+            </h2>
+            <p className="mb-6 text-sm text-fg-subtle">
+              These are your usual in-office days. They pre-fill each new week
+              for you to review and confirm.
+            </p>
 
-            <div className="grid grid-cols-5 gap-3">
+            <div
+              className={cn(
+                "grid grid-cols-5 gap-3 transition-opacity",
+                isRemoteSelected && "pointer-events-none opacity-50",
+              )}
+              aria-disabled={isRemoteSelected}
+            >
               {WEEKDAYS.map((day) => (
                 <ScheduleDayItem
                   key={day.id}
                   day={day}
                   isSelected={selectedDayIds.has(day.id)}
                   onToggle={toggleDay}
+                  disabled={isRemoteSelected}
                 />
               ))}
             </div>
@@ -285,7 +311,7 @@ export default function ProfilePage() {
           </span>
           <button
             type="submit"
-            className="rounded-lg border border-line-strong bg-surface px-5 py-2.5 text-sm font-medium text-fg hover:bg-surface-sunken"
+            className="rounded-lg bg-surface px-10 py-1 text-md font-large text-fg shadow-[0px_11.42px_34.26px_0px_#0000000F] hover:bg-surface-sunken"
           >
             Save Changes
           </button>

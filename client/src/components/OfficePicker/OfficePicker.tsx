@@ -40,7 +40,18 @@ export default function OfficePicker() {
     (office) => office.name.toLowerCase() !== "remote",
   );
 
+  const remoteOffice = offices.find(
+    (office) => office.name.toLowerCase() === "remote",
+  );
+
+  const isRemoteSelected =
+    !!remoteOffice && String(remoteOffice.id) === selectedOfficeId;
+
   function heroIdForOffice(office: Office): string {
+    // Remote has no hero photo of its own, so fall back to the default hero
+    // rather than requesting a missing image and flashing the placeholder.
+    if (office.name.toLowerCase() === "remote") return DEFAULT_HERO_OFFICE_ID;
+
     return office.name.toLowerCase().trim().replaceAll(" ", "-");
   }
 
@@ -86,6 +97,8 @@ export default function OfficePicker() {
 
     if (!selectedOffice) return;
 
+    const isRemote = selectedOffice.name.toLowerCase() === "remote";
+
     const payload: PatchUserRequest = createUpdateUserObjectPayload(
       undefined,
       undefined,
@@ -98,35 +111,14 @@ export default function OfficePicker() {
           queryKey: generateCurrentUserKey(),
         });
 
+        if (isRemote) {
+          navigate("/remote");
+          return;
+        }
+
         navigate("/users/schedule", {
           state: { office: selectedOffice },
         });
-      },
-    });
-  }
-
-  function handleRemote() {
-    // Remote users have no in-office days to pick, so persist the remote office,
-    // skip the schedule screen, and drop them straight into the calendar.
-    const remoteOffice = offices.find(
-      (office) => office.name.toLowerCase() === "remote",
-    );
-
-    if (!remoteOffice) return;
-
-    const payload: PatchUserRequest = createUpdateUserObjectPayload(
-      undefined,
-      undefined,
-      remoteOffice.id,
-    );
-
-    updateUserMutation.mutate(payload, {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: generateCurrentUserKey(),
-        });
-
-        navigate("/calendar");
       },
     });
   }
@@ -198,20 +190,28 @@ export default function OfficePicker() {
 
             <button
               type="button"
-              onClick={handleContinue}
-              disabled={!selectedOfficeId || updateUserMutation.isPending}
-              className="mt-8 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => {
+                if (remoteOffice) handleSelectOffice(String(remoteOffice.id));
+              }}
+              disabled={!remoteOffice || updateUserMutation.isPending}
+              aria-pressed={isRemoteSelected}
+              className={cn(
+                "mt-8 w-full rounded-full border py-3 text-sm font-semibold text-fg transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                isRemoteSelected
+                  ? "border-fill bg-surface-muted"
+                  : "border-line-strong hover:border-line-faint hover:bg-surface-sunken",
+              )}
             >
-              Continue
+              No home office. I'm fully remote.
             </button>
 
             <button
               type="button"
-              onClick={handleRemote}
-              disabled={updateUserMutation.isPending}
-              className="mt-3 w-full rounded-full border border-line-strong py-3 text-sm font-semibold text-fg transition-colors hover:border-line-faint hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={handleContinue}
+              disabled={!selectedOfficeId || updateUserMutation.isPending}
+              className="mt-3 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              No home office. I'm fully remote.
+              Continue
             </button>
           </div>
         </div>

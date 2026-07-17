@@ -59,7 +59,7 @@ export default function SchedulePicker() {
         queryClient.setQueryData(generateCurrentUserKey(), (user: User) =>
           user ? { ...user, default_schedule: schedule } : user,
         );
-        navigate("/users/login");
+        navigate("/users/signin");
       },
     });
   }

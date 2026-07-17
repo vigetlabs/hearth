@@ -5,13 +5,17 @@ import { authLoader } from "@/routes/loaders/authLoader";
 import { redirectAuthenticatedUserLoader } from "@/routes/loaders/redirectAuthenticatedUserLoader";
 
 import IndexPage from "@/pages/IndexPage/IndexPage";
-import SignupPage from "@/pages/SignupPage/SignupPage";
 import OfficePickerPage from "@/pages/OfficePickerPage/OfficePickerPage";
 import SchedulePickerPage from "@/pages/SchedulePickerPage/SchedulePickerPage";
-import LoginPage from "@/pages/LoginPage/LoginPage";
+import SigninPage from "@/pages/SigninPage/SigninPage";
 import ProfilePage from "@/pages/ProfilePage/ProfilePage";
 import CalendarPage from "@/pages/CalendarPage/CalendarPage";
 import RemotePage from "@/pages/RemotePage/RemotePage";
+import SandboxPage from "@/pages/SandboxPage/SandboxPage";
+
+const devRoutes = import.meta.env.DEV
+  ? [{ path: "sandbox", Component: SandboxPage }]
+  : [];
 
 export const router = createBrowserRouter([
   {
@@ -20,15 +24,15 @@ export const router = createBrowserRouter([
     Component: App,
     children: [
       { index: true, Component: IndexPage },
+      ...devRoutes,
       {
         path: "users",
         children: [
-          { path: "signup", Component: SignupPage },
           { path: "office", Component: OfficePickerPage },
           { path: "schedule", Component: SchedulePickerPage },
           {
-            path: "login",
-            Component: LoginPage,
+            path: "signin",
+            Component: SigninPage,
             loader: redirectAuthenticatedUserLoader,
           },
           { path: "profile", Component: ProfilePage, loader: authLoader },

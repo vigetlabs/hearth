@@ -15,11 +15,8 @@ export default function IndexPage() {
   return (
     <div>
       <div>API status: {data.status}</div>
-      <Link to="/users/signup" className="p-2">
-        Signup
-      </Link>
-      <Link to="/users/login" className="p-2">
-        Login
+      <Link to="/users/signin" className="p-2">
+        Sign in
       </Link>
       <Link to="/calendar" className="p-2">
         Calendar
