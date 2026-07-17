@@ -2,7 +2,7 @@ class OfficePresence < ApplicationRecord
   STALE_AFTER = 90.seconds
 
   belongs_to :user
-  belongs_to :office, optional: true
+  belongs_to :office
 
   validates :connection_id, presence: true
   validates :last_seen_at, presence: true

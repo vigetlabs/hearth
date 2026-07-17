@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe OfficePresence, type: :model do
   describe "associations" do
-    it { is_expected.to belong_to(:office).optional }
+    it { is_expected.to belong_to(:office) }
     it { is_expected.to belong_to(:user) }
   end
 
@@ -34,9 +34,9 @@ RSpec.describe OfficePresence, type: :model do
     end
 
     context "when office is missing" do
-      it "is valid" do
+      it "is invalid" do
         office_presence.office = nil
-        expect(office_presence).to be_valid
+        expect(office_presence).not_to be_valid
       end
     end
 
