@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_052046) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_17_165136) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "office_presences", force: :cascade do |t|
+    t.string "connection_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_seen_at"
+    t.bigint "office_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["office_id"], name: "index_office_presences_on_office_id"
+    t.index ["user_id", "office_id", "connection_id"], name: "index_office_presences_on_user_office_connection", unique: true
+    t.index ["user_id"], name: "index_office_presences_on_user_id"
+  end
 
   create_table "offices", force: :cascade do |t|
     t.string "city", null: false
@@ -83,6 +95,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_052046) do
     t.index ["user_id"], name: "index_visits_on_user_id"
   end
 
+  add_foreign_key "office_presences", "offices"
+  add_foreign_key "office_presences", "users"
   add_foreign_key "schedules", "users"
   add_foreign_key "user_identities", "users"
   add_foreign_key "users", "offices"
