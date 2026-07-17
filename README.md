@@ -110,6 +110,43 @@ Then start the frontend development server:
 
 The local development environment should now be fully running. Another option to quickly start the frontend development server once the frontend dependencies have been installed is to run `just client` at the project root.
 
+#### Action Cable Testing
+
+This project uses Action Cable to enable live synchronization with calendar events. Due to the nature of web sockets requiring other external users performing the intended action in order to accurately determine whether or not a web socket feature is correctly working, it can be difficult to test the current local implementation without pushing to some public staging server. To solve this, the local development environment supports setting up public [Cloudflare Tunnels](https://developers.cloudflare.com/tunnel/) to allow other users to access the development environment. This will provide the correct environment to enable multiple external users to test web socket feature functionality.
+
+In order to set up the Cloudflare Tunnels, first stop botht the Vite server and Docker compose services. Once the servers have stopped, clean any existing containers by running `just reset`. Now start a Cloudflare Tunnel:
+
+1. Ensure [cloudflared command-line client](https://github.com/cloudflare/cloudflared). Then run the following commands:
+```
+cloudflared tunnel --url http://localhost:5173
+```
+
+2. If you have access to Nix shells, you can run the following commands:
+```
+// enter a shell with access to cloudflared command-line client package
+just cloudflared-shell
+
+// start a cloudflared tunnel for http://localhost:5173
+just cloudflared-tunnel
+```
+
+Once the tunnel is running, it will provide a public URL. In the `api/.env` file, set the value through `PUBLIC_APP_URL=<public-tunnel-url>`. Then start up the servers as normal:
+
+```
+// api
+just build
+just api
+
+// client
+./dev-start
+```
+
+Before sharing and/or accessing the public tunnel URL, ensure the following are set in the Hearth Google OAuth Credentials:
+- "Authorized JavaScript Origins" section has the tunnel URL in its URIs list
+- "Authorized Redirect URIs" section has `<tunnel-url>/api/v1/users/auth/google_oauth2/callback` in its URIs list
+
+At this point, the tunnel URL should work as it would in a local development environment, allowing users to test out the web sockets.
+
 #### Pre-commit Setup
 
 This project uses pre-commit hooks to help ensure code quality. To install the pre-commit project hooks, run the following command from the root of the repository:

@@ -72,6 +72,12 @@ prettier:
 types:
   cd client && npm run generate:api-types
 
+cloudflared-shell:
+  nix shell nixpkgs#cloudflared
+
+cloudflared-tunnel:
+  cloudflared tunnel --url http://localhost:5173
+
 # Slack bot: weekly scheduler (long-running, Fridays 12:00 ET)
 slack-schedule:
   cd services/slack-bot && node --env-file=.env src/scheduler.ts
