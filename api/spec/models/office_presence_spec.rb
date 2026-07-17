@@ -99,4 +99,59 @@ RSpec.describe OfficePresence, type: :model do
       end
     end
   end
+
+  describe "scopes" do
+    include ActiveSupport::Testing::TimeHelpers
+
+    describe ".active" do
+      it "returns presences seen within the stale threshold" do
+        travel_to(Time.zone.local(2026, 7, 17, 12, 0, 0)) do
+          active_presence = create(
+            :office_presence,
+            last_seen_at: described_class::STALE_AFTER.ago
+          )
+
+          recently_seen_presence = create(
+            :office_presence,
+            last_seen_at: 1.second.ago
+          )
+
+          stale_presence = create(
+            :office_presence,
+            last_seen_at: described_class::STALE_AFTER.ago - 1.second
+          )
+
+          expect(described_class.active).to contain_exactly(
+            active_presence,
+            recently_seen_presence
+          )
+          expect(described_class.active).not_to include(stale_presence)
+        end
+      end
+    end
+
+    describe ".stale" do
+      it "returns presences seen before the stale threshold" do
+        travel_to(Time.zone.local(2026, 7, 17, 12, 0, 0)) do
+          stale_presence = create(
+            :office_presence,
+            last_seen_at: described_class::STALE_AFTER.ago - 1.second
+          )
+          older_stale_presence = create(
+            :office_presence,
+            last_seen_at: described_class::STALE_AFTER.ago - 1.hour
+          )
+          active_presence = create(
+            :office_presence,
+            last_seen_at: described_class::STALE_AFTER.ago
+          )
+          expect(described_class.stale).to contain_exactly(
+            stale_presence,
+            older_stale_presence
+          )
+          expect(described_class.stale).not_to include(active_presence)
+        end
+      end
+    end
+  end
 end
