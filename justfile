@@ -81,6 +81,9 @@ cloudflared-tunnel:
 srb:
   {{DDC}} exec -T api sh -c 'bundle exec srb tc'
 
+srb-update:
+  {{DDC}} exec -T api sh -c 'bundle exec tapioca gem && bundle exec tapioca dsl && bundle exec srb tc'
+
 rbi:
   {{DDC}} exec -T api sh -c \
     'bundle exec tapioca gem && bundle exec srb tc'
