@@ -1,7 +1,11 @@
+# typed: strict
+
 module AuthorizeConnection
+  extend T::Sig
   extend ActiveSupport::Concern
 
-  def allowed_to_view?(current_user)
-    current_user.present?
+  sig { params(user: T.nilable(User)).returns(T::Boolean) }
+  def allowed_to_view?(user)
+    user.present?
   end
 end
