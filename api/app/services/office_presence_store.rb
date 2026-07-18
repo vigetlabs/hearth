@@ -6,40 +6,50 @@ class OfficePresenceStore
     @redis = redis
   end
 
+  def register(user_id:, connection_id:)
+    ApplicationRedis.with do |redis|
+      redis.zadd(
+        redis_key,
+        expires_at,
+        member(user_id:, connection_id:)
+      )
+    end
+  end
+
   def heartbeat(user_id:, connection_id:)
     register(user_id:, connection_id:)
   end
 
-  def register(user_id:, connection_id:)
-    redis.zadd(
-      redis_key,
-      expires_at,
-      member(user_id:, connection_id:)
-    )
-  end
-
   def remove(user_id:, connection_id:)
-    redis.zrem(
-      redis_key,
-      member(user_id:, connection_id:)
-    )
+    ApplicationRedis.with do |redis|
+      redis.zrem(
+        redis_key,
+        member(user_id:, connection_id:)
+      )
+    end
   end
 
   def active_user_ids
     remove_stale
 
-    redis
-      .zrange(redis_key, 0, -1)
-      .filter_map { |value| parse_user_id(value) }
-      .uniq
+    ApplicationRedis.with do |redis|
+      redis
+        .zrange(redis_key, 0, -1)
+        .filter_map { |value| parse_user_id(value) }
+        .uniq
+    end
   end
 
+  private
+
   def remove_stale
-    redis.zremrangebyscore(
-      redis_key,
-      "-inf",
-      Time.current.to_f
-    )
+    ApplicationRedis.with do |redis|
+      redis.zremrangebyscore(
+        redis_key,
+        "-inf",
+        Time.current.to_f
+      )
+    end
   end
 
   private
