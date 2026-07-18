@@ -9,7 +9,7 @@ class OfficePresenceStore
   def register(user_id:, connection_id:)
     ApplicationRedis.with do |redis|
       redis.zadd(
-        redis_key,
+        office_presence_redis_key,
         expires_at,
         member(user_id:, connection_id:)
       )
@@ -23,7 +23,7 @@ class OfficePresenceStore
   def remove(user_id:, connection_id:)
     ApplicationRedis.with do |redis|
       redis.zrem(
-        redis_key,
+        office_presence_redis_key,
         member(user_id:, connection_id:)
       )
     end
@@ -34,7 +34,7 @@ class OfficePresenceStore
 
     ApplicationRedis.with do |redis|
       redis
-        .zrange(redis_key, 0, -1)
+        .zrange(office_presence_redis_key, 0, -1)
         .filter_map { |value| parse_user_id(value) }
         .uniq
     end
@@ -45,7 +45,7 @@ class OfficePresenceStore
   def remove_stale
     ApplicationRedis.with do |redis|
       redis.zremrangebyscore(
-        redis_key,
+        office_presence_redis_key,
         "-inf",
         Time.current.to_f
       )
@@ -56,8 +56,13 @@ class OfficePresenceStore
 
   attr_reader :office_id, :redis
 
-  def redis_key
-    "office_presence:office:#{office_id}"
+  def office_presence_redis_key
+    [
+      ApplicationRedis::PREFIX,
+      "office-presence",
+      "office",
+      office_id
+    ].join(":")
   end
 
 
