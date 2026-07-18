@@ -133,7 +133,7 @@ Before committing, ensure that the development services are running, as the hook
 
 This project uses Action Cable to enable live synchronization with calendar events. Due to the nature of web sockets requiring other external users performing the intended action in order to accurately determine whether or not a web socket feature is correctly working, it can be difficult to test the current local implementation without pushing to some public staging server. To solve this, the local development environment supports setting up public [Cloudflare Tunnels](https://developers.cloudflare.com/tunnel/) to allow other users to access the development environment. This will provide the correct environment to enable multiple external users to test web socket feature functionality.
 
-In order to set up the Cloudflare Tunnels, first stop botht the Vite server and Docker compose services. Once the servers have stopped, clean any existing containers by running `just reset`. Now start a Cloudflare Tunnel:
+In order to set up the Cloudflare Tunnels, first stop both the Vite server and Docker compose services. Once the servers have stopped, clean any existing containers by running `just reset`. Now start a Cloudflare Tunnel with one of the following options:
 
 1. Ensure [cloudflared command-line client](https://github.com/cloudflare/cloudflared). Then run the following commands:
 ```
@@ -164,4 +164,4 @@ Before sharing and/or accessing the public tunnel URL, ensure the following are 
 - "Authorized JavaScript Origins" section has the tunnel URL in its URIs list
 - "Authorized Redirect URIs" section has `<tunnel-url>/api/v1/users/auth/google_oauth2/callback` in its URIs list
 
-At this point, the tunnel URL should work as it would in a local development environment, allowing users to test out the web sockets.
+At this point, the tunnel URL should work as it would in a local development environment, allowing users to test out the web sockets. Once done with the cloudflare tunnel, ensure to clean up by setting the `PUBLIC_APP_URL` variable to nothing and removing the URIs in the Google console, as Cloudflare Tunnel URLs change each time a tunnel is started.
