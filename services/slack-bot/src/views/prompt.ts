@@ -1,7 +1,13 @@
 import type { KnownBlock } from '@slack/web-api'
 import { config } from '../config.ts'
-import { OFFICE, WEEKDAYS, defaultWeek, nextMonday } from '../schedule/store.ts'
-import type { WeekSchedule } from '../schedule/store.ts'
+import {
+  OFFICE,
+  defaultWeek,
+  isInOffice,
+  nextWeekdays,
+  weekConfirmed,
+} from '../schedule/week.ts'
+import type { UserWeekSchedule } from '../schedule/week.ts'
 
 // Action id for the "Edit Schedule" button. The interactivity endpoint
 // (server.ts) dispatches on this and opens the schedule modal.
@@ -18,21 +24,20 @@ export const VIEW_CALENDAR = 'view_calendar'
 
 type ScheduleDay = { label: string; inOffice: boolean }
 
-// Attach next week's Mon–Fri dates to a stored week's in-office flags. The dates
-// are computed here; the flags come from the store (or defaultWeek()).
-function nextWeekSchedule(week: WeekSchedule): ScheduleDay[] {
-  const monday = nextMonday()
+// Pair each of next week's Mon–Fri days (dates from week.ts) with the user's
+// in-office answer for that day. The dates and day set come from nextWeekdays()
+// so the DM and modal can never drift; the statuses come from the passed week.
+function nextWeekSchedule(week: UserWeekSchedule): ScheduleDay[] {
   const fmt = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   })
 
-  return WEEKDAYS.map(({ key }, i) => {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
-    return { label: fmt.format(d), inOffice: week[key] }
-  })
+  return nextWeekdays().map(({ date, dateKey }) => ({
+    label: fmt.format(date),
+    inOffice: isInOffice(week[dateKey]!),
+  }))
 }
 
 function formatSchedule(days: ScheduleDay[]): string {
@@ -46,15 +51,17 @@ function formatSchedule(days: ScheduleDay[]): string {
 
 // Renders the weekly DM for a given week. Defaults to defaultWeek() so callers
 // without a stored schedule (e.g. the first send) still work; the interactivity
-// endpoint passes the user's saved week to re-render the message in place.
+// endpoint passes the user's saved week to re-render the message in place. The
+// confirmed rendering is derived from the week itself (weekConfirmed) — a week
+// whose days are all confirmed-* needs no separate flag.
 export function buildPrompt(
   recordId: string,
-  week: WeekSchedule = defaultWeek(),
-  { confirmed = false }: { confirmed?: boolean } = {},
+  week: UserWeekSchedule = defaultWeek(),
 ): {
   text: string
   blocks: KnownBlock[]
 } {
+  const confirmed = weekConfirmed(week)
   const days = nextWeekSchedule(week)
   const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
 

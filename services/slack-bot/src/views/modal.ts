@@ -2,8 +2,8 @@
 // into a week. Slack hands back the entire form state in one `view_submission`
 // payload, so a full edit is a single write — see parseSchedule.
 import type { ModalView, KnownBlock, PlainTextOption } from '@slack/web-api'
-import { OFFICE, WEEKDAYS, nextWeekDates } from '../schedule/store.ts'
-import type { Weekday, WeekSchedule } from '../schedule/store.ts'
+import { OFFICE, isInOffice, nextWeekdays } from '../schedule/week.ts'
+import type { UserWeekSchedule } from '../schedule/week.ts'
 
 // server.ts dispatches view_submission on this callback_id.
 export const SCHEDULE_MODAL_CALLBACK = 'schedule_modal'
@@ -13,10 +13,12 @@ export const SCHEDULE_MODAL_CALLBACK = 'schedule_modal'
 const OFFICE_DAYS_BLOCK = 'office_days'
 const OFFICE_DAYS_ACTION = 'office_days'
 
-function dayOption(key: Weekday, label: string, date: string): PlainTextOption {
+// One checkbox per weekday, valued by its YYYY-MM-DD date key (the same key the
+// week is keyed by) so a submission maps straight back onto the week.
+function dayOption(dateKey: string, label: string, date: string): PlainTextOption {
   return {
     text: { type: 'plain_text', text: `${label}  ·  ${date}`, emoji: true },
-    value: key,
+    value: dateKey,
   }
 }
 
@@ -27,14 +29,17 @@ function dayOption(key: Weekday, label: string, date: string): PlainTextOption {
 // submit — server.ts uses it to carry the original message's channel/ts so it
 // can rewrite that message in place.
 export function buildScheduleModal(
-  week: WeekSchedule,
+  week: UserWeekSchedule,
   privateMetadata?: string,
 ): ModalView {
-  const dates = nextWeekDates()
-  const options = WEEKDAYS.map(({ key, label }) =>
-    dayOption(key, label, dates[key]),
+  const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+  const weekdays = nextWeekdays()
+  const options = weekdays.map(({ dateKey, label, date }) =>
+    dayOption(dateKey, label, fmt.format(date)),
   )
-  const initialOptions = options.filter((_, i) => week[WEEKDAYS[i]!.key])
+  const initialOptions = options.filter((_, i) =>
+    isInOffice(week[weekdays[i]!.dateKey]!),
+  )
 
   const blocks: KnownBlock[] = [
     {
@@ -85,17 +90,19 @@ export type SubmittedView = {
   }
 }
 
-// Turn a submission back into a WeekSchedule: every checked box's weekday is
-// in-office (true), every other weekday is out (false).
-export function parseSchedule(view: SubmittedView): WeekSchedule {
+// Turn a submission back into a week: every checked box's day is in-office, every
+// other weekday is out. This reads the raw "in office?" answer as planning-* —
+// whether saving also *confirms* the week is the caller's policy (server.ts runs
+// it through confirmWeek), not something the checkbox state can express.
+export function parseSchedule(view: SubmittedView): UserWeekSchedule {
   const selected =
     view.state?.values?.[OFFICE_DAYS_BLOCK]?.[OFFICE_DAYS_ACTION]
       ?.selected_options ?? []
   const inOffice = new Set(selected.map((o) => o.value))
 
-  const week = {} as WeekSchedule
-  for (const { key } of WEEKDAYS) {
-    week[key] = inOffice.has(key)
+  const week: UserWeekSchedule = {}
+  for (const { dateKey } of nextWeekdays()) {
+    week[dateKey] = inOffice.has(dateKey) ? 'planning-yes' : 'planning-no'
   }
   return week
 }

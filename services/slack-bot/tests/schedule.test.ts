@@ -2,12 +2,9 @@
 // network — this is the part that stays identical when the store later calls Rails.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import {
-  InMemoryScheduleStore,
-  WEEKDAYS,
-  defaultWeek,
-} from '../src/schedule/store.ts'
-import type { WeekSchedule } from '../src/schedule/store.ts'
+import { InMemoryScheduleStore } from '../src/schedule/store.ts'
+import { defaultWeek, nextWeekdays } from '../src/schedule/week.ts'
+import type { UserWeekSchedule } from '../src/schedule/week.ts'
 import {
   SCHEDULE_MODAL_CALLBACK,
   buildScheduleModal,
@@ -15,13 +12,27 @@ import {
 } from '../src/views/modal.ts'
 import type { SubmittedView } from '../src/views/modal.ts'
 
-// Turn a WeekSchedule into the view.state.values shape Slack posts back: the
-// single "office_days" checkbox group reports the checked weekdays as
+// Next week's five weekday date keys (YYYY-MM-DD), in Mon→Fri order — the keys a
+// UserWeekSchedule is keyed by and the values the modal's checkboxes carry.
+const DATE_KEYS = nextWeekdays().map(({ dateKey }) => dateKey)
+
+// Build a UserWeekSchedule from a Mon→Fri list of in-office flags, using the
+// planning-* statuses parseSchedule produces (so build↔parse round-trips).
+function planningWeek(inOffice: boolean[]): UserWeekSchedule {
+  const week: UserWeekSchedule = {}
+  DATE_KEYS.forEach((dateKey, i) => {
+    week[dateKey] = inOffice[i] ? 'planning-yes' : 'planning-no'
+  })
+  return week
+}
+
+// Turn a week into the view.state.values shape Slack posts back: the single
+// "office_days" checkbox group reports the checked days (by date key) as
 // selected_options, so we can drive parseSchedule like a real view_submission.
-function asSubmittedView(week: WeekSchedule): SubmittedView {
-  const selected_options = WEEKDAYS.filter(({ key }) => week[key]).map(
-    ({ key }) => ({ value: key }),
-  )
+function asSubmittedView(week: UserWeekSchedule): SubmittedView {
+  const selected_options = DATE_KEYS.filter(
+    (dateKey) => week[dateKey] === 'planning-yes',
+  ).map((dateKey) => ({ value: dateKey }))
   return {
     callback_id: SCHEDULE_MODAL_CALLBACK,
     state: { values: { office_days: { office_days: { selected_options } } } },
@@ -35,13 +46,7 @@ test('store returns the default week for an unknown user', async () => {
 
 test('store round-trips a saved week per user', async () => {
   const store = new InMemoryScheduleStore()
-  const mine: WeekSchedule = {
-    mon: true,
-    tue: true,
-    wed: false,
-    thu: true,
-    fri: false,
-  }
+  const mine = planningWeek([true, true, false, true, false])
 
   await store.setSchedule('U1', mine)
 
@@ -50,13 +55,7 @@ test('store round-trips a saved week per user', async () => {
 })
 
 test('modal build → parse is a faithful round-trip', () => {
-  const week: WeekSchedule = {
-    mon: false,
-    tue: true,
-    wed: false,
-    thu: false,
-    fri: true,
-  }
+  const week = planningWeek([false, true, false, false, true])
 
   // The modal pre-checks exactly the in-office days in its one checkbox group.
   const modal = buildScheduleModal(week)
@@ -86,19 +85,19 @@ test('parseSchedule treats only checked boxes as in-office', () => {
     state: {
       values: {
         office_days: {
-          office_days: { selected_options: [{ value: 'mon' }, { value: 'wed' }] },
+          // Mon + Wed checked.
+          office_days: {
+            selected_options: [{ value: DATE_KEYS[0] }, { value: DATE_KEYS[2] }],
+          },
         },
       },
     },
   }
 
-  assert.deepEqual(parseSchedule(view), {
-    mon: true,
-    tue: false,
-    wed: true,
-    thu: false,
-    fri: false,
-  })
+  assert.deepEqual(
+    parseSchedule(view),
+    planningWeek([true, false, true, false, false]),
+  )
 })
 
 test('parseSchedule reads a fully-remote week (nothing checked) as all out', () => {
@@ -107,11 +106,8 @@ test('parseSchedule reads a fully-remote week (nothing checked) as all out', () 
     state: { values: { office_days: { office_days: { selected_options: [] } } } },
   }
 
-  assert.deepEqual(parseSchedule(view), {
-    mon: false,
-    tue: false,
-    wed: false,
-    thu: false,
-    fri: false,
-  })
+  assert.deepEqual(
+    parseSchedule(view),
+    planningWeek([false, false, false, false, false]),
+  )
 })

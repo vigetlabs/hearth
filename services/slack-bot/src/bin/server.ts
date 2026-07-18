@@ -5,8 +5,9 @@ import { CONFIRM_SCHEDULE, EDIT_SCHEDULE, VIEW_CALENDAR } from '../views/prompt.
 import { LiveSlackService } from '../slack/client.ts'
 import { SlackMessenger } from '../slack/messenger.ts'
 import { buildPrompt } from '../views/prompt.ts'
-import { InMemoryScheduleStore, formatWeek } from '../schedule/store.ts'
+import { InMemoryScheduleStore } from '../schedule/store.ts'
 import type { ScheduleStore } from '../schedule/store.ts'
+import { confirmWeek, formatWeek } from '../schedule/week.ts'
 import {
   SCHEDULE_MODAL_CALLBACK,
   buildScheduleModal,
@@ -143,15 +144,14 @@ async function handleBlockActions(payload: Interaction): Promise<void> {
       const ts = payload.container?.message_ts
       if (!userId || !channel || !ts) return
 
-      // Send the user's current week through the store (the API seam), then
-      // rewrite this same message in place with a small confirmation.
-      const week = await store.getSchedule(userId)
+      // Lock the user's current week in (planning-* → confirmed-*), send it
+      // through the store (the API seam), then rewrite this same message in
+      // place — the confirmed statuses drive its "confirmed" rendering.
+      const week = confirmWeek(await store.getSchedule(userId))
       await store.confirmSchedule(userId, week)
       console.log(`confirmed schedule for ${userId}:`, week)
 
-      const { text, blocks } = buildPrompt(action.value ?? 'weekly', week, {
-        confirmed: true,
-      })
+      const { text, blocks } = buildPrompt(action.value ?? 'weekly', week)
       await slack.botClient.chat.update({ channel, ts, text, blocks })
       break
     }
@@ -172,19 +172,20 @@ async function handleViewSubmission(payload: Interaction): Promise<void> {
   const userId = payload.user?.id
   if (!userId) return
 
-  const week = parseSchedule(payload.view)
+  // A saved edit is itself a confirmation, so lock it in (planning-* →
+  // confirmed-*) before persisting — it lands in the same confirmed state as the
+  // Confirm button.
+  const week = confirmWeek(parseSchedule(payload.view))
   await store.setSchedule(userId, week)
   console.log(`saved schedule for ${userId}:`, week)
 
   // Preferred path: rewrite the original DM in place so it shows the saved week.
-  // A saved edit is itself a confirmation, so it lands in the same confirmed
-  // state as the Confirm button — the Confirm button drops away and the green
-  // check acknowledges it, rather than leaving a now-pointless Confirm to click.
+  // The confirmed statuses drive its rendering — the Confirm button drops away
+  // and the green check acknowledges it, rather than leaving a now-pointless
+  // Confirm to click.
   const ref = parseMessageRef(payload.view.private_metadata)
   if (ref.channel && ref.ts) {
-    const { text, blocks } = buildPrompt(ref.recordId ?? 'weekly', week, {
-      confirmed: true,
-    })
+    const { text, blocks } = buildPrompt(ref.recordId ?? 'weekly', week)
     await slack.botClient.chat.update({ channel: ref.channel, ts: ref.ts, text, blocks })
     return
   }
