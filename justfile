@@ -78,6 +78,17 @@ cloudflared-shell:
 cloudflared-tunnel:
   cloudflared tunnel --url http://localhost:5173
 
+srb:
+  {{DDC}} exec -T api sh -c 'bundle exec srb tc'
+
+rbi:
+  {{DDC}} exec -T api sh -c \
+    'bundle exec tapioca gem && bundle exec srb tc'
+
+dsl:
+  {{DDC}} exec -T api sh -c \
+    'bundle exec tapioca dsl && bundle exec srb tc'
+
 # Slack bot: weekly scheduler (long-running, Fridays 12:00 ET)
 slack-schedule:
   cd services/slack-bot && node --env-file=.env src/scheduler.ts
