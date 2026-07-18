@@ -1,9 +1,12 @@
 class OfficePresenceChannel < ApplicationCable::Channel
+  include FindOffice
+  include AuthorizeConnection
+
   def subscribed
     @office = find_office
 
     return reject unless @office
-    return reject unless allowed_to_view?
+    return reject unless allowed_to_view?(current_user)
 
     stream_for @office
 
@@ -38,16 +41,6 @@ class OfficePresenceChannel < ApplicationCable::Channel
   end
 
   private
-
-  def find_office
-    Office.find(params[:office_id])
-  rescue KeyError, ActiveRecord::RecordNotFound
-    nil
-  end
-
-  def allowed_to_view?
-    current_user.present?
-  end
 
   def presence_store
     @presence_store ||= OfficePresenceStore.new(
