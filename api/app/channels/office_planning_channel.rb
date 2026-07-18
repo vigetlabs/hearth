@@ -91,17 +91,29 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(dates: T::Array[String]).void }
   def transmit_snapshot(dates:)
-    selected_user_ids_by_date = dates.index_with do |date|
-      planning_store.selected_user_ids(date:)
-    end
-
-    users_by_id = load_users(
-      selected_user_ids_by_date.values.flatten.uniq
+    selected_user_ids_by_date = T.let(
+      dates.index_with do |date|
+        planning_store.selected_user_ids(date:)
+      end,
+      T::Hash[String, T::Array[Integer]]
     )
 
-    dates_data = selected_user_ids_by_date.transform_values do |user_ids|
-      serialize_users(user_ids, users_by_id:)
-    end
+    user_ids = T.let(
+      selected_user_ids_by_date.values.flatten.uniq,
+      T::Array[Integer]
+    )
+
+    users_by_id = T.let(
+      load_users(user_ids),
+      T::Hash[Integer, User]
+    )
+
+    dates_data = T.let(
+      selected_user_ids_by_date.transform_values do |user_ids|
+        serialize_users(user_ids, users_by_id:)
+      end,
+      T::Hash[String, T::Array[ChannelSerializedUser]]
+    )
 
     transmit(
       type: "planning.snapshot",
@@ -112,8 +124,15 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(date: String).void }
   def broadcast_date_snapshot(date:)
-    user_ids = planning_store.selected_user_ids(date:)
-    users_by_id = load_users(user_ids)
+    user_ids = T.let(
+      planning_store.selected_user_ids(date:),
+      T::Array[Integer]
+    )
+
+    users_by_id = T.let(
+      load_users(user_ids),
+      T::Hash[Integer, User]
+    )
 
     payload = {
       type: "planning.date_updated",
