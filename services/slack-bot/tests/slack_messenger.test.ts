@@ -3,10 +3,10 @@
 // test and restored afterward.
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { SlackMessenger } from '../src/slack_messenger.ts'
+import { SlackMessenger } from '../src/slack/messenger.ts'
 import { config } from '../src/config.ts'
 import { fakeSendClient } from './support.ts'
-import type { SlackService } from '../src/slack_service.ts'
+import type { SlackService } from '../src/slack/client.ts'
 
 function serviceWith(client: SlackService['botClient']): SlackService {
   return { botClient: client } as unknown as SlackService

@@ -1,6 +1,6 @@
 import type { KnownBlock } from '@slack/web-api'
-import type { SlackService } from './slack_service.ts'
-import { config } from './config.ts'
+import type { SlackService } from './client.ts'
+import { config } from '../config.ts'
 
 type SendParams = { text?: string; blocks: KnownBlock[] }
 type Result<T = {}> = { success: false } | ({ success: true } & T)

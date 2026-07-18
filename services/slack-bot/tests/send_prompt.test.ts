@@ -4,9 +4,9 @@
 // isolates the resolve-and-iterate logic from the network.
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { sendWeeklyPrompt } from '../src/send_prompt.ts'
+import { sendWeeklyPrompt } from '../src/send-prompt.ts'
 import { config } from '../src/config.ts'
-import type { SlackService, SlackMember } from '../src/slack_service.ts'
+import type { SlackService, SlackMember } from '../src/slack/client.ts'
 import type { WebClient } from '@slack/web-api'
 
 // Records which resolver ran so we can assert the pool-selection branch.

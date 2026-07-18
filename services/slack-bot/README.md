@@ -34,39 +34,41 @@ npm install
 | `SLACK_BOT_TOKEN` | all sends | `xoxb-…`, from step 3 above |
 | `SLACK_USERGROUP_ID` | `schedule`, `send-now` | the user group whose active members get the DM (`S…`) |
 | `USE_SLACK` | all sends | must be `true` to actually deliver; `false` makes every send a no-op (safe for dev) |
-| `DEMO_USER_ID` | `send-demo` | optional default recipient for the demo |
 | `SLACK_SIGNING_SECRET` | interactivity endpoint only | from step 4; not needed for the DM triggers |
 | `PORT` | interactivity endpoint only | defaults to `3000` |
 
 > If `npm run …` can't find `node` (a Windows PATH quirk in some shells), run the
-> underlying command directly, e.g. `node --env-file=.env src/send_now.ts`.
+> underlying command directly, e.g. `node --env-file=.env src/bin/send-now.ts`.
 
 ## Architecture
 
-Each piece is small and testable in isolation:
+Files are grouped by role, split along dependency direction: `src/slack/` is the
+only folder that touches `@slack/web-api`, `src/schedule/` and `src/views/` are
+pure and network-free, and `src/bin/` is thin wiring. Each piece is small and
+testable in isolation:
 
 | File | Role |
 | --- | --- |
 | `src/config.ts` | Reads + validates env (`node --env-file=.env` loads it) |
-| `src/slack_service.ts` | Wrapper over `@slack/web-api`. Resolves the user group and filters to active accounts. Ships a `FakeSlackService` for tests |
-| `src/slack_messenger.ts` | Outbound Block Kit messages (DM + channel), gated by the `USE_SLACK` kill-switch |
-| `src/prompt.ts` | Builds the weekly message (schedule + Edit Schedule button). Mock display data lives here |
-| `src/schedule_store.ts` | Schedule domain types + persistence seam. In-memory `InMemoryScheduleStore` today; swap for a Rails-backed store later |
-| `src/schedule_modal.ts` | Builds the Edit Schedule modal from a week and parses a submission back into one |
-| `src/send_prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both `schedule` and `send-now` |
-| `src/scheduler.ts` | Friday cron entry point (`schedule`) |
-| `src/send_now.ts` | Manual group-send entry point (`send-now`) |
-| `src/send-demo.ts` | Single-user entry point (`send-demo`) |
-| `src/verify.ts` + `src/server.ts` | Interactivity endpoint: signature verification, opens the modal, persists submissions |
+| `src/slack/client.ts` | Wrapper over `@slack/web-api`. Resolves the user group and filters to active accounts. Ships a `FakeSlackService` for tests |
+| `src/slack/messenger.ts` | Outbound Block Kit messages (DM + channel), gated by the `USE_SLACK` kill-switch |
+| `src/slack/verify.ts` | Verifies Slack's request signature on the interactivity endpoint |
+| `src/schedule/store.ts` | Schedule domain types + persistence seam. In-memory `InMemoryScheduleStore` today; swap for a Rails-backed store later |
+| `src/views/prompt.ts` | Builds the weekly message (schedule + Edit Schedule button). Mock display data lives here |
+| `src/views/modal.ts` | Builds the Edit Schedule modal from a week and parses a submission back into one |
+| `src/send-prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both `schedule` and `send-now` |
+| `src/bin/scheduler.ts` | Friday cron entry point (`schedule`) |
+| `src/bin/send-now.ts` | Manual group-send entry point (`send-now`) |
+| `src/bin/server.ts` | Interactivity endpoint: acks + dispatches interactions, opens the modal, persists submissions |
 
 **Recipient filtering.** `SLACK_USERGROUP_ID` is the subset selector, maintained
 in Slack itself. At send time the bot resolves the group live and drops any
 member whose account is deactivated, a bot, or a guest (`deleted` / `is_bot` /
 `is_restricted`) — so the list is always current without a database.
 
-## The three DM triggers
+## The two DM triggers
 
-All three send the **same** message (built by `src/prompt.ts`). They differ only
+Both send the **same** message (built by `src/views/prompt.ts`). They differ only
 in *when* they fire and *who* receives it.
 
 ### 1. `npm run schedule` — automatic, weekly
@@ -96,24 +98,12 @@ npm run send-now
 #   U0BBB: ok
 ```
 
-### 3. `npm run send-demo -- <SLACK_USER_ID>` — manual, single user
-
-DMs **one** person (usually yourself) and ignores the user group entirely. The
-quickest smoke test that tokens and message rendering work.
-
-```bash
-npm run send-demo -- U0XXXXXXX
-# or, with DEMO_USER_ID set in .env:
-npm run send-demo
-```
-
 ### Which one do I want?
 
 | Goal | Use |
 | --- | --- |
 | The real weekly Friday DM | `schedule` |
-| Send the weekly DM to the group right now | `send-now` |
-| Check my setup by DMing just myself | `send-demo` |
+| Send the weekly DM to the group right now (e.g. to check setup) | `send-now` |
 
 ## The Edit Schedule button & interactivity
 
@@ -125,7 +115,7 @@ message's channel/ts in its `private_metadata` so the submit handler knows which
 message to update; if that's ever missing it falls back to a fresh confirmation
 DM.
 
-This needs the interactivity endpoint (`src/server.ts`) running, because a
+This needs the interactivity endpoint (`src/bin/server.ts`) running, because a
 non-link button delivers its click to your app's **Request URL** — that POST is
 the only way the press reaches your code. So unlike the three DM triggers, the
 button is **not** self-contained: it requires
@@ -143,10 +133,10 @@ npm start   # runs the interactivity endpoint on PORT (default 3000)
 ### Where the data lives (and the API seam)
 
 Schedules are currently held in memory by `InMemoryScheduleStore`
-(`src/schedule_store.ts`) — restarting `npm start` resets everyone to the
+(`src/schedule/store.ts`) — restarting `npm start` resets everyone to the
 default week. This is deliberate: it lets the full editing flow work with **no
 backend**. When the Rails API is ready, add a `LiveScheduleStore` implementing
 the same `ScheduleStore` interface (`getSchedule` / `setSchedule`) and swap the
-one line in `server.ts`. Because a modal submission hands back the entire week
+one line in `src/bin/server.ts`. Because a modal submission hands back the entire week
 at once, `setSchedule` maps to a **single** endpoint keyed by user id (body =
 the whole week) — no per-day routes.

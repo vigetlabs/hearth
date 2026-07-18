@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { config } from './config.ts'
+import { config } from '../config.ts'
 
 // Verify Slack's request signature. Requires the *raw* request body, so capture
 // it before any body parser rewrites it.

@@ -3,7 +3,7 @@
 // page of the roster? Runs against the real filter with a mocked Slack client.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { LiveSlackService } from '../src/slack_service.ts'
+import { LiveSlackService } from '../src/slack/client.ts'
 import { makeUser, fakeUsersListClient, fakeGroupClient } from './support.ts'
 
 test('listActiveUsers keeps active real humans', async () => {

@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env src/server.ts",
-    "schedule": "node --env-file=.env src/scheduler.ts",
-    "send-now": "node --env-file=.env src/send_now.ts",
+    "start": "node --env-file=.env src/bin/server.ts",
+    "schedule": "node --env-file=.env src/bin/scheduler.ts",
+    "send-now": "node --env-file=.env src/bin/send-now.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"tests/**/*.test.ts\""
   },

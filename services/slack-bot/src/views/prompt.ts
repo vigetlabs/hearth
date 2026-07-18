@@ -1,7 +1,7 @@
 import type { KnownBlock } from '@slack/web-api'
-import { config } from './config.ts'
-import { OFFICE, WEEKDAYS, defaultWeek, nextMonday } from './schedule_store.ts'
-import type { WeekSchedule } from './schedule_store.ts'
+import { config } from '../config.ts'
+import { OFFICE, WEEKDAYS, defaultWeek, nextMonday } from '../schedule/store.ts'
+import type { WeekSchedule } from '../schedule/store.ts'
 
 // Action id for the "Edit Schedule" button. The interactivity endpoint
 // (server.ts) dispatches on this and opens the schedule modal.

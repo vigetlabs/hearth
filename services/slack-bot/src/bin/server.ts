@@ -1,18 +1,18 @@
 import http from 'node:http'
-import { assertConfig, config } from './config.ts'
-import { verifySlackSignature } from './verify.ts'
-import { CONFIRM_SCHEDULE, EDIT_SCHEDULE, VIEW_CALENDAR } from './prompt.ts'
-import { LiveSlackService } from './slack_service.ts'
-import { SlackMessenger } from './slack_messenger.ts'
-import { buildPrompt } from './prompt.ts'
-import { InMemoryScheduleStore, formatWeek } from './schedule_store.ts'
-import type { ScheduleStore } from './schedule_store.ts'
+import { assertConfig, config } from '../config.ts'
+import { verifySlackSignature } from '../slack/verify.ts'
+import { CONFIRM_SCHEDULE, EDIT_SCHEDULE, VIEW_CALENDAR } from '../views/prompt.ts'
+import { LiveSlackService } from '../slack/client.ts'
+import { SlackMessenger } from '../slack/messenger.ts'
+import { buildPrompt } from '../views/prompt.ts'
+import { InMemoryScheduleStore, formatWeek } from '../schedule/store.ts'
+import type { ScheduleStore } from '../schedule/store.ts'
 import {
   SCHEDULE_MODAL_CALLBACK,
   buildScheduleModal,
   parseSchedule,
-} from './schedule_modal.ts'
-import type { SubmittedView } from './schedule_modal.ts'
+} from '../views/modal.ts'
+import type { SubmittedView } from '../views/modal.ts'
 
 // Verifying requests needs the signing secret; opening the modal + DMing a
 // confirmation need the bot token.

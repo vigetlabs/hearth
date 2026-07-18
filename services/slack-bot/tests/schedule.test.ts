@@ -6,14 +6,14 @@ import {
   InMemoryScheduleStore,
   WEEKDAYS,
   defaultWeek,
-} from '../src/schedule_store.ts'
-import type { WeekSchedule } from '../src/schedule_store.ts'
+} from '../src/schedule/store.ts'
+import type { WeekSchedule } from '../src/schedule/store.ts'
 import {
   SCHEDULE_MODAL_CALLBACK,
   buildScheduleModal,
   parseSchedule,
-} from '../src/schedule_modal.ts'
-import type { SubmittedView } from '../src/schedule_modal.ts'
+} from '../src/views/modal.ts'
+import type { SubmittedView } from '../src/views/modal.ts'
 
 // Turn a WeekSchedule into the view.state.values shape Slack posts back: the
 // single "office_days" checkbox group reports the checked weekdays as

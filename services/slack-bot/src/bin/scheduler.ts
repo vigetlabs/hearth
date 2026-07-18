@@ -2,8 +2,8 @@
 // 12:00 noon Eastern. Runs the same send as `npm run send-now`.
 //   npm run schedule
 import { CronJob } from 'cron'
-import { assertConfig } from './config.ts'
-import { sendWeeklyPrompt } from './send_prompt.ts'
+import { assertConfig } from '../config.ts'
+import { sendWeeklyPrompt } from '../send-prompt.ts'
 
 assertConfig(['botToken'])
 

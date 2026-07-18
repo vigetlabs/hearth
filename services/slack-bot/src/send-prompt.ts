@@ -1,7 +1,7 @@
-import { LiveSlackService } from './slack_service.ts'
-import type { SlackService } from './slack_service.ts'
-import { SlackMessenger } from './slack_messenger.ts'
-import { buildPrompt } from './prompt.ts'
+import { LiveSlackService } from './slack/client.ts'
+import type { SlackService } from './slack/client.ts'
+import { SlackMessenger } from './slack/messenger.ts'
+import { buildPrompt } from './views/prompt.ts'
 import { config } from './config.ts'
 
 export type SendOutcome = { id: string; success: boolean }

@@ -2,8 +2,8 @@
 // into a week. Slack hands back the entire form state in one `view_submission`
 // payload, so a full edit is a single write — see parseSchedule.
 import type { ModalView, KnownBlock, PlainTextOption } from '@slack/web-api'
-import { OFFICE, WEEKDAYS, nextWeekDates } from './schedule_store.ts'
-import type { Weekday, WeekSchedule } from './schedule_store.ts'
+import { OFFICE, WEEKDAYS, nextWeekDates } from '../schedule/store.ts'
+import type { Weekday, WeekSchedule } from '../schedule/store.ts'
 
 // server.ts dispatches view_submission on this callback_id.
 export const SCHEDULE_MODAL_CALLBACK = 'schedule_modal'
