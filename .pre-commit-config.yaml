@@ -8,6 +8,13 @@ repos:
         pass_filenames: false
         files: ^api/
 
+      - id: api-srb
+        name: Run Sorbet
+        entry: scripts/get-branch-project bundle exec srb tc
+        language: system
+        pass_filenames: false
+        files: ^api/
+
       - id: api-rubocop
         name: Run Rubocop
         entry: scripts/get-branch-project bundle exec rubocop
