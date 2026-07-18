@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
+import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import Logo from "@/components/Logo/Logo";
 
 import { useAuth } from "@/util/auth/useAuth";
@@ -46,23 +47,9 @@ export default function Header() {
           </span>
 
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-semibold text-fg hover:bg-surface-strong focus:outline-none">
+            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-fg hover:bg-surface-strong focus:outline-none">
               Profile
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 4.5 6 7.5 9 4.5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronDownIcon className="h-3 w-3" />
             </DropdownMenu.Trigger>
 
             <DropdownMenu.Portal>

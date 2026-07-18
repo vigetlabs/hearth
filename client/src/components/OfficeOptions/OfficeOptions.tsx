@@ -9,6 +9,7 @@ interface OfficeOptionsProps {
   selectedOfficeId: string;
   handleSelectOffice?: (newOfficeId: string) => void;
   officeItemClassName?: string;
+  containerClassName?: string;
 }
 
 export default function OfficeOptions({
@@ -17,6 +18,7 @@ export default function OfficeOptions({
   selectedOfficeId,
   handleSelectOffice,
   officeItemClassName,
+  containerClassName,
 }: OfficeOptionsProps) {
   const visibleOfficeButtons = showRemoteOption
     ? offices
@@ -27,6 +29,7 @@ export default function OfficeOptions({
   const officeClasses = cn(
     "mt-5 grid gap-3",
     showRemoteOption ? "grid-cols-5" : "grid-cols-4",
+    containerClassName,
   );
 
   return (
@@ -34,7 +37,6 @@ export default function OfficeOptions({
       value={selectedOfficeId}
       onValueChange={handleSelectOffice}
       aria-label="Which office is your primary?"
-      className=""
     >
       <div className={officeClasses}>
         {visibleOfficeButtons.map((office: Office) => (

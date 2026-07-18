@@ -10,7 +10,11 @@ import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMuta
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { cn } from "@/util/cn";
 
-import { DEFAULT_HERO_OFFICE_ID, heroImageFor } from "./heroImage";
+import {
+  DEFAULT_OFFICE_NAME,
+  heroIdForOfficeName,
+  heroImageFor,
+} from "./heroImage";
 
 import "./OfficePicker.css";
 import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
@@ -34,8 +38,6 @@ export default function OfficePicker() {
 
   const offices = officesQuery.data ?? [];
 
-  // The dedicated "fully remote" button below the grid stands in for the remote
-  // option, so the cards only cover the physical offices.
   const officeCards = offices.filter(
     (office) => office.name.toLowerCase() !== "remote",
   );
@@ -50,9 +52,11 @@ export default function OfficePicker() {
   function heroIdForOffice(office: Office): string {
     // Remote has no hero photo of its own, so fall back to the default hero
     // rather than requesting a missing image and flashing the placeholder.
-    if (office.name.toLowerCase() === "remote") return DEFAULT_HERO_OFFICE_ID;
+    if (office.name.toLowerCase() === "remote") {
+      return heroIdForOfficeName(DEFAULT_OFFICE_NAME);
+    }
 
-    return office.name.toLowerCase().trim().replaceAll(" ", "-");
+    return heroIdForOfficeName(office.name);
   }
 
   function findOffice(officeId: string | null): Office | undefined {
@@ -64,7 +68,9 @@ export default function OfficePicker() {
   function heroIdForOfficeId(officeId: string | null): string {
     const office = findOffice(officeId);
 
-    return office ? heroIdForOffice(office) : DEFAULT_HERO_OFFICE_ID;
+    return office
+      ? heroIdForOffice(office)
+      : heroIdForOfficeName(DEFAULT_OFFICE_NAME);
   }
 
   function handleSelectOffice(newOfficeId: string) {
@@ -72,7 +78,8 @@ export default function OfficePicker() {
     // the slide direction. Fall back to the default hero's slot when nothing was
     // selected yet, since that's the image currently on screen.
     const defaultOfficeIndex = officeCards.findIndex(
-      (office) => heroIdForOffice(office) === DEFAULT_HERO_OFFICE_ID,
+      (office) =>
+        heroIdForOffice(office) === heroIdForOfficeName(DEFAULT_OFFICE_NAME),
     );
 
     const oldIndex = selectedOfficeId
@@ -153,7 +160,7 @@ export default function OfficePicker() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="flex w-full flex-col px-8 py-8 lg:w-[55%] lg:px-16">
+      <div className="flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -162,19 +169,19 @@ export default function OfficePicker() {
           <span aria-hidden="true">‹</span> Go back
         </button>
 
-        <div className="flex flex-1 flex-col items-center justify-center py-12">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl leading-snug font-bold text-fg">
-              <span className="text-fg-faint">Hearth</span> shows you who's in
-              your office every day, so you can time your visits right
+        <div className="flex flex-1 flex-col items-center justify-start pt-40 pb-12">
+          <div className="w-full max-w-[90%]">
+            <h1 className="text-2xl leading-snug font-bold text-fg">
+              <span className="text-strong">Hearth</span> shows you who's in
+              your primary office every day, so you can time your visits right
             </h1>
 
             <div className="mt-10">
               <p className="text-sm font-semibold text-fg">
-                What's your primary office?
+                Which office are you based in?
               </p>
 
-              <p className="mt-1 text-sm text-fg-subtle">
+              <p className="mt-1 text-sm text-fg">
                 Pick the one you visit the most, even if you're mostly remote.
               </p>
             </div>
@@ -199,7 +206,7 @@ export default function OfficePicker() {
                 "mt-8 w-full rounded-full border py-3 text-sm font-semibold text-fg transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                 isRemoteSelected
                   ? "border-fill bg-surface-muted"
-                  : "border-line-strong hover:border-line-faint hover:bg-surface-sunken",
+                  : "border-line hover:border-line-faint hover:bg-surface-sunken",
               )}
             >
               No home office. I'm fully remote.
@@ -218,7 +225,7 @@ export default function OfficePicker() {
       </div>
 
       <div
-        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[45%]"
+        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[50%]"
         aria-hidden="true"
       >
         {/*

@@ -1,5 +1,6 @@
 import { RadioGroup } from "radix-ui";
 
+import PickerItem from "@/components/PickerItem/PickerItem";
 import type { Office } from "@/types/api/offices";
 import { cn } from "@/util/cn";
 
@@ -14,10 +15,8 @@ export default function OfficeItem({ office, className }: OfficeItemProps) {
   const emoji = office.emoji ?? "🏢";
 
   const itemClasses = cn(
-    "flex aspect-square cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-line-faint text-fg transition-colors",
-    "hover:border-fill",
-    "focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none",
-    "data-[state=checked]:border-2 data-[state=checked]:border-line-selected data-[state=checked]:bg-surface-muted",
+    "aspect-square gap-0.5 rounded-2xl border border-line",
+    "data-[state=checked]:border-2 data-[state=checked]:border-line-selected data-[state=checked]:bg-selected",
     "data-[state=checked]:hover:border-fill",
     isRemote
       ? "border-dashed data-[state=checked]:border-solid"
@@ -26,12 +25,16 @@ export default function OfficeItem({ office, className }: OfficeItemProps) {
   );
 
   return (
-    <RadioGroup.Item value={String(office.id)} className={itemClasses}>
-      <span className="text-3xl" aria-hidden="true">
-        {emoji}
-      </span>
+    <RadioGroup.Item value={String(office.id)} asChild>
+      <PickerItem className={itemClasses}>
+        <span className="text-2xl" aria-hidden="true">
+          {emoji}
+        </span>
 
-      <span className="font-medium capitalize">{office.name}</span>
+        <span className="-mt-0.5 text-xs font-semibold capitalize">
+          {office.name}
+        </span>
+      </PickerItem>
     </RadioGroup.Item>
   );
 }

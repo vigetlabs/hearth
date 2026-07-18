@@ -66,7 +66,7 @@ export default function SchedulePicker() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="flex w-full flex-col px-8 py-8 lg:w-[55%] lg:px-16">
+      <div className="flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -76,22 +76,18 @@ export default function SchedulePicker() {
           Go back
         </button>
 
-        <div className="flex flex-1 flex-col items-center justify-center py-12">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl leading-snug font-bold text-fg">
+        <div className="flex flex-1 flex-col items-center justify-start pt-48 pb-12">
+          <div className="w-full max-w-[90%]">
+            <h1 className="text-2xl leading-snug font-bold text-fg">
               What days are you usually in the{" "}
-              <span className="text-fg-faint capitalize">{office.name}</span>{" "}
+              <span className="text-strong capitalize">{office.name}</span>{" "}
               office?
             </h1>
 
             <div className="mt-10">
-              <p className="text-sm font-semibold text-fg">
-                Pick your usual in-office days
-              </p>
-
-              <p className="mt-1 text-sm text-fg-subtle">
-                This becomes your default each week, but you can always adjust
-                it for a specific week later.
+              <p className="mt-1 text-sm text-fg">
+                <span className="font-bold">This is your weekly default.</span>{" "}
+                You can adjust it anytime.
               </p>
 
               <div className="mt-5 grid grid-cols-5 gap-3">
@@ -112,18 +108,14 @@ export default function SchedulePicker() {
               disabled={!canSave || createDefaultScheduleMutation.isPending}
               className="mt-8 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {createDefaultScheduleMutation.isPending
-                ? "Saving..."
-                : canSave
-                  ? "Save schedule"
-                  : "Skip for now"}
+              Continue
             </button>
           </div>
         </div>
       </div>
 
       <div
-        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[45%]"
+        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[50%]"
         aria-hidden="true"
       >
         <div
