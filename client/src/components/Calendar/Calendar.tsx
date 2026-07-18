@@ -1,18 +1,13 @@
-import { useState } from "react";
-
 import { DayCell } from "@/components/Calendar/DayCell";
 
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
-import type {
-  AttendanceStatus,
-  PersonStatus,
-  WeekSchedule,
-} from "@/types/calendar/calendar";
+import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
 
 import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
 import { isSameDay, toDateKey } from "@/util/dates/date";
+import type { OfficePlanningDates } from "@/util/cable/useOfficePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: PersonStatus[] = [];
@@ -20,14 +15,15 @@ const EMPTY_DAY: PersonStatus[] = [];
 const confirmedCountOf = (day: PersonStatus[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
 
-type AttendanceOverrides = Record<string, AttendanceStatus>;
-
 interface CalendarProps {
   schedule: WeekSchedule;
   office: Office;
   days: Date[];
   locked: boolean;
   user: User;
+  planningByDate: OfficePlanningDates;
+  isPlanningConnected: boolean;
+  onPlanningToggle: (date: string) => void;
 }
 
 export function Calendar({
@@ -36,60 +32,54 @@ export function Calendar({
   days,
   locked,
   user,
+  planningByDate,
+  isPlanningConnected,
+  onPlanningToggle,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
-  const [overrides, setOverrides] = useState<AttendanceOverrides>({});
-
   function getDayData(key: string): PersonStatus[] {
     const day = schedule[key] ?? EMPTY_DAY;
-    const overriddenStatus = overrides[key];
+    const planningUsers = planningByDate[key] ?? [];
 
-    if (!overriddenStatus) {
-      return day;
-    }
+    const planningUserIds = new Set(
+      planningUsers.map((planningUser) => planningUser.id),
+    );
 
-    const mine = day.find((person) => person.userId === user.id);
+    const updatedDay = day.map((person) => {
+      if (person.status === "confirmed-yes") {
+        return person;
+      }
 
-    if (mine) {
-      return day.map((person) =>
-        person.userId === user.id
-          ? {
-              ...person,
-              status: overriddenStatus,
-            }
-          : person,
-      );
-    }
+      if (planningUserIds.has(person.userId)) {
+        return {
+          ...person,
+          status: "planning-yes" as const,
+        };
+      }
 
-    return [
-      {
-        userId: user.id,
-        name: myName,
-        status: overriddenStatus,
-      },
-      ...day,
-    ];
+      return person;
+    });
+
+    const existingUserIds = new Set(updatedDay.map((person) => person.userId));
+
+    const additionalPlanningUsers = planningUsers
+      .filter((planningUser) => !existingUserIds.has(planningUser.id))
+      .map((planningUser) => ({
+        userId: planningUser.id,
+        name: userDisplayName(planningUser),
+        status: "planning-yes" as const,
+      }));
+
+    return [...additionalPlanningUsers, ...updatedDay];
   }
 
   function toggleMine(key: string): void {
-    if (!myName || locked) return;
+    if (!myName || locked || !isPlanningConnected) {
+      return;
+    }
 
-    const day = getDayData(key);
-    const mine = day.find((person) => person.userId === user.id);
-
-    const isCurrentlyGoing = mine !== undefined && isInOffice(mine.status);
-
-    const nextStatus: AttendanceStatus = isCurrentlyGoing
-      ? "planning-no"
-      : "planning-yes";
-
-    setOverrides((current) => ({
-      ...current,
-      [key]: nextStatus,
-    }));
-
-    // updateVisitMutation.mutate(...)
+    onPlanningToggle(key);
   }
 
   const attendance = Object.fromEntries(

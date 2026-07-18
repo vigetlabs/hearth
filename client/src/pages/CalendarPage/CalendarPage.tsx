@@ -11,8 +11,9 @@ import { useSearchParams } from "react-router";
 import type { WeekSchedule } from "@/types/calendar/calendar";
 import { buildWeekSchedule } from "@/util/calendar/schedule";
 import Loader from "@/components/Loader/Loader";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Office } from "@/types/api/offices";
+import { useOfficePlanning } from "@/util/cable/useOfficePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -97,9 +98,15 @@ export default function CalendarPage() {
     office_id: activeOfficeId ?? 1,
   });
 
-  const weekDates = Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
-    addDays(focusedWeekStartDate, index),
+  const weekDates = useMemo(
+    () =>
+      Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
+        addDays(focusedWeekStartDate, index),
+      ),
+    [focusedWeekStartDate],
   );
+
+  const planningDateKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
 
   const weekKey = toDateKey(focusedWeekStartDate);
   const currentWeekKey = toDateKey(startOfWeek(new Date()));
@@ -107,6 +114,36 @@ export default function CalendarPage() {
   const isCurrentWeek = weekKey === currentWeekKey;
   const isWeekConfirmed = confirmedWeeks.has(weekKey);
   const isRemote = office?.name.toLowerCase() === "remote";
+
+  const {
+    planningByDate,
+    isConnected: isPlanningConnected,
+    selectDate,
+    deselectDate,
+    // refreshSnapshot
+  } = useOfficePlanning({
+    officeId: activeOfficeId ?? null,
+    currentUserId: user?.id ?? null,
+    dates: planningDateKeys,
+  });
+
+  function togglePlanningDate(date: string): void {
+    if (!user || !isPlanningConnected || isWeekConfirmed) {
+      return;
+    }
+
+    const usersForDate = planningByDate[date] ?? [];
+
+    const currentUserIsPlanning = usersForDate.some(
+      (planningUser) => planningUser.id === user.id,
+    );
+
+    if (currentUserIsPlanning) {
+      deselectDate(date);
+    } else {
+      selectDate(date);
+    }
+  }
 
   function goPrevWeek(): void {
     changeFocusedWeek(addDays(focusedWeekStartDate, -7));
@@ -281,6 +318,9 @@ export default function CalendarPage() {
             days={weekDates}
             locked={isWeekConfirmed}
             user={user}
+            planningByDate={planningByDate}
+            isPlanningConnected={isPlanningConnected}
+            onPlanningToggle={togglePlanningDate}
           />
         </div>
       </div>

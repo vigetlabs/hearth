@@ -19,6 +19,10 @@ class OfficePlanningChannel < ApplicationCable::Channel
     }
   end
 
+  OfficePlanningDates = T.type_alias do
+    T::Hash[String, T::Array[ChannelSerializedUser]]
+  end
+
   sig { void }
   def subscribed
     office = find_office(params[:office_id])
@@ -112,14 +116,14 @@ class OfficePlanningChannel < ApplicationCable::Channel
       selected_user_ids_by_date.transform_values do |user_ids|
         serialize_users(user_ids, users_by_id:)
       end,
-      T::Hash[String, T::Array[ChannelSerializedUser]]
+      OfficePlanningDates
     )
 
-    transmit(
+    transmit({
       type: "planning.snapshot",
       office_id: office.id,
       dates: dates_data
-    )
+    })
   end
 
   sig { params(date: String).void }
@@ -135,7 +139,7 @@ class OfficePlanningChannel < ApplicationCable::Channel
     )
 
     payload = {
-      type: "planning.date_updated",
+      type: "planning.date.updated",
       office_id: office.id,
       date:,
       users: serialize_users(user_ids, users_by_id:)
