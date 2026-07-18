@@ -3,7 +3,7 @@ class OfficePresenceChannel < ApplicationCable::Channel
   include AuthorizeConnection
 
   def subscribed
-    @office = find_office
+    @office = find_office(params[:office_id])
 
     return reject unless @office
     return reject unless allowed_to_view?(current_user)
