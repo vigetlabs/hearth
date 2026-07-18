@@ -14,11 +14,6 @@ development:
     <<: *default
     database: <%= ENV.fetch("DATABASE_NAME", "dev_db") %>
 
-  cable:
-    <<: *default
-    database: hearth_development_cable
-    migrations_paths: db/cable_migrate
-
 test:
   primary:
     <<: *default
@@ -34,11 +29,6 @@ staging:
     username: api
     password: <%= ENV["API_DATABASE_PASSWORD"] %>
 
-  cable:
-    <<: *default
-    database: hearth_development_cable
-    migrations_paths: db/cable_migrate
-
 production:
   primary:
     <<: *default
@@ -47,8 +37,3 @@ production:
     port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
     username: api
     password: <%= ENV["API_DATABASE_PASSWORD"] %>
-
-  cable:
-    <<: *default
-    database: hearth_development_cable
-    migrations_paths: db/cable_migrate
