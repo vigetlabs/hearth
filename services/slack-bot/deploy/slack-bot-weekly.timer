@@ -1,0 +1,21 @@
+# Fires slack-bot-weekly.service every Friday at 12:00 noon Eastern. The
+# America/New_York suffix makes systemd handle EST/EDT automatically (this
+# replaces the old in-process cron's timezone logic).
+#
+# The timezone suffix on OnCalendar needs systemd >= 252 (Amazon Linux 2023 is
+# fine; `systemctl --version` to check). On older systemd, drop the suffix and
+# instead set the host clock to America/New_York (`sudo timedatectl set-timezone
+# America/New_York`), or use cron with `CRON_TZ=America/New_York` — see README.
+#
+# Verify after install:  systemctl list-timers slack-bot-weekly.timer
+[Unit]
+Description=Run slack-bot weekly group send (Fri 12:00 America/New_York)
+
+[Timer]
+OnCalendar=Fri 12:00 America/New_York
+# Deliver a missed Friday on next boot if the host was down at 12:00 — a late
+# reminder beats a silent miss. Set to false if you'd rather skip missed runs.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

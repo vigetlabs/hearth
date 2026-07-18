@@ -1,0 +1,26 @@
+# Interactivity endpoint (long-running). Acks Slack button clicks / modal
+# submissions. This is the ONLY piece that needs to stay up 24/7; the weekly
+# send is a separate timer (slack-bot-weekly.*), so a crash here can't stop it.
+#
+# Install:
+#   sudo cp deploy/slack-bot-server.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now slack-bot-server.service
+#
+# Adjust User/WorkingDirectory/node path to match the host (see README).
+[Unit]
+Description=slack-bot interactivity endpoint
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=slackbot
+WorkingDirectory=/opt/slack-bot
+# Absolute path to node 24 — check `which node` on the host and match it.
+ExecStart=/usr/bin/node --env-file=.env src/bin/server.ts
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

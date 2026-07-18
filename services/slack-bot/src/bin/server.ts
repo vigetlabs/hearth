@@ -14,8 +14,12 @@ import {
 } from '../views/modal.ts'
 import type { SubmittedView } from '../views/modal.ts'
 
-// Verifying requests needs the signing secret; opening the modal + DMing a
-// confirmation need the bot token.
+// This process is the interactivity endpoint only: opening the Edit modal and
+// writing confirmation/updated DMs in response to button clicks. The bot token
+// authorizes those outbound calls; the signing secret verifies inbound requests.
+// The weekly Friday send is a separate one-shot (`send-now`) driven by a system
+// timer on the host — see deploy/ and the README — so a crash here never affects
+// it, and the send doesn't depend on this process staying alive all week.
 assertConfig(['signingSecret', 'botToken'])
 
 // Live Slack client for outbound calls (views.open, confirmation DM). Swap

@@ -19,8 +19,9 @@ Runs on Node 24's native TypeScript support — no build step, no compiler.
    weekly DM goes to. Grab its ID (`S…`) from the group's URL or via
    `usergroups.list`.
 
-The **Signing Secret** is only needed for the optional interactivity endpoint
-(see the bottom of this file); the three DM triggers just need the bot token.
+The **Signing Secret** is needed to run the server (it verifies inbound
+interactivity requests — see the bottom of this file); the one-off `send-now`
+just needs the bot token.
 
 ## Configuration
 
@@ -32,10 +33,10 @@ npm install
 | Var | Needed by | Notes |
 | --- | --- | --- |
 | `SLACK_BOT_TOKEN` | all sends | `xoxb-…`, from step 3 above |
-| `SLACK_USERGROUP_ID` | `schedule`, `send-now` | the user group whose active members get the DM (`S…`) |
+| `SLACK_USERGROUP_ID` | weekly send, `send-now` | the user group whose active members get the DM (`S…`) |
 | `USE_SLACK` | all sends | must be `true` to actually deliver; `false` makes every send a no-op (safe for dev) |
-| `SLACK_SIGNING_SECRET` | interactivity endpoint only | from step 4; not needed for the DM triggers |
-| `PORT` | interactivity endpoint only | defaults to `3000` |
+| `SLACK_SIGNING_SECRET` | `npm start` (interactivity) | from step 4; not needed for `send-now` |
+| `PORT` | `npm start` (interactivity) | defaults to `3000` |
 
 > If `npm run …` can't find `node` (a Windows PATH quirk in some shells), run the
 > underlying command directly, e.g. `node --env-file=.env src/bin/send-now.ts`.
@@ -56,40 +57,34 @@ testable in isolation:
 | `src/schedule/store.ts` | Schedule domain types + persistence seam. In-memory `InMemoryScheduleStore` today; swap for a Rails-backed store later |
 | `src/views/prompt.ts` | Builds the weekly message (schedule + Edit Schedule button). Mock display data lives here |
 | `src/views/modal.ts` | Builds the Edit Schedule modal from a week and parses a submission back into one |
-| `src/send-prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both `schedule` and `send-now` |
-| `src/bin/scheduler.ts` | Friday cron entry point (`schedule`) |
-| `src/bin/send-now.ts` | Manual group-send entry point (`send-now`) |
-| `src/bin/server.ts` | Interactivity endpoint: acks + dispatches interactions, opens the modal, persists submissions |
+| `src/send-prompt.ts` | Shared runner: resolve group → filter active → DM each. Used by both the weekly timer and `send-now` |
+| `src/bin/send-now.ts` | The group-send entry point. Fired weekly by a system timer in prod (`deploy/`), and by hand for testing |
+| `src/bin/server.ts` | The interactivity endpoint: acks + dispatches interactions, opens the modal, persists submissions. Long-running; does **not** schedule anything |
+| `deploy/` | systemd units for EC2: a service for the interactivity endpoint, plus a `oneshot` + timer that runs `send-now` every Friday |
 
 **Recipient filtering.** `SLACK_USERGROUP_ID` is the subset selector, maintained
 in Slack itself. At send time the bot resolves the group live and drops any
 member whose account is deactivated, a bot, or a guest (`deleted` / `is_bot` /
 `is_restricted`) — so the list is always current without a database.
 
-## The two DM triggers
+## The weekly send
 
-Both send the **same** message (built by `src/views/prompt.ts`). They differ only
-in *when* they fire and *who* receives it.
+The weekly DM is a **one-shot** (`src/bin/send-now.ts`), not a daemon. It
+resolves the recipient pool live, DMs each active member the prompt, and exits.
+The same command is used two ways:
 
-### 1. `npm run schedule` — automatic, weekly
+### In production — a system timer runs it every Friday
 
-Starts a long-running process that DMs every active member of
-`SLACK_USERGROUP_ID` **every Friday at 12:00 noon Eastern**
-(`America/New_York`, so EST/EDT is handled automatically).
+On EC2 a **systemd timer** (`deploy/slack-bot-weekly.timer`) invokes `send-now`
+**every Friday at 12:00 noon Eastern** (`America/New_York`, so EST/EDT is handled
+automatically). Nothing has to stay alive between Fridays, and because the timer
+lives in the OS — not in a Node process — a reboot or a crash of the
+interactivity server can't cause a missed send. See **Deploying on EC2** below.
 
-```bash
-npm run schedule
-# Scheduler started (Fridays 12:00 America/New_York). Next run: 2026-07-10T12:00:00-04:00. Ctrl+C to stop.
-```
+### For testing — run it by hand
 
-This is the production cadence. It only fires while the process is running — if
-the machine sleeps or the process dies, that Friday is missed. For real
-deployments back it with a system cron / restarting container / hosted scheduler.
-
-### 2. `npm run send-now` — manual, same recipients
-
-Fires the **exact same group send** as the scheduler, immediately — for testing
-without waiting until Friday.
+Fires the **exact same group send**, immediately, from your shell — for checking
+setup without waiting until Friday or standing anything up.
 
 ```bash
 npm run send-now
@@ -98,12 +93,42 @@ npm run send-now
 #   U0BBB: ok
 ```
 
+## Deploying on EC2
+
+Two independent units, so the once-a-week send never depends on the server
+staying up:
+
+| Unit | Type | Role |
+| --- | --- | --- |
+| `slack-bot-server.service` | long-running | the interactivity endpoint (`server.ts`), restarts on failure |
+| `slack-bot-weekly.timer` → `slack-bot-weekly.service` | timer + `oneshot` | runs `send-now` every Friday 12:00 ET |
+
+```bash
+# On the instance, from the deployed app dir (e.g. /opt/slack-bot):
+sudo cp deploy/slack-bot-*.service deploy/slack-bot-weekly.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now slack-bot-server.service   # interactivity endpoint
+sudo systemctl enable --now slack-bot-weekly.timer     # weekly send
+systemctl list-timers slack-bot-weekly.timer           # confirm next run
+```
+
+Each unit uses `WorkingDirectory=/opt/slack-bot` and `node --env-file=.env …`, so
+the `.env` (bot token, signing secret, etc.) lives next to the code just like in
+dev. Edit `User`, `WorkingDirectory`, and the absolute `node` path in the units
+to match the host before installing — the headers in each file say what to set.
+
+The `OnCalendar` timezone suffix needs systemd ≥ 252 (Amazon Linux 2023 is fine).
+On older systemd, drop the suffix and either set the host clock to
+`America/New_York` or use a cron entry with `CRON_TZ=America/New_York 0 12 * * 5`
+calling the same `node --env-file=.env src/bin/send-now.ts`.
+
 ### Which one do I want?
 
 | Goal | Use |
 | --- | --- |
-| The real weekly Friday DM | `schedule` |
-| Send the weekly DM to the group right now (e.g. to check setup) | `send-now` |
+| Run the interactivity endpoint locally | `npm start` |
+| Send the weekly DM to the group right now (e.g. to check setup) | `npm run send-now` |
+| The real weekly Friday DM in prod | the `slack-bot-weekly.timer` above |
 
 ## The Edit Schedule button & interactivity
 
@@ -115,10 +140,10 @@ message's channel/ts in its `private_metadata` so the submit handler knows which
 message to update; if that's ever missing it falls back to a fresh confirmation
 DM.
 
-This needs the interactivity endpoint (`src/bin/server.ts`) running, because a
-non-link button delivers its click to your app's **Request URL** — that POST is
-the only way the press reaches your code. So unlike the three DM triggers, the
-button is **not** self-contained: it requires
+This needs the server (`src/bin/server.ts`) running, because a non-link button
+delivers its click to your app's **Request URL** — that POST is the only way the
+press reaches your code. So unlike the one-off `send-now`, the button is **not**
+self-contained: it requires
 
 - a publicly reachable **Request URL** set under **Interactivity & Shortcuts**
   (tunnel with `ngrok http 3000` in dev), pointing at `/slack/handle-event`,
@@ -127,7 +152,7 @@ button is **not** self-contained: it requires
   then opens the modal / saves).
 
 ```bash
-npm start   # runs the interactivity endpoint on PORT (default 3000)
+npm start   # interactivity endpoint on PORT (default 3000)
 ```
 
 ### Where the data lives (and the API seam)
