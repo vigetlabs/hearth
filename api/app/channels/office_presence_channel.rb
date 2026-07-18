@@ -7,25 +7,33 @@ class OfficePresenceChannel < ApplicationCable::Channel
 
     stream_for @office
 
-    register_office_presence
-    remove_stale_presences
+    presence_store.register(
+      user_id: current_user.id,
+      connection_id: connection_id
+    )
 
     broadcast_active_office_presences
   end
 
   def unsubscribed
-    current_presence&.destroy
-    broadcast_active_office_presences if @office
+    return unless @office
+
+    presence_store.remove(
+      user_id: current_user.id,
+      connection_id: connection_id
+    )
+
+    broadcast_active_office_presences
   end
 
-  # periodic heartbeat function called by client to keep
-  # connection alive and prevent it being labeled as stale
   def heartbeat
     return unless @office
 
-    current_presence&.touch(:last_seen_at)
+    presence_store.heartbeat(
+      user_id: current_user.id,
+      connection_id: connection_id
+    )
 
-    remove_stale_presences
     broadcast_active_office_presences
   end
 
@@ -41,37 +49,10 @@ class OfficePresenceChannel < ApplicationCable::Channel
     current_user.present?
   end
 
-  def register_office_presence
-    now = Time.current
-
-    OfficePresence.upsert(
-      {
-        user_id: current_user.id,
-        office_id: @office.id,
-        connection_id: connection_id,
-        last_seen_at: now,
-        created_at: now,
-        updated_at: now
-      },
-      unique_by: :index_office_presences_on_user_office_connection
+  def presence_store
+    @presence_store ||= OfficePresenceStore.new(
+      office_id: @office.id
     )
-  end
-
-  def current_presence
-    return unless @office
-
-    OfficePresence.find_by(
-      user_id: current_user.id,
-      office_id: @office.id,
-      connection_id: connection_id
-    )
-  end
-
-  def remove_stale_presences
-    OfficePresence
-      .where(office_id: @office.id)
-      .stale
-      .delete_all
   end
 
   def broadcast_active_office_presences
@@ -80,6 +61,7 @@ class OfficePresenceChannel < ApplicationCable::Channel
       office_id: @office.id,
       users: active_office_users
     }
+
     self.class.broadcast_to(
       @office,
       payload
@@ -87,12 +69,9 @@ class OfficePresenceChannel < ApplicationCable::Channel
   end
 
   def active_office_users
-    OfficePresence
-      .where(office_id: @office.id)
-      .active
-      .includes(:user)
-      .map(&:user)
-      .uniq(&:id)
+    User
+      .where(id: presence_store.active_user_ids)
+      .includes(:default_schedule)
       .map do |user|
         {
           id: user.id,
