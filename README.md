@@ -127,6 +127,43 @@ just check
 
 Before committing, ensure that the development services are running, as the hooks rely on them to run the checks.
 
+### Sorbet
+This project uses Sorbet for static type checking and Tapioca to generate RBI files for gems and Rails DSLs in order to better reason about particular sections of the codebase. Sorbet has already been initialized once in the repository. The generated files under `api/sorbet/` should be commited in order to prevent reinitialization.
+
+#### Type Checking
+
+Run the Sorbet type checking with either of the following commands:
+- `bundle exec src tc`
+- `just srb`
+
+This is the command used during normal development and should be run before submitting changes.
+
+#### Updating RBI Files
+
+After adding, removing, or updating a gem:
+```
+
+// with bundler
+bundle exec tapioca gem
+bundle exec srb tc
+
+// or with just
+just rbi
+```
+
+After changing a Rails DSL declaration, such as an Active Record association, enum, scope or delegation, update the generated DSL RBI files by running the following commands:
+
+```
+// with bundler
+bundle exec tapioca dsl
+bundle exec src tc
+
+// or with just
+just dsl
+```
+
+
+
 ## Local Development Testing 
 
 ### Action Cable Testing

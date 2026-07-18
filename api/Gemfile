@@ -36,6 +36,9 @@ group :development, :test do
   gem "rspec-rails"
   gem "factory_bot_rails"
   gem "simplecov", require: false
+  gem "sorbet", "~> 0.6.13342"
+  gem "sorbet-runtime", "~> 0.6.13342"
+  gem "tapioca", "~> 0.19.2"
 end
 
 gem "devise", "~> 5.0"
