@@ -8,10 +8,16 @@ import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
 import { isSameDay, toDateKey } from "@/util/dates/date";
 
-import { setPlanningOverrideStateForUser } from "@/util/cable/planning/overrideState";
+import {
+  planningOverrideStateForUser,
+  resolveAttendance,
+  baseAttendanceForUser,
+} from "@/util/cable/planning/overrideState";
+
 import type {
   ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
+  PlanningOverrideState,
 } from "@/types/cable/officePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
@@ -19,57 +25,6 @@ const EMPTY_DAY: PersonStatus[] = [];
 
 const confirmedCountOf = (day: PersonStatus[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
-
-// null refers to the planning system has no opinion
-type PlanningOverrideState = "selected" | "deselected" | null;
-
-function resolveAttendance({
-  hasConfirmedVisit,
-  planningOverride,
-  isDefaultScheduleDay,
-}: {
-  hasConfirmedVisit: boolean;
-  planningOverride: PlanningOverrideState;
-  isDefaultScheduleDay: boolean;
-}): boolean {
-  if (hasConfirmedVisit) {
-    return true;
-  }
-
-  if (planningOverride === "selected") {
-    return true;
-  }
-
-  if (planningOverride === "deselected") {
-    return false;
-  }
-
-  return isDefaultScheduleDay;
-}
-
-function baseAttendanceForUser(
-  day: PersonStatus[],
-  userId: number,
-): {
-  hasConfirmedVisit: boolean;
-  isDefaultScheduleDay: boolean;
-} {
-  const person = day.find((dayPerson) => dayPerson.userId === userId);
-
-  if (!person) {
-    return {
-      hasConfirmedVisit: false,
-      isDefaultScheduleDay: false,
-    };
-  }
-
-  const hasConfirmedVisit = person.status === "confirmed-yes";
-
-  return {
-    hasConfirmedVisit,
-    isDefaultScheduleDay: !hasConfirmedVisit && isInOffice(person.status),
-  };
-}
 
 interface CalendarProps {
   schedule: WeekSchedule;
@@ -101,17 +56,15 @@ export function Calendar({
     const resolvedScheduledPeople = day.flatMap((person): PersonStatus[] => {
       const hasConfirmedVisit = person.status === "confirmed-yes";
 
-      const planningOverride = setPlanningOverrideStateForUser(
-        overrides,
-        person.userId,
-      );
+      const planningOverrideState: PlanningOverrideState =
+        planningOverrideStateForUser(overrides, person.userId);
 
       const isDefaultScheduleDay =
         !hasConfirmedVisit && isInOffice(person.status);
 
       const attending = resolveAttendance({
         hasConfirmedVisit,
-        planningOverride,
+        planningOverrideState,
         isDefaultScheduleDay,
       });
 
@@ -123,7 +76,7 @@ export function Calendar({
         return [person];
       }
 
-      if (planningOverride === "selected") {
+      if (planningOverrideState === "selected") {
         return [
           {
             ...person,
@@ -159,21 +112,21 @@ export function Calendar({
 
     const baseDay = schedule[key] ?? EMPTY_DAY;
 
-    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser(
-      baseDay,
-      user.id,
-    );
+    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
+      day: baseDay,
+      userId: user.id,
+    });
 
     if (hasConfirmedVisit) {
       return;
     }
 
-    const planningOverride: PlanningOverrideState =
-      setPlanningOverrideStateForUser(planningByDate[key], user.id);
+    const planningOverrideState: PlanningOverrideState =
+      planningOverrideStateForUser(planningByDate[key], user.id);
 
     const currentlyAttending = resolveAttendance({
       hasConfirmedVisit,
-      planningOverride,
+      planningOverrideState,
       isDefaultScheduleDay,
     });
 

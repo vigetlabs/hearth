@@ -116,7 +116,7 @@ export default function CalendarPage() {
   const isRemote = office?.name.toLowerCase() === "remote";
 
   const {
-    planningByDate,
+    planningStatesByDate,
     isConnected: isPlanningConnected,
     selectDate,
     deselectDate,
@@ -311,7 +311,7 @@ export default function CalendarPage() {
             days={weekDates}
             locked={isWeekConfirmed}
             user={user}
-            planningByDate={planningByDate}
+            planningByDate={planningStatesByDate}
             isPlanningConnected={isPlanningConnected}
             onPlanningToggle={handlePlanningToggle}
           />

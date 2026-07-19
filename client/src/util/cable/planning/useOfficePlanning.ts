@@ -52,7 +52,7 @@ interface UseOfficePlanningOptions {
 }
 
 interface UseOfficePlanningResult {
-  planningByDate: OfficeDatesPlanningOverrideStates;
+  planningStatesByDate: OfficeDatesPlanningOverrideStates;
   isConnected: boolean;
   selectDate: (date: string) => void;
   deselectDate: (date: string) => void;
@@ -75,7 +75,7 @@ export function useOfficePlanning({
   const [connectionState, setConnectionState] =
     useState<ConnectionState | null>(null);
 
-  const planningByDate =
+  const planningStatesByDate =
     officeId !== null && planningState?.officeId === officeId
       ? planningState.dates
       : EMPTY_PLANNING_DATES;
@@ -217,7 +217,7 @@ export function useOfficePlanning({
     const selectedDates: string[] = [];
     const deselectedDates: string[] = [];
 
-    Object.entries(planningByDate).forEach(([date, overrides]) => {
+    Object.entries(planningStatesByDate).forEach(([date, overrides]) => {
       const isSelected = overrides.selected.some(
         (user: ChannelSerializedUser) => user.id === currentUserId,
       );
@@ -237,7 +237,7 @@ export function useOfficePlanning({
       selectedDates,
       deselectedDates,
     };
-  }, [planningByDate, currentUserId]);
+  }, [planningStatesByDate, currentUserId]);
 
   const currentUserOverridesRef =
     useRef<CurrentUserPlanningOverrideState>(currentUserOverrides);
@@ -281,7 +281,7 @@ export function useOfficePlanning({
   }, [isConnected, perform]);
 
   return {
-    planningByDate,
+    planningStatesByDate,
     isConnected,
     selectDate,
     deselectDate,
