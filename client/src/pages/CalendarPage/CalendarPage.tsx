@@ -13,6 +13,7 @@ import type { WeekSchedule } from "@/types/calendar/calendar";
 
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
+import { generateVisitsKey } from "@/util/api/keys/visitKeys";
 import { useWeekAttendanceConfirmation } from "@/util/api/mutations/attendanceConfirmations/attendanceConfirmations";
 import { useAttendanceConfirmationsQuery } from "@/util/api/queries/attendanceConfirmationQueries";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
@@ -220,7 +221,11 @@ export default function CalendarPage() {
             ),
           }),
           queryClient.invalidateQueries({
-            queryKey: ["visits", weekKey, "week", activeOfficeId],
+            queryKey: generateVisitsKey({
+              date: weekKey,
+              view: "week",
+              office_id: activeOfficeId,
+            }),
           }),
         ]);
 

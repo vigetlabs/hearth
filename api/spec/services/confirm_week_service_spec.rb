@@ -263,10 +263,10 @@ RSpec.describe ConfirmWeekService do
 
     context "when the week has already been confirmed" do
       let(:selected_dates) do
-        [ Date.new(2026, 7, 13) ]
+        [ Date.new(2026, 7, 15) ]
       end
 
-      before do
+      let!(:existing_confirmation) do
         create(
           :attendance_confirmation,
           user:,
@@ -276,28 +276,34 @@ RSpec.describe ConfirmWeekService do
         )
       end
 
-      it "raises an already-confirmed error" do
-        expect { confirm_week }
-          .to raise_error(
-            described_class::AlreadyConfirmedError,
-            "This attendance week has already been confirmed"
-          )
+      let!(:existing_visit) do
+        create(
+          :visit,
+          user:,
+          office:,
+          visit_date: Date.new(2026, 7, 13)
+        )
       end
 
-      it "does not create or modify visits" do
+      it "updates the visits to match the newly selected dates" do
+        result = confirm_week
+
+        expect(result.visits.map(&:visit_date))
+          .to eq([ Date.new(2026, 7, 15) ])
+
         expect do
-          confirm_week
-        rescue described_class::AlreadyConfirmedError
-          nil
-        end.not_to change(Visit, :count)
+          existing_visit.reload
+        end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      it "does not create another attendance confirmation" do
-        expect do
-          confirm_week
-        rescue described_class::AlreadyConfirmedError
-          nil
-        end.not_to change(AttendanceConfirmation, :count)
+      it "reuses the existing attendance confirmation" do
+        result = nil
+
+        expect { result = confirm_week }
+          .not_to change(AttendanceConfirmation, :count)
+
+        expect(result.confirmation.id)
+          .to eq(existing_confirmation.id)
       end
     end
 
@@ -307,11 +313,17 @@ RSpec.describe ConfirmWeekService do
       end
 
       before do
+        confirmation = AttendanceConfirmation.new
+
         allow(AttendanceConfirmation)
-          .to receive(:create!)
+          .to receive(:find_or_initialize_by)
+          .and_return(confirmation)
+
+        allow(confirmation)
+          .to receive(:update!)
           .and_raise(
             ActiveRecord::RecordInvalid.new(
-              AttendanceConfirmation.new
+              confirmation
             )
           )
       end
@@ -325,38 +337,6 @@ RSpec.describe ConfirmWeekService do
         expect do
           confirm_week
         rescue ActiveRecord::RecordInvalid
-          nil
-        end.not_to change(Visit, :count)
-      end
-    end
-
-    context "when the confirmation insert violates the unique index" do
-      let(:selected_dates) do
-        [ Date.new(2026, 7, 13) ]
-      end
-
-      before do
-        allow(AttendanceConfirmation)
-          .to receive(:find_by)
-          .and_return(nil)
-
-        allow(AttendanceConfirmation)
-          .to receive(:create!)
-          .and_raise(ActiveRecord::RecordNotUnique)
-      end
-
-      it "converts the database error into an already-confirmed error" do
-        expect { confirm_week }
-          .to raise_error(
-            described_class::AlreadyConfirmedError,
-            "This attendance week has already been confirmed"
-          )
-      end
-
-      it "rolls back visit changes" do
-        expect do
-          confirm_week
-        rescue described_class::AlreadyConfirmedError
           nil
         end.not_to change(Visit, :count)
       end

@@ -295,6 +295,52 @@ RSpec.describe "Api::V1::AttendanceConfirmations::AttendanceConfirmations", type
       )
     end
 
+    context "when the week has already been confirmed" do
+      let!(:confirmation) do
+        create(
+          :attendance_confirmation,
+          user: user,
+          office: office,
+          period_type: :week,
+          starts_on: Date.new(2026, 7, 13)
+        )
+      end
+
+      let!(:old_visit) do
+        create(
+          :visit,
+          user: user,
+          office: office,
+          visit_date: Date.new(2026, 7, 13)
+        )
+      end
+
+      it "replaces the week's visits and keeps the existing confirmation" do
+        confirmation_count = AttendanceConfirmation.count
+
+        expect { make_request }
+          .to change(Visit, :count)
+          .by(1)
+
+        expect(AttendanceConfirmation.count).to eq(confirmation_count)
+        expect(response).to have_http_status(:ok)
+
+        visit_dates =
+          Visit
+            .where(user: user, office: office)
+            .order(:visit_date)
+            .pluck(:visit_date)
+
+        expect(visit_dates).to eq(
+          [ Date.new(2026, 7, 14), Date.new(2026, 7, 16) ]
+        )
+
+        expect(
+          JSON.parse(response.body).dig("data", "attendance_confirmation", "id")
+        ).to eq(confirmation.id)
+      end
+    end
+
     it "normalizes starts_on to Monday" do
       post api_path("/attendance_confirmations"),
         params: {

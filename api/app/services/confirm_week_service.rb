@@ -3,7 +3,6 @@
 class ConfirmWeekService
   extend T::Sig
 
-  class AlreadyConfirmedError < StandardError; end
   class InvalidDateError < StandardError; end
   class ConflictingVisitError < StandardError; end
 
@@ -41,11 +40,9 @@ class ConfirmWeekService
     visits = T.let([], T::Array[Visit])
 
     ApplicationRecord.transaction do
-      ensure_not_already_confirmed!
-
       synchronize_visits!
 
-      confirmation = create_confirmation!
+      confirmation = persist_confirmation!
       visits = confirmed_visits.to_a
     end
 
@@ -108,22 +105,6 @@ class ConfirmWeekService
   end
 
   sig { void }
-  def ensure_not_already_confirmed!
-    existing_confirmation =
-      AttendanceConfirmation.find_by(
-        user:,
-        office:,
-        period_type: :week,
-        starts_on: normalized_week_start
-      )
-
-    return unless existing_confirmation
-
-    raise AlreadyConfirmedError,
-      "This attendance week has already been confirmed"
-  end
-
-  sig { void }
   def validate_no_conflicting_visits!
     conflict =
       Visit
@@ -181,17 +162,16 @@ class ConfirmWeekService
   end
 
   sig { returns(AttendanceConfirmation) }
-  def create_confirmation!
-    AttendanceConfirmation.create!(
+  def persist_confirmation!
+    confirmation = AttendanceConfirmation.find_or_initialize_by(
       user:,
       office:,
       period_type: :week,
-      starts_on: normalized_week_start,
-      ends_on: normalized_week_end,
+      starts_on: normalized_week_start
     )
-  rescue ActiveRecord::RecordNotUnique
-    raise AlreadyConfirmedError,
-      "This attendance week has already been confirmed"
+
+    confirmation.update!(ends_on: normalized_week_end)
+    confirmation
   end
 
   sig { returns(ActiveRecord::Relation) }
