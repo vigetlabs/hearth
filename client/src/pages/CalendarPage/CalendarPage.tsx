@@ -13,7 +13,7 @@ import { buildWeekSchedule } from "@/util/calendar/schedule";
 import Loader from "@/components/Loader/Loader";
 import { useCallback, useMemo, useState } from "react";
 import type { Office } from "@/types/api/offices";
-import { useOfficePlanning } from "@/util/cable/useOfficePlanning";
+import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 

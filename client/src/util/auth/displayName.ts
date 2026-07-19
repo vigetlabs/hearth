@@ -1,5 +1,5 @@
 import type { User } from "@/types/api/users";
-import type { ChannelSerializedUser } from "../cable/useOfficePlanning";
+import type { ChannelSerializedUser } from "@/types/cable/officePlanning";
 
 export function userDisplayName(
   user: User | ChannelSerializedUser | null,

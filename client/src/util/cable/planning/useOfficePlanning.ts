@@ -1,38 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Subscription } from "@rails/actioncable";
-import type { User } from "@/types/api/users";
-import { cable } from "./cable";
 
-export type ChannelSerializedUser = Pick<
-  User,
-  "id" | "first_name" | "last_name" | "office_id"
->;
+import type {
+  ChannelSerializedUser,
+  OfficeDatesPlanningOverrideStates,
+  OfficePlanningState,
+  TogglePlanningOverrideState,
+} from "@/types/cable/officePlanning";
 
-export interface OfficePlanningDateOverrides {
-  selected: ChannelSerializedUser[];
-  deselected: ChannelSerializedUser[];
-}
+import { cable } from "../cable";
 
-export type OfficePlanningDates = Record<string, OfficePlanningDateOverrides>;
+const EMPTY_PLANNING_DATES: OfficeDatesPlanningOverrideStates = {};
 
-const EMPTY_PLANNING_DATES: OfficePlanningDates = {};
-
+/*
+ * Represents a snapshot of all dates and all serialized users on that date
+ */
 interface PlanningSnapshotMessage {
   type: "planning.snapshot";
   office_id: number;
-  dates: OfficePlanningDates;
+  dates: OfficeDatesPlanningOverrideStates;
 }
 
+/*
+ * Represents a single date update for all serialized users on that date
+ */
 interface PlanningDateUpdatedMessage {
   type: "planning.date.updated";
   office_id: number;
   date: string;
-  overrides: OfficePlanningDateOverrides;
+  overrides: TogglePlanningOverrideState;
 }
 
 type OfficePlanningMessage =
   PlanningSnapshotMessage | PlanningDateUpdatedMessage;
+
+interface ConnectionState {
+  officeId: number;
+  connected: boolean;
+}
+
+interface CurrentUserPlanningOverrideState {
+  selectedDates: string[];
+  deselectedDates: string[];
+}
 
 interface UseOfficePlanningOptions {
   officeId: number | null;
@@ -41,29 +52,14 @@ interface UseOfficePlanningOptions {
 }
 
 interface UseOfficePlanningResult {
-  planningByDate: OfficePlanningDates;
+  planningByDate: OfficeDatesPlanningOverrideStates;
   isConnected: boolean;
   selectDate: (date: string) => void;
   deselectDate: (date: string) => void;
   refreshSnapshot: () => void;
 }
 
-interface OfficePlanningState {
-  officeId: number;
-  dates: OfficePlanningDates;
-}
-
-interface ConnectionState {
-  officeId: number;
-  connected: boolean;
-}
-
-interface CurrentUserOverrides {
-  selectedDates: string[];
-  deselectedDates: string[];
-}
-
-const EMPTY_CURRENT_USER_OVERRIDES: CurrentUserOverrides = {
+const EMPTY_CURRENT_USER_OVERRIDES: CurrentUserPlanningOverrideState = {
   selectedDates: [],
   deselectedDates: [],
 };
@@ -213,7 +209,7 @@ export function useOfficePlanning({
     };
   }, [officeId]);
 
-  const currentUserOverrides = useMemo<CurrentUserOverrides>(() => {
+  const currentUserOverrides = useMemo<CurrentUserPlanningOverrideState>(() => {
     if (currentUserId === null) {
       return EMPTY_CURRENT_USER_OVERRIDES;
     }
@@ -223,11 +219,11 @@ export function useOfficePlanning({
 
     Object.entries(planningByDate).forEach(([date, overrides]) => {
       const isSelected = overrides.selected.some(
-        (user) => user.id === currentUserId,
+        (user: ChannelSerializedUser) => user.id === currentUserId,
       );
 
       const isDeselected = overrides.deselected.some(
-        (user) => user.id === currentUserId,
+        (user: ChannelSerializedUser) => user.id === currentUserId,
       );
 
       if (isSelected) {
@@ -244,7 +240,7 @@ export function useOfficePlanning({
   }, [planningByDate, currentUserId]);
 
   const currentUserOverridesRef =
-    useRef<CurrentUserOverrides>(currentUserOverrides);
+    useRef<CurrentUserPlanningOverrideState>(currentUserOverrides);
 
   useEffect(() => {
     currentUserOverridesRef.current = currentUserOverrides;
