@@ -42,6 +42,8 @@ Rails.application.routes.draw do
       resources :offices, only: [ :index ], module: :offices
 
       resources :visits, only: [ :create, :index ], module: :visits
+
+      resources :attendance_confirmations, only: [ :create, :index ], module: :attendance_confirmations
     end
   end
 end

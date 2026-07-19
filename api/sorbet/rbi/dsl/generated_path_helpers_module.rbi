@@ -10,6 +10,9 @@ module GeneratedPathHelpersModule
   include ::ActionDispatch::Routing::PolymorphicRoutes
 
   sig { params(args: T.untyped).returns(String) }
+  def api_v1_attendance_confirmations_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def api_v1_failure_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }

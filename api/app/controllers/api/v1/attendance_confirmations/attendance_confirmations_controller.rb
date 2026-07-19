@@ -8,6 +8,7 @@ class Api::V1::AttendanceConfirmations::AttendanceConfirmationsController < Appl
 
   rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found
   rescue_from ActionController::BadRequest, with: :handle_bad_request
+  rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
 
   before_action :authenticate_user!
 
@@ -38,6 +39,43 @@ class Api::V1::AttendanceConfirmations::AttendanceConfirmationsController < Appl
     )
   end
 
+  sig { void }
+  def create
+    office = T.let(find_office!, Office)
+    week_start = T.let(normalized_week_start!, Date)
+    selected_dates = T.let(parsed_selected_dates!, T::Array[Date])
+    user = T.must(current_user)
+
+    confirm_result =
+      ConfirmWeekService
+        .new(
+          user: user,
+          office: office,
+          week_start: week_start,
+          selected_dates: selected_dates
+        )
+        .call
+
+      serialized_confirmation = AttendanceConfirmationSerializer
+        .new(confirm_result.confirmation)
+        .serializable_hash[:data][:attributes]
+
+      serialized_visits = VisitSerializer
+        .new(confirm_result.visits)
+        .serializable_hash[:data]
+        .map { |visit| visit[:attributes] }
+
+      data = {
+        attendance_confirmation: serialized_confirmation,
+        visits: serialized_visits
+      }
+
+      success_response(
+        data: data,
+        message: "Successfully created confirmed visits"
+      )
+  end
+
   private
 
 
@@ -49,6 +87,9 @@ class Api::V1::AttendanceConfirmations::AttendanceConfirmationsController < Appl
   sig { returns(Integer) }
   def office_id_param
     value = params.require(:office_id)
+
+    return value if value.is_a?(Integer)
+
     Integer(value, 10)
   rescue ArgumentError, TypeError
     raise ActionController::BadRequest,
@@ -70,7 +111,7 @@ class Api::V1::AttendanceConfirmations::AttendanceConfirmationsController < Appl
 
   sig { returns(T::Array[Date]) }
   def parsed_selected_dates!
-    raw_dates = params.require(:selected_dates)
+    raw_dates = params.fetch(:selected_dates)
 
     unless raw_dates.is_a?(Array)
       raise ActionController::BadRequest,
@@ -83,5 +124,7 @@ class Api::V1::AttendanceConfirmations::AttendanceConfirmationsController < Appl
       raise ActionController::BadRequest,
         "selected_dates must contain valid dates"
     end
+  rescue KeyError
+    raise ActionController::ParameterMissing, :selected_dates
   end
 end

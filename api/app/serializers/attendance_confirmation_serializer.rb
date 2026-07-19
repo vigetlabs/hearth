@@ -1,7 +1,8 @@
 class AttendanceConfirmationSerializer
   include JSONAPI::Serializer
 
-  attributes :user_id,
+  attributes :id,
+             :user_id,
              :office_id,
              :period_type
 
