@@ -39,6 +39,8 @@ export default function CalendarPage() {
     getWeekStartFromSearchParams(searchParams),
   );
 
+  const [editingWeekId, setEditingWeekId] = useState<string | null>(null);
+
   const officeIdParam = searchParams.get("office");
 
   const parsedOfficeId = officeIdParam ? Number(officeIdParam) : undefined;
@@ -59,6 +61,12 @@ export default function CalendarPage() {
 
   const weekKey = toDateKey(focusedWeekStartDate);
   const currentWeekKey = toDateKey(startOfWeek(new Date()));
+
+  const currentEditingWeekId =
+    activeOfficeId === undefined ? null : `${activeOfficeId}:${weekKey}`;
+
+  const isEditingWeek =
+    currentEditingWeekId !== null && editingWeekId === currentEditingWeekId;
 
   const officesQuery = useOfficesQuery();
   const offices = officesQuery.data ?? [];
@@ -96,6 +104,8 @@ export default function CalendarPage() {
   const isCurrentWeek = weekKey === currentWeekKey;
 
   const isWeekConfirmed = user !== undefined && confirmedUserIds.has(user.id);
+
+  const isCalendarLocked = isWeekConfirmed && !isEditingWeek;
 
   const isRemote = office?.name.toLowerCase() === "remote";
 
@@ -145,6 +155,14 @@ export default function CalendarPage() {
 
   function goToday(): void {
     changeFocusedWeek(new Date());
+  }
+
+  function editWeek(): void {
+    if (currentEditingWeekId === null) {
+      return;
+    }
+
+    setEditingWeekId(currentEditingWeekId);
   }
 
   function confirmWeek(): void {
@@ -205,11 +223,15 @@ export default function CalendarPage() {
             queryKey: ["visits", weekKey, "week", activeOfficeId],
           }),
         ]);
+
+        setEditingWeekId(null);
       },
     });
   }
 
   function changeOffice(nextOffice: Office): void {
+    setEditingWeekId(null);
+
     setSearchParams((currentParams) => {
       const nextParams = new URLSearchParams(currentParams);
 
@@ -222,6 +244,7 @@ export default function CalendarPage() {
   function changeFocusedWeek(nextWeekStart: Date): void {
     const normalizedWeekStart = startOfWeek(nextWeekStart);
 
+    setEditingWeekId(null);
     setFocusedWeekStartDate(normalizedWeekStart);
 
     setSearchParams((currentParams) => {
@@ -261,9 +284,9 @@ export default function CalendarPage() {
 
   const rangeLabel = `${rangeFormat.format(
     weekDates[0],
-  )} - ${rangeFormat.format(weekDates[WEEKDAYS_PER_WEEK - 1])}, ${weekDates[
-    WEEKDAYS_PER_WEEK - 1
-  ].getFullYear()}`;
+  )} - ${rangeFormat.format(
+    weekDates[WEEKDAYS_PER_WEEK - 1],
+  )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-page">
@@ -314,11 +337,13 @@ export default function CalendarPage() {
               <div className="h-6 w-px bg-line" />
 
               <p className="text-sm text-fg-subtle">
-                {isWeekConfirmed ? (
+                {isEditingWeek ? (
                   <>
                     <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
                     Unlock Week to make changes.
                   </>
+                ) : isWeekConfirmed ? (
+                  <span className="font-bold text-fg">Confirmed.</span>
                 ) : (
                   <>
                     <span className="font-bold text-fg">Planning.</span> Yet to
@@ -327,15 +352,14 @@ export default function CalendarPage() {
                 )}
               </p>
 
-              {isWeekConfirmed ? (
+              {isWeekConfirmed && !isEditingWeek ? (
                 <button
                   type="button"
-                  disabled
-                  title="Unlocking a confirmed week is not yet supported"
+                  onClick={editWeek}
                   className={unlockButton}
                 >
                   <LockIcon className="h-3.5 w-3.5" />
-                  Week Confirmed
+                  Edit Week
                 </button>
               ) : (
                 <button
@@ -349,7 +373,9 @@ export default function CalendarPage() {
                 >
                   {createAttendanceConfirmationMutation.isPending
                     ? "Confirming..."
-                    : "Confirm Week"}
+                    : isEditingWeek
+                      ? "Confirm Updated Week"
+                      : "Confirm Week"}
                 </button>
               )}
             </div>
@@ -359,7 +385,8 @@ export default function CalendarPage() {
             schedule={schedule}
             office={office}
             days={weekDates}
-            locked={isWeekConfirmed}
+            locked={isCalendarLocked}
+            editingConfirmedWeek={isEditingWeek}
             user={user}
             planningByDate={planningStatesByDate}
             isPlanningConnected={isPlanningConnected}
@@ -388,9 +415,7 @@ const unlockButton = `ml-auto ${darkPillButton}`;
 
 function getWeekStartFromSearchParams(searchParams: URLSearchParams): Date {
   const year = Number(searchParams.get("year"));
-
   const month = Number(searchParams.get("month"));
-
   const day = Number(searchParams.get("day"));
 
   if (
@@ -421,8 +446,6 @@ function getWeekStartFromSearchParams(searchParams: URLSearchParams): Date {
 
 function setDateSearchParams(params: URLSearchParams, date: Date): void {
   params.set("year", String(date.getFullYear()));
-
   params.set("month", String(date.getMonth() + 1));
-
   params.set("day", String(date.getDate()));
 }

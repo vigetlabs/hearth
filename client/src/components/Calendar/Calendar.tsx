@@ -3,22 +3,21 @@ import { DayCell } from "@/components/Calendar/DayCell";
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
 import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
+import type {
+  ChannelSerializedUser,
+  OfficeDatesPlanningOverrideStates,
+} from "@/types/cable/officePlanning";
 
 import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
 import { isSameDay, toDateKey } from "@/util/dates/date";
 
 import {
+  baseAttendanceForUser,
   planningOverrideStateForUser,
   resolveAttendance,
-  baseAttendanceForUser,
+  resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
-
-import type {
-  ChannelSerializedUser,
-  OfficeDatesPlanningOverrideStates,
-  PlanningOverrideState,
-} from "@/types/cable/officePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: PersonStatus[] = [];
@@ -35,6 +34,7 @@ interface CalendarProps {
   planningByDate: OfficeDatesPlanningOverrideStates;
   isPlanningConnected: boolean;
   onPlanningToggle: (date: string, attending: boolean) => void;
+  editingConfirmedWeek: boolean;
 }
 
 export function Calendar({
@@ -46,6 +46,7 @@ export function Calendar({
   planningByDate,
   isPlanningConnected,
   onPlanningToggle,
+  editingConfirmedWeek,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
@@ -56,20 +57,43 @@ export function Calendar({
     const resolvedScheduledPeople = day.flatMap((person): PersonStatus[] => {
       const hasConfirmedVisit = person.status === "confirmed-yes";
 
-      const planningOverrideState: PlanningOverrideState =
-        planningOverrideStateForUser(overrides, person.userId);
+      const planningOverrideState = planningOverrideStateForUser(
+        overrides,
+        person.userId,
+      );
 
       const isDefaultScheduleDay =
         !hasConfirmedVisit && isInOffice(person.status);
 
-      const attending = resolveAttendance({
-        hasConfirmedVisit,
-        planningOverrideState,
-        isDefaultScheduleDay,
-      });
+      const isEditingCurrentUser =
+        editingConfirmedWeek && person.userId === user.id;
+
+      const attending = isEditingCurrentUser
+        ? resolveEditingAttendance({
+            hasConfirmedVisit,
+            planningOverrideState,
+          })
+        : resolveAttendance({
+            hasConfirmedVisit,
+            planningOverrideState,
+            isDefaultScheduleDay,
+          });
 
       if (!attending) {
         return [];
+      }
+
+      /*
+       * While editing, a newly selected day is
+       * planning state until the user reconfirms.
+       */
+      if (isEditingCurrentUser && planningOverrideState === "selected") {
+        return [
+          {
+            ...person,
+            status: "planning-yes",
+          },
+        ];
       }
 
       if (hasConfirmedVisit) {
@@ -117,18 +141,29 @@ export function Calendar({
       userId: user.id,
     });
 
-    if (hasConfirmedVisit) {
+    /*
+     * Confirmed visits remain immutable outside
+     * explicit edit mode.
+     */
+    if (hasConfirmedVisit && !editingConfirmedWeek) {
       return;
     }
 
-    const planningOverrideState: PlanningOverrideState =
-      planningOverrideStateForUser(planningByDate[key], user.id);
+    const planningOverrideState = planningOverrideStateForUser(
+      planningByDate[key],
+      user.id,
+    );
 
-    const currentlyAttending = resolveAttendance({
-      hasConfirmedVisit,
-      planningOverrideState,
-      isDefaultScheduleDay,
-    });
+    const currentlyAttending = editingConfirmedWeek
+      ? resolveEditingAttendance({
+          hasConfirmedVisit,
+          planningOverrideState,
+        })
+      : resolveAttendance({
+          hasConfirmedVisit,
+          planningOverrideState,
+          isDefaultScheduleDay,
+        });
 
     onPlanningToggle(key, !currentlyAttending);
   }

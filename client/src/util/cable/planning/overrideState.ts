@@ -69,6 +69,24 @@ export function resolveAttendance({
   return isDefaultScheduleDay;
 }
 
+export function resolveEditingAttendance({
+  hasConfirmedVisit,
+  planningOverrideState,
+}: {
+  hasConfirmedVisit: boolean;
+  planningOverrideState: PlanningOverrideState;
+}): boolean {
+  if (planningOverrideState === "selected") {
+    return true;
+  }
+
+  if (planningOverrideState === "deselected") {
+    return false;
+  }
+
+  return hasConfirmedVisit;
+}
+
 interface BaseAttendanceForUserOptions {
   day: PersonStatus[];
   userId: number;
