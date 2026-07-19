@@ -4,9 +4,7 @@ class VisitSerializer
              :office_id,
              :visit_date,
              :created_at,
-             :updated_at,
-             :status
-
+             :updated_at
 
   attribute :user do |visit|
     {

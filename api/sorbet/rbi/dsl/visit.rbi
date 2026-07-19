@@ -8,7 +8,6 @@
 class Visit
   include GeneratedAssociationMethods
   include GeneratedAttributeMethods
-  include EnumMethodsModule
   extend CommonRelationMethods
   extend GeneratedRelationMethods
 
@@ -20,9 +19,6 @@ class Visit
   class << self
     sig { params(attributes: T.untyped, block: T.nilable(T.proc.params(object: ::Visit).void)).returns(::Visit) }
     def new(attributes = nil, &block); end
-
-    sig { returns(T::Hash[T.any(String, Symbol), Integer]) }
-    def statuses; end
   end
 
   module CommonRelationMethods
@@ -364,20 +360,6 @@ class Visit
     def third_to_last!; end
   end
 
-  module EnumMethodsModule
-    sig { void }
-    def confirmed!; end
-
-    sig { returns(T::Boolean) }
-    def confirmed?; end
-
-    sig { void }
-    def planned!; end
-
-    sig { returns(T::Boolean) }
-    def planned?; end
-  end
-
   module GeneratedAssociationMethods
     sig { params(args: T.untyped, blk: T.untyped).returns(::Office) }
     def build_office(*args, &blk); end
@@ -448,9 +430,6 @@ class Visit
     def arel_columns(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def confirmed(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def create_with(*args, &blk); end
 
     sig { params(value: T::Boolean).returns(PrivateAssociationRelation) }
@@ -511,12 +490,6 @@ class Visit
     def none(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def not_confirmed(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def not_planned(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def null_relation?(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
@@ -533,9 +506,6 @@ class Visit
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def order(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def planned(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def preload(*args, &blk); end
@@ -789,9 +759,6 @@ class Visit
     def restore_office_id!; end
 
     sig { void }
-    def restore_status!; end
-
-    sig { void }
     def restore_updated_at!; end
 
     sig { void }
@@ -824,12 +791,6 @@ class Visit
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_office_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
-    sig { returns(T.nilable([::String, ::String])) }
-    def saved_change_to_status; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def saved_change_to_status?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
     sig { returns(T.nilable([::ActiveSupport::TimeWithZone, ::ActiveSupport::TimeWithZone])) }
     def saved_change_to_updated_at; end
 
@@ -847,51 +808,6 @@ class Visit
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_visit_date?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { returns(::String) }
-    def status; end
-
-    sig { params(value: T.any(::String, ::Symbol, ::Integer)).returns(T.any(::String, ::Symbol, ::Integer)) }
-    def status=(value); end
-
-    sig { returns(T::Boolean) }
-    def status?; end
-
-    sig { returns(T.nilable(::String)) }
-    def status_before_last_save; end
-
-    sig { returns(T.untyped) }
-    def status_before_type_cast; end
-
-    sig { returns(T::Boolean) }
-    def status_came_from_user?; end
-
-    sig { returns(T.nilable([::String, ::String])) }
-    def status_change; end
-
-    sig { returns(T.nilable([::String, ::String])) }
-    def status_change_to_be_saved; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def status_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { returns(T.nilable(::String)) }
-    def status_in_database; end
-
-    sig { returns(T.nilable([::String, ::String])) }
-    def status_previous_change; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def status_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { returns(T.nilable(::String)) }
-    def status_previously_was; end
-
-    sig { returns(T.nilable(::String)) }
-    def status_was; end
-
-    sig { void }
-    def status_will_change!; end
 
     sig { returns(::ActiveSupport::TimeWithZone) }
     def updated_at; end
@@ -1041,9 +957,6 @@ class Visit
     def will_save_change_to_office_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def will_save_change_to_status?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_updated_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
@@ -1065,9 +978,6 @@ class Visit
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def arel_columns(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def confirmed(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def create_with(*args, &blk); end
@@ -1130,12 +1040,6 @@ class Visit
     def none(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def not_confirmed(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def not_planned(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def null_relation?(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
@@ -1152,9 +1056,6 @@ class Visit
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def order(*args, &blk); end
-
-    sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def planned(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def preload(*args, &blk); end

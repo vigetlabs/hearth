@@ -17,59 +17,6 @@ RSpec.describe Visit, type: :model do
     end
   end
 
-  describe "status" do
-    it "defines the expected enum values" do
-      expect(described_class.statuses).to eq(
-        "planned" => 0,
-        "confirmed" => 1
-      )
-    end
-
-    context "when the status is planned" do
-      subject(:visit) { build(:visit, status: :planned) }
-
-      it "is valid" do
-        expect(visit).to be_valid
-      end
-
-      it "reports the planned status" do
-        expect(visit).to be_planned
-      end
-
-      it "returns planned as the status value" do
-        expect(visit.status).to eq("planned")
-      end
-    end
-
-    context "when the status is confirmed" do
-      subject(:visit) { build(:visit, status: :confirmed) }
-
-      it "is valid" do
-        expect(visit).to be_valid
-      end
-
-      it "reports the confirmed status" do
-        expect(visit).to be_confirmed
-      end
-
-      it "returns confirmed as the status value" do
-        expect(visit.status).to eq("confirmed")
-      end
-    end
-
-    it "persists the planned status" do
-      visit = create(:visit, status: :planned)
-
-      expect(visit.reload.status).to eq("planned")
-    end
-
-    it "persists the confirmed status" do
-      visit = create(:visit, status: :confirmed)
-
-      expect(visit.reload.status).to eq("confirmed")
-    end
-  end
-
   describe "visit date uniqueness" do
     let(:user) { create(:user) }
     let(:office) { create(:office) }
