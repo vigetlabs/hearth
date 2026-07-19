@@ -5,6 +5,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to belong_to(:office).optional }
     it { is_expected.to have_many(:user_identities) }
     it { is_expected.to have_many(:schedules) }
+    it { is_expected.to have_many(:attendance_confirmations) }
   end
 
   subject(:user) do
