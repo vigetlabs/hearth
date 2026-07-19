@@ -66,7 +66,14 @@ RSpec.configure do |config|
           users_response: OpenApi::Schemas::V1::Users::USERS_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
           login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
-          patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST
+          patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST,
+
+          attendance_confirmation: OpenApi::Schemas::V1::AttendanceConfirmations::ATTENDANCE_CONFIRMATION_OBJECT,
+          create_attendance_confirmation_request: OpenApi::Schemas::V1::AttendanceConfirmations::CREATE_ATTENDANCE_CONFIRMATION_REQUEST,
+          attendance_confirmations_response: OpenApi::Schemas::V1::AttendanceConfirmations::ATTENDANCE_CONFIRMATIONS_RESPONSE,
+          create_attendance_confirmation_response: OpenApi::Schemas::V1::AttendanceConfirmations::CREATE_ATTENDANCE_CONFIRMATION_RESPONSE
+
+
         }
       }
     }

@@ -4,6 +4,91 @@ info:
   title: Hearth API
   version: v1
 paths:
+  "/api/v1/attendance_confirmations":
+    get:
+      summary: Fetch attendance confirmations
+      tags:
+      - Attendance Confirmations
+      security:
+      - cookie_auth: []
+      parameters:
+      - name: office_id
+        in: query
+        required: true
+        schema:
+          type: integer
+        description: The office whose confirmations should be returned.
+      - name: starts_on
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+        description: Any date within the requested week. The API normalizes this value
+          to the Monday of that week.
+      responses:
+        '200':
+          description: attendance confirmations fetched successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/attendance_confirmations_response"
+        '400':
+          description: parameter has an invalid format
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication is required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+        '404':
+          description: office was not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/not_found_error_response"
+    post:
+      summary: Confirm attendance for a week
+      tags:
+      - Attendance Confirmations
+      security:
+      - cookie_auth: []
+      parameters: []
+      responses:
+        '200':
+          description: attendance confirmed successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/create_attendance_confirmation_response"
+        '400':
+          description: request contains invalid selected dates
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication is required
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
+        '404':
+          description: office was not found
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/not_found_error_response"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/create_attendance_confirmation_request"
+        required: true
   "/api/v1/offices":
     get:
       summary: Fetches all offices
@@ -860,7 +945,6 @@ components:
       - visit_date
       - created_at
       - updated_at
-      - status
       - office_id
       properties:
         id:
@@ -893,20 +977,8 @@ components:
           format: date-time
           description: Updated-at time in ISO 8601 format
           example: '2026-07-10T13:42:18.123Z'
-        status:
-          type: string
-          enum:
-          - planned
-          - confirmed
-          description: The visit's current status
         office_id:
           type: integer
-    visit_status:
-      type: string
-      enum:
-      - planned
-      - confirmed
-      description: The visit's current status
     visit_date:
       type: string
       format: date
@@ -963,7 +1035,6 @@ components:
               - visit_date
               - created_at
               - updated_at
-              - status
               - office_id
               properties:
                 id:
@@ -996,12 +1067,6 @@ components:
                   format: date-time
                   description: Updated-at time in ISO 8601 format
                   example: '2026-07-10T13:42:18.123Z'
-                status:
-                  type: string
-                  enum:
-                  - planned
-                  - confirmed
-                  description: The visit's current status
                 office_id:
                   type: integer
     visits_response:
@@ -1035,7 +1100,6 @@ components:
                 - visit_date
                 - created_at
                 - updated_at
-                - status
                 - office_id
                 properties:
                   id:
@@ -1068,12 +1132,6 @@ components:
                     format: date-time
                     description: Updated-at time in ISO 8601 format
                     example: '2026-07-10T13:42:18.123Z'
-                  status:
-                    type: string
-                    enum:
-                    - planned
-                    - confirmed
-                    description: The visit's current status
                   office_id:
                     type: integer
     user:
@@ -1432,3 +1490,205 @@ components:
                 sunday:
                   type: boolean
                   description: Whether the user has selected this day in their schedule
+    attendance_confirmation:
+      type: object
+      description: An attendance confirmation for a specific time period.
+      required:
+      - id
+      - user_id
+      - office_id
+      - period_type
+      - starts_on
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        office_id:
+          type: integer
+        period_type:
+          type: string
+          enum:
+          - week
+        starts_on:
+          type: string
+          format: date
+          description: The normalized start date of the confirmation period.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    create_attendance_confirmation_request:
+      type: object
+      description: Request body for confirming attendance for a week.
+      required:
+      - office_id
+      - starts_on
+      - selected_dates
+      properties:
+        office_id:
+          type: integer
+          description: The office for which attendance is being confirmed.
+        starts_on:
+          type: string
+          format: date
+          description: Any date within the week being confirmed. The API normalizes
+            this value to the Monday of that week.
+        selected_dates:
+          type: array
+          description: The dates for which visits should exist. An empty array confirms
+            the week without creating visits.
+          items:
+            type: string
+            format: date
+    attendance_confirmations_response:
+      type: object
+      description: Response containing attendance confirmations for an office and
+        week.
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          type: object
+          required:
+          - confirmations
+          properties:
+            confirmations:
+              type: array
+              items:
+                type: object
+                description: An attendance confirmation for a specific time period.
+                required:
+                - id
+                - user_id
+                - office_id
+                - period_type
+                - starts_on
+                properties:
+                  id:
+                    type: integer
+                  user_id:
+                    type: integer
+                  office_id:
+                    type: integer
+                  period_type:
+                    type: string
+                    enum:
+                    - week
+                  starts_on:
+                    type: string
+                    format: date
+                    description: The normalized start date of the confirmation period.
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+    create_attendance_confirmation_response:
+      type: object
+      description: Response returned after confirming attendance for a week.
+      required:
+      - status
+      - data
+      properties:
+        status:
+          type: object
+          description: Shared status metadata returned by API responses.
+          required:
+          - message
+          properties:
+            message:
+              type: string
+        data:
+          type: object
+          required:
+          - attendance_confirmation
+          - visits
+          properties:
+            attendance_confirmation:
+              type: object
+              description: An attendance confirmation for a specific time period.
+              required:
+              - id
+              - user_id
+              - office_id
+              - period_type
+              - starts_on
+              properties:
+                id:
+                  type: integer
+                user_id:
+                  type: integer
+                office_id:
+                  type: integer
+                period_type:
+                  type: string
+                  enum:
+                  - week
+                starts_on:
+                  type: string
+                  format: date
+                  description: The normalized start date of the confirmation period.
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+            visits:
+              type: array
+              items:
+                type: object
+                description: Public visit data returned by the API.
+                required:
+                - id
+                - user
+                - visit_date
+                - created_at
+                - updated_at
+                - office_id
+                properties:
+                  id:
+                    type: integer
+                  user:
+                    type: object
+                    required:
+                    - id
+                    - first_name
+                    - last_name
+                    properties:
+                      id:
+                        type: integer
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                  visit_date:
+                    type: string
+                    format: date
+                    description: Calendar date only with no timezone (YYYY-MM-DD)
+                    example: '2026-07-10'
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Created-at time in ISO 8601 format
+                    example: '2026-07-10T13:42:18.123Z'
+                  updated_at:
+                    type: string
+                    format: date-time
+                    description: Updated-at time in ISO 8601 format
+                    example: '2026-07-10T13:42:18.123Z'
+                  office_id:
+                    type: integer

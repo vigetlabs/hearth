@@ -20,6 +20,9 @@ module OpenApi
 
       module Users
       end
+
+      module AttendanceConfirmations
+      end
     end
   end
 end
@@ -31,3 +34,4 @@ require_relative "schemas/v1/schedules/schedules"
 require_relative "schemas/v1/offices/offices"
 require_relative "schemas/v1/users/users"
 require_relative "schemas/v1/visits/visits"
+require_relative "schemas/v1/attendance_confirmations/attendance_confirmations"
