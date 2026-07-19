@@ -1,14 +1,22 @@
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { cable } from "./cable";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import type { Subscription } from "@rails/actioncable";
+
 import type { User } from "@/types/api/users";
+
+import { cable } from "./cable";
 
 export type ChannelSerializedUser = Pick<
   User,
   "id" | "first_name" | "last_name" | "office_id"
 >;
 
-export type OfficePlanningDates = Record<string, ChannelSerializedUser[]>;
+export interface OfficePlanningDateOverrides {
+  selected: ChannelSerializedUser[];
+  deselected: ChannelSerializedUser[];
+}
+
+export type OfficePlanningDates = Record<string, OfficePlanningDateOverrides>;
 
 const EMPTY_PLANNING_DATES: OfficePlanningDates = {};
 
@@ -22,7 +30,7 @@ interface PlanningDateUpdatedMessage {
   type: "planning.date.updated";
   office_id: number;
   date: string;
-  users: ChannelSerializedUser[];
+  overrides: OfficePlanningDateOverrides;
 }
 
 type OfficePlanningMessage =
@@ -52,6 +60,16 @@ interface ConnectionState {
   connected: boolean;
 }
 
+interface CurrentUserOverrides {
+  selectedDates: string[];
+  deselectedDates: string[];
+}
+
+const EMPTY_CURRENT_USER_OVERRIDES: CurrentUserOverrides = {
+  selectedDates: [],
+  deselectedDates: [],
+};
+
 export function useOfficePlanning({
   officeId,
   currentUserId,
@@ -78,7 +96,6 @@ export function useOfficePlanning({
 
   const datesKey = useMemo(() => [...dates].sort().join(","), [dates]);
 
-  // copy latest visible calendar dates into ref effect
   useEffect(() => {
     datesRef.current = dates;
   }, [dates]);
@@ -95,28 +112,25 @@ export function useOfficePlanning({
       return;
     }
 
-    const datesPayload = { dates: datesRef.current };
-
-    perform("snapshot", datesPayload);
+    perform("snapshot", {
+      dates: datesRef.current,
+    });
   }, [perform]);
 
   const selectDate = useCallback(
     (date: string) => {
-      const datePayload = { date: date };
-      perform("select", datePayload);
+      perform("select", { date });
     },
     [perform],
   );
 
   const deselectDate = useCallback(
     (date: string) => {
-      const datePayload = { date: date };
-      perform("deselect", datePayload);
+      perform("deselect", { date });
     },
     [perform],
   );
 
-  // create and clean up action cable effect
   useEffect(() => {
     if (officeId === null) {
       subscriptionRef.current = null;
@@ -156,29 +170,31 @@ export function useOfficePlanning({
           });
         },
 
-        received(msg: OfficePlanningMessage) {
-          if (msg.office_id !== subscribedOfficeId) {
+        received(message: OfficePlanningMessage) {
+          if (message.office_id !== subscribedOfficeId) {
             return;
           }
 
-          switch (msg.type) {
+          switch (message.type) {
             case "planning.snapshot":
               setPlanningState({
                 officeId: subscribedOfficeId,
-                dates: msg.dates,
+                dates: message.dates,
               });
               break;
 
             case "planning.date.updated":
               setPlanningState((current) => {
                 const currentDates =
-                  current?.officeId === subscribedOfficeId ? current.dates : {};
+                  current?.officeId === subscribedOfficeId
+                    ? current.dates
+                    : EMPTY_PLANNING_DATES;
 
                 return {
                   officeId: subscribedOfficeId,
                   dates: {
                     ...currentDates,
-                    [msg.date]: msg.users,
+                    [message.date]: message.overrides,
                   },
                 };
               });
@@ -199,24 +215,43 @@ export function useOfficePlanning({
     };
   }, [officeId]);
 
-  const selectedDates = useMemo(() => {
+  const currentUserOverrides = useMemo<CurrentUserOverrides>(() => {
     if (currentUserId === null) {
-      return [];
+      return EMPTY_CURRENT_USER_OVERRIDES;
     }
 
-    return Object.entries(planningByDate)
-      .filter(([, users]) => users.some((user) => user.id === currentUserId))
-      .map(([date]) => date);
+    const selectedDates: string[] = [];
+    const deselectedDates: string[] = [];
+
+    Object.entries(planningByDate).forEach(([date, overrides]) => {
+      const isSelected = overrides.selected.some(
+        (user) => user.id === currentUserId,
+      );
+
+      const isDeselected = overrides.deselected.some(
+        (user) => user.id === currentUserId,
+      );
+
+      if (isSelected) {
+        selectedDates.push(date);
+      } else if (isDeselected) {
+        deselectedDates.push(date);
+      }
+    });
+
+    return {
+      selectedDates,
+      deselectedDates,
+    };
   }, [planningByDate, currentUserId]);
 
-  const selectedDatesRef = useRef(selectedDates);
+  const currentUserOverridesRef =
+    useRef<CurrentUserOverrides>(currentUserOverrides);
 
-  // copy latest current-user selections into ref effect
   useEffect(() => {
-    selectedDatesRef.current = selectedDates;
-  }, [selectedDates]);
+    currentUserOverridesRef.current = currentUserOverrides;
+  }, [currentUserOverrides]);
 
-  // refresh snapshot when visible dates change effect
   useEffect(() => {
     if (!isConnected || dates.length === 0) {
       return;
@@ -225,21 +260,23 @@ export function useOfficePlanning({
     refreshSnapshot();
   }, [datesKey, isConnected, refreshSnapshot, dates.length]);
 
-  // start & stop heartbeat effect
   useEffect(() => {
     if (!isConnected) {
       return;
     }
 
     const heartbeat = () => {
-      const datesToRenew = selectedDatesRef.current;
+      const { selectedDates, deselectedDates } =
+        currentUserOverridesRef.current;
 
-      if (datesToRenew.length === 0) {
+      if (selectedDates.length === 0 && deselectedDates.length === 0) {
         return;
       }
 
-      const datesPayload = { dates: datesToRenew };
-      perform("heartbeat", datesPayload);
+      perform("heartbeat", {
+        selected_dates: selectedDates,
+        deselected_dates: deselectedDates,
+      });
     };
 
     const intervalId = window.setInterval(heartbeat, 30_000);

@@ -6,14 +6,94 @@ import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
 
 import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
+import type {
+  OfficePlanningDateOverrides,
+  OfficePlanningDates,
+} from "@/util/cable/useOfficePlanning";
 import { isSameDay, toDateKey } from "@/util/dates/date";
-import type { OfficePlanningDates } from "@/util/cable/useOfficePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: PersonStatus[] = [];
 
 const confirmedCountOf = (day: PersonStatus[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
+
+type PlanningOverride = "selected" | "deselected" | null;
+
+function planningOverrideForUser(
+  overrides: OfficePlanningDateOverrides | undefined,
+  userId: number,
+): PlanningOverride {
+  if (!overrides) {
+    return null;
+  }
+
+  const isSelected = overrides.selected.some(
+    (planningUser) => planningUser.id === userId,
+  );
+
+  if (isSelected) {
+    return "selected";
+  }
+
+  const isDeselected = overrides.deselected.some(
+    (planningUser) => planningUser.id === userId,
+  );
+
+  if (isDeselected) {
+    return "deselected";
+  }
+
+  return null;
+}
+
+function resolveAttendance({
+  hasConfirmedVisit,
+  planningOverride,
+  isDefaultScheduleDay,
+}: {
+  hasConfirmedVisit: boolean;
+  planningOverride: PlanningOverride;
+  isDefaultScheduleDay: boolean;
+}): boolean {
+  if (hasConfirmedVisit) {
+    return true;
+  }
+
+  if (planningOverride === "selected") {
+    return true;
+  }
+
+  if (planningOverride === "deselected") {
+    return false;
+  }
+
+  return isDefaultScheduleDay;
+}
+
+function baseAttendanceForUser(
+  day: PersonStatus[],
+  userId: number,
+): {
+  hasConfirmedVisit: boolean;
+  isDefaultScheduleDay: boolean;
+} {
+  const person = day.find((dayPerson) => dayPerson.userId === userId);
+
+  if (!person) {
+    return {
+      hasConfirmedVisit: false,
+      isDefaultScheduleDay: false,
+    };
+  }
+
+  const hasConfirmedVisit = person.status === "confirmed-yes";
+
+  return {
+    hasConfirmedVisit,
+    isDefaultScheduleDay: !hasConfirmedVisit && isInOffice(person.status),
+  };
+}
 
 interface CalendarProps {
   schedule: WeekSchedule;
@@ -23,7 +103,7 @@ interface CalendarProps {
   user: User;
   planningByDate: OfficePlanningDates;
   isPlanningConnected: boolean;
-  onPlanningToggle: (date: string) => void;
+  onPlanningToggle: (date: string, attending: boolean) => void;
 }
 
 export function Calendar({
@@ -40,38 +120,57 @@ export function Calendar({
 
   function getDayData(key: string): PersonStatus[] {
     const day = schedule[key] ?? EMPTY_DAY;
-    const planningUsers = planningByDate[key] ?? [];
+    const overrides = planningByDate[key];
 
-    const planningUserIds = new Set(
-      planningUsers.map((planningUser) => planningUser.id),
-    );
+    const resolvedScheduledPeople = day.flatMap((person): PersonStatus[] => {
+      const hasConfirmedVisit = person.status === "confirmed-yes";
 
-    const updatedDay = day.map((person) => {
-      if (person.status === "confirmed-yes") {
-        return person;
+      const planningOverride = planningOverrideForUser(
+        overrides,
+        person.userId,
+      );
+
+      const isDefaultScheduleDay =
+        !hasConfirmedVisit && isInOffice(person.status);
+
+      const attending = resolveAttendance({
+        hasConfirmedVisit,
+        planningOverride,
+        isDefaultScheduleDay,
+      });
+
+      if (!attending) {
+        return [];
       }
 
-      if (planningUserIds.has(person.userId)) {
-        return {
-          ...person,
-          status: "planning-yes" as const,
-        };
+      if (hasConfirmedVisit) {
+        return [person];
       }
 
-      return person;
+      if (planningOverride === "selected") {
+        return [
+          {
+            ...person,
+            status: "planning-yes",
+          },
+        ];
+      }
+
+      return [person];
     });
 
-    const existingUserIds = new Set(updatedDay.map((person) => person.userId));
+    const scheduledUserIds = new Set(day.map((person) => person.userId));
 
-    const additionalPlanningUsers = planningUsers
-      .filter((planningUser) => !existingUserIds.has(planningUser.id))
-      .map((planningUser) => ({
-        userId: planningUser.id,
-        name: userDisplayName(planningUser),
-        status: "planning-yes" as const,
-      }));
+    const additionalSelectedUsers =
+      overrides?.selected
+        .filter((planningUser) => !scheduledUserIds.has(planningUser.id))
+        .map((planningUser): PersonStatus => ({
+          userId: planningUser.id,
+          name: userDisplayName(planningUser),
+          status: "planning-yes",
+        })) ?? [];
 
-    return [...additionalPlanningUsers, ...updatedDay];
+    return [...additionalSelectedUsers, ...resolvedScheduledPeople];
   }
 
   function toggleMine(key: string): void {
@@ -79,7 +178,29 @@ export function Calendar({
       return;
     }
 
-    onPlanningToggle(key);
+    const baseDay = schedule[key] ?? EMPTY_DAY;
+
+    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser(
+      baseDay,
+      user.id,
+    );
+
+    if (hasConfirmedVisit) {
+      return;
+    }
+
+    const planningOverride = planningOverrideForUser(
+      planningByDate[key],
+      user.id,
+    );
+
+    const currentlyAttending = resolveAttendance({
+      hasConfirmedVisit,
+      planningOverride,
+      isDefaultScheduleDay,
+    });
+
+    onPlanningToggle(key, !currentlyAttending);
   }
 
   const attendance = Object.fromEntries(
@@ -102,6 +223,7 @@ export function Calendar({
   );
 
   const maxCount = Math.max(0, ...counts);
+
   const hotSpotDays = new Set<number>();
 
   if (maxCount > 0) {
@@ -115,7 +237,9 @@ export function Calendar({
 
     topConfirmed
       .filter((index) => planningCounts[index] === maxPlanning)
-      .forEach((index) => hotSpotDays.add(index));
+      .forEach((index) => {
+        hotSpotDays.add(index);
+      });
   }
 
   const todayIndex = days.findIndex((day) => isSameDay(day, new Date()));
@@ -148,7 +272,7 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 overflow-hidden rounded-xl border border-line divide-x divide-line"
+        className="grid min-h-0 flex-1 divide-x divide-line overflow-hidden rounded-xl border border-line"
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",
@@ -156,10 +280,9 @@ export function Calendar({
       >
         {days.map((day, index) => {
           const key = toDateKey(day);
+
           const dayData = attendance[key] ?? EMPTY_DAY;
 
-          // TODO: Show visitor count for this day (people from other offices)
-          // right now we just show confirmed count for current office
           const visitorCount = counts[index];
 
           return (

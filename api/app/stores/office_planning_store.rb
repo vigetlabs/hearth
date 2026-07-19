@@ -5,6 +5,9 @@ class OfficePlanningStore
 
   STALE_AFTER = T.let(2.minutes, ActiveSupport::Duration)
 
+  SELECTED = "selected"
+  DESELECTED = "deselected"
+
   sig { params(office_id: Integer, redis: Redis).void }
   def initialize(office_id:, redis: REDIS)
     @office_id = office_id
@@ -14,26 +17,75 @@ class OfficePlanningStore
   sig { params(date: String, user_id: Integer).void }
   def select(date:, user_id:)
     ApplicationRedis.with do |redis|
-      redis.zadd(
-        office_planning_redis_key(date:),
-        expires_at,
-        user_id
-      )
-    end
-  end
+      redis.multi do |transaction|
+        transaction.zrem(
+          create_office_planning_key(date:, variation: DESELECTED),
+          user_id
+        )
 
-  sig { params(date: String, user_id: Integer).void }
-  def heartbeat(date:, user_id:)
-    select(date:, user_id:)
+        transaction.zadd(
+          create_office_planning_key(date:, variation: SELECTED),
+          expires_at,
+          user_id
+        )
+      end
+    end
   end
 
   sig { params(date: String, user_id: Integer).void }
   def deselect(date:, user_id:)
     ApplicationRedis.with do |redis|
-      redis.zrem(
-        office_planning_redis_key(date:),
-        user_id
-      )
+      redis.multi do |transaction|
+        transaction.zrem(
+          create_office_planning_key(date:, variation: SELECTED),
+          user_id
+        )
+
+        transaction.zadd(
+          create_office_planning_key(date:, variation: DESELECTED),
+          expires_at,
+          user_id
+        )
+      end
+    end
+  end
+
+  sig do
+    params(
+      selected_dates: T::Array[String],
+      deselected_dates: T::Array[String],
+      user_id: Integer
+    ).void
+  end
+  def heartbeat(selected_dates:, deselected_dates:, user_id:)
+    ApplicationRedis.with do |redis|
+      redis.multi do |transaction|
+        selected_dates.each do |date|
+          transaction.zrem(
+            create_office_planning_key(date:, variation: DESELECTED),
+            user_id
+          )
+
+          transaction.zadd(
+            create_office_planning_key(date:, variation: SELECTED),
+            expires_at,
+            user_id
+          )
+        end
+
+        deselected_dates.each do |date|
+          transaction.zrem(
+            create_office_planning_key(date:, variation: SELECTED),
+            user_id
+          )
+
+          transaction.zadd(
+            create_office_planning_key(date:, variation: DESELECTED),
+            expires_at,
+            user_id
+          )
+        end
+      end
     end
   end
 
@@ -43,7 +95,18 @@ class OfficePlanningStore
 
     ApplicationRedis.with do |redis|
       redis
-        .zrange(office_planning_redis_key(date:), 0, -1)
+        .zrange(create_office_planning_key(date:, variation: SELECTED), 0, -1)
+        .map(&:to_i)
+    end
+  end
+
+  sig { params(date: String).returns(T::Array[Integer]) }
+  def deselected_user_ids(date:)
+    remove_stale(date:)
+
+    ApplicationRedis.with do |redis|
+      redis
+        .zrange(create_office_planning_key(date:, variation: DESELECTED), 0, -1)
         .map(&:to_i)
     end
   end
@@ -54,15 +117,28 @@ class OfficePlanningStore
   def remove_stale(date:)
     ApplicationRedis.with do |redis|
       redis.zremrangebyscore(
-        office_planning_redis_key(date:),
+        create_office_planning_key(date:, variation: SELECTED),
+        "-inf",
+        Time.current.to_f
+      )
+    end
+
+    ApplicationRedis.with do |redis|
+      redis.zremrangebyscore(
+        create_office_planning_key(date:, variation: DESELECTED),
         "-inf",
         Time.current.to_f
       )
     end
   end
 
-  sig { params(date: String).returns(String) }
-  def office_planning_redis_key(date:)
+  sig { returns(Float) }
+  def expires_at
+      STALE_AFTER.from_now.to_f
+  end
+
+  sig { params(date: String, variation: String).returns(String) }
+  def create_office_planning_key(date:, variation:)
     normalized_date = DateUtility.normalize_to_string(date)
 
     raise ArgumentError, "Invalid date provided for Redis key" if normalized_date.nil?
@@ -73,12 +149,8 @@ class OfficePlanningStore
       "office",
       @office_id,
       "date",
-      normalized_date
+      normalized_date,
+      variation
     ].join(":")
-  end
-
-  sig { returns(Float) }
-  def expires_at
-      STALE_AFTER.from_now.to_f
   end
 end

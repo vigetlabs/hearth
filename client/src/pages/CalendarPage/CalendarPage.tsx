@@ -11,7 +11,7 @@ import { useSearchParams } from "react-router";
 import type { WeekSchedule } from "@/types/calendar/calendar";
 import { buildWeekSchedule } from "@/util/calendar/schedule";
 import Loader from "@/components/Loader/Loader";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Office } from "@/types/api/offices";
 import { useOfficePlanning } from "@/util/cable/useOfficePlanning";
 
@@ -127,23 +127,17 @@ export default function CalendarPage() {
     dates: planningDateKeys,
   });
 
-  function togglePlanningDate(date: string): void {
-    if (!user || !isPlanningConnected || isWeekConfirmed) {
-      return;
-    }
+  const handlePlanningToggle = useCallback(
+    (date: string, attending: boolean) => {
+      if (attending) {
+        selectDate(date);
+        return;
+      }
 
-    const usersForDate = planningByDate[date] ?? [];
-
-    const currentUserIsPlanning = usersForDate.some(
-      (planningUser) => planningUser.id === user.id,
-    );
-
-    if (currentUserIsPlanning) {
       deselectDate(date);
-    } else {
-      selectDate(date);
-    }
-  }
+    },
+    [selectDate, deselectDate],
+  );
 
   function goPrevWeek(): void {
     changeFocusedWeek(addDays(focusedWeekStartDate, -7));
@@ -226,7 +220,6 @@ export default function CalendarPage() {
     visitsQuery.data ?? [],
     weekDates,
   );
-  console.log(schedule);
 
   const rangeLabel = `${rangeFormat.format(
     weekDates[0],
@@ -320,7 +313,7 @@ export default function CalendarPage() {
             user={user}
             planningByDate={planningByDate}
             isPlanningConnected={isPlanningConnected}
-            onPlanningToggle={togglePlanningDate}
+            onPlanningToggle={handlePlanningToggle}
           />
         </div>
       </div>
