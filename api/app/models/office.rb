@@ -20,6 +20,7 @@ class Office < ApplicationRecord
 
   has_many :users
   has_many :visits, dependent: :destroy
+  has_many :attendance_confirmations, dependent: :destroy
 
   def normalize_location_fields
     self.name = name&.squish&.downcase

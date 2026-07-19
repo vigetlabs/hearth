@@ -362,6 +362,20 @@ class Office
 
   module GeneratedAssociationMethods
     sig { returns(T::Array[T.untyped]) }
+    def attendance_confirmation_ids; end
+
+    sig { params(ids: T::Array[T.untyped]).returns(T::Array[T.untyped]) }
+    def attendance_confirmation_ids=(ids); end
+
+    # This method is created by ActiveRecord on the `Office` class because it declared `has_many :attendance_confirmations`.
+    # 🔗 [Rails guide for `has_many` association](https://guides.rubyonrails.org/association_basics.html#the-has-many-association)
+    sig { returns(::AttendanceConfirmation::PrivateCollectionProxy) }
+    def attendance_confirmations; end
+
+    sig { params(value: T::Enumerable[::AttendanceConfirmation]).void }
+    def attendance_confirmations=(value); end
+
+    sig { returns(T::Array[T.untyped]) }
     def user_ids; end
 
     sig { params(ids: T::Array[T.untyped]).returns(T::Array[T.untyped]) }
