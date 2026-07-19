@@ -7,8 +7,6 @@ import type {
 } from "@/types/calendar/calendar";
 import { toDateKey } from "@/util/dates/date";
 
-// `Date.getDay()` order (0 = Sunday … 6 = Saturday), used to read the matching
-// weekday off a user's `default_schedule`.
 const WEEKDAY_FIELDS = [
   "sunday",
   "monday",
@@ -19,7 +17,8 @@ const WEEKDAY_FIELDS = [
   "saturday",
 ] as const;
 
-// Matches `userDisplayName`: first name plus the last name's initial.
+type WeekdayField = (typeof WEEKDAY_FIELDS)[number];
+
 function displayName(user: Pick<User, "first_name" | "last_name">): string {
   const lastInitial = user.last_name[0];
 
@@ -30,19 +29,48 @@ function getVisitKey(userId: number, visitDate: string): string {
   return `${userId}:${visitDate}`;
 }
 
-function mapVisitStatus(status: Visit["status"]): AttendanceStatus {
-  switch (status) {
-    case "confirmed":
-      return "confirmed-yes";
-    case "planned":
-      return "planning-yes";
+function personStatusFromUser(
+  user: Pick<User, "id" | "first_name" | "last_name">,
+  status: AttendanceStatus,
+): PersonStatus {
+  return {
+    userId: user.id,
+    name: displayName(user),
+    status,
+  };
+}
+
+function homeUserStatus({
+  user,
+  visit,
+  weekday,
+  isWeekConfirmed,
+}: {
+  user: User;
+  visit: Visit | undefined;
+  weekday: WeekdayField;
+  isWeekConfirmed: boolean;
+}): AttendanceStatus {
+  if (visit) {
+    return "confirmed-yes";
   }
+
+  if (isWeekConfirmed) {
+    return "confirmed-no";
+  }
+
+  if (user.default_schedule?.[weekday]) {
+    return "planning-yes";
+  }
+
+  return "planning-no";
 }
 
 export function buildWeekSchedule(
   users: User[],
   visits: Visit[],
   weekDates: Date[],
+  confirmedUserIds: ReadonlySet<number>,
 ): WeekSchedule {
   const visitsByUserAndDate = new Map(
     visits.map((visit) => [
@@ -60,18 +88,16 @@ export function buildWeekSchedule(
     schedule[dateKey] = users.map((user): PersonStatus => {
       const visit = visitsByUserAndDate.get(getVisitKey(user.id, dateKey));
 
-      const status: AttendanceStatus = visit
-        ? mapVisitStatus(visit.status)
-        : user.default_schedule?.[weekday]
-          ? "planning-yes"
-          : "planning-no";
+      const status = homeUserStatus({
+        user,
+        visit,
+        weekday,
+        isWeekConfirmed: confirmedUserIds.has(user.id),
+      });
 
-      return {
-        userId: user.id,
-        name: displayName(user),
-        status,
-      };
+      return personStatusFromUser(user, status);
     });
   }
+
   return schedule;
 }

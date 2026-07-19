@@ -4,6 +4,125 @@
  */
 
 export interface paths {
+  "/api/v1/attendance_confirmations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Fetch attendance confirmations */
+    get: {
+      parameters: {
+        query: {
+          /** @description The office whose confirmations should be returned. */
+          office_id: number;
+          /** @description Any date within the requested week. The API normalizes this value to the Monday of that week. */
+          starts_on: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description attendance confirmations fetched successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["attendance_confirmations_response"];
+          };
+        };
+        /** @description parameter has an invalid format */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+        /** @description authentication is required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+        /** @description office was not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["not_found_error_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Confirm attendance for a week */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["create_attendance_confirmation_request"];
+        };
+      };
+      responses: {
+        /** @description attendance confirmed successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["create_attendance_confirmation_response"];
+          };
+        };
+        /** @description request contains invalid selected dates */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+        /** @description authentication is required */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["authentication_error_response"];
+          };
+        };
+        /** @description office was not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["not_found_error_response"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/offices": {
     parameters: {
       query?: never;
@@ -862,18 +981,8 @@ export interface components {
        * @example 2026-07-10T13:42:18.123Z
        */
       updated_at: string;
-      /**
-       * @description The visit's current status
-       * @enum {string}
-       */
-      status: "planned" | "confirmed";
       office_id: number;
     };
-    /**
-     * @description The visit's current status
-     * @enum {string}
-     */
-    visit_status: "planned" | "confirmed";
     /**
      * Format: date
      * @description Calendar date only with no timezone (YYYY-MM-DD)
@@ -925,11 +1034,6 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
-          /**
-           * @description The visit's current status
-           * @enum {string}
-           */
-          status: "planned" | "confirmed";
           office_id: number;
         };
       };
@@ -966,11 +1070,6 @@ export interface components {
            * @example 2026-07-10T13:42:18.123Z
            */
           updated_at: string;
-          /**
-           * @description The visit's current status
-           * @enum {string}
-           */
-          status: "planned" | "confirmed";
           office_id: number;
         }[];
       };
@@ -1126,6 +1225,113 @@ export interface components {
           /** @description Whether the user has selected this day in their schedule */
           sunday: boolean;
         };
+      };
+    };
+    /** @description An attendance confirmation for a specific time period. */
+    attendance_confirmation: {
+      id: number;
+      user_id: number;
+      office_id: number;
+      /** @enum {string} */
+      period_type: "week";
+      /**
+       * Format: date
+       * @description The normalized start date of the confirmation period.
+       */
+      starts_on: string;
+      /** Format: date-time */
+      created_at?: string;
+      /** Format: date-time */
+      updated_at?: string;
+    };
+    /** @description Request body for confirming attendance for a week. */
+    create_attendance_confirmation_request: {
+      /** @description The office for which attendance is being confirmed. */
+      office_id: number;
+      /**
+       * Format: date
+       * @description Any date within the week being confirmed. The API normalizes this value to the Monday of that week.
+       */
+      starts_on: string;
+      /** @description The dates for which visits should exist. An empty array confirms the week without creating visits. */
+      selected_dates: string[];
+    };
+    /** @description Response containing attendance confirmations for an office and week. */
+    attendance_confirmations_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        confirmations: {
+          id: number;
+          user_id: number;
+          office_id: number;
+          /** @enum {string} */
+          period_type: "week";
+          /**
+           * Format: date
+           * @description The normalized start date of the confirmation period.
+           */
+          starts_on: string;
+          /** Format: date-time */
+          created_at?: string;
+          /** Format: date-time */
+          updated_at?: string;
+        }[];
+      };
+    };
+    /** @description Response returned after confirming attendance for a week. */
+    create_attendance_confirmation_response: {
+      /** @description Shared status metadata returned by API responses. */
+      status: {
+        message: string;
+      };
+      data: {
+        /** @description An attendance confirmation for a specific time period. */
+        attendance_confirmation: {
+          id: number;
+          user_id: number;
+          office_id: number;
+          /** @enum {string} */
+          period_type: "week";
+          /**
+           * Format: date
+           * @description The normalized start date of the confirmation period.
+           */
+          starts_on: string;
+          /** Format: date-time */
+          created_at?: string;
+          /** Format: date-time */
+          updated_at?: string;
+        };
+        visits: {
+          id: number;
+          user: {
+            id: number;
+            first_name: string;
+            last_name: string;
+          };
+          /**
+           * Format: date
+           * @description Calendar date only with no timezone (YYYY-MM-DD)
+           * @example 2026-07-10
+           */
+          visit_date: string;
+          /**
+           * Format: date-time
+           * @description Created-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          created_at: string;
+          /**
+           * Format: date-time
+           * @description Updated-at time in ISO 8601 format
+           * @example 2026-07-10T13:42:18.123Z
+           */
+          updated_at: string;
+          office_id: number;
+        }[];
       };
     };
   };
