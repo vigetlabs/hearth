@@ -6,6 +6,8 @@ import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 import type {
   ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
+  PlanningOverrideState,
+  TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
 
 import { isInOffice } from "@/types/calendar/calendar";
@@ -51,68 +53,64 @@ export function Calendar({
   const myName = userDisplayName(user);
 
   function getDayData(key: string): RosterUser[] {
-    const day = schedule[key] ?? EMPTY_DAY;
-    const overrides = planningByDate[key];
+    const rosterUsers: RosterUser[] = schedule[key] ?? EMPTY_DAY;
+    const overrides: TogglePlanningOverrideState = planningByDate[key];
 
-    const resolvedScheduledPeople = day.flatMap((person): RosterUser[] => {
-      const hasConfirmedVisit = person.status === "confirmed-yes";
+    const resolvedScheduledPeople = rosterUsers.map(
+      (rosterUser): RosterUser => {
+        const hasConfirmedVisit = rosterUser.status === "confirmed-yes";
 
-      const planningOverrideState = planningOverrideStateForUser(
-        overrides,
-        person.userId,
-      );
+        const planningOverrideState: PlanningOverrideState =
+          planningOverrideStateForUser(overrides, rosterUser.userId);
 
-      const isDefaultScheduleDay =
-        !hasConfirmedVisit && isInOffice(person.status);
+        const isEditingWeek =
+          editingConfirmedWeek && rosterUser.userId === user.id;
 
-      const isEditingCurrentUser =
-        editingConfirmedWeek && person.userId === user.id;
+        if (isEditingWeek) {
+          if (planningOverrideState === "selected") {
+            return {
+              ...rosterUser,
+              status: "planning-yes",
+            };
+          }
 
-      const attending = isEditingCurrentUser
-        ? resolveEditingAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-          })
-        : resolveAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-            isDefaultScheduleDay,
-          });
+          if (planningOverrideState === "deselected") {
+            return {
+              ...rosterUser,
+              status: "planning-no",
+            };
+          }
+          return rosterUser;
+        }
 
-      if (!attending) {
-        return [];
-      }
+        if (hasConfirmedVisit) {
+          return rosterUser;
+        }
 
-      /*
-       * While editing, a newly selected day is
-       * planning state until the user reconfirms.
-       */
-      if (isEditingCurrentUser && planningOverrideState === "selected") {
-        return [
-          {
-            ...person,
+        if (planningOverrideState === "selected") {
+          return {
+            ...rosterUser,
             status: "planning-yes",
-          },
-        ];
-      }
+          };
+        }
 
-      if (hasConfirmedVisit) {
-        return [person];
-      }
+        if (planningOverrideState === "deselected") {
+          return {
+            ...rosterUser,
+            status: "planning-no",
+          };
+        }
 
-      if (planningOverrideState === "selected") {
-        return [
-          {
-            ...person,
-            status: "planning-yes",
-          },
-        ];
-      }
+        return {
+          ...rosterUser,
+          status: hasConfirmedVisit ? "planning-yes" : "planning-no",
+        };
+      },
+    );
 
-      return [person];
-    });
-
-    const scheduledUserIds = new Set(day.map((person) => person.userId));
+    const scheduledUserIds = new Set(
+      rosterUsers.map((rosterUser: RosterUser) => rosterUser.userId),
+    );
 
     const additionalSelectedUsers =
       overrides?.selected

@@ -423,9 +423,7 @@ export default function CalendarPage() {
                 >
                   {createAttendanceConfirmationMutation.isPending
                     ? "Confirming..."
-                    : isEditingWeek
-                      ? "Confirm Updated Week"
-                      : "Confirm Week"}
+                    : "Confirm Week"}
                 </button>
               )}
             </div>
