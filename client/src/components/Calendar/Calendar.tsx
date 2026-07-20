@@ -58,13 +58,15 @@ export function Calendar({
 
     const resolvedScheduledPeople = rosterUsers.map(
       (rosterUser): RosterUser => {
-        const hasConfirmedVisit = rosterUser.status === "confirmed-yes";
-
         const planningOverrideState: PlanningOverrideState =
           planningOverrideStateForUser(overrides, rosterUser.userId);
 
         const isEditingWeek =
           editingConfirmedWeek && rosterUser.userId === user.id;
+
+        const isAttendanceConfirmed =
+          rosterUser.status === "confirmed-yes" ||
+          rosterUser.status === "confirmed-no";
 
         if (isEditingWeek) {
           if (planningOverrideState === "selected") {
@@ -83,7 +85,7 @@ export function Calendar({
           return rosterUser;
         }
 
-        if (hasConfirmedVisit) {
+        if (isAttendanceConfirmed) {
           return rosterUser;
         }
 
@@ -101,10 +103,7 @@ export function Calendar({
           };
         }
 
-        return {
-          ...rosterUser,
-          status: hasConfirmedVisit ? "planning-yes" : "planning-no",
-        };
+        return rosterUser;
       },
     );
 
