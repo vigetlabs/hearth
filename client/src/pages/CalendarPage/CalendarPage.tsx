@@ -29,6 +29,7 @@ import type {
   ChannelSerializedUser,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
+import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -217,6 +218,10 @@ export default function CalendarPage() {
     officeId: activeOfficeId ?? null,
     currentUserId: user?.id ?? null,
     dates: planningWeekDateKeys,
+  });
+
+  const { isConnected: isAttendingConnected } = useOfficeAttending({
+    officeId: activeOfficeId ?? null,
   });
 
   const handlePlanningToggle = useCallback(
@@ -441,6 +446,7 @@ export default function CalendarPage() {
             user={user}
             planningByDate={planningStatesByDate}
             isPlanningConnected={isPlanningConnected}
+            isAttendingConnected={isAttendingConnected}
             onPlanningToggle={handlePlanningToggle}
           />
         </div>

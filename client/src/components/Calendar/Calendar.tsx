@@ -35,6 +35,7 @@ interface CalendarProps {
   user: User;
   planningByDate: OfficeDatesPlanningOverrideStates;
   isPlanningConnected: boolean;
+  isAttendingConnected: boolean;
   onPlanningToggle: (date: string, attending: boolean) => void;
   editingConfirmedWeek: boolean;
 }
@@ -47,6 +48,7 @@ export function Calendar({
   user,
   planningByDate,
   isPlanningConnected,
+  isAttendingConnected,
   onPlanningToggle,
   editingConfirmedWeek,
 }: CalendarProps) {
@@ -127,7 +129,7 @@ export function Calendar({
   }
 
   function toggleMine(key: string): void {
-    if (!myName || locked || !isPlanningConnected) {
+    if (!myName || locked || !isPlanningConnected || !isAttendingConnected) {
       return;
     }
 

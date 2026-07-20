@@ -46,10 +46,17 @@ class ConfirmWeekService
       visits = confirmed_visits.to_a
     end
 
-    ConfirmResult.new(
+    confirmation_result = ConfirmResult.new(
       confirmation: T.must(confirmation),
       visits: visits
     )
+
+    OfficeAttendanceChannel.broadcast_attendance_confirmation(
+      office: @office,
+      confirmation: confirmation_result.confirmation
+    )
+
+    confirmation_result
   end
 
   private
