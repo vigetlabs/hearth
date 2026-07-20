@@ -7,6 +7,7 @@ type ScheduleDayItemProps = {
   isSelected: boolean;
   onToggle: (dayId: string) => void;
   disabled?: boolean;
+  className?: string;
 };
 
 export default function ScheduleDayItem({
@@ -14,6 +15,7 @@ export default function ScheduleDayItem({
   isSelected,
   onToggle,
   disabled = false,
+  className,
 }: ScheduleDayItemProps) {
   return (
     <PickerItem
@@ -25,6 +27,7 @@ export default function ScheduleDayItem({
         isSelected
           ? "border border-line-selected bg-selected shadow-[inset_0_0_0_1px_var(--color-line-selected)] hover:border-line-selected hover:bg-selected"
           : "border border-line bg-surface",
+        className,
       )}
     >
       <span className="text-sm font-bold">{day.label}</span>
