@@ -1,11 +1,11 @@
 import { DayHeader } from "@/components/Calendar/DayHeader";
 import { DayRoster } from "@/components/Calendar/DayRoster";
-import type { PersonStatus } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
 
 interface DayCellProps {
   date: Date;
   /** The full office roster with each person's status for this day. */
-  people: PersonStatus[];
+  people: RosterUser[];
   myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */

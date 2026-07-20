@@ -9,7 +9,7 @@ import Loader from "@/components/Loader/Loader";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 
 import type { Office } from "@/types/api/offices";
-import type { WeekSchedule } from "@/types/calendar/calendar";
+import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
@@ -22,7 +22,13 @@ import { useVisitsQuery } from "@/util/api/queries/visitQueries";
 import { useAuth } from "@/util/auth/useAuth";
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { buildWeekSchedule } from "@/util/calendar/schedule";
-import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
+import { addDays, startOfWeek, generateDateKey } from "@/util/dates/date";
+import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations";
+import type { User } from "@/types/api/users";
+import type {
+  ChannelSerializedUser,
+  TogglePlanningOverrideState,
+} from "@/types/cable/officePlanning";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -31,208 +37,40 @@ const rangeFormat = new Intl.DateTimeFormat(undefined, {
   day: "numeric",
 });
 
+/*
+ * Most of the variables are separated into a specific category for easier readability.
+ * However, some of the logic crosses between categories.
+ */
 export default function CalendarPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  /* === GENERAL INITIALIZATION LOGIC ===
+   *
+   * This logic contains the general initialization logic that determines what the user sees
+   * when the page is first rendered. The variables in this section is used to derive other states /
+   * influence what is rendered
+   */
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [focusedWeekStartDate, setFocusedWeekStartDate] = useState(() =>
-    getWeekStartFromSearchParams(searchParams),
-  );
-
-  const [editingWeekId, setEditingWeekId] = useState<string | null>(null);
-
-  const officeIdParam = searchParams.get("office");
-
-  const parsedOfficeId = officeIdParam ? Number(officeIdParam) : undefined;
-
-  const activeOfficeId = Number.isFinite(parsedOfficeId)
+  const officeIdParam: string = searchParams.get("office");
+  const parsedOfficeId: number | null = officeIdParam
+    ? Number(officeIdParam)
+    : undefined;
+  const activeOfficeId: number = Number.isFinite(parsedOfficeId)
     ? parsedOfficeId
     : user?.office_id;
 
-  const weekDates = useMemo(
-    () =>
-      Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
-        addDays(focusedWeekStartDate, index),
-      ),
-    [focusedWeekStartDate],
-  );
-
-  const planningDateKeys = useMemo(() => weekDates.map(toDateKey), [weekDates]);
-
-  const weekKey = toDateKey(focusedWeekStartDate);
-  const currentWeekKey = toDateKey(startOfWeek(new Date()));
-
-  const currentEditingWeekId =
-    activeOfficeId === undefined ? null : `${activeOfficeId}:${weekKey}`;
-
-  const isEditingWeek =
-    currentEditingWeekId !== null && editingWeekId === currentEditingWeekId;
-
   const officesQuery = useOfficesQuery();
-  const offices = officesQuery.data ?? [];
+  const offices: Office[] = officesQuery.data ?? [];
+  const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
-  const defaultOffice =
-    offices.find((option) => option.id === user?.office_id) ??
-    offices[0] ??
-    null;
-
-  const office =
-    offices.find((officeOption) => officeOption.id === activeOfficeId) ??
-    defaultOffice;
+  const activeOffice: Office =
+    findActiveOffice(offices, activeOfficeId) ?? defaultOffice;
 
   const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
 
-  const visitsQuery = useVisitsQuery({
-    date: weekKey,
-    view: "week",
-    office_id: activeOfficeId ?? 1,
-  });
-
-  const attendanceConfirmationsQuery = useAttendanceConfirmationsQuery({
-    officeId: activeOfficeId,
-    startsOn: weekKey,
-  });
-
-  const confirmedUserIds = useMemo(() => {
-    const attendanceConfirmations = attendanceConfirmationsQuery.data ?? [];
-
-    return new Set(
-      attendanceConfirmations.map((confirmation) => confirmation.user_id),
-    );
-  }, [attendanceConfirmationsQuery.data]);
-
-  const isCurrentWeek = weekKey === currentWeekKey;
-
-  const isWeekConfirmed = user !== undefined && confirmedUserIds.has(user.id);
-
-  const isCalendarLocked = isWeekConfirmed && !isEditingWeek;
-
-  const isRemote = office?.name.toLowerCase() === "remote";
-
-  const {
-    planningStatesByDate,
-    isConnected: isPlanningConnected,
-    selectDate,
-    deselectDate,
-  } = useOfficePlanning({
-    officeId: activeOfficeId ?? null,
-    currentUserId: user?.id ?? null,
-    dates: planningDateKeys,
-  });
-
-  const createAttendanceConfirmationMutation = useWeekAttendanceConfirmation();
-
-  const schedule: WeekSchedule = useMemo(
-    () =>
-      buildWeekSchedule(
-        officeRosterQuery.data ?? [],
-        visitsQuery.data ?? [],
-        weekDates,
-        confirmedUserIds,
-      ),
-    [officeRosterQuery.data, visitsQuery.data, weekDates, confirmedUserIds],
-  );
-
-  const handlePlanningToggle = useCallback(
-    (date: string, attending: boolean) => {
-      if (attending) {
-        selectDate(date);
-        return;
-      }
-
-      deselectDate(date);
-    },
-    [selectDate, deselectDate],
-  );
-
-  function goPrevWeek(): void {
-    changeFocusedWeek(addDays(focusedWeekStartDate, -7));
-  }
-
-  function goNextWeek(): void {
-    changeFocusedWeek(addDays(focusedWeekStartDate, 7));
-  }
-
-  function goToday(): void {
-    changeFocusedWeek(new Date());
-  }
-
-  function editWeek(): void {
-    if (currentEditingWeekId === null) {
-      return;
-    }
-
-    setEditingWeekId(currentEditingWeekId);
-  }
-
-  function confirmWeek(): void {
-    if (!user || activeOfficeId === undefined) {
-      return;
-    }
-
-    const selectedDates = weekDates
-      .filter((date) => {
-        const dateKey = toDateKey(date);
-        const day = schedule[dateKey] ?? [];
-
-        const currentUserStatus = day.find(
-          (person) => person.userId === user.id,
-        );
-
-        const planningState = planningStatesByDate[dateKey];
-
-        const explicitlySelected = planningState?.selected.some(
-          (planningUser) => planningUser.id === user.id,
-        );
-
-        const explicitlyDeselected = planningState?.deselected.some(
-          (planningUser) => planningUser.id === user.id,
-        );
-
-        if (explicitlySelected) {
-          return true;
-        }
-
-        if (explicitlyDeselected) {
-          return false;
-        }
-
-        return (
-          currentUserStatus?.status === "planning-yes" ||
-          currentUserStatus?.status === "confirmed-yes"
-        );
-      })
-      .map(toDateKey);
-
-    const payload = createAttendanceConfirmationObjectPayload({
-      officeId: activeOfficeId,
-      startsOn: weekKey,
-      selectedDates,
-    });
-
-    createAttendanceConfirmationMutation.mutate(payload, {
-      onSuccess: async () => {
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: generateAttendanceConfirmationKey(
-              activeOfficeId,
-              weekKey,
-            ),
-          }),
-          queryClient.invalidateQueries({
-            queryKey: generateVisitsKey({
-              date: weekKey,
-              view: "week",
-              office_id: activeOfficeId,
-            }),
-          }),
-        ]);
-
-        setEditingWeekId(null);
-      },
-    });
-  }
+  const isRemote = activeOffice?.name.toLowerCase() === "remote";
 
   function changeOffice(nextOffice: Office): void {
     setEditingWeekId(null);
@@ -246,6 +84,30 @@ export default function CalendarPage() {
     });
   }
 
+  /* === DATE LOGIC ===
+   *
+   * This logic determines how the dates are handled in the calendar, such as jumping to today,
+   * viewing the next or previous week, and determining what the beginning date of the week is.
+   *
+   * Date keys typically operate operate in strings, otherwise, date related variables typically are
+   * in the type of `Date`.
+   */
+
+  const [focusedWeekStartDate, setFocusedWeekStartDate] = useState<Date>(() =>
+    getWeekStartFromSearchParams(searchParams),
+  );
+  const focusedWeekStartDateKey: string = generateDateKey(focusedWeekStartDate);
+
+  const weekDates: Date[] = useMemo(
+    () => generateWeekDates(focusedWeekStartDate, WEEKDAYS_PER_WEEK),
+    [focusedWeekStartDate],
+  );
+
+  const planningWeekDateKeys: string[] = useMemo(
+    () => weekDates.map(generateDateKey),
+    [weekDates],
+  );
+
   function changeFocusedWeek(nextWeekStart: Date): void {
     const normalizedWeekStart = startOfWeek(nextWeekStart);
 
@@ -258,6 +120,195 @@ export default function CalendarPage() {
       setDateSearchParams(nextParams, normalizedWeekStart);
 
       return nextParams;
+    });
+  }
+
+  function goPrevWeek(): void {
+    changeFocusedWeek(addDays(focusedWeekStartDate, -7));
+  }
+
+  function goNextWeek(): void {
+    changeFocusedWeek(addDays(focusedWeekStartDate, 7));
+  }
+
+  function goToday(): void {
+    changeFocusedWeek(new Date());
+  }
+
+  const rangeLabel = `${rangeFormat.format(
+    weekDates[0],
+  )} - ${rangeFormat.format(
+    weekDates[WEEKDAYS_PER_WEEK - 1],
+  )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
+
+  const currentStartingWeekKey: string = generateDateKey(
+    startOfWeek(new Date()),
+  );
+
+  const isCurrentWeek = focusedWeekStartDateKey === currentStartingWeekKey;
+
+  /* === EDITING WEEK LOGIC ===
+   *
+   * This logic handles when a calendar should be locked for a user. Calendar becomes locked when
+   * a user "confirms" their week or when there is an existing `AttendanceConfirmation` record
+   * in the currently viewing date range and office
+   */
+  const [editingWeekId, setEditingWeekId] = useState<string | null>(null);
+  const currentEditingWeekId: string | null =
+    activeOfficeId === undefined
+      ? null
+      : generateEditingWeekId(activeOfficeId, focusedWeekStartDateKey);
+
+  const isEditingWeek =
+    currentEditingWeekId !== null && editingWeekId === currentEditingWeekId;
+
+  function editWeek(): void {
+    if (currentEditingWeekId === null) {
+      return;
+    }
+
+    setEditingWeekId(currentEditingWeekId);
+  }
+
+  /* === VISITS LOGIC ===
+   *
+   * This logic handles the visit objects within the calendar page.
+   */
+  const visitsQuery = useVisitsQuery({
+    date: focusedWeekStartDateKey,
+    view: "week",
+    office_id: activeOfficeId ?? 1,
+  });
+
+  /* === ATTENDANCE LOGIC ===
+   *
+   * This logic handles the attendance statuses within the calendar page. These are the following possible
+   * states that a user can be categorized in: `confirmed-yes`, `confirmed-no`, `planning-yes`, and
+   * `planning-no`.
+   */
+  const attendanceConfirmationsQuery = useAttendanceConfirmationsQuery({
+    officeId: activeOfficeId,
+    startsOn: focusedWeekStartDateKey,
+  });
+
+  const confirmedUserIds = useConfirmedUserIds(
+    attendanceConfirmationsQuery.data,
+  );
+
+  const isWeekConfirmed = user !== undefined && confirmedUserIds.has(user.id);
+
+  const isCalendarLocked = isWeekConfirmed && !isEditingWeek;
+
+  const createAttendanceConfirmationMutation = useWeekAttendanceConfirmation();
+
+  /*
+   * === ACTION CABLE CHANNEL LOGIC ===
+   *
+   * This logic handles the the live functionality of the calendar that comes from Rails Action Cable
+   * and Redis adapter
+   */
+  const {
+    planningStatesByDate,
+    isConnected: isPlanningConnected,
+    selectDate,
+    deselectDate,
+  } = useOfficePlanning({
+    officeId: activeOfficeId ?? null,
+    currentUserId: user?.id ?? null,
+    dates: planningWeekDateKeys,
+  });
+
+  const handlePlanningToggle = useCallback(
+    (date: string, attending: boolean) => {
+      if (attending) {
+        selectDate(date);
+        return;
+      }
+
+      deselectDate(date);
+    },
+    [selectDate, deselectDate],
+  );
+
+  const schedule: WeekSchedule = useMemo(
+    () =>
+      buildWeekSchedule(
+        officeRosterQuery.data ?? [],
+        visitsQuery.data ?? [],
+        weekDates,
+        confirmedUserIds,
+      ),
+    [officeRosterQuery.data, visitsQuery.data, weekDates, confirmedUserIds],
+  );
+
+  function confirmWeek(): void {
+    if (!user || activeOfficeId === undefined) {
+      return;
+    }
+
+    const selectedDates: string[] = weekDates
+      .filter((date: Date) => {
+        const dateKey: string = generateDateKey(date);
+        const rosterUsers: RosterUser[] = schedule[dateKey] ?? [];
+
+        const curRosterUser = rosterUsers.find(
+          (rosterUser) => rosterUser.userId === user.id,
+        );
+
+        const planningState: TogglePlanningOverrideState =
+          planningStatesByDate[dateKey];
+
+        const hasCurUserSelectedDate: boolean = isCurrentUserInPlanningState(
+          planningState.selected,
+          user.id,
+        );
+
+        const hasCurUserDeselectedDate: boolean = isCurrentUserInPlanningState(
+          planningState.deselected,
+          user.id,
+        );
+
+        if (hasCurUserSelectedDate) {
+          return true;
+        }
+
+        if (hasCurUserDeselectedDate) {
+          return false;
+        }
+
+        return (
+          curRosterUser?.status === "planning-yes" ||
+          curRosterUser?.status === "confirmed-yes"
+        );
+      })
+      .map(generateDateKey);
+
+    const payload = createAttendanceConfirmationObjectPayload({
+      officeId: activeOfficeId,
+      startsOn: focusedWeekStartDateKey,
+      selectedDates,
+    });
+
+    createAttendanceConfirmationMutation.mutate(payload, {
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: generateAttendanceConfirmationKey(
+              activeOfficeId,
+              focusedWeekStartDateKey,
+            ),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: generateVisitsKey({
+              date: focusedWeekStartDateKey,
+              view: "week",
+              office_id: activeOfficeId,
+            }),
+          }),
+        ]);
+
+        setEditingWeekId(null);
+      },
     });
   }
 
@@ -279,7 +330,7 @@ export default function CalendarPage() {
     return <div>Unable to load calendar</div>;
   }
 
-  if (!office || activeOfficeId === undefined) {
+  if (!activeOffice || activeOfficeId === undefined) {
     return <div>No office is available</div>;
   }
 
@@ -287,24 +338,18 @@ export default function CalendarPage() {
     return <div>No user is available</div>;
   }
 
-  const rangeLabel = `${rangeFormat.format(
-    weekDates[0],
-  )} - ${rangeFormat.format(
-    weekDates[WEEKDAYS_PER_WEEK - 1],
-  )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
-
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-page">
       <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
           <div className="flex items-center gap-3 pb-5">
             <h2 className="flex items-center gap-2 text-2xl font-bold capitalize text-fg">
-              {office.name}
+              {activeOffice.name}
 
-              <span aria-hidden="true">{office.emoji}</span>
+              <span aria-hidden="true">{activeOffice.emoji}</span>
             </h2>
 
-            <OfficeSwitcher office={office} setOffice={changeOffice} />
+            <OfficeSwitcher office={activeOffice} setOffice={changeOffice} />
           </div>
 
           {!isRemote && (
@@ -388,7 +433,7 @@ export default function CalendarPage() {
 
           <Calendar
             schedule={schedule}
-            office={office}
+            office={activeOffice}
             days={weekDates}
             locked={isCalendarLocked}
             editingConfirmedWeek={isEditingWeek}
@@ -453,4 +498,56 @@ function setDateSearchParams(params: URLSearchParams, date: Date): void {
   params.set("year", String(date.getFullYear()));
   params.set("month", String(date.getMonth() + 1));
   params.set("day", String(date.getDate()));
+}
+
+function generateEditingWeekId(
+  activeOfficeId: number,
+  focusedWeekStartDateKey: string,
+): string {
+  return `${activeOfficeId}:${focusedWeekStartDateKey}`;
+}
+
+function useConfirmedUserIds(
+  confirmations: AttendanceConfirmation[] | undefined,
+): Set<number> {
+  return useMemo(
+    () =>
+      new Set(
+        (confirmations ?? []).map((confirmation) => confirmation.user_id),
+      ),
+    [confirmations],
+  );
+}
+
+function generateWeekDates(weekStartDate: Date, numberOfDays = 5): Date[] {
+  return Array.from({ length: numberOfDays }, (_, index) =>
+    addDays(weekStartDate, index),
+  );
+}
+
+function findCurrentUserOffice(
+  offices: Office[],
+  currentUser: User,
+): Office | null {
+  return (
+    offices.find((office) => office.id === currentUser.office_id) ??
+    offices[0] ??
+    null
+  );
+}
+
+function findActiveOffice(
+  offices: Office[],
+  activeOfficeId: number,
+): Office | null {
+  return offices.find((office) => office.id === activeOfficeId);
+}
+
+function isCurrentUserInPlanningState(
+  planningStateVariationUserList: ChannelSerializedUser[],
+  userId: number,
+): boolean {
+  return planningStateVariationUserList.some(
+    (planningUser) => planningUser.id === userId,
+  );
 }

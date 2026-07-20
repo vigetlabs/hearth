@@ -7,7 +7,7 @@ import type {
   StatusVariant,
 } from "@/components/Calendar/StatusIcon";
 import NudgeIcon from "@/components/icons/NudgeIcon";
-import type { PersonStatus } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
 import { isFuture } from "@/util/dates/date";
 import { cn } from "@/util/cn";
 
@@ -15,7 +15,7 @@ interface DayRosterProps {
   /** The day this roster is for; nudging is only allowed for future days. */
   date: Date;
   /** The full office roster with each person's status for this day. */
-  people: PersonStatus[];
+  people: RosterUser[];
   myUserId: number;
 }
 
@@ -138,8 +138,7 @@ export function DayRoster({ date, people, myUserId }: DayRosterProps) {
   );
 }
 
-const byName = (a: PersonStatus, b: PersonStatus) =>
-  a.name.localeCompare(b.name);
+const byName = (a: RosterUser, b: RosterUser) => a.name.localeCompare(b.name);
 
 function TabButton({
   active,
@@ -193,7 +192,7 @@ function RosterRow({
   muted = false,
   nudgeable = false,
 }: {
-  person: PersonStatus;
+  person: RosterUser;
   myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;

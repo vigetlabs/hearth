@@ -10,10 +10,10 @@ export const isInOffice = (status: AttendanceStatus) =>
   status === "confirmed-yes" || status === "planning-yes";
 
 /** One roster member's status for a single day. */
-export interface PersonStatus {
+export interface RosterUser {
   userId: number;
   name: string;
   status: AttendanceStatus;
 }
 
-export type WeekSchedule = Record<string, PersonStatus[]>;
+export type WeekSchedule = Record<string, RosterUser[]>;

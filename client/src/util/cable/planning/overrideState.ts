@@ -2,7 +2,7 @@ import type {
   PlanningOverrideState,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
-import type { PersonStatus } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";
 
 export function planningOverrideStateForUser(
@@ -88,7 +88,7 @@ export function resolveEditingAttendance({
 }
 
 interface BaseAttendanceForUserOptions {
-  day: PersonStatus[];
+  day: RosterUser[];
   userId: number;
 }
 

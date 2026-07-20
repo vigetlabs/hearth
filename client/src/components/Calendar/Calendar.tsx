@@ -2,7 +2,7 @@ import { DayCell } from "@/components/Calendar/DayCell";
 
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
-import type { PersonStatus, WeekSchedule } from "@/types/calendar/calendar";
+import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 import type {
   ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
@@ -10,7 +10,7 @@ import type {
 
 import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
-import { isSameDay, toDateKey } from "@/util/dates/date";
+import { generateDateKey, isSameDay } from "@/util/dates/date";
 
 import {
   baseAttendanceForUser,
@@ -20,9 +20,9 @@ import {
 } from "@/util/cable/planning/overrideState";
 
 const WEEKDAYS_PER_WEEK = 5;
-const EMPTY_DAY: PersonStatus[] = [];
+const EMPTY_DAY: RosterUser[] = [];
 
-const confirmedCountOf = (day: PersonStatus[]): number =>
+const confirmedCountOf = (day: RosterUser[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
 
 interface CalendarProps {
@@ -50,11 +50,11 @@ export function Calendar({
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
-  function getDayData(key: string): PersonStatus[] {
+  function getDayData(key: string): RosterUser[] {
     const day = schedule[key] ?? EMPTY_DAY;
     const overrides = planningByDate[key];
 
-    const resolvedScheduledPeople = day.flatMap((person): PersonStatus[] => {
+    const resolvedScheduledPeople = day.flatMap((person): RosterUser[] => {
       const hasConfirmedVisit = person.status === "confirmed-yes";
 
       const planningOverrideState = planningOverrideStateForUser(
@@ -120,7 +120,7 @@ export function Calendar({
           (planningUser: ChannelSerializedUser) =>
             !scheduledUserIds.has(planningUser.id),
         )
-        .map((planningUser: ChannelSerializedUser): PersonStatus => ({
+        .map((planningUser: ChannelSerializedUser): RosterUser => ({
           userId: planningUser.id,
           name: userDisplayName(planningUser),
           status: "planning-yes",
@@ -170,19 +170,19 @@ export function Calendar({
 
   const attendance = Object.fromEntries(
     days.map((day) => {
-      const key = toDateKey(day);
+      const key = generateDateKey(day);
 
       return [key, getDayData(key)];
     }),
   ) as WeekSchedule;
 
   const counts = days.map((day) =>
-    confirmedCountOf(attendance[toDateKey(day)] ?? EMPTY_DAY),
+    confirmedCountOf(attendance[generateDateKey(day)] ?? EMPTY_DAY),
   );
 
   const planningCounts = days.map(
     (day) =>
-      (attendance[toDateKey(day)] ?? EMPTY_DAY).filter(
+      (attendance[generateDateKey(day)] ?? EMPTY_DAY).filter(
         (person) => person.status === "planning-yes",
       ).length,
   );
@@ -244,7 +244,7 @@ export function Calendar({
         }}
       >
         {days.map((day, index) => {
-          const key = toDateKey(day);
+          const key = generateDateKey(day);
 
           const dayData = attendance[key] ?? EMPTY_DAY;
 

@@ -7,7 +7,7 @@
  */
 
 /** Local-date key in `YYYY-MM-DD` form (no timezone drift from `toISOString`). */
-export function toDateKey(date: Date): string {
+export function generateDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -32,10 +32,10 @@ export function startOfWeek(date: Date): Date {
 
 /** True when both dates fall on the same calendar day. */
 export function isSameDay(a: Date, b: Date): boolean {
-  return toDateKey(a) === toDateKey(b);
+  return generateDateKey(a) === generateDateKey(b);
 }
 
 /** True when `date` falls on a calendar day after today (local time). */
 export function isFuture(date: Date, today: Date = new Date()): boolean {
-  return toDateKey(date) > toDateKey(today);
+  return generateDateKey(date) > generateDateKey(today);
 }

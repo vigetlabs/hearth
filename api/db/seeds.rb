@@ -1,53 +1,53 @@
 # # AI GENERATED
-# # puts "Seeding offices..."
-# #
-# office_attributes = [
-#   {
-#     name: "Durham",
-#     city: "Durham",
-#     state: "NC",
-#     timezone: "America/New_York",
-#     emoji: "🐂"
-#   },
-#   {
-#     name: "Boulder",
-#     city: "Boulder",
-#     state: "CO",
-#     timezone: "America/Denver",
-#     emoji: "⛰️"
-#   },
-#   {
-#     name: "Falls Church",
-#     city: "Falls Church",
-#     state: "VA",
-#     timezone: "America/New_York",
-#     emoji: "🌸"
-#   },
-#   {
-#     name: "Chattanooga",
-#     city: "Chattanooga",
-#     state: "TN",
-#     timezone: "America/New_York",
-#     emoji: "🚂"
-#   },
-#   {
-#     name: "Remote",
-#     city: "Remote",
-#     state: "Remote",
-#     timezone: "Etc/UTC",
-#     emoji: "🏠"
-#   }
-# ]
-#
-# offices = office_attributes.to_h do |attributes|
-#   office_name = attributes.fetch(:name).downcase
-#
-#   office = Office.find_or_initialize_by(name: office_name)
-#   office.update!(attributes)
-#
-#   [ office_name, office ]
-# end
-#
+puts "Seeding offices..."
+
+office_attributes = [
+  {
+    name: "Durham",
+    city: "Durham",
+    state: "NC",
+    timezone: "America/New_York",
+    emoji: "🐂"
+  },
+  {
+    name: "Boulder",
+    city: "Boulder",
+    state: "CO",
+    timezone: "America/Denver",
+    emoji: "⛰️"
+  },
+  {
+    name: "Falls Church",
+    city: "Falls Church",
+    state: "VA",
+    timezone: "America/New_York",
+    emoji: "🌸"
+  },
+  {
+    name: "Chattanooga",
+    city: "Chattanooga",
+    state: "TN",
+    timezone: "America/New_York",
+    emoji: "🚂"
+  },
+  {
+    name: "Remote",
+    city: "Remote",
+    state: "Remote",
+    timezone: "Etc/UTC",
+    emoji: "🏠"
+  }
+]
+
+offices = office_attributes.to_h do |attributes|
+  office_name = attributes.fetch(:name).downcase
+
+  office = Office.find_or_initialize_by(name: office_name)
+  office.update!(attributes)
+
+  [ office_name, office ]
+end
+
 # puts "Seeding users..."
 #
 # seed_users = [
@@ -460,7 +460,7 @@
 #   )
 # end
 #
-# puts "Seed complete."
-# puts "Offices: #{Office.count}"
+puts "Seed complete."
+puts "Offices: #{Office.count}"
 # puts "Users: #{User.count}"
 # puts "Visits: #{Visit.count}"
