@@ -16,7 +16,7 @@ const PickerItem = forwardRef<HTMLButtonElement, PickerItemProps>(
         type={type}
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center text-fg transition-colors",
-          "hover:border-fill",
+          "hover:border-line-faint hover:bg-surface-sunken",
           "focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none",
           "disabled:cursor-not-allowed",
           className,

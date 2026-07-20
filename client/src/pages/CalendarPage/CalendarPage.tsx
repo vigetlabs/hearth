@@ -198,7 +198,7 @@ export default function CalendarPage() {
   )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-surface-muted">
+    <div className="flex flex-1 flex-col overflow-hidden bg-page">
       <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
           <div className="flex items-center gap-3 pb-5">

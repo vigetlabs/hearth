@@ -4,7 +4,6 @@ import App from "@/App";
 import { authLoader } from "@/routes/loaders/authLoader";
 import { redirectAuthenticatedUserLoader } from "@/routes/loaders/redirectAuthenticatedUserLoader";
 
-import IndexPage from "@/pages/IndexPage/IndexPage";
 import OfficePickerPage from "@/pages/OfficePickerPage/OfficePickerPage";
 import SchedulePickerPage from "@/pages/SchedulePickerPage/SchedulePickerPage";
 import SigninPage from "@/pages/SigninPage/SigninPage";
@@ -23,18 +22,17 @@ export const router = createBrowserRouter([
     path: "/",
     Component: App,
     children: [
-      { index: true, Component: IndexPage },
+      {
+        index: true,
+        Component: SigninPage,
+        loader: redirectAuthenticatedUserLoader,
+      },
       ...devRoutes,
       {
         path: "users",
         children: [
           { path: "office", Component: OfficePickerPage },
           { path: "schedule", Component: SchedulePickerPage },
-          {
-            path: "signin",
-            Component: SigninPage,
-            loader: redirectAuthenticatedUserLoader,
-          },
           { path: "profile", Component: ProfilePage, loader: authLoader },
         ],
       },

@@ -23,8 +23,8 @@ export default function ScheduleDayItem({
       className={cn(
         "aspect-[2/1] gap-1 rounded-xl p-3 text-center",
         isSelected
-          ? "border-2 border-line-selected bg-selected"
-          : "border border-line",
+          ? "border border-line-selected bg-selected shadow-[inset_0_0_0_1px_var(--color-line-selected)] hover:border-line-selected hover:bg-selected"
+          : "border border-line bg-surface",
       )}
     >
       <span className="text-sm font-bold">{day.label}</span>

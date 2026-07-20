@@ -42,7 +42,7 @@ function areDaySetsEqual(first: Set<string>, second: Set<string>) {
 const sectionClassName =
   "flex flex-1 flex-col justify-center rounded-3xl bg-surface px-14 py-4 shadow-card";
 
-const officeItemClassName = "min-w-32 aspect-[3/2]";
+const officeItemClassName = "min-w-28 aspect-[3/2]";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -175,14 +175,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-surface-muted">
+    <div className="flex flex-1 flex-col overflow-hidden bg-page">
       <form
         onSubmit={handleSave}
         className="mx-auto flex min-h-0 w-full max-w-[780px] flex-1 flex-col px-6 py-6"
       >
         <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-sm text-fg-subtle hover:text-fg-strong"
+          to="/calendar"
+          className="inline-flex self-start items-center gap-1 text-sm font-bold text-fg-subtle hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </Link>
@@ -269,7 +269,7 @@ export default function ProfilePage() {
                 selectedOfficeId={selectedOfficeId}
                 handleSelectOffice={setSelectedOfficeId}
                 officeItemClassName={officeItemClassName}
-                containerClassName="mt-0"
+                containerClassName="mt-0 gap-4"
               />
             </div>
           </section>
@@ -314,7 +314,7 @@ export default function ProfilePage() {
           </span>
           <button
             type="submit"
-            className="rounded-lg bg-surface px-10 py-1 text-base font-semibold text-fg shadow-card hover:bg-surface-sunken"
+            className="rounded-lg border border-line bg-surface px-10 py-1 text-sm font-semibold text-fg shadow-card transition-colors hover:border-line-faint hover:bg-surface-sunken"
           >
             Save Changes
           </button>

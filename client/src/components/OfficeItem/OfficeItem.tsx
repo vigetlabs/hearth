@@ -15,9 +15,9 @@ export default function OfficeItem({ office, className }: OfficeItemProps) {
   const emoji = office.emoji ?? "🏢";
 
   const itemClasses = cn(
-    "aspect-square gap-0.5 rounded-2xl border border-line",
-    "data-[state=checked]:border-2 data-[state=checked]:border-line-selected data-[state=checked]:bg-selected",
-    "data-[state=checked]:hover:border-fill",
+    "aspect-square gap-0.5 rounded-2xl border border-line bg-surface",
+    "data-[state=checked]:border-line-selected data-[state=checked]:bg-selected data-[state=checked]:shadow-[inset_0_0_0_1px_var(--color-line-selected)]",
+    "data-[state=checked]:hover:border-line-selected data-[state=checked]:hover:bg-selected",
     isRemote
       ? "border-dashed data-[state=checked]:border-solid"
       : "border-solid",

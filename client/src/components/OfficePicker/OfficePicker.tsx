@@ -9,6 +9,10 @@ import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { cn } from "@/util/cn";
+import WordLogo from "@/components/Logo/WordLogo";
+import Loader from "@/components/Loader/Loader";
+import HeroLayer from "@/components/Hero/HeroLayer";
+import HeroPanel from "@/components/Hero/HeroPanel";
 
 import {
   DEFAULT_OFFICE_NAME,
@@ -29,6 +33,18 @@ export default function OfficePicker() {
 
   // Which way the pair slides: "left" when the new card sits left of the old.
   const [direction, setDirection] = useState<"left" | "right">("right");
+
+  // Hero image srcs the browser has finished loading (via the hidden preload
+  // <img>s below). Until the current selection's hero is in here, the panel
+  // shows a loading indicator instead of a blank gray background.
+  const [loadedHeroes, setLoadedHeroes] = useState<Set<string>>(new Set());
+
+  function markHeroLoaded(src: string) {
+    setLoadedHeroes((prev) => {
+      if (prev.has(src)) return prev;
+      return new Set(prev).add(src);
+    });
+  }
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -133,6 +149,9 @@ export default function OfficePicker() {
   const selectedHeroOfficeId = heroIdForOfficeId(selectedOfficeId);
   const previousHeroOfficeId = heroIdForOfficeId(previousOfficeId);
 
+  const selectedHeroImage = heroImageFor(selectedHeroOfficeId);
+  const isHeroLoading = !loadedHeroes.has(selectedHeroImage);
+
   // Only play the crossfade when the hero image actually changes. Picking Falls
   // Church from the initial (unselected) state is a real selection change but
   // resolves to the same default hero, so it should swap silently.
@@ -159,12 +178,12 @@ export default function OfficePicker() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-page">
       <div className="flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 self-start text-sm font-semibold text-fg-subtle hover:text-fg"
+          className="flex items-center gap-1 self-start text-sm font-bold text-fg-subtle hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </button>
@@ -172,8 +191,9 @@ export default function OfficePicker() {
         <div className="flex flex-1 flex-col items-center justify-start pt-40 pb-12">
           <div className="w-full max-w-[90%]">
             <h1 className="text-2xl leading-snug font-bold text-fg">
-              <span className="text-strong">Hearth</span> shows you who's in
-              your primary office every day, so you can time your visits right
+              <WordLogo className="inline-block h-[0.85em] w-auto translate-y-[-0.13em]" />{" "}
+              shows you who's in your primary office every day, so you can time
+              your visits right
             </h1>
 
             <div className="mt-10">
@@ -205,8 +225,8 @@ export default function OfficePicker() {
               className={cn(
                 "mt-8 w-full rounded-full border py-3 text-sm font-semibold text-fg transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                 isRemoteSelected
-                  ? "border-fill bg-surface-muted"
-                  : "border-line hover:border-line-faint hover:bg-surface-sunken",
+                  ? "border-line-selected bg-selected shadow-[inset_0_0_0_1px_var(--color-line-selected)] hover:border-line-selected hover:bg-selected"
+                  : "border-line bg-surface hover:border-line-faint hover:bg-surface-sunken",
               )}
             >
               No home office. I'm fully remote.
@@ -216,7 +236,7 @@ export default function OfficePicker() {
               type="button"
               onClick={handleContinue}
               disabled={!selectedOfficeId || updateUserMutation.isPending}
-              className="mt-3 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-3 w-full rounded-full py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:bg-strong enabled:hover:bg-strong-hover disabled:cursor-not-allowed disabled:bg-surface-muted"
             >
               Continue
             </button>
@@ -224,27 +244,19 @@ export default function OfficePicker() {
         </div>
       </div>
 
-      <div
-        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[50%]"
-        aria-hidden="true"
-      >
+      <HeroPanel>
         {/*
           Outgoing layer: the image from before the latest pick, sliding off and
           fading out. Only rendered once a transition has happened. Keyed by the
           new selection so it remounts (and replays its animation) every switch.
         */}
         {shouldAnimate && (
-          <div
+          <HeroLayer
             key={`prev-${selectedOfficeId}`}
-            // Layers overhang the panel horizontally by more than the slide
-            // distance (2rem), so the image always covers the full width as it
-            // slides — its own edge never sweeps into view against the panel cut.
-            className="office-hero office-hero--exit absolute inset-y-0 -inset-x-10 bg-cover bg-center"
+            className="office-hero office-hero--exit"
+            src={heroImageFor(previousHeroOfficeId)}
             style={
-              {
-                backgroundImage: `url(${heroImageFor(previousHeroOfficeId)})`,
-                "--slide-sign": direction === "left" ? -1 : 1,
-              } as CSSProperties
+              { "--slide-sign": direction === "left" ? -1 : 1 } as CSSProperties
             }
           />
         )}
@@ -254,20 +266,26 @@ export default function OfficePicker() {
           and fades up over the outgoing layer. Skips the enter animation on the
           very first render (no previous image to transition from).
         */}
-        <div
+        <HeroLayer
           key={`curr-${selectedOfficeId}`}
-          className={cn(
-            "office-hero absolute inset-y-0 -inset-x-10 bg-cover bg-center",
-            shouldAnimate && "office-hero--enter",
-          )}
+          className={cn("office-hero", shouldAnimate && "office-hero--enter")}
+          src={selectedHeroImage}
           style={
-            {
-              backgroundImage: `url(${heroImageFor(selectedHeroOfficeId)})`,
-              "--slide-sign": direction === "left" ? -1 : 1,
-            } as CSSProperties
+            { "--slide-sign": direction === "left" ? -1 : 1 } as CSSProperties
           }
         />
-      </div>
+
+        {/*
+          Loading indicator shown over the panel until the current selection's
+          hero image has finished loading, so the space reads as "loading"
+          rather than a blank gray background.
+        */}
+        {isHeroLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-surface-strong">
+            <Loader size="h-8 w-8" />
+          </div>
+        )}
+      </HeroPanel>
 
       {/*
         Preload every office hero on mount so switching selection swaps the panel
@@ -276,13 +294,26 @@ export default function OfficePicker() {
         display:none images are still loaded by the browser.
       */}
       <div className="hidden" aria-hidden="true">
-        {officeCards.map((office) => (
-          <img
-            key={office.id}
-            src={heroImageFor(heroIdForOffice(office))}
-            alt=""
-          />
-        ))}
+        {officeCards.map((office) => {
+          const src = heroImageFor(heroIdForOffice(office));
+
+          return (
+            <img
+              key={office.id}
+              // Already-cached images can mount `complete` before React attaches
+              // onLoad, so `onLoad` never fires — check on mount as well.
+              ref={(img) => {
+                if (img?.complete) markHeroLoaded(src);
+              }}
+              src={src}
+              alt=""
+              onLoad={() => markHeroLoaded(src)}
+              // A missing hero degrades to the placeholder background, so stop
+              // showing the loader rather than spinning forever.
+              onError={() => markHeroLoaded(src)}
+            />
+          );
+        })}
       </div>
     </div>
   );

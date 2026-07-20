@@ -5,7 +5,7 @@ export async function authLoader() {
   const user = await getCurrentUserOrNull();
 
   if (!user) {
-    throw redirect("/users/signin");
+    throw redirect("/");
   }
 
   return user;

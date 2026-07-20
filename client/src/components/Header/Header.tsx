@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import Logo from "@/components/Logo/Logo";
+import WordLogoLowercase from "@/components/Logo/WordLogoLowercase";
 
 import { useAuth } from "@/util/auth/useAuth";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
@@ -28,17 +28,16 @@ export default function Header() {
         await queryClient.invalidateQueries({
           queryKey: generateCurrentUserKey(),
         });
-        navigate("/users/signin");
+        navigate("/");
       },
     });
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface">
+    <header className="sticky top-0 z-10 border-b border-line bg-surface shadow-[0px_6px_15px_0px_#84392314]">
       <div className="flex items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-3">
-          <Logo className="h-9 w-9" />
-          <span className="text-lg font-bold text-fg">Hearth</span>
+        <Link to="/calendar" className="flex items-center gap-3">
+          <WordLogoLowercase className="h-6" />
         </Link>
 
         <div className="flex items-center gap-6">

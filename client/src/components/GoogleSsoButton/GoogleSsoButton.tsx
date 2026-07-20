@@ -13,7 +13,7 @@ export default function GoogleSsoButton({ className }: GoogleSsoButtonProps) {
       type="button"
       onClick={redirectToGoogleSso}
       className={cn(
-        "flex w-full items-center justify-center gap-2 rounded-lg border border-line-strong px-4 py-3 font-semibold text-fg transition-colors hover:bg-surface-sunken",
+        "flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 font-semibold text-fg transition-colors hover:border-line-faint hover:bg-surface-sunken",
         className,
       )}
     >

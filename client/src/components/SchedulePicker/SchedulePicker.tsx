@@ -4,6 +4,8 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { heroImageFor } from "@/components/OfficePicker/heroImage";
+import HeroLayer from "@/components/Hero/HeroLayer";
+import HeroPanel from "@/components/Hero/HeroPanel";
 import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
 import type { CreateScheduleRequest } from "@/types/api/schedules";
 import type { Office } from "@/types/api/offices";
@@ -59,18 +61,18 @@ export default function SchedulePicker() {
         queryClient.setQueryData(generateCurrentUserKey(), (user: User) =>
           user ? { ...user, default_schedule: schedule } : user,
         );
-        navigate("/users/signin");
+        navigate("/");
       },
     });
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-page">
       <div className="flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 self-start text-sm font-semibold text-fg-subtle hover:text-fg"
+          className="flex items-center gap-1 self-start text-sm font-bold text-fg-subtle hover:text-black"
         >
           <span aria-hidden="true">‹</span>
           Go back
@@ -106,7 +108,7 @@ export default function SchedulePicker() {
               type="button"
               onClick={handleSave}
               disabled={!canSave || createDefaultScheduleMutation.isPending}
-              className="mt-8 w-full rounded-full bg-fill py-3 text-sm font-semibold text-fg-inverse transition-colors hover:bg-fill-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-8 w-full rounded-full py-3 text-sm font-semibold text-fg-inverse transition-colors enabled:bg-strong enabled:hover:bg-strong-hover disabled:cursor-not-allowed disabled:bg-surface-muted"
             >
               Continue
             </button>
@@ -114,17 +116,9 @@ export default function SchedulePicker() {
         </div>
       </div>
 
-      <div
-        className="relative hidden overflow-hidden bg-surface-strong lg:block lg:w-[50%]"
-        aria-hidden="true"
-      >
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${heroImageFor(heroOfficeId)})`,
-          }}
-        />
-      </div>
+      <HeroPanel>
+        <HeroLayer src={heroImageFor(heroOfficeId)} />
+      </HeroPanel>
     </div>
   );
 }

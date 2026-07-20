@@ -47,6 +47,7 @@
   --color-fg-inverse-muted: #f0dfce; /* muted text on the terracotta accent */
 
   /* Surfaces — backgrounds */
+  --color-page: #f8f1e9; /* App background — pages, onboarding screens */
   --color-surface: var(
     --color-white
   ); /* Surface/Default — cards, header, inputs */
@@ -83,4 +84,9 @@
 
   /* Elevation — soft card/button lift (Figma drop shadow) */
   --shadow-card: 0px 11.42px 34.26px 0px #0000000f;
+}
+
+/* App background — every screen sits on the warm cream page color */
+body {
+  background-color: var(--color-page);
 }
