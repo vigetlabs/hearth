@@ -40,7 +40,7 @@ function areDaySetsEqual(first: Set<string>, second: Set<string>) {
 }
 
 const sectionClassName =
-  "flex flex-1 flex-col justify-center rounded-3xl bg-surface px-14 py-4 shadow-card";
+  "flex flex-1 flex-col justify-center rounded-3xl bg-surface px-14 pt-2 pb-6 shadow-card";
 
 const officeItemClassName = "min-w-28 aspect-[3/2]";
 
@@ -193,7 +193,7 @@ export default function ProfilePage() {
 
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           <section className={sectionClassName}>
-            <h2 className="mb-1 text-base font-bold text-fg">Profile</h2>
+            <h2 className="mt-2 mb-3 text-base font-bold text-fg">Profile</h2>
 
             <div className="space-y-3">
               <div className="flex flex-row gap-5 w-full">
@@ -256,7 +256,9 @@ export default function ProfilePage() {
           </section>
 
           <section className={sectionClassName}>
-            <h2 className="mb-1 text-base font-bold text-fg">Default Office</h2>
+            <h2 className="mt-2 mb-3 text-base font-bold text-fg">
+              Default Office
+            </h2>
             <p className="mb-3 text-xs text-fg-subtle">
               Remote means no home office. Use the Remote View to browse offices
               when you plan to visit one.
@@ -275,7 +277,7 @@ export default function ProfilePage() {
           </section>
 
           <section className={sectionClassName}>
-            <h2 className="mb-1 text-base font-bold text-fg">
+            <h2 className="mt-2 mb-3 text-base font-bold text-fg">
               Default Schedule
             </h2>
             <p className="mb-3 text-xs text-fg-subtle">

@@ -13,6 +13,7 @@ import WordLogo from "@/components/Logo/WordLogo";
 import Loader from "@/components/Loader/Loader";
 import HeroLayer from "@/components/Hero/HeroLayer";
 import HeroPanel from "@/components/Hero/HeroPanel";
+import CornerGlow from "@/components/CornerGlow/CornerGlow";
 
 import {
   DEFAULT_OFFICE_NAME,
@@ -179,16 +180,18 @@ export default function OfficePicker() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-page">
-      <div className="flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
+      <div className="relative flex w-full flex-col px-8 py-8 lg:w-[50%] lg:px-16">
+        <CornerGlow />
+
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 self-start text-sm font-bold text-fg-subtle hover:text-black"
+          className="relative z-10 flex items-center gap-1 self-start text-sm font-bold text-fg-subtle hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </button>
 
-        <div className="flex flex-1 flex-col items-center justify-start pt-40 pb-12">
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-start pt-40 pb-12">
           <div className="w-full max-w-[90%]">
             <h1 className="text-2xl leading-snug font-bold text-fg">
               <WordLogo className="inline-block h-[0.85em] w-auto translate-y-[-0.13em] text-strong" />{" "}
