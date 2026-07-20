@@ -1,6 +1,154 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
+  describe "GET /visits/mine" do
+    let(:user) { create(:user) }
+    let(:other_user) { create(:user) }
+    let(:headers) { auth_headers_for(user) }
+
+    subject(:get_my_visits) do
+      get api_path("/visits/mine"),
+        params: params,
+        headers: headers
+    end
+
+    context "when the current user has no visits in the range" do
+      let(:params) do
+        {
+          date: "2026-07-15",
+          view: "week"
+        }
+      end
+
+      it "returns an empty visits array" do
+        get_my_visits
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        expect(json["data"]["visits"]).to eq([])
+      end
+    end
+
+    context "when the user is not authenticated" do
+      let(:params) do
+        {
+          date: "2026-07-15",
+          view: "week"
+        }
+      end
+
+      subject(:get_my_visits) do
+        get api_path("/visits/mine"),
+          params: params
+      end
+
+      it "returns an unauthorized response" do
+        get_my_visits
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns an authentication error" do
+        get_my_visits
+        json = JSON.parse(response.body)
+
+        expect(json).to include(
+          "status" => include(
+            "code" => 401
+          ),
+          "error" => include(
+            "type" => ApiErrorTypes::AUTHENTICATION
+          )
+        )
+      end
+    end
+
+    context "with a week view" do
+      let(:params) do
+        {
+          date: "2026-07-15",
+          view: "week"
+        }
+      end
+
+      let!(:monday_visit) do
+        create(
+          :visit,
+          user: user,
+          visit_date: Date.new(2026, 7, 13)
+        )
+      end
+
+      let!(:thursday_visit) do
+        create(
+          :visit,
+          user: user,
+          visit_date: Date.new(2026, 7, 16)
+        )
+      end
+
+      let!(:visit_outside_range) do
+        create(
+          :visit,
+          user: user,
+          visit_date: Date.new(2026, 7, 20)
+        )
+      end
+
+      let!(:other_users_visit) do
+        create(
+          :visit,
+          user: other_user,
+          visit_date: Date.new(2026, 7, 13)
+        )
+      end
+
+      it "returns the current user's visits within the requested range" do
+        get_my_visits
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        visits = json["data"]["visits"]
+
+        expect(visits.pluck("id")).to eq([
+          monday_visit.id,
+          thursday_visit.id
+        ])
+      end
+
+      it "does not return visits belonging to another user" do
+        get_my_visits
+        json = JSON.parse(response.body)
+        visits = json["data"]["visits"]
+        expect(visits.pluck("id")).not_to include(other_users_visit.id)
+      end
+
+      it "does not return visits outside the requested date range" do
+        get_my_visits
+        json = JSON.parse(response.body)
+        visits = json["data"]["visits"]
+        expect(visits.pluck("id")).not_to include(visit_outside_range.id)
+      end
+
+      it "orders visits by visit date" do
+        get_my_visits
+        json = JSON.parse(response.body)
+        visits = json["data"]["visits"]
+
+        expect(visits.pluck("visit_date")).to eq([
+          "2026-07-13",
+          "2026-07-16"
+        ])
+      end
+
+      it "returns the success message" do
+        get_my_visits
+        json = JSON.parse(response.body)
+        expect(json["status"]["message"]).to eq(
+          "Fetched current user's visits successfully"
+        )
+      end
+    end
+  end
+
   describe "GET /visits" do
     let!(:user) { create(:user) }
     let!(:office) { create(:office) }

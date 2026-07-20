@@ -55,6 +55,9 @@ module GeneratedUrlHelpersModule
   def me_api_v1_users_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def mine_api_v1_visits_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def new_rails_conductor_inbound_email_source_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }

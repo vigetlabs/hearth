@@ -175,7 +175,7 @@ export default function CalendarPage() {
    *
    * This logic handles the visit objects within the calendar page.
    */
-  const visitsQuery = useVisitsQuery({
+  const officeVisitsQuery = useVisitsQuery({
     date: focusedWeekStartDateKey,
     view: "week",
     office_id: activeOfficeId ?? 1,
@@ -240,11 +240,16 @@ export default function CalendarPage() {
     () =>
       buildWeekSchedule(
         officeRosterQuery.data ?? [],
-        visitsQuery.data ?? [],
+        officeVisitsQuery.data ?? [],
         weekDates,
         confirmedUserIds,
       ),
-    [officeRosterQuery.data, visitsQuery.data, weekDates, confirmedUserIds],
+    [
+      officeRosterQuery.data,
+      officeVisitsQuery.data,
+      weekDates,
+      confirmedUserIds,
+    ],
   );
 
   function confirmWeek(): void {
@@ -323,7 +328,7 @@ export default function CalendarPage() {
   if (
     officesQuery.isPending ||
     officeRosterQuery.isPending ||
-    visitsQuery.isPending ||
+    officeVisitsQuery.isPending ||
     attendanceConfirmationsQuery.isPending
   ) {
     return <Loader />;
@@ -332,7 +337,7 @@ export default function CalendarPage() {
   if (
     officesQuery.isError ||
     officeRosterQuery.isError ||
-    visitsQuery.isError ||
+    officeVisitsQuery.isError ||
     attendanceConfirmationsQuery.isError
   ) {
     return <div>Unable to load calendar</div>;

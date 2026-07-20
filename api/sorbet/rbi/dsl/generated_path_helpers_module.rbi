@@ -55,6 +55,9 @@ module GeneratedPathHelpersModule
   def me_api_v1_users_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def mine_api_v1_visits_path(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def new_rails_conductor_inbound_email_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
