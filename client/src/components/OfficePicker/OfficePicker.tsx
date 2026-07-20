@@ -191,7 +191,7 @@ export default function OfficePicker() {
         <div className="flex flex-1 flex-col items-center justify-start pt-40 pb-12">
           <div className="w-full max-w-[90%]">
             <h1 className="text-2xl leading-snug font-bold text-fg">
-              <WordLogo className="inline-block h-[0.85em] w-auto translate-y-[-0.13em]" />{" "}
+              <WordLogo className="inline-block h-[0.85em] w-auto translate-y-[-0.13em] text-strong" />{" "}
               shows you who's in your primary office every day, so you can time
               your visits right
             </h1>
