@@ -81,8 +81,10 @@ export function buildWeekSchedule(
     const dateKey: string = generateDateKey(date);
     const weekday: WeekdayField = WEEKDAY_FIELDS[date.getDay()];
 
-    schedule[dateKey] = users.map((user): RosterUser => {
-      const visit: Visit = visitsByUserAndDate.get(
+    const rosterUserIds = new Set(users.map((user) => user.id));
+
+    const rosterPeople: RosterUser[] = users.map((user): RosterUser => {
+      const visit: Visit | undefined = visitsByUserAndDate.get(
         generateUserIdVisitKey(user.id, dateKey),
       );
 
@@ -95,7 +97,22 @@ export function buildWeekSchedule(
 
       return buildRosterUser(user, status);
     });
-  }
 
+    const visitingGuests = visits
+      .filter(
+        (visit) =>
+          visit.visit_date === dateKey && !rosterUserIds.has(visit.user.id),
+      )
+      .map((visit): RosterUser => {
+        const channelUser: ChannelSerializedUser = {
+          id: visit.user.id,
+          first_name: visit.user.first_name,
+          last_name: visit.user.last_name,
+          office_id: visit.office_id,
+        };
+        return buildRosterUser(channelUser, "confirmed-yes");
+      });
+    schedule[dateKey] = [...visitingGuests, ...rosterPeople];
+  }
   return schedule;
 }
