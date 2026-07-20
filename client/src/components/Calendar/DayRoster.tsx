@@ -9,6 +9,7 @@ import type {
 import NudgeIcon from "@/components/icons/NudgeIcon";
 import type { PersonStatus } from "@/types/calendar/calendar";
 import { isFuture } from "@/util/dates/date";
+import { cn } from "@/util/cn";
 
 interface DayRosterProps {
   /** The day this roster is for; nudging is only allowed for future days. */
@@ -155,9 +156,10 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`whitespace-nowrap rounded-full px-2.5 py-0.5 transition-colors ${
-        active ? "bg-strong text-fg-inverse" : "text-fg-subtle hover:text-fg"
-      }`}
+      className={cn(
+        "whitespace-nowrap rounded-full px-2.5 py-0.5 transition-colors",
+        active ? "bg-strong text-fg-inverse" : "text-fg-subtle hover:text-fg",
+      )}
     >
       {children}
     </button>
@@ -206,9 +208,11 @@ function RosterRow({
     <li className="flex items-center gap-2 py-1.5">
       <StatusIcon mark={mark} variant={variant} size="md" />
       <span
-        className={`min-w-0 flex-1 truncate text-sm ${
-          muted ? "text-fg-subtle" : "text-fg"
-        } ${isMe ? "font-medium" : ""}`}
+        className={cn(
+          "min-w-0 flex-1 truncate text-sm",
+          muted ? "text-fg-subtle" : "text-fg",
+          isMe && "font-medium",
+        )}
         title={person.name}
       >
         {person.name}

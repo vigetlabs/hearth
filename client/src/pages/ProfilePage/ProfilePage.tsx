@@ -39,13 +39,12 @@ function areDaySetsEqual(first: Set<string>, second: Set<string>) {
   return [...first].every((value) => second.has(value));
 }
 
-const sectionClassName = cn(
-  "rounded-3xl bg-surface px-14 py-8 shadow-[0px_11.42px_34.26px_0px_#0000000F]",
-);
+const sectionClassName =
+  "flex flex-1 flex-col justify-center rounded-3xl bg-surface px-14 py-4 shadow-card";
+
+const officeItemClassName = "min-w-28 aspect-[3/2]";
 
 export default function ProfilePage() {
-  const officeItemClassName = cn("min-w-32");
-
   const { user } = useAuth();
 
   const queryClient = useQueryClient();
@@ -176,24 +175,27 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-muted">
-      <form onSubmit={handleSave} className="mx-auto max-w-[1032px] px-6 py-8">
+    <div className="flex flex-1 flex-col overflow-hidden bg-page">
+      <form
+        onSubmit={handleSave}
+        className="mx-auto flex min-h-0 w-full max-w-[780px] flex-1 flex-col px-6 py-6"
+      >
         <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-sm text-fg-subtle hover:text-fg-strong"
+          to="/calendar"
+          className="inline-flex self-start items-center gap-1 text-sm font-bold text-fg-subtle hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </Link>
 
-        <h1 className="mt-2 mb-8 text-3xl font-bold text-fg">
+        <h1 className="mt-1 mb-3 text-xl font-bold text-fg">
           Profile &amp; Settings
         </h1>
 
-        <div className="space-y-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
           <section className={sectionClassName}>
-            <h2 className="mb-6 text-2xl font-bold text-fg">Profile</h2>
+            <h2 className="mb-1 text-base font-bold text-fg">Profile</h2>
 
-            <div className="space-y-5">
+            <div className="space-y-3">
               <div className="flex flex-row gap-5 w-full">
                 <div className="flex flex-col flex-1">
                   <label
@@ -207,7 +209,7 @@ export default function ProfilePage() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
+                    className="w-full rounded-lg border border-line-strong px-4 py-1.5 text-fg focus:border-fill focus:outline-none"
                   />
                 </div>
 
@@ -223,7 +225,7 @@ export default function ProfilePage() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full rounded-lg border border-line-strong px-4 py-2.5 text-fg focus:border-fill focus:outline-none"
+                    className="w-full rounded-lg border border-line-strong px-4 py-1.5 text-fg focus:border-fill focus:outline-none"
                   />
                 </div>
               </div>
@@ -243,7 +245,7 @@ export default function ProfilePage() {
                   readOnly
                   disabled
                   aria-describedby="email-help"
-                  className="w-full cursor-not-allowed rounded-lg border border-line bg-surface-muted px-4 py-2.5 text-fg-subtle focus:outline-none"
+                  className="w-full cursor-not-allowed rounded-lg border border-line bg-surface-muted px-4 py-1.5 text-fg-subtle focus:outline-none"
                 />
                 <p id="email-help" className="mt-1.5 text-xs text-fg-subtle">
                   Your email is managed through your Google account and can't be
@@ -254,8 +256,8 @@ export default function ProfilePage() {
           </section>
 
           <section className={sectionClassName}>
-            <h2 className="mb-1 text-2xl font-bold text-fg">Default Office</h2>
-            <p className="mb-6 text-sm text-fg-subtle">
+            <h2 className="mb-1 text-base font-bold text-fg">Default Office</h2>
+            <p className="mb-3 text-xs text-fg-subtle">
               Remote means no home office. Use the Remote View to browse offices
               when you plan to visit one.
             </p>
@@ -267,15 +269,16 @@ export default function ProfilePage() {
                 selectedOfficeId={selectedOfficeId}
                 handleSelectOffice={setSelectedOfficeId}
                 officeItemClassName={officeItemClassName}
+                containerClassName="mt-0 gap-4"
               />
             </div>
           </section>
 
           <section className={sectionClassName}>
-            <h2 className="mb-1 text-2xl font-bold text-fg">
+            <h2 className="mb-1 text-base font-bold text-fg">
               Default Schedule
             </h2>
-            <p className="mb-6 text-sm text-fg-subtle">
+            <p className="mb-3 text-xs text-fg-subtle">
               These are your usual in-office days. They pre-fill each new week
               for you to review and confirm.
             </p>
@@ -300,7 +303,7 @@ export default function ProfilePage() {
           </section>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-4">
+        <div className="mt-4 flex items-center justify-end gap-4">
           <span role="status" aria-live="polite" className="text-sm">
             {!isDirty && saveFeedback === "saved" && (
               <span className="text-success">✓ Changes saved</span>
@@ -311,7 +314,7 @@ export default function ProfilePage() {
           </span>
           <button
             type="submit"
-            className="rounded-lg bg-surface px-10 py-1 text-md font-large text-fg shadow-[0px_11.42px_34.26px_0px_#0000000F] hover:bg-surface-sunken"
+            className="rounded-lg border border-line bg-surface px-10 py-1 text-sm font-semibold text-fg shadow-card transition-colors hover:border-line-faint hover:bg-surface-sunken"
           >
             Save Changes
           </button>

@@ -2,6 +2,7 @@ import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import FlameIcon from "@/components/icons/FlameIcon";
 import MinusIcon from "@/components/icons/MinusIcon";
+import { cn } from "@/util/cn";
 
 const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -49,11 +50,13 @@ function PlanningHeader({
           ? "You're planning this day — remove yourself"
           : "Add yourself to this day"
       }
-      className={`${headerBase} border-b border-line transition-colors disabled:cursor-not-allowed ${
+      className={cn(
+        headerBase,
+        "border-b border-line transition-colors disabled:cursor-not-allowed",
         isSelected
-          ? "bg-surface-strong hover:bg-line-strong"
-          : "bg-surface hover:bg-surface-muted"
-      }`}
+          ? "bg-selected hover:bg-line-selected"
+          : "bg-surface hover:bg-surface-sunken",
+      )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
@@ -72,7 +75,6 @@ function PlanningHeader({
         visitorCount={visitorCount}
         isHotSpot={isHotSpot}
         visitorClass="bg-strong text-fg-inverse"
-        emptyClass="text-fg-faint"
         hotSpotClass="bg-strong text-fg-inverse"
       />
     </button>
@@ -88,11 +90,13 @@ function ConfirmedHeader({
 }: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
   return (
     <div
-      className={`${headerBase} border-b ${
+      className={cn(
+        headerBase,
+        "border-b",
         isSelected
           ? "border-strong-hover bg-strong text-fg-inverse"
-          : "border-line bg-surface-strong text-fg"
-      }`}
+          : "border-line bg-surface-strong text-fg",
+      )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
@@ -100,11 +104,12 @@ function ConfirmedHeader({
           dateNumClass={isSelected ? "text-fg-inverse-muted" : "text-fg-subtle"}
         />
         <span
-          className={`${iconCircle} ${
+          className={cn(
+            iconCircle,
             isSelected
               ? "border-fg-inverse text-fg-inverse"
-              : "border-strong text-fg"
-          }`}
+              : "border-strong text-fg",
+          )}
           aria-hidden="true"
         >
           {isSelected ? (
@@ -119,7 +124,6 @@ function ConfirmedHeader({
         visitorCount={visitorCount}
         isHotSpot={isHotSpot}
         visitorClass="bg-surface text-fg"
-        emptyClass={isSelected ? "text-fg-inverse-muted" : "text-fg-faint"}
         hotSpotClass="bg-surface text-fg"
       />
     </div>
@@ -137,10 +141,12 @@ function DayDateLabel({
 }) {
   return (
     <span className="block">
-      <span className={`block text-xl font-bold ${weekdayClass}`}>
+      <span className={cn("block text-xl font-bold", weekdayClass)}>
         {weekdayFormat.format(date)}
       </span>
-      <span className={`block text-sm ${dateNumClass}`}>{date.getDate()}</span>
+      <span className={cn("block text-sm", dateNumClass)}>
+        {date.getDate()}
+      </span>
     </span>
   );
 }
@@ -152,31 +158,25 @@ function BadgeStack({
   visitorCount,
   isHotSpot,
   visitorClass,
-  emptyClass,
   hotSpotClass,
 }: {
   visitorCount: number;
   isHotSpot: boolean;
   visitorClass: string;
-  emptyClass: string;
   hotSpotClass: string;
 }) {
   return (
     <span className="mt-2 flex flex-col items-start gap-2">
       <span className={badgeSlot}>
-        {visitorCount > 0 ? (
-          <span className={`${badge} ${visitorClass}`}>
+        {visitorCount > 0 && (
+          <span className={cn(badge, visitorClass)}>
             {visitorCount} visitors
-          </span>
-        ) : (
-          <span className={`whitespace-nowrap text-xs ${emptyClass}`}>
-            No confirmed plans yet
           </span>
         )}
       </span>
       <span className={badgeSlot}>
         {isHotSpot && (
-          <span className={`${badge} ${hotSpotClass}`}>
+          <span className={cn(badge, hotSpotClass)}>
             Most confirmed
             <FlameIcon className="h-2.5 w-2.5" />
           </span>

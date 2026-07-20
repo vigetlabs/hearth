@@ -4,7 +4,7 @@ import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useOfficeRosterQuery } from "@/util/api/queries/userQueries";
 import { useVisitsQuery } from "@/util/api/queries/visitQueries";
-import LockIcon from "@/components/icons/LockIcon";
+import PencilIcon from "@/components/icons/PencilIcon";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import { addDays, startOfWeek, toDateKey } from "@/util/dates/date";
 import { useSearchParams } from "react-router";
@@ -129,7 +129,7 @@ export default function CalendarPage() {
     // @TODO: Should call mutation to change user's selected visits to "confirmed" status in DB
   }
 
-  function unlockWeek(): void {
+  function editWeek(): void {
     setConfirmedWeeks((current) => {
       const next = new Set(current);
       next.delete(weekKey);
@@ -198,7 +198,7 @@ export default function CalendarPage() {
   )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-surface-muted">
+    <div className="flex flex-1 flex-col overflow-hidden bg-page">
       <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
           <div className="flex items-center gap-3 pb-5">
@@ -246,7 +246,10 @@ export default function CalendarPage() {
 
               <p className="text-sm text-fg-subtle">
                 {isWeekConfirmed ? (
-                  <span className="font-bold text-fg">Confirmed.</span>
+                  <>
+                    <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
+                    Unlock Week to make changes.
+                  </>
                 ) : (
                   <>
                     <span className="font-bold text-fg">Planning.</span> Yet to
@@ -256,13 +259,9 @@ export default function CalendarPage() {
               </p>
 
               {isWeekConfirmed ? (
-                <button
-                  type="button"
-                  onClick={unlockWeek}
-                  className={unlockButton}
-                >
-                  <LockIcon className="h-3.5 w-3.5" />
-                  Unlock Week
+                <button type="button" onClick={editWeek} className={editButton}>
+                  Edit Week
+                  <PencilIcon className="h-5 w-5" />
                 </button>
               ) : (
                 <button
@@ -302,4 +301,4 @@ const darkPillButton =
 
 const confirmButton = `ml-auto ${darkPillButton}`;
 
-const unlockButton = `ml-auto ${darkPillButton}`;
+const editButton = `ml-auto ${darkPillButton}`;

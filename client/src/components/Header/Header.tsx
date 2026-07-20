@@ -2,7 +2,8 @@ import { Link, useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
-import Logo from "@/components/Logo/Logo";
+import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
+import WordLogoLowercase from "@/components/Logo/WordLogoLowercase";
 
 import { useAuth } from "@/util/auth/useAuth";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
@@ -27,17 +28,16 @@ export default function Header() {
         await queryClient.invalidateQueries({
           queryKey: generateCurrentUserKey(),
         });
-        navigate("/users/signin");
+        navigate("/");
       },
     });
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface">
+    <header className="sticky top-0 z-10 border-b border-line bg-surface shadow-[0px_6px_15px_0px_#84392314]">
       <div className="flex items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-3">
-          <Logo className="h-9 w-9" />
-          <span className="text-lg font-bold text-fg">Hearth</span>
+        <Link to="/calendar" className="flex items-center gap-3">
+          <WordLogoLowercase className="h-6" />
         </Link>
 
         <div className="flex items-center gap-6">
@@ -46,23 +46,9 @@ export default function Header() {
           </span>
 
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-semibold text-fg hover:bg-surface-strong focus:outline-none">
+            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-fg hover:bg-surface-strong focus:outline-none">
               Profile
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 4.5 6 7.5 9 4.5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronDownIcon className="h-3 w-3" />
             </DropdownMenu.Trigger>
 
             <DropdownMenu.Portal>

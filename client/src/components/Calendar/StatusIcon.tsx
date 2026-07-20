@@ -3,6 +3,7 @@ import MinusIcon from "@/components/icons/MinusIcon";
 import PlusIcon from "@/components/icons/PlusIcon";
 import XIcon from "@/components/icons/XIcon";
 import type { AttendanceStatus } from "@/types/calendar/calendar";
+import { cn } from "@/util/cn";
 
 /** The four attendance states plus the "add me to this day" affordance. */
 export type StatusMark = AttendanceStatus | "add";
@@ -60,7 +61,12 @@ export function StatusIcon({
   return (
     <span
       aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center rounded-full ${CIRCLE_SIZE[size]} ${VARIANT[variant]} ${className}`}
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full",
+        CIRCLE_SIZE[size],
+        VARIANT[variant],
+        className,
+      )}
     >
       <Glyph className={GLYPH_SIZE[size]} />
     </span>

@@ -47,7 +47,7 @@ export default function OfficeSwitcher({
                 <span className="text-lg" aria-hidden="true">
                   {option.emoji}
                 </span>
-                <span className="text-base capitalize text-fg">
+                <span className="text-base font-semibold capitalize text-fg">
                   {option.name}
                 </span>
               </DropdownMenu.Item>

@@ -1,4 +1,6 @@
+import PickerItem from "@/components/PickerItem/PickerItem";
 import type { Weekday } from "@/types/schedule/schedule";
+import { cn } from "@/util/cn";
 
 type ScheduleDayItemProps = {
   day: Weekday;
@@ -14,22 +16,22 @@ export default function ScheduleDayItem({
   disabled = false,
 }: ScheduleDayItemProps) {
   return (
-    <button
-      type="button"
+    <PickerItem
       onClick={() => onToggle(day.id)}
       disabled={disabled}
       aria-pressed={isSelected}
-      className={`flex aspect-[2/1] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl p-3 text-center text-fg transition-colors hover:border-fill focus-visible:ring-2 focus-visible:ring-line-faint focus-visible:outline-none disabled:cursor-not-allowed ${
+      className={cn(
+        "aspect-[2/1] gap-1 rounded-xl p-3 text-center",
         isSelected
-          ? "border-2 border-line-selected bg-surface-muted"
-          : "border border-line-faint"
-      }`}
+          ? "border border-line-selected bg-selected shadow-[inset_0_0_0_1px_var(--color-line-selected)] hover:border-line-selected hover:bg-selected"
+          : "border border-line bg-surface",
+      )}
     >
-      <span className="text-xl font-bold">{day.label}</span>
+      <span className="text-sm font-bold">{day.label}</span>
 
-      <span className="text-xs text-fg-subtle" aria-hidden="true">
+      <span className="text-[0.625rem] text-fg-subtle" aria-hidden="true">
         {isSelected ? "✓ in office" : "+ add"}
       </span>
-    </button>
+    </PickerItem>
   );
 }
