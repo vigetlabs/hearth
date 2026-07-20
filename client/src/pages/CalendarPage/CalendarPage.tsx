@@ -212,6 +212,7 @@ export default function CalendarPage() {
     isConnected: isPlanningConnected,
     selectDate,
     deselectDate,
+    clearDates,
   } = useOfficePlanning({
     officeId: activeOfficeId ?? null,
     currentUserId: user?.id ?? null,
@@ -291,6 +292,8 @@ export default function CalendarPage() {
 
     createAttendanceConfirmationMutation.mutate(payload, {
       onSuccess: async () => {
+        clearDates(planningWeekDateKeys);
+
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: generateAttendanceConfirmationKey(

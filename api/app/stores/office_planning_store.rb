@@ -52,6 +52,30 @@ class OfficePlanningStore
 
   sig do
     params(
+      dates: T::Array[String],
+      user_id: Integer
+    ).void
+  end
+  def clear(dates:, user_id:)
+    ApplicationRedis.with do |redis|
+      redis.multi do |transaction|
+        dates.each do |date|
+          transaction.zrem(
+            create_office_planning_key(date:, variation: SELECTED),
+            user_id
+          )
+
+          transaction.zrem(
+            create_office_planning_key(date:, variation: DESELECTED),
+            user_id
+          )
+        end
+      end
+    end
+  end
+
+  sig do
+    params(
       selected_dates: T::Array[String],
       deselected_dates: T::Array[String],
       user_id: Integer

@@ -88,6 +88,20 @@ class OfficePlanningChannel < ApplicationCable::Channel
     broadcast_date_snapshot(date:)
   end
 
+  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  def clear(data)
+    dates = DateUtility.validate_dates(data["dates"])
+
+    planning_store.clear(
+      dates:,
+      user_id: current_user.id
+    )
+
+    dates.each do |date|
+      broadcast_date_snapshot(date:)
+    end
+  end
+
   private
 
   sig { returns(Office) }
@@ -144,16 +158,6 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(date: String).void }
   def broadcast_date_snapshot(date:)
-    # user_ids = T.let(
-    #   planning_store.selected_user_ids(date:),
-    #   T::Array[Integer]
-    # )
-    #
-    # users_by_id = T.let(
-    #   load_users(user_ids),
-    #   T::Hash[Integer, User]
-    # )
-
     payload = {
       type: "planning.date.updated",
       office_id: office.id,

@@ -64,9 +64,9 @@ export function Calendar({
         const isEditingWeek =
           editingConfirmedWeek && rosterUser.userId === user.id;
 
-        const isAttendanceConfirmed =
-          rosterUser.status === "confirmed-yes" ||
-          rosterUser.status === "confirmed-no";
+        // const isAttendanceConfirmed =
+        //   rosterUser.status === "confirmed-yes" ||
+        //   rosterUser.status === "confirmed-no";
 
         if (isEditingWeek) {
           if (planningOverrideState === "selected") {
@@ -85,9 +85,9 @@ export function Calendar({
           return rosterUser;
         }
 
-        if (isAttendanceConfirmed) {
-          return rosterUser;
-        }
+        // if (isAttendanceConfirmed) {
+        //   return rosterUser;
+        // }
 
         if (planningOverrideState === "selected") {
           return {

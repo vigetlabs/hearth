@@ -56,6 +56,7 @@ interface UseOfficePlanningResult {
   isConnected: boolean;
   selectDate: (date: string) => void;
   deselectDate: (date: string) => void;
+  clearDates: (dates: string[]) => void;
   refreshSnapshot: () => void;
 }
 
@@ -121,6 +122,13 @@ export function useOfficePlanning({
   const deselectDate = useCallback(
     (date: string) => {
       perform("deselect", { date });
+    },
+    [perform],
+  );
+
+  const clearDates = useCallback(
+    (dates: string[]) => {
+      perform("clear", { dates });
     },
     [perform],
   );
@@ -285,6 +293,7 @@ export function useOfficePlanning({
     isConnected,
     selectDate,
     deselectDate,
+    clearDates,
     refreshSnapshot,
   };
 }
