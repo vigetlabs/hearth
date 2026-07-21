@@ -1,7 +1,9 @@
-import type { Subscription } from "@rails/actioncable";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { cable } from "../cable";
+import {
+  subscribeShared,
+  type SharedSubscription,
+} from "../sharedSubscription";
 import type { AttendanceWeekConfirmedMessage } from "@/types/cable/officeAttendance";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
 import { generateVisitsKey } from "@/util/api/keys/visitKeys";
@@ -27,7 +29,7 @@ export function useOfficeAttending({
   const [connectionState, setConnectionState] =
     useState<ConnectionState | null>(null);
 
-  const subscriptionRef = useRef<Subscription | null>(null);
+  const subscriptionRef = useRef<SharedSubscription | null>(null);
 
   const isConnected =
     officeId !== null &&
@@ -41,7 +43,7 @@ export function useOfficeAttending({
 
     const subscribedOfficeId = officeId;
 
-    const subscription = cable.subscriptions.create(
+    const subscription = subscribeShared<AttendanceWeekConfirmedMessage>(
       {
         channel: "OfficeAttendanceChannel",
         office_id: subscribedOfficeId,
