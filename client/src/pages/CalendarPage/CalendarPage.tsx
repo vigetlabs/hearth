@@ -68,7 +68,11 @@ export default function CalendarPage() {
     : user?.office_id;
 
   const officesQuery = useOfficesQuery();
-  const offices: Office[] = officesQuery.data ?? [];
+  const offices: Office[] = useMemo(
+    () => officesQuery.data ?? [],
+    [officesQuery.data],
+  );
+
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
   const officesById = useMemo(
@@ -196,7 +200,10 @@ export default function CalendarPage() {
     view: "week",
   });
 
-  const currentUserVisits = currentUserVisitsQuery.data ?? [];
+  const currentUserVisits: Visit[] = useMemo(
+    () => currentUserVisitsQuery.data ?? [],
+    [currentUserVisitsQuery.data],
+  );
 
   const currentUserExternalVisitsByDate: Map<string, Visit> = useMemo(
     () =>
