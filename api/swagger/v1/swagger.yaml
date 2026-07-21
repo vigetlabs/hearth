@@ -306,6 +306,42 @@ paths:
             schema:
               "$ref": "#/components/schemas/patch_user_request"
         required: true
+  "/api/v1/visits/mine":
+    get:
+      summary: Retrieves the authenticated user's visits for a calendar range
+      tags:
+      - Visits
+      security:
+      - cookie_auth: []
+      parameters:
+      - name: date
+        in: query
+        required: false
+        schema:
+          "$ref": "#/components/schemas/visit_date"
+        description: Anchor date for the calendar range. Defaults to the current date.
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - week
+          default: week
+        description: Calendar view used to calculate the returned range.
+      responses:
+        '200':
+          description: user visits fetched successfully
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/visits_response"
+        '400':
+          description: invalid query parameters
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
   "/api/v1/visits":
     get:
       summary: Retrieves visits for a calendar range
