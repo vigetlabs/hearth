@@ -1,17 +1,68 @@
+import { useEffect, useState } from "react";
+
 import SigninForm from "@/components/SigninForm/SigninForm";
 import WordLogo from "@/components/Logo/WordLogo";
+
+import "./SigninPage.css";
 
 // Decorative emoji badges that float in the page margins around the sign-in
 // card. Purely ornamental, so they are hidden from assistive tech and only
 // shown on wide screens where there is room in the margins.
+// `float` picks one of the drifting keyframe tracks defined in App.css and the
+// speed/offset that give each badge its own slow, out-of-sync wander.
 const EMOJI_BADGES = [
-  { emoji: "🐂", position: "left-[19%] top-[27%]" },
-  { emoji: "🌸", position: "right-[13%] top-[34%]" },
-  { emoji: "🚂", position: "left-[7%] top-[55%]" },
-  { emoji: "⛰️", position: "right-[8%] top-[57%]" },
+  {
+    emoji: "🐂",
+    position: "left-[19%] top-[27%]",
+    float: { animation: "badge-float-a 8s ease-in-out infinite", delay: "0s" },
+  },
+  {
+    emoji: "🌸",
+    position: "right-[13%] top-[34%]",
+    float: {
+      animation: "badge-float-b 10s ease-in-out infinite",
+      delay: "-4s",
+    },
+  },
+  {
+    emoji: "🚂",
+    position: "left-[7%] top-[55%]",
+    float: {
+      animation: "badge-float-c 9s ease-in-out infinite",
+      delay: "-9s",
+    },
+  },
+  {
+    emoji: "⛰️",
+    position: "right-[8%] top-[57%]",
+    float: {
+      animation: "badge-float-d 11s ease-in-out infinite",
+      delay: "-6s",
+    },
+  },
 ];
 
 export default function SigninPage() {
+  // Pause the drifting badges whenever this screen isn't actually being looked
+  // at — either the tab is hidden (another tab is focused) or the browser
+  // window itself has lost focus to another desktop window. `visibilitychange`
+  // only covers the tab case, so we also watch window focus/blur and require
+  // both the page to be visible and to have focus for the badges to run.
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    const update = () => setPaused(document.hidden || !document.hasFocus());
+    update();
+    document.addEventListener("visibilitychange", update);
+    window.addEventListener("focus", update);
+    window.addEventListener("blur", update);
+    return () => {
+      document.removeEventListener("visibilitychange", update);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("blur", update);
+    };
+  }, []);
+
   return (
     <div className="relative flex min-h-screen flex-1 flex-col overflow-hidden bg-page">
       {/* Faint background grid lines */}
@@ -34,10 +85,15 @@ export default function SigninPage() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 hidden lg:block"
       >
-        {EMOJI_BADGES.map(({ emoji, position }) => (
+        {EMOJI_BADGES.map(({ emoji, position, float }) => (
           <div
             key={emoji}
-            className={`absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line bg-surface text-[30px] shadow-[0px_10px_24px_-4px_#66381A29] ${position}`}
+            className={`badge-float absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line bg-surface text-[30px] shadow-[0px_10px_24px_-4px_#66381A29] ${position}`}
+            style={{
+              animation: float.animation,
+              animationDelay: float.delay,
+              animationPlayState: paused ? "paused" : "running",
+            }}
           >
             {/* leading-[0] collapses the line box so flex centers the glyph
                 itself rather than the baseline-aligned text line */}
