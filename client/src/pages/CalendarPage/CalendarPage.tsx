@@ -18,7 +18,10 @@ import { useWeekAttendanceConfirmation } from "@/util/api/mutations/attendanceCo
 import { useAttendanceConfirmationsQuery } from "@/util/api/queries/attendanceConfirmationQueries";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useOfficeRosterQuery } from "@/util/api/queries/userQueries";
-import { useVisitsQuery } from "@/util/api/queries/visitQueries";
+import {
+  useCurrentVisitsQuery,
+  useVisitsQuery,
+} from "@/util/api/queries/visitQueries";
 import { useAuth } from "@/util/auth/useAuth";
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { buildWeekSchedule } from "@/util/calendar/schedule";
@@ -30,6 +33,7 @@ import type {
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
+import type { Visit } from "@/types/api/visits";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -181,6 +185,23 @@ export default function CalendarPage() {
     office_id: activeOfficeId ?? 1,
   });
 
+  const currentUserVisitsQuery = useCurrentVisitsQuery({
+    date: focusedWeekStartDateKey,
+    view: "week",
+  });
+
+  const currentUserVisits = currentUserVisitsQuery.data ?? [];
+
+  const currentUserExternalVisitsByDate: Map<string, Visit> = useMemo(
+    () =>
+      new Map(
+        currentUserVisits
+          .filter((visit) => visit.office_id !== activeOfficeId)
+          .map((visit) => [visit.visit_date, visit]),
+      ),
+    [currentUserVisits, activeOfficeId],
+  );
+
   /* === ATTENDANCE LOGIC ===
    *
    * This logic handles the attendance statuses within the calendar page. These are the following possible
@@ -243,6 +264,8 @@ export default function CalendarPage() {
         officeVisitsQuery.data ?? [],
         weekDates,
         confirmedUserIds,
+        user?.id,
+        currentUserExternalVisitsByDate,
       ),
     [
       officeRosterQuery.data,
@@ -261,6 +284,10 @@ export default function CalendarPage() {
       .filter((date: Date) => {
         const dateKey: string = generateDateKey(date);
         const rosterUsers: RosterUser[] = schedule[dateKey] ?? [];
+
+        if (currentUserExternalVisitsByDate.has(dateKey)) {
+          return false;
+        }
 
         const curRosterUser = rosterUsers.find(
           (rosterUser) => rosterUser.userId === user.id,

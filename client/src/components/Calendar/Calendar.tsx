@@ -66,9 +66,14 @@ export function Calendar({
         const isEditingWeek =
           editingConfirmedWeek && rosterUser.userId === user.id;
 
-        // const isAttendanceConfirmed =
-        //   rosterUser.status === "confirmed-yes" ||
-        //   rosterUser.status === "confirmed-no";
+        const isPersistedStatus =
+          rosterUser.status === "confirmed-yes" ||
+          rosterUser.status === "confirmed-no" ||
+          rosterUser.status === "confirmed-elsewhere";
+
+        if (isPersistedStatus && !isEditingWeek) {
+          return rosterUser;
+        }
 
         if (isEditingWeek) {
           if (planningOverrideState === "selected") {
@@ -86,10 +91,6 @@ export function Calendar({
           }
           return rosterUser;
         }
-
-        // if (isAttendanceConfirmed) {
-        //   return rosterUser;
-        // }
 
         if (planningOverrideState === "selected") {
           return {
@@ -135,15 +136,17 @@ export function Calendar({
 
     const baseDay = schedule[key] ?? EMPTY_DAY;
 
+    const currentPerson = baseDay.find((person) => person.userId === user.id);
+
+    if (currentPerson?.status === "confirmed-elsewhere") {
+      return;
+    }
+
     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
       day: baseDay,
       userId: user.id,
     });
 
-    /*
-     * Confirmed visits remain immutable outside
-     * explicit edit mode.
-     */
     if (hasConfirmedVisit && !editingConfirmedWeek) {
       return;
     }
@@ -245,7 +248,7 @@ export function Calendar({
         {days.map((day, index) => {
           const key = generateDateKey(day);
 
-          const dayData = attendance[key] ?? EMPTY_DAY;
+          const rosterUsers: RosterUser[] = attendance[key] ?? EMPTY_DAY;
 
           const visitorCount = counts[index];
 
@@ -253,14 +256,14 @@ export function Calendar({
             <DayCell
               key={key}
               date={day}
-              people={dayData}
+              rosterUsers={rosterUsers}
               myUserId={user.id}
-              isMine={dayData.some(
+              isMine={rosterUsers.some(
                 (person) =>
                   person.userId === user.id && isInOffice(person.status),
               )}
               visitorCount={visitorCount}
-              total={dayData.length}
+              total={rosterUsers.length}
               isHotSpot={hotSpotDays.has(index)}
               locked={locked}
               onToggleMine={() => toggleMine(key)}

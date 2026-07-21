@@ -3,7 +3,11 @@
 // they've locked it in. "planning-no" is the default for anyone unlisted
 // (tentatively/planning to be out).
 export type AttendanceStatus =
-  "confirmed-yes" | "planning-yes" | "planning-no" | "confirmed-no";
+  | "confirmed-yes"
+  | "planning-yes"
+  | "planning-no"
+  | "confirmed-no"
+  | "confirmed-elsewhere";
 
 /** Whether a status counts as being in the office (as opposed to out). */
 export const isInOffice = (status: AttendanceStatus) =>

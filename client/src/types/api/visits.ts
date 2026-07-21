@@ -13,3 +13,8 @@ export interface GetVisitsParams {
   view?: "week";
   office_id: number;
 }
+
+export interface GetCurrentUserVisitsParams {
+  date?: string;
+  view?: "week";
+}

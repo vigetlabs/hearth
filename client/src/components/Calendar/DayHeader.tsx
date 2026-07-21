@@ -20,6 +20,7 @@ interface DayHeaderProps {
   myUserId: number;
   /** Toggle the logged-in user in/out of the office for this day. */
   onToggleMine: () => void;
+  isConfirmedElsewhere: boolean;
 }
 
 export function DayHeader({ locked, ...props }: DayHeaderProps) {
@@ -38,6 +39,7 @@ function PlanningHeader({
   isHotSpot,
   myUserId,
   onToggleMine,
+  isConfirmedElsewhere,
 }: Omit<DayHeaderProps, "locked">) {
   return (
     <button
@@ -52,10 +54,12 @@ function PlanningHeader({
       }
       className={cn(
         headerBase,
-        "border-b border-line transition-colors disabled:cursor-not-allowed",
-        isSelected
-          ? "bg-selected hover:bg-line-selected"
-          : "bg-surface hover:bg-surface-sunken",
+        "border-b border-line transition-colors disabled::cursor-not-allowed",
+        isConfirmedElsewhere
+          ? "bg-red-500"
+          : isSelected
+            ? "bg-selected hover:bg-line-selected"
+            : "bg-surface hover:bg-surface-sunk"
       )}
     >
       <span className="flex items-start justify-between">
@@ -87,15 +91,18 @@ function ConfirmedHeader({
   isSelected,
   visitorCount,
   isHotSpot,
+  isConfirmedElsewhere,
 }: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
   return (
     <div
       className={cn(
         headerBase,
         "border-b",
-        isSelected
-          ? "border-strong-hover bg-strong text-fg-inverse"
-          : "border-line bg-surface-strong text-fg",
+        isConfirmedElsewhere
+          ? "bg-red-500"
+          : isSelected
+            ? "border-strong-hover bg-strong text-fg-inverse"
+            : "border-line bg-surface-strong text-fg"
       )}
     >
       <span className="flex items-start justify-between">

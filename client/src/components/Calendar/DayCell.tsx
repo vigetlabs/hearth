@@ -5,7 +5,7 @@ import type { RosterUser } from "@/types/calendar/calendar";
 interface DayCellProps {
   date: Date;
   /** The full office roster with each person's status for this day. */
-  people: RosterUser[];
+  rosterUsers: RosterUser[];
   myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */
@@ -25,7 +25,7 @@ interface DayCellProps {
 
 export function DayCell({
   date,
-  people,
+  rosterUsers,
   myUserId,
   isMine,
   visitorCount,
@@ -43,9 +43,14 @@ export function DayCell({
         locked={locked}
         myUserId={myUserId}
         onToggleMine={onToggleMine}
+        isConfirmedElsewhere={rosterUsers.some(
+          (person) =>
+            person.userId == myUserId &&
+            person.status === "confirmed-elsewhere",
+        )}
       />
 
-      <DayRoster date={date} people={people} myUserId={myUserId} />
+      <DayRoster date={date} rosterUsers={rosterUsers} myUserId={myUserId} />
     </div>
   );
 }

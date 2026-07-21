@@ -67,6 +67,8 @@ export function buildWeekSchedule(
   visits: Visit[],
   weekDates: Date[],
   confirmedUserIds: ReadonlySet<number>,
+  currentUserId: number,
+  currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>,
 ): WeekSchedule {
   const visitsByUserAndDate = new Map(
     visits.map((visit) => [
@@ -88,12 +90,19 @@ export function buildWeekSchedule(
         generateUserIdVisitKey(user.id, dateKey),
       );
 
-      const status: AttendanceStatus = homeUserStatus({
-        user,
-        visit,
-        weekday,
-        isWeekConfirmed: confirmedUserIds.has(user.id),
-      });
+      const externalVisit =
+        user.id === currentUserId
+          ? currentUserExternalVisitsByDate.get(dateKey)
+          : undefined;
+
+      const status: AttendanceStatus = externalVisit
+        ? "confirmed-elsewhere"
+        : homeUserStatus({
+            user,
+            visit,
+            weekday,
+            isWeekConfirmed: confirmedUserIds.has(user.id),
+          });
 
       return buildRosterUser(user, status);
     });
