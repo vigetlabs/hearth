@@ -21,6 +21,8 @@ interface DayCellProps {
   locked: boolean;
   /** Toggle the logged-in user in/out of the office for this day. */
   onToggleMine: () => void;
+  isConfirmedElsewhere: boolean;
+  externalOfficeName: string;
 }
 
 export function DayCell({
@@ -32,6 +34,8 @@ export function DayCell({
   isHotSpot,
   locked,
   onToggleMine,
+  isConfirmedElsewhere,
+  externalOfficeName,
 }: DayCellProps) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -43,11 +47,13 @@ export function DayCell({
         locked={locked}
         myUserId={myUserId}
         onToggleMine={onToggleMine}
-        isConfirmedElsewhere={rosterUsers.some(
-          (person) =>
-            person.userId == myUserId &&
-            person.status === "confirmed-elsewhere",
-        )}
+        // isConfirmedElsewhere={rosterUsers.some(
+        //   (person) =>
+        //     person.userId == myUserId &&
+        //     person.status === "confirmed-elsewhere",
+        // )}
+        isConfirmedElsewhere={isConfirmedElsewhere}
+        externalOfficeName={externalOfficeName}
       />
 
       <DayRoster date={date} rosterUsers={rosterUsers} myUserId={myUserId} />

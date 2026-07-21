@@ -34,6 +34,7 @@ import type {
 } from "@/types/cable/officePlanning";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
 import type { Visit } from "@/types/api/visits";
+import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -69,6 +70,11 @@ export default function CalendarPage() {
   const officesQuery = useOfficesQuery();
   const offices: Office[] = officesQuery.data ?? [];
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
+
+  const officesById = useMemo(
+    () => new Map(offices.map((office) => [office.id, office])),
+    [offices],
+  );
 
   const activeOffice: Office =
     findActiveOffice(offices, activeOfficeId) ?? defaultOffice;
@@ -202,6 +208,17 @@ export default function CalendarPage() {
     [currentUserVisits, activeOfficeId],
   );
 
+  const externalOfficeNamesByDate = useMemo(
+    () =>
+      new Map(
+        [...currentUserExternalVisitsByDate].map(([date, visit]) => [
+          date,
+          officesById.get(visit.office_id)?.name ?? "[NO NAME]",
+        ]),
+      ),
+    [currentUserExternalVisitsByDate, officesById],
+  );
+
   /* === ATTENDANCE LOGIC ===
    *
    * This logic handles the attendance statuses within the calendar page. These are the following possible
@@ -272,6 +289,8 @@ export default function CalendarPage() {
       officeVisitsQuery.data,
       weekDates,
       confirmedUserIds,
+      user?.id,
+      currentUserExternalVisitsByDate,
     ],
   );
 
@@ -344,6 +363,12 @@ export default function CalendarPage() {
               view: "week",
               office_id: activeOfficeId,
             }),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: generateCurrentUserVisitsKey(
+              focusedWeekStartDateKey,
+              "week",
+            ),
           }),
         ]);
 
@@ -480,6 +505,8 @@ export default function CalendarPage() {
             isPlanningConnected={isPlanningConnected}
             isAttendingConnected={isAttendingConnected}
             onPlanningToggle={handlePlanningToggle}
+            currentUserExternalVisitsByDate={currentUserExternalVisitsByDate}
+            externalOfficeNamesByDate={externalOfficeNamesByDate}
           />
         </div>
       </div>

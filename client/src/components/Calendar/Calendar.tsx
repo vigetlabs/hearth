@@ -20,6 +20,7 @@ import {
   resolveAttendance,
   resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
+import type { Visit } from "@/types/api/visits";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
@@ -38,6 +39,8 @@ interface CalendarProps {
   isAttendingConnected: boolean;
   onPlanningToggle: (date: string, attending: boolean) => void;
   editingConfirmedWeek: boolean;
+  currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>;
+  externalOfficeNamesByDate: ReadonlyMap<string, string>;
 }
 
 export function Calendar({
@@ -51,6 +54,8 @@ export function Calendar({
   isAttendingConnected,
   onPlanningToggle,
   editingConfirmedWeek,
+  currentUserExternalVisitsByDate,
+  externalOfficeNamesByDate,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
@@ -134,13 +139,19 @@ export function Calendar({
       return;
     }
 
-    const baseDay = schedule[key] ?? EMPTY_DAY;
+    const externalVisit = currentUserExternalVisitsByDate.get(key);
 
-    const currentPerson = baseDay.find((person) => person.userId === user.id);
-
-    if (currentPerson?.status === "confirmed-elsewhere") {
+    if (externalVisit) {
       return;
     }
+
+    const baseDay = schedule[key] ?? EMPTY_DAY;
+
+    // const currentPerson = baseDay.find((person) => person.userId === user.id);
+
+    // if (currentPerson?.status === "confirmed-elsewhere") {
+    //   return;
+    // }
 
     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
       day: baseDay,
@@ -252,21 +263,29 @@ export function Calendar({
 
           const visitorCount = counts[index];
 
+          const externalVisit = currentUserExternalVisitsByDate.get(key);
+          const isElsewhere = externalVisit !== undefined;
+
           return (
             <DayCell
               key={key}
               date={day}
               rosterUsers={rosterUsers}
               myUserId={user.id}
-              isMine={rosterUsers.some(
-                (person) =>
-                  person.userId === user.id && isInOffice(person.status),
-              )}
+              isMine={
+                !isElsewhere &&
+                rosterUsers.some(
+                  (person) =>
+                    person.userId === user.id && isInOffice(person.status),
+                )
+              }
               visitorCount={visitorCount}
               total={rosterUsers.length}
               isHotSpot={hotSpotDays.has(index)}
               locked={locked}
               onToggleMine={() => toggleMine(key)}
+              isConfirmedElsewhere={isElsewhere}
+              externalOfficeName={externalOfficeNamesByDate.get(key)}
             />
           );
         })}

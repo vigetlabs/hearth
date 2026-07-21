@@ -21,6 +21,7 @@ interface DayHeaderProps {
   /** Toggle the logged-in user in/out of the office for this day. */
   onToggleMine: () => void;
   isConfirmedElsewhere: boolean;
+  externalOfficeName: string;
 }
 
 export function DayHeader({ locked, ...props }: DayHeaderProps) {
@@ -59,7 +60,7 @@ function PlanningHeader({
           ? "bg-red-500"
           : isSelected
             ? "bg-selected hover:bg-line-selected"
-            : "bg-surface hover:bg-surface-sunk"
+            : "bg-surface hover:bg-surface-sunk",
       )}
     >
       <span className="flex items-start justify-between">
@@ -102,7 +103,7 @@ function ConfirmedHeader({
           ? "bg-red-500"
           : isSelected
             ? "border-strong-hover bg-strong text-fg-inverse"
-            : "border-line bg-surface-strong text-fg"
+            : "border-line bg-surface-strong text-fg",
       )}
     >
       <span className="flex items-start justify-between">
