@@ -63,15 +63,16 @@ export default function CalendarPage() {
   const parsedOfficeId: number | null = officeIdParam
     ? Number(officeIdParam)
     : undefined;
-  const activeOfficeId: number = Number.isFinite(parsedOfficeId)
-    ? parsedOfficeId
-    : user?.office_id;
 
   const officesQuery = useOfficesQuery();
   const offices: Office[] = useMemo(
     () => officesQuery.data ?? [],
     [officesQuery.data],
   );
+
+  const activeOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
+    ? parsedOfficeId
+    : (user?.office_id ?? offices[0]?.id);
 
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
@@ -265,7 +266,7 @@ export default function CalendarPage() {
     dates: planningWeekDateKeys,
   });
 
-  const { isConnected: isAttendingConnected } = useOfficeAttending({
+  useOfficeAttending({
     officeId: activeOfficeId ?? null,
   });
 
@@ -510,7 +511,6 @@ export default function CalendarPage() {
             user={user}
             planningByDate={planningStatesByDate}
             isPlanningConnected={isPlanningConnected}
-            isAttendingConnected={isAttendingConnected}
             onPlanningToggle={handlePlanningToggle}
             currentUserExternalVisitsByDate={currentUserExternalVisitsByDate}
             externalOfficeNamesByDate={externalOfficeNamesByDate}

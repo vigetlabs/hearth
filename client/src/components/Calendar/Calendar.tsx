@@ -36,7 +36,6 @@ interface CalendarProps {
   user: User;
   planningByDate: OfficeDatesPlanningOverrideStates;
   isPlanningConnected: boolean;
-  isAttendingConnected: boolean;
   onPlanningToggle: (date: string, attending: boolean) => void;
   editingConfirmedWeek: boolean;
   currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>;
@@ -51,7 +50,6 @@ export function Calendar({
   user,
   planningByDate,
   isPlanningConnected,
-  isAttendingConnected,
   onPlanningToggle,
   editingConfirmedWeek,
   currentUserExternalVisitsByDate,
@@ -68,32 +66,7 @@ export function Calendar({
         const planningOverrideState: PlanningOverrideState =
           planningOverrideStateForUser(overrides, rosterUser.userId);
 
-        const isEditingWeek =
-          editingConfirmedWeek && rosterUser.userId === user.id;
-
-        const isPersistedStatus =
-          rosterUser.status === "confirmed-yes" ||
-          rosterUser.status === "confirmed-no" ||
-          rosterUser.status === "confirmed-elsewhere";
-
-        if (isPersistedStatus && !isEditingWeek) {
-          return rosterUser;
-        }
-
-        if (isEditingWeek) {
-          if (planningOverrideState === "selected") {
-            return {
-              ...rosterUser,
-              status: "planning-yes",
-            };
-          }
-
-          if (planningOverrideState === "deselected") {
-            return {
-              ...rosterUser,
-              status: "planning-no",
-            };
-          }
+        if (rosterUser.status === "confirmed-elsewhere") {
           return rosterUser;
         }
 
@@ -135,7 +108,7 @@ export function Calendar({
   }
 
   function toggleMine(key: string): void {
-    if (!myName || locked || !isPlanningConnected || !isAttendingConnected) {
+    if (!myName || locked || !isPlanningConnected) {
       return;
     }
 
