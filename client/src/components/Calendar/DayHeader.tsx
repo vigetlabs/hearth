@@ -41,21 +41,24 @@ function PlanningHeader({
   myUserId,
   onToggleMine,
   isConfirmedElsewhere,
+  externalOfficeName,
 }: Omit<DayHeaderProps, "locked">) {
   return (
     <button
       type="button"
       onClick={onToggleMine}
-      disabled={!myUserId}
+      disabled={!myUserId || isConfirmedElsewhere}
       aria-pressed={isSelected}
       aria-label={
-        isSelected
-          ? "You're planning this day — remove yourself"
-          : "Add yourself to this day"
+        isConfirmedElsewhere
+          ? `Confirmed at ${externalOfficeName}`
+          : isSelected
+            ? "You're planning this day — remove yourself"
+            : "Add yourself to this day"
       }
       className={cn(
         headerBase,
-        "border-b border-line transition-colors disabled::cursor-not-allowed",
+        "border-b border-line transition-colors disabled:cursor-not-allowed",
         isConfirmedElsewhere
           ? "bg-red-500"
           : isSelected
@@ -69,12 +72,19 @@ function PlanningHeader({
           weekdayClass="text-fg"
           dateNumClass="text-fg-subtle"
         />
+
         <StatusIcon
           size="lg"
           variant="dashed"
           mark={isSelected ? "confirmed-yes" : "add"}
         />
       </span>
+
+      {isConfirmedElsewhere && (
+        <span className="mt-2 block text-sm font-semibold">
+          Confirmed at {externalOfficeName}
+        </span>
+      )}
 
       <BadgeStack
         visitorCount={visitorCount}
@@ -93,14 +103,15 @@ function ConfirmedHeader({
   visitorCount,
   isHotSpot,
   isConfirmedElsewhere,
-}: Omit<DayHeaderProps, "locked" | "myName" | "onToggleMine">) {
+  externalOfficeName,
+}: Omit<DayHeaderProps, "locked" | "myUserId" | "onToggleMine">) {
   return (
     <div
       className={cn(
         headerBase,
         "border-b",
         isConfirmedElsewhere
-          ? "bg-red-500"
+          ? "border-red-700 bg-red-500 text-white"
           : isSelected
             ? "border-strong-hover bg-strong text-fg-inverse"
             : "border-line bg-surface-strong text-fg",
@@ -109,14 +120,24 @@ function ConfirmedHeader({
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          dateNumClass={isSelected ? "text-fg-inverse-muted" : "text-fg-subtle"}
+          weekdayClass={isConfirmedElsewhere ? "text-white" : ""}
+          dateNumClass={
+            isConfirmedElsewhere
+              ? "text-white/80"
+              : isSelected
+                ? "text-fg-inverse-muted"
+                : "text-fg-subtle"
+          }
         />
+
         <span
           className={cn(
             iconCircle,
-            isSelected
-              ? "border-fg-inverse text-fg-inverse"
-              : "border-strong text-fg",
+            isConfirmedElsewhere
+              ? "border-white text-white"
+              : isSelected
+                ? "border-fg-inverse text-fg-inverse"
+                : "border-strong text-fg",
           )}
           aria-hidden="true"
         >
@@ -127,6 +148,12 @@ function ConfirmedHeader({
           )}
         </span>
       </span>
+
+      {isConfirmedElsewhere && (
+        <span className="mt-2 block text-sm font-semibold">
+          Confirmed at {externalOfficeName}
+        </span>
+      )}
 
       <BadgeStack
         visitorCount={visitorCount}
