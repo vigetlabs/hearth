@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { cable } from "./cable";
+import { subscribeShared } from "./sharedSubscription";
 import type { User } from "@/types/api/users";
 
 interface PresenceSnapshot {
@@ -16,7 +16,7 @@ export function useOfficePresence(officeId: number | undefined): User[] {
       return;
     }
 
-    const subscription = cable.subscriptions.create(
+    const subscription = subscribeShared<PresenceSnapshot>(
       {
         channel: "OfficePresenceChannel",
         office_id: officeId,
