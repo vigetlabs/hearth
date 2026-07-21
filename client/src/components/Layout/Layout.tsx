@@ -6,11 +6,11 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const HIDE_HEADER_PATHS = ["/users/office", "/users/schedule"];
+const SHOW_HEADER_PATHS = ["/calendar", "/users/profile"];
 
 export default function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
-  const showHeader = !HIDE_HEADER_PATHS.includes(pathname);
+  const showHeader = SHOW_HEADER_PATHS.includes(pathname);
 
   return (
     <AuthProvider>
