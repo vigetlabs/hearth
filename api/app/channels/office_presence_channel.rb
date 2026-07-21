@@ -5,8 +5,7 @@ class OfficePresenceChannel < ApplicationCable::Channel
   def subscribed
     @office = find_office(params[:office_id])
 
-    return reject unless @office
-    return reject unless allowed_to_view?(current_user)
+    return reject unless @office && allowed_to_view?(current_user)
 
     stream_for @office
 
