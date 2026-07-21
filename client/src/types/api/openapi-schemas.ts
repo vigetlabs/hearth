@@ -596,6 +596,56 @@ export interface paths {
     };
     trace?: never;
   };
+  "/api/v1/visits/mine": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieves the authenticated user's visits for a calendar range */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Anchor date for the calendar range. Defaults to the current date. */
+          date?: components["schemas"]["visit_date"];
+          /** @description Calendar view used to calculate the returned range. */
+          view?: "week";
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description user visits fetched successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "Application/json": components["schemas"]["visits_response"];
+          };
+        };
+        /** @description invalid query parameters */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "Application/json": components["schemas"]["bad_request_error_response"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/visits": {
     parameters: {
       query?: never;
