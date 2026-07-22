@@ -29,6 +29,14 @@ if changed_matching '(^api/|^docker-compose\.dev\.yml$|^api/Gemfile|^api/Gemfile
   echo "API files changed. Running RSpec..."
   scripts/get-branch-project bundle exec rspec
 
+  echo "Verifying Gems and DSL files with Tapioca..."
+  scripts/get-branch-project \
+    sh -c 'bundle exec tapioca gem --verify &&
+           bundle exec tapioca dsl --verify'
+
+  echo "Running Sorbet..."
+  scripts/get-branch-project bundle exec srb tc
+
   echo "Running Rubocop..."
   scripts/get-branch-project bundle exec rubocop
 

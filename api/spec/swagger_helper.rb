@@ -56,7 +56,6 @@ RSpec.configure do |config|
           offices_response: OpenApi::Schemas::V1::Offices::OFFICES_RESPONSE,
 
           visit: OpenApi::Schemas::V1::Visits::VISIT_OBJECT,
-          visit_status: OpenApi::Schemas::V1::Visits::VISIT_STATUS,
           visit_date: OpenApi::Schemas::V1::Visits::VISIT_DATE,
           create_visits_request: OpenApi::Schemas::V1::Visits::CREATE_VISITS_REQUEST,
           visit_response: OpenApi::Schemas::V1::Visits::VISIT_RESPONSE,
@@ -67,7 +66,14 @@ RSpec.configure do |config|
           users_response: OpenApi::Schemas::V1::Users::USERS_RESPONSE,
           create_user_request: OpenApi::Schemas::V1::Users::CREATE_USER_REQUEST,
           login_user_request: OpenApi::Schemas::V1::Users::LOGIN_USER_REQUEST,
-          patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST
+          patch_user_request: OpenApi::Schemas::V1::Users::PATCH_USER_REQUEST,
+
+          attendance_confirmation: OpenApi::Schemas::V1::AttendanceConfirmations::ATTENDANCE_CONFIRMATION_OBJECT,
+          create_attendance_confirmation_request: OpenApi::Schemas::V1::AttendanceConfirmations::CREATE_ATTENDANCE_CONFIRMATION_REQUEST,
+          attendance_confirmations_response: OpenApi::Schemas::V1::AttendanceConfirmations::ATTENDANCE_CONFIRMATIONS_RESPONSE,
+          create_attendance_confirmation_response: OpenApi::Schemas::V1::AttendanceConfirmations::CREATE_ATTENDANCE_CONFIRMATION_RESPONSE
+
+
         }
       }
     }

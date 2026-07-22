@@ -1,11 +1,11 @@
 import { DayHeader } from "@/components/Calendar/DayHeader";
 import { DayRoster } from "@/components/Calendar/DayRoster";
-import type { PersonStatus } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
 
 interface DayCellProps {
   date: Date;
   /** The full office roster with each person's status for this day. */
-  people: PersonStatus[];
+  rosterUsers: RosterUser[];
   myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */
@@ -21,17 +21,21 @@ interface DayCellProps {
   locked: boolean;
   /** Toggle the logged-in user in/out of the office for this day. */
   onToggleMine: () => void;
+  isConfirmedElsewhere: boolean;
+  externalOfficeName: string;
 }
 
 export function DayCell({
   date,
-  people,
+  rosterUsers,
   myUserId,
   isMine,
   visitorCount,
   isHotSpot,
   locked,
   onToggleMine,
+  isConfirmedElsewhere,
+  externalOfficeName,
 }: DayCellProps) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -43,9 +47,16 @@ export function DayCell({
         locked={locked}
         myUserId={myUserId}
         onToggleMine={onToggleMine}
+        // isConfirmedElsewhere={rosterUsers.some(
+        //   (person) =>
+        //     person.userId == myUserId &&
+        //     person.status === "confirmed-elsewhere",
+        // )}
+        isConfirmedElsewhere={isConfirmedElsewhere}
+        externalOfficeName={externalOfficeName}
       />
 
-      <DayRoster date={date} people={people} myUserId={myUserId} />
+      <DayRoster date={date} rosterUsers={rosterUsers} myUserId={myUserId} />
     </div>
   );
 }

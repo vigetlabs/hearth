@@ -7,7 +7,7 @@ import type {
   StatusVariant,
 } from "@/components/Calendar/StatusIcon";
 import NudgeIcon from "@/components/icons/NudgeIcon";
-import type { PersonStatus } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
 import { isFuture } from "@/util/dates/date";
 import { cn } from "@/util/cn";
 
@@ -15,7 +15,7 @@ interface DayRosterProps {
   /** The day this roster is for; nudging is only allowed for future days. */
   date: Date;
   /** The full office roster with each person's status for this day. */
-  people: PersonStatus[];
+  rosterUsers: RosterUser[];
   myUserId: number;
 }
 
@@ -24,21 +24,25 @@ type Tab = "in" | "out";
 /** Replaces the per-status dropdowns with a two-way toggle: one side lists
     everyone in the office (split into confirmed vs. still-planning), the other
     lists everyone who's out. */
-export function DayRoster({ date, people, myUserId }: DayRosterProps) {
+export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
   // Only nudge for upcoming days — today and past days are too late.
   const canNudge = isFuture(date);
 
-  const confirmed = people
-    .filter((person) => person.status === "confirmed-yes")
+  const confirmed = rosterUsers
+    .filter((rosterUser) => rosterUser.status === "confirmed-yes")
     .sort(byName);
-  const planning = people
-    .filter((person) => person.status === "planning-yes")
+  const planning = rosterUsers
+    .filter((rosterUser) => rosterUser.status === "planning-yes")
     .sort(byName);
-  const confirmedOut = people
-    .filter((person) => person.status === "confirmed-no")
+  const confirmedOut = rosterUsers
+    .filter(
+      (rosterUser) =>
+        rosterUser.status === "confirmed-no" ||
+        rosterUser.status === "confirmed-elsewhere",
+    )
     .sort(byName);
-  const plannedOut = people
-    .filter((person) => person.status === "planning-no")
+  const plannedOut = rosterUsers
+    .filter((rosterUser) => rosterUser.status === "planning-no")
     .sort(byName);
 
   const confirmedInCount = confirmed.length;
@@ -138,8 +142,7 @@ export function DayRoster({ date, people, myUserId }: DayRosterProps) {
   );
 }
 
-const byName = (a: PersonStatus, b: PersonStatus) =>
-  a.name.localeCompare(b.name);
+const byName = (a: RosterUser, b: RosterUser) => a.name.localeCompare(b.name);
 
 function TabButton({
   active,
@@ -193,7 +196,7 @@ function RosterRow({
   muted = false,
   nudgeable = false,
 }: {
-  person: PersonStatus;
+  person: RosterUser;
   myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;

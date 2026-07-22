@@ -7,7 +7,7 @@ class Api::V1::Visits::VisitsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
   rescue_from ActionController::BadRequest, with: :handle_bad_request
 
-  before_action :authenticate_user!, only: [ :create, :index ]
+  before_action :authenticate_user!, only: [ :create, :index, :mine ]
 
   CALENDAR_VIEWS = %w[week]
 
@@ -31,6 +31,27 @@ class Api::V1::Visits::VisitsController < ApplicationController
     success_response(
       data: data,
       message: "Fetched visits successfully"
+    )
+  end
+
+  def mine
+    range = date_range
+
+    visits = current_user
+      .visits
+      .where(visit_date: range)
+      .order(:visit_date)
+
+    serialized_visits = VisitSerializer
+      .new(visits)
+      .serializable_hash[:data]
+      .map { |visit| visit[:attributes] }
+
+    data = { visits: serialized_visits }
+
+    success_response(
+      data: data,
+      message: "Fetched current user's visits successfully"
     )
   end
 

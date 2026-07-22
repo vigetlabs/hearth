@@ -1,8 +1,15 @@
 require "active_support/core_ext/integer/time"
+require "uri"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
-  config.x.frontend_url = "http://localhost:5173"
+
+  public_url = ENV["PUBLIC_APP_URL"].presence || "http://localhost:5173"
+  api_url = ENV["PUBLIC_APP_URL"].presence || "http://localhost:8000"
+  config.x.frontend_url = public_url
+  config.x.api_url = api_url
+  config.hosts << URI.parse(public_url).host
+  config.action_cable.allowed_request_origins = [ public_url ]
 
   # In the development environment your application's code is reloaded any time
   # it changes. This slows down response time but is perfect for development

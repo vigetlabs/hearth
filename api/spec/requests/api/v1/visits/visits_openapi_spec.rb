@@ -1,6 +1,65 @@
 require "swagger_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
+  path "/api/v1/visits/mine" do
+    get "Retrieves the authenticated user's visits for a calendar range" do
+      tags "Visits"
+      produces "Application/json"
+      security [ cookie_auth: [] ]
+
+      parameter name: :date,
+        in: :query,
+        required: false,
+        schema: { "$ref" => "#/components/schemas/visit_date" },
+        description: "Anchor date for the calendar range. Defaults to the current date."
+
+      parameter name: :view,
+        in: :query,
+        required: false,
+        schema: {
+          type: :string,
+          enum: %w[week],
+          default: "week"
+        },
+        description: "Calendar view used to calculate the returned range."
+
+      response "200", "user visits fetched successfully" do
+        schema "$ref" => "#/components/schemas/visits_response"
+
+        let(:user) { create(:user) }
+        let(:date) { "2026-07-21" }
+        let(:view) { "week" }
+
+        before do
+          sign_in user
+        end
+
+        run_test!
+      end
+
+      response "400", "invalid query parameters" do
+        schema "$ref" => "#/components/schemas/bad_request_error_response"
+
+        let(:user) { create(:user) }
+        let(:date) { "invalid-date" }
+        let(:view) { "year" }
+
+        before do
+          sign_in user
+        end
+
+        run_test!
+      end
+
+      response "401", "authentication required" do
+        schema "$ref" => "#/components/schemas/authentication_error_response"
+
+        let(:date) { "2026-07-15" }
+        let(:view) { "week" }
+      end
+    end
+  end
+
   path "/api/v1/visits" do
     get "Retrieves visits for a calendar range" do
       tags "Visits"

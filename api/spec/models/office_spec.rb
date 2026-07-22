@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe Office, type: :model do
   describe "associations" do
     it { is_expected.to have_many(:users) }
+    it { is_expected.to have_many(:attendance_confirmations) }
   end
 
   describe "validations" do

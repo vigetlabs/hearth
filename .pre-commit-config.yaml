@@ -8,6 +8,24 @@ repos:
         pass_filenames: false
         files: ^api/
 
+      - id: api-dsl-verify
+        name: Run Tapioca DSL verify
+        entry: scripts/get-branch-project
+        language: system
+        pass_filenames: false
+        files: ^api/
+        args:
+          - sh
+          - -c
+          - bundle exec tapioca gem --verify && bundle exec tapioca dsl --verify
+
+      - id: api-srb
+        name: Run Sorbet
+        entry: scripts/get-branch-project bundle exec srb tc
+        language: system
+        pass_filenames: false
+        files: ^api/
+
       - id: api-rubocop
         name: Run Rubocop
         entry: scripts/get-branch-project bundle exec rubocop

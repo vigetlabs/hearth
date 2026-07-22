@@ -20,6 +20,9 @@ module Api
     config.middleware.use JwtCookieMiddleware
     config.middleware.use ActionDispatch::Cookies
 
+    config.autoload_paths << Rails.root.join("app/stores")
+    config.eager_load_paths << Rails.root.join("app/stores")
+
     config.session_store :cookie_store,
       key: "_single_sign_on_session",
       same_site: :lax

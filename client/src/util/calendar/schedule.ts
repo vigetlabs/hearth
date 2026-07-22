@@ -2,13 +2,13 @@ import type { User } from "@/types/api/users";
 import type { Visit } from "@/types/api/visits";
 import type {
   AttendanceStatus,
-  PersonStatus,
+  RosterUser,
   WeekSchedule,
 } from "@/types/calendar/calendar";
-import { toDateKey } from "@/util/dates/date";
+import { generateDateKey } from "@/util/dates/date";
+import { userDisplayName } from "../auth/displayName";
+import type { ChannelSerializedUser } from "@/types/cable/officePlanning";
 
-// `Date.getDay()` order (0 = Sunday … 6 = Saturday), used to read the matching
-// weekday off a user's `default_schedule`.
 const WEEKDAY_FIELDS = [
   "sunday",
   "monday",
@@ -19,34 +19,60 @@ const WEEKDAY_FIELDS = [
   "saturday",
 ] as const;
 
-// Matches `userDisplayName`: first name plus the last name's initial.
-function displayName(user: Pick<User, "first_name" | "last_name">): string {
-  const lastInitial = user.last_name[0];
+type WeekdayField = (typeof WEEKDAY_FIELDS)[number];
 
-  return lastInitial ? `${user.first_name} ${lastInitial}` : user.first_name;
-}
-
-function getVisitKey(userId: number, visitDate: string): string {
+function generateUserIdVisitKey(userId: number, visitDate: string): string {
   return `${userId}:${visitDate}`;
 }
 
-function mapVisitStatus(status: Visit["status"]): AttendanceStatus {
-  switch (status) {
-    case "confirmed":
-      return "confirmed-yes";
-    case "planned":
-      return "planning-yes";
+function buildRosterUser(
+  user: ChannelSerializedUser,
+  status: AttendanceStatus,
+): RosterUser {
+  return {
+    userId: user.id,
+    name: userDisplayName(user),
+    status,
+  };
+}
+
+function homeUserStatus({
+  user,
+  visit,
+  weekday,
+  isWeekConfirmed,
+}: {
+  user: User;
+  visit: Visit | undefined;
+  weekday: WeekdayField;
+  isWeekConfirmed: boolean;
+}): AttendanceStatus {
+  if (visit) {
+    return "confirmed-yes";
   }
+
+  if (isWeekConfirmed) {
+    return "confirmed-no";
+  }
+
+  if (user.default_schedule?.[weekday]) {
+    return "planning-yes";
+  }
+
+  return "planning-no";
 }
 
 export function buildWeekSchedule(
   users: User[],
   visits: Visit[],
   weekDates: Date[],
+  confirmedUserIds: ReadonlySet<number>,
+  currentUserId: number,
+  currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>,
 ): WeekSchedule {
   const visitsByUserAndDate = new Map(
     visits.map((visit) => [
-      getVisitKey(visit.user.id, visit.visit_date),
+      generateUserIdVisitKey(visit.user.id, visit.visit_date),
       visit,
     ]),
   );
@@ -54,24 +80,48 @@ export function buildWeekSchedule(
   const schedule: WeekSchedule = {};
 
   for (const date of weekDates) {
-    const dateKey = toDateKey(date);
-    const weekday = WEEKDAY_FIELDS[date.getDay()];
+    const dateKey: string = generateDateKey(date);
+    const weekday: WeekdayField = WEEKDAY_FIELDS[date.getDay()];
 
-    schedule[dateKey] = users.map((user): PersonStatus => {
-      const visit = visitsByUserAndDate.get(getVisitKey(user.id, dateKey));
+    const rosterUserIds = new Set(users.map((user) => user.id));
 
-      const status: AttendanceStatus = visit
-        ? mapVisitStatus(visit.status)
-        : user.default_schedule?.[weekday]
-          ? "planning-yes"
-          : "planning-no";
+    const rosterPeople: RosterUser[] = users.map((user): RosterUser => {
+      const visit: Visit | undefined = visitsByUserAndDate.get(
+        generateUserIdVisitKey(user.id, dateKey),
+      );
 
-      return {
-        userId: user.id,
-        name: displayName(user),
-        status,
-      };
+      const externalVisit =
+        user.id === currentUserId
+          ? currentUserExternalVisitsByDate.get(dateKey)
+          : undefined;
+
+      const status: AttendanceStatus = externalVisit
+        ? "confirmed-elsewhere"
+        : homeUserStatus({
+            user,
+            visit,
+            weekday,
+            isWeekConfirmed: confirmedUserIds.has(user.id),
+          });
+
+      return buildRosterUser(user, status);
     });
+
+    const visitingGuests = visits
+      .filter(
+        (visit) =>
+          visit.visit_date === dateKey && !rosterUserIds.has(visit.user.id),
+      )
+      .map((visit): RosterUser => {
+        const channelUser: ChannelSerializedUser = {
+          id: visit.user.id,
+          first_name: visit.user.first_name,
+          last_name: visit.user.last_name,
+          office_id: visit.office_id,
+        };
+        return buildRosterUser(channelUser, "confirmed-yes");
+      });
+    schedule[dateKey] = [...visitingGuests, ...rosterPeople];
   }
   return schedule;
 }

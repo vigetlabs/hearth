@@ -1,26 +1,32 @@
-import { useState } from "react";
-
 import { DayCell } from "@/components/Calendar/DayCell";
 
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
+import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 import type {
-  AttendanceStatus,
-  PersonStatus,
-  WeekSchedule,
-} from "@/types/calendar/calendar";
+  ChannelSerializedUser,
+  OfficeDatesPlanningOverrideStates,
+  PlanningOverrideState,
+  TogglePlanningOverrideState,
+} from "@/types/cable/officePlanning";
 
 import { isInOffice } from "@/types/calendar/calendar";
 import { userDisplayName } from "@/util/auth/displayName";
-import { isSameDay, toDateKey } from "@/util/dates/date";
+import { generateDateKey, isSameDay } from "@/util/dates/date";
+
+import {
+  baseAttendanceForUser,
+  planningOverrideStateForUser,
+  resolveAttendance,
+  resolveEditingAttendance,
+} from "@/util/cable/planning/overrideState";
+import type { Visit } from "@/types/api/visits";
 
 const WEEKDAYS_PER_WEEK = 5;
-const EMPTY_DAY: PersonStatus[] = [];
+const EMPTY_DAY: RosterUser[] = [];
 
-const confirmedCountOf = (day: PersonStatus[]): number =>
+const confirmedCountOf = (day: RosterUser[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
-
-type AttendanceOverrides = Record<string, AttendanceStatus>;
 
 interface CalendarProps {
   schedule: WeekSchedule;
@@ -28,6 +34,12 @@ interface CalendarProps {
   days: Date[];
   locked: boolean;
   user: User;
+  planningByDate: OfficeDatesPlanningOverrideStates;
+  isPlanningConnected: boolean;
+  onPlanningToggle: (date: string, attending: boolean) => void;
+  editingConfirmedWeek: boolean;
+  currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>;
+  externalOfficeNamesByDate: ReadonlyMap<string, string>;
 }
 
 export function Calendar({
@@ -36,82 +48,133 @@ export function Calendar({
   days,
   locked,
   user,
+  planningByDate,
+  isPlanningConnected,
+  onPlanningToggle,
+  editingConfirmedWeek,
+  currentUserExternalVisitsByDate,
+  externalOfficeNamesByDate,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
-  const [overrides, setOverrides] = useState<AttendanceOverrides>({});
+  function getDayData(key: string): RosterUser[] {
+    const rosterUsers: RosterUser[] = schedule[key] ?? EMPTY_DAY;
+    const overrides: TogglePlanningOverrideState = planningByDate[key];
 
-  function getDayData(key: string): PersonStatus[] {
-    const day = schedule[key] ?? EMPTY_DAY;
-    const overriddenStatus = overrides[key];
+    const resolvedScheduledPeople = rosterUsers.map(
+      (rosterUser): RosterUser => {
+        const planningOverrideState: PlanningOverrideState =
+          planningOverrideStateForUser(overrides, rosterUser.userId);
 
-    if (!overriddenStatus) {
-      return day;
-    }
+        if (rosterUser.status === "confirmed-elsewhere") {
+          return rosterUser;
+        }
 
-    const mine = day.find((person) => person.userId === user.id);
+        if (planningOverrideState === "selected") {
+          return {
+            ...rosterUser,
+            status: "planning-yes",
+          };
+        }
 
-    if (mine) {
-      return day.map((person) =>
-        person.userId === user.id
-          ? {
-              ...person,
-              status: overriddenStatus,
-            }
-          : person,
-      );
-    }
+        if (planningOverrideState === "deselected") {
+          return {
+            ...rosterUser,
+            status: "planning-no",
+          };
+        }
 
-    return [
-      {
-        userId: user.id,
-        name: myName,
-        status: overriddenStatus,
+        return rosterUser;
       },
-      ...day,
-    ];
+    );
+
+    const scheduledUserIds = new Set(
+      rosterUsers.map((rosterUser: RosterUser) => rosterUser.userId),
+    );
+
+    const additionalSelectedUsers =
+      overrides?.selected
+        .filter(
+          (planningUser: ChannelSerializedUser) =>
+            !scheduledUserIds.has(planningUser.id),
+        )
+        .map((planningUser: ChannelSerializedUser): RosterUser => ({
+          userId: planningUser.id,
+          name: userDisplayName(planningUser),
+          status: "planning-yes",
+        })) ?? [];
+
+    return [...additionalSelectedUsers, ...resolvedScheduledPeople];
   }
 
   function toggleMine(key: string): void {
-    if (!myName || locked) return;
+    if (!myName || locked || !isPlanningConnected) {
+      return;
+    }
 
-    const day = getDayData(key);
-    const mine = day.find((person) => person.userId === user.id);
+    const externalVisit = currentUserExternalVisitsByDate.get(key);
 
-    const isCurrentlyGoing = mine !== undefined && isInOffice(mine.status);
+    if (externalVisit) {
+      return;
+    }
 
-    const nextStatus: AttendanceStatus = isCurrentlyGoing
-      ? "planning-no"
-      : "planning-yes";
+    const baseDay = schedule[key] ?? EMPTY_DAY;
 
-    setOverrides((current) => ({
-      ...current,
-      [key]: nextStatus,
-    }));
+    // const currentPerson = baseDay.find((person) => person.userId === user.id);
 
-    // updateVisitMutation.mutate(...)
+    // if (currentPerson?.status === "confirmed-elsewhere") {
+    //   return;
+    // }
+
+    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
+      day: baseDay,
+      userId: user.id,
+    });
+
+    if (hasConfirmedVisit && !editingConfirmedWeek) {
+      return;
+    }
+
+    const planningOverrideState = planningOverrideStateForUser(
+      planningByDate[key],
+      user.id,
+    );
+
+    const currentlyAttending = editingConfirmedWeek
+      ? resolveEditingAttendance({
+          hasConfirmedVisit,
+          planningOverrideState,
+        })
+      : resolveAttendance({
+          hasConfirmedVisit,
+          planningOverrideState,
+          isDefaultScheduleDay,
+        });
+
+    onPlanningToggle(key, !currentlyAttending);
   }
 
   const attendance = Object.fromEntries(
     days.map((day) => {
-      const key = toDateKey(day);
+      const key = generateDateKey(day);
 
       return [key, getDayData(key)];
     }),
   ) as WeekSchedule;
 
   const counts = days.map((day) =>
-    confirmedCountOf(attendance[toDateKey(day)] ?? EMPTY_DAY),
+    confirmedCountOf(attendance[generateDateKey(day)] ?? EMPTY_DAY),
   );
 
   const planningCounts = days.map(
     (day) =>
-      (attendance[toDateKey(day)] ?? EMPTY_DAY).filter(
+      (attendance[generateDateKey(day)] ?? EMPTY_DAY).filter(
         (person) => person.status === "planning-yes",
       ).length,
   );
 
   const maxCount = Math.max(0, ...counts);
+
   const hotSpotDays = new Set<number>();
 
   if (maxCount > 0) {
@@ -125,7 +188,9 @@ export function Calendar({
 
     topConfirmed
       .filter((index) => planningCounts[index] === maxPlanning)
-      .forEach((index) => hotSpotDays.add(index));
+      .forEach((index) => {
+        hotSpotDays.add(index);
+      });
   }
 
   const todayIndex = days.findIndex((day) => isSameDay(day, new Date()));
@@ -158,35 +223,42 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 overflow-hidden rounded-xl border border-line divide-x divide-line"
+        className="grid min-h-0 flex-1 divide-x divide-line overflow-hidden rounded-xl border border-line"
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",
         }}
       >
         {days.map((day, index) => {
-          const key = toDateKey(day);
-          const dayData = attendance[key] ?? EMPTY_DAY;
+          const key = generateDateKey(day);
 
-          // TODO: Show visitor count for this day (people from other offices)
-          // right now we just show confirmed count for current office
+          const rosterUsers: RosterUser[] = attendance[key] ?? EMPTY_DAY;
+
           const visitorCount = counts[index];
+
+          const externalVisit = currentUserExternalVisitsByDate.get(key);
+          const isElsewhere = externalVisit !== undefined;
 
           return (
             <DayCell
               key={key}
               date={day}
-              people={dayData}
+              rosterUsers={rosterUsers}
               myUserId={user.id}
-              isMine={dayData.some(
-                (person) =>
-                  person.userId === user.id && isInOffice(person.status),
-              )}
+              isMine={
+                !isElsewhere &&
+                rosterUsers.some(
+                  (person) =>
+                    person.userId === user.id && isInOffice(person.status),
+                )
+              }
               visitorCount={visitorCount}
-              total={dayData.length}
+              total={rosterUsers.length}
               isHotSpot={hotSpotDays.has(index)}
               locked={locked}
               onToggleMine={() => toggleMine(key)}
+              isConfirmedElsewhere={isElsewhere}
+              externalOfficeName={externalOfficeNamesByDate.get(key)}
             />
           );
         })}

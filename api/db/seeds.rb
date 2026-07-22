@@ -1,6 +1,6 @@
-# AI GENERATED
-# puts "Seeding offices..."
-#
+# # AI GENERATED
+puts "Seeding offices..."
+
 office_attributes = [
   {
     name: "Durham",
@@ -283,7 +283,7 @@ def grouped_weekdays(start_date, end_date)
     .group_by { |date| date.beginning_of_week(:monday) }
 end
 
-def create_or_update_visit!(user:, office:, visit_date:, status:)
+def create_or_update_visit!(user:, office:, visit_date:)
   visit = Visit.find_or_initialize_by(
     user: user,
     visit_date: visit_date
@@ -291,7 +291,6 @@ def create_or_update_visit!(user:, office:, visit_date:, status:)
 
   visit.update!(
     office: office,
-    status: status
   )
 end
 
@@ -368,7 +367,6 @@ weeks.each_with_index do |(_week_start, dates), week_index|
           user: user,
           office: office,
           visit_date: date,
-          status: :confirmed
         )
       end
 
@@ -377,7 +375,6 @@ weeks.each_with_index do |(_week_start, dates), week_index|
           user: user,
           office: office,
           visit_date: date,
-          status: :planned
         )
       end
     end
@@ -420,7 +417,6 @@ weeks.each_with_index do |(_week_start, dates), week_index|
       user: visitor,
       office: office,
       visit_date: visitor_date,
-      status: random.rand < 0.5 ? :confirmed : :planned
     )
   end
 end
@@ -461,7 +457,6 @@ weeks.each_with_index do |(_week_start, dates), week_index|
     user: remote_user,
     office: office,
     visit_date: visit_date,
-    status: week_index.even? ? :confirmed : :planned
   )
 end
 

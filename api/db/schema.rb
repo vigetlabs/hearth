@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_052046) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_152552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "attendance_confirmations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "ends_on", null: false
+    t.bigint "office_id", null: false
+    t.integer "period_type", null: false
+    t.date "starts_on", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["office_id"], name: "index_attendance_confirmations_on_office_id"
+    t.index ["user_id", "office_id", "period_type", "starts_on"], name: "index_attendance_confirmations_on_period", unique: true
+    t.index ["user_id"], name: "index_attendance_confirmations_on_user_id"
+  end
 
   create_table "offices", force: :cascade do |t|
     t.string "city", null: false
@@ -74,7 +87,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_052046) do
   create_table "visits", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "office_id", null: false
-    t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.date "visit_date"
@@ -83,6 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_052046) do
     t.index ["user_id"], name: "index_visits_on_user_id"
   end
 
+  add_foreign_key "attendance_confirmations", "offices"
   add_foreign_key "schedules", "users"
   add_foreign_key "user_identities", "users"
   add_foreign_key "users", "offices"
