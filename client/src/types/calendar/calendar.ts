@@ -18,6 +18,7 @@ export interface RosterUser {
   userId: number;
   name: string;
   status: AttendanceStatus;
+  isVisitor: boolean;
 }
 
 export type WeekSchedule = Record<string, RosterUser[]>;

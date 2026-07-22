@@ -538,19 +538,19 @@ export default function CalendarPage() {
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center text-fg hover:text-fg-subtle";
+  "flex h-8 w-8 items-center justify-center text-fg transition-colors hover:text-fg-subtle";
 
 const pillButton =
-  "rounded-full border border-line bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
+  "rounded-full border border-line bg-surface px-5 py-2 text-sm text-fg transition-colors hover:bg-surface-sunken";
 
 const todayButton = `${pillButton} font-semibold`;
 
 const darkPillButton =
-  "flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
+  "flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse transition-colors hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
 
 const confirmButton = `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
 
-const unlockButton = `ml-auto ${darkPillButton} bg-[#451811]!`;
+const unlockButton = `ml-auto ${darkPillButton} bg-[#6F281D]! hover:bg-[#451811]!`;
 
 function getWeekStartFromSearchParams(searchParams: URLSearchParams): Date {
   const year = Number(searchParams.get("year"));

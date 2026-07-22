@@ -46,7 +46,7 @@ export default function Header() {
           </span>
 
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-fg hover:bg-surface-strong focus:outline-none">
+            <DropdownMenu.Trigger className="flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-fg transition-colors hover:bg-surface-strong focus:outline-none">
               Profile
               <ChevronDownIcon className="h-3 w-3" />
             </DropdownMenu.Trigger>
@@ -68,14 +68,14 @@ export default function Header() {
 
                 <DropdownMenu.Item
                   onSelect={() => navigate("/users/profile")}
-                  className="cursor-pointer rounded-md px-3 py-2 text-sm text-fg outline-none data-[highlighted]:bg-surface-muted"
+                  className="cursor-pointer rounded-md px-3 py-2 text-sm text-fg outline-none transition-colors data-[highlighted]:bg-surface-muted"
                 >
                   Profile &amp; Settings
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Item
                   onSelect={handleLogout}
-                  className="cursor-pointer rounded-md px-3 py-2 text-sm text-danger outline-none data-[highlighted]:bg-danger-surface"
+                  className="cursor-pointer rounded-md px-3 py-2 text-sm text-danger outline-none transition-colors data-[highlighted]:bg-danger-surface"
                 >
                   Log Out
                 </DropdownMenu.Item>
