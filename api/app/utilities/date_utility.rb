@@ -37,4 +37,25 @@ class DateUtility
       .filter_map { |date| normalize_to_string(date) }
       .uniq
   end
+
+  sig { params(value: T.untyped).returns(Date) }
+  def self.normalize_week_start(value)
+    date = Date.iso8601(value.to_s)
+    date.beginning_of_week(:monday)
+  rescue Date::Error
+    raise ArgumentError, "Invalid date"
+  end
+
+  sig { params(value: T.untyped).returns(Date) }
+  def self.normalize_week_end(value)
+    date = Date.iso8601(value.to_s)
+    date.end_of_week(:sunday)
+  rescue Date::Error
+    raise ArgumentError, "Invalid date"
+  end
+
+  sig { params(week_start: Date).returns(T::Array[String]) }
+  def self.week_dates(week_start)
+    (week_start..(week_start + 4.days)).map(&:iso8601)
+  end
 end
