@@ -32,13 +32,20 @@ jobs:
           fi
 
           case "$deploy_env" in
-            staging)    api_url="https://api.staging.hearth.vigetx.com/api/v1" ;;
-            production) api_url="https://api.hearth.vigetx.com/api/v1" ;;
+            staging)    
+              api_url="https://api.staging.hearth.vigetx.com/api/v1"
+              cable_url="wss://api.staging.hearth.vigetx.com/cable"
+              ;;
+            production) 
+              api_url="https://api.hearth.vigetx.com/api/v1" 
+              cable_url="wss://api.hearth.vigetx.com/cable"
+              ;;
             *) echo "Unknown env: $deploy_env"; exit 1 ;;
           esac
 
           echo "deploy_env=$deploy_env" >> "$GITHUB_OUTPUT"
           echo "api_url=$api_url"       >> "$GITHUB_OUTPUT"
+          echo "cable_url=$cable_url"       >> "$GITHUB_OUTPUT"
 
   build:
     needs: set_env
@@ -86,6 +93,7 @@ jobs:
           push: true
           build-args: |
             VITE_API_URL=${{ needs.set_env.outputs.api_url }}
+            VITE_CABLE_URL=${{ needs.set_env.outputs.cable_url }}
           cache-from: type=gha,scope=ui
           cache-to: type=gha,mode=max,scope=ui
           tags: |

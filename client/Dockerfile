@@ -9,6 +9,9 @@ WORKDIR /app
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
+ARG VITE_CABLE_URL
+ENV VITE_CABLE_URL=$VITE_CABLE_URL
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

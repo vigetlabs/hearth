@@ -2,6 +2,7 @@ require_relative "boot"
 require_relative "../app/middleware/jwt_cookie_middleware.rb"
 
 require "rails/all"
+require "sorbet-runtime"
 
 
 # Require the gems listed in Gemfile, including any gems
