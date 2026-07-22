@@ -6,14 +6,14 @@ export default function PencilIcon({ className }: PencilIconProps) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 16 16"
-      fill="currentColor"
+      viewBox="0 0 18 18"
+      fill="none"
       className={className}
     >
-      {/* Pencil tip + body */}
-      <path d="M2.5 13.5 L5.19 13.36 L11.55 7 L9.01 4.45 L2.64 10.81 Z" />
-      {/* Eraser (separated by a small gap) */}
-      <path d="M12.12 6.43 L13.31 5.23 L10.77 2.69 L9.57 3.88 Z" />
+      <path
+        d="M9.8995 3.82842L14.1421 8.07109L4.24264 17.9706H0V13.7279L9.8995 3.82842ZM11.3137 2.41421L13.435 0.29289C13.8256 -0.09763 14.4587 -0.09763 14.8492 0.29289L17.6777 3.12132C18.0682 3.51184 18.0682 4.14501 17.6777 4.53553L15.5563 6.65685L11.3137 2.41421Z"
+        fill="currentColor"
+      />
     </svg>
   );
 }

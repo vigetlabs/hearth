@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router";
 
 import { Calendar } from "@/components/Calendar/Calendar";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import LockIcon from "@/components/icons/LockIcon";
+import PencilIcon from "@/components/icons/PencilIcon";
 import Loader from "@/components/Loader/Loader";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 
@@ -59,10 +59,13 @@ export default function CalendarPage() {
    */
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const officeIdParam: string = searchParams.get("office");
-  const parsedOfficeId: number | null = officeIdParam
+  const officeIdParam: string | null = searchParams.get("office");
+  const parsedOfficeId: number | undefined = officeIdParam
     ? Number(officeIdParam)
     : undefined;
+  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
+    ? parsedOfficeId
+    : (user?.office_id ?? undefined);
 
   const officesQuery = useOfficesQuery();
   const offices: Office[] = useMemo(
@@ -82,7 +85,15 @@ export default function CalendarPage() {
   );
 
   const activeOffice: Office =
-    findActiveOffice(offices, activeOfficeId) ?? defaultOffice;
+    findActiveOffice(offices, requestedOfficeId) ?? defaultOffice;
+
+  /*
+   * Derive the effective office id from the resolved office so it stays in sync
+   * with what the calendar actually displays. Users without an assigned office
+   * (office_id === null) fall back to the default office instead of leaking a
+   * null office id into the API requests.
+   */
+  const activeOfficeId: number | undefined = activeOffice?.id;
 
   const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
 
@@ -406,8 +417,13 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-page">
-      <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
+      />
+
+      <div className="relative mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
           <div className="flex items-center gap-3 pb-5">
             <h2 className="flex items-center gap-2 text-2xl font-bold capitalize text-fg">
@@ -421,7 +437,7 @@ export default function CalendarPage() {
 
           {!isRemote && (
             <div className="flex items-center gap-4 pb-5">
-              <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
+              <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
                 <button
                   type="button"
                   onClick={goPrevWeek}
@@ -451,20 +467,23 @@ export default function CalendarPage() {
                 </button>
               )}
 
-              <div className="h-6 w-px bg-line" />
+              <div className="h-4 w-0.5 bg-line" />
 
-              <p className="text-sm text-fg-subtle">
+              <p className="text-sm text-fg">
                 {isEditingWeek ? (
                   <>
                     <span className="font-bold text-fg">Editing.</span> Confirm
                     the week to save your changes.
                   </>
                 ) : isWeekConfirmed ? (
-                  <span className="font-bold text-fg">Confirmed.</span>
+                  <>
+                    <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
+                    Edit Week to make changes.
+                  </>
                 ) : (
                   <>
-                    <span className="font-bold text-fg">Planning.</span> Yet to
-                    be confirmed
+                    <span className="font-bold text-fg">Planning.</span> Select
+                    your days, then confirm.
                   </>
                 )}
               </p>
@@ -476,8 +495,8 @@ export default function CalendarPage() {
                   disabled={!isAttendanceConnected || !isPlanningConnected}
                   className={unlockButton}
                 >
-                  <LockIcon className="h-3.5 w-3.5" />
                   Edit Week
+                  <PencilIcon className="h-3.5 w-3.5" />
                 </button>
               ) : (
                 <button
@@ -517,7 +536,7 @@ export default function CalendarPage() {
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center text-fg-strong hover:text-fg";
+  "flex h-8 w-8 items-center justify-center text-fg hover:text-fg-subtle";
 
 const pillButton =
   "rounded-full border border-line bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
@@ -527,9 +546,9 @@ const todayButton = `${pillButton} font-semibold`;
 const darkPillButton =
   "flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
 
-const confirmButton = `ml-auto ${darkPillButton}`;
+const confirmButton = `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
 
-const unlockButton = `ml-auto ${darkPillButton}`;
+const unlockButton = `ml-auto ${darkPillButton} bg-[#451811]!`;
 
 function getWeekStartFromSearchParams(searchParams: URLSearchParams): Date {
   const year = Number(searchParams.get("year"));
@@ -599,9 +618,9 @@ function findCurrentUserOffice(
 
 function findActiveOffice(
   offices: Office[],
-  activeOfficeId: number,
+  activeOfficeId: number | undefined,
 ): Office | null {
-  return offices.find((office) => office.id === activeOfficeId);
+  return offices.find((office) => office.id === activeOfficeId) ?? null;
 }
 
 function isCurrentUserInPlanningState(

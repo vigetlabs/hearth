@@ -220,11 +220,7 @@ export function Calendar({
     <div className="relative flex min-h-0 flex-1 flex-col">
       {todayIndex !== -1 && (
         <span
-          className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            locked
-              ? "border border-strong bg-surface text-fg"
-              : "bg-strong text-fg-inverse"
-          }`}
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg px-3 py-1 text-[0.625rem] font-semibold text-fg-inverse"
           style={{
             left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
           }}
@@ -234,7 +230,7 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 divide-x divide-line overflow-hidden rounded-xl border border-line"
+        className="grid min-h-0 flex-1 divide-x-2 divide-line overflow-hidden rounded-xl border-2 border-line"
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",
