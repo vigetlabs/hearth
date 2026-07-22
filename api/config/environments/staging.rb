@@ -2,6 +2,10 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   config.x.frontend_url = "https://staging.hearth.vigetx.com"
+  config.action_cable.allowed_request_origins = [
+    config.x.frontend_url
+  ]
+  config.action_cable.url = "wss://api.staging.hearth.vigetx.com/cable"
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
