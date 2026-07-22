@@ -37,7 +37,6 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "simplecov", require: false
   gem "sorbet", "~> 0.6.13342"
-  gem "sorbet-runtime", "~> 0.6.13342"
   gem "tapioca", "~> 0.19.2"
 end
 
@@ -46,6 +45,7 @@ gem "jsonapi-serializer", "~> 2.2"
 gem "rswag", "~> 2.17"
 gem "ostruct"
 gem "devise-jwt", "~> 0.13.0"
+gem "sorbet-runtime", "~> 0.6.13342"
 
 gem "omniauth", "~> 2.1"
 
