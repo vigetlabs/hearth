@@ -26,7 +26,8 @@ const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
 
 const confirmedCountOf = (day: RosterUser[]): number =>
-  day.filter((person) => person.status === "confirmed-yes").length;
+  day.filter((person) => person.status === "confirmed-yes" && person.isVisitor)
+    .length;
 
 interface CalendarProps {
   schedule: WeekSchedule;
@@ -119,6 +120,7 @@ export function Calendar({
           userId: planningUser.id,
           name: userDisplayName(planningUser),
           status: "planning-yes",
+          isVisitor: false,
         })) ?? [];
 
     return [...additionalSelectedUsers, ...resolvedScheduledPeople];

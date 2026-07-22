@@ -182,7 +182,7 @@ export default function ProfilePage() {
       >
         <Link
           to="/calendar"
-          className="inline-flex self-start items-center gap-1 text-sm font-bold text-fg-subtle hover:text-black"
+          className="inline-flex self-start items-center gap-1 text-sm font-bold text-fg-subtle transition-colors hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </Link>

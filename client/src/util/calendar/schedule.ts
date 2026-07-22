@@ -28,11 +28,13 @@ function generateUserIdVisitKey(userId: number, visitDate: string): string {
 function buildRosterUser(
   user: ChannelSerializedUser,
   status: AttendanceStatus,
+  isVisitor: boolean,
 ): RosterUser {
   return {
     userId: user.id,
     name: userDisplayName(user),
     status,
+    isVisitor,
   };
 }
 
@@ -104,7 +106,7 @@ export function buildWeekSchedule(
             isWeekConfirmed: confirmedUserIds.has(user.id),
           });
 
-      return buildRosterUser(user, status);
+      return buildRosterUser(user, status, false);
     });
 
     const visitingGuests = visits
@@ -119,7 +121,7 @@ export function buildWeekSchedule(
           last_name: visit.user.last_name,
           office_id: visit.office_id,
         };
-        return buildRosterUser(channelUser, "confirmed-yes");
+        return buildRosterUser(channelUser, "confirmed-yes", true);
       });
     schedule[dateKey] = [...visitingGuests, ...rosterPeople];
   }

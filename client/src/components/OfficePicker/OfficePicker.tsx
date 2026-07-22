@@ -186,7 +186,7 @@ export default function OfficePicker() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="relative z-10 flex items-center gap-1 self-start text-sm font-bold text-fg-subtle hover:text-black"
+          className="relative z-10 flex items-center gap-1 self-start text-sm font-bold text-fg-subtle transition-colors hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back
         </button>

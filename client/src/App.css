@@ -26,6 +26,11 @@
   ============================================================================
 */
 @theme {
+  /* Motion — default fade speed for `transition-*` utilities (a touch slower
+     than Tailwind's 150ms default). Utilities with an explicit `duration-*`
+     still override this. */
+  --default-transition-duration: 250ms;
+
   /* Typography — app-wide sans font */
   --font-sans:
     "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif,
