@@ -37,7 +37,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 border-b border-line bg-surface shadow-[0px_6px_15px_0px_#84392314]">
       <div className="flex items-center justify-between px-6 py-4">
         <Link to="/calendar" className="flex items-center gap-3">
-          <WordLogo className="h-6 text-[#5C352F]" />
+          <WordLogo className="h-6 text-fg" />
         </Link>
 
         <div className="flex items-center gap-6">
