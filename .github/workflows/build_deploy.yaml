@@ -18,6 +18,7 @@ jobs:
     outputs:
       deploy_env: ${{ steps.set.outputs.deploy_env }}
       api_url: ${{ steps.set.outputs.api_url }}
+      cable_url: ${{ steps.set.outputs.cable_url }}
     steps:
       - id: set
         run: |
