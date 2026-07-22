@@ -58,10 +58,18 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
         role="tablist"
         className="mx-auto mb-4 flex w-fit rounded-full bg-surface-muted p-1 text-xs font-bold"
       >
-        <TabButton active={tab === "in"} onClick={() => setTab("in")}>
+        <TabButton
+          active={tab === "in"}
+          onClick={() => setTab("in")}
+          activeClassName="bg-in-office text-fg-inverse"
+        >
           In Office
         </TabButton>
-        <TabButton active={tab === "out"} onClick={() => setTab("out")}>
+        <TabButton
+          active={tab === "out"}
+          onClick={() => setTab("out")}
+          activeClassName="bg-out-office text-fg-inverse"
+        >
           Not in Office
         </TabButton>
       </div>
@@ -78,6 +86,7 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
                     myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="solid"
+                    iconClassName="border-fg bg-fg"
                   />
                 ))}
               </RosterSection>
@@ -86,6 +95,7 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
               <RosterSection
                 title="Planning to Come In"
                 count={planningInCount}
+                titleClassName="text-[#8A7A6E]"
               >
                 {planning.map((person) => (
                   <RosterRow
@@ -94,7 +104,6 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
                     myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="outline"
-                    muted
                     nudgeable={canNudge}
                   />
                 ))}
@@ -107,7 +116,7 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
       ) : confirmedOutCount > 0 || planningOutCount > 0 ? (
         <div className="space-y-4">
           {confirmedOut.length > 0 && (
-            <RosterSection title="Confirmed out" count={confirmedOutCount}>
+            <RosterSection title="Confirmed Out" count={confirmedOutCount}>
               {confirmedOut.map((person) => (
                 <RosterRow
                   key={person.userId}
@@ -115,12 +124,16 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
                   myUserId={myUserId}
                   mark="confirmed-no"
                   variant="solid"
+                  iconClassName="border-fg bg-fg"
                 />
               ))}
             </RosterSection>
           )}
           {plannedOut.length > 0 && (
-            <RosterSection title="Planning to be out" count={planningOutCount}>
+            <RosterSection
+              title="Planning Not to Come In"
+              count={planningOutCount}
+            >
               {plannedOut.map((person) => (
                 <RosterRow
                   key={person.userId}
@@ -128,7 +141,7 @@ export function DayRoster({ date, rosterUsers, myUserId }: DayRosterProps) {
                   myUserId={myUserId}
                   mark="planning-no"
                   variant="outline"
-                  muted
+                  iconClassName="border-fg"
                   nudgeable={canNudge}
                 />
               ))}
@@ -147,10 +160,12 @@ const byName = (a: RosterUser, b: RosterUser) => a.name.localeCompare(b.name);
 function TabButton({
   active,
   onClick,
+  activeClassName,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  activeClassName: string;
   children: ReactNode;
 }) {
   return (
@@ -161,7 +176,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         "whitespace-nowrap rounded-full px-2.5 py-0.5 transition-colors",
-        active ? "bg-strong text-fg-inverse" : "text-fg-subtle hover:text-fg",
+        active ? activeClassName : "text-fg-subtle hover:text-fg",
       )}
     >
       {children}
@@ -173,14 +188,16 @@ function RosterSection({
   title,
   count,
   children,
+  titleClassName,
 }: {
   title: string;
   count: number;
   children: ReactNode;
+  titleClassName?: string;
 }) {
   return (
     <div>
-      <h3 className="mb-1.5 text-xs font-bold text-fg">
+      <h3 className={cn("mb-1.5 text-xs font-normal text-fg", titleClassName)}>
         {title} ({count})
       </h3>
       <ul>{children}</ul>
@@ -193,14 +210,14 @@ function RosterRow({
   myUserId,
   mark,
   variant,
-  muted = false,
+  iconClassName,
   nudgeable = false,
 }: {
   person: RosterUser;
   myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;
-  muted?: boolean;
+  iconClassName?: string;
   nudgeable?: boolean;
 }) {
   const isMe = person.userId === myUserId;
@@ -209,13 +226,14 @@ function RosterRow({
 
   return (
     <li className="flex items-center gap-2 py-1.5">
-      <StatusIcon mark={mark} variant={variant} size="md" />
+      <StatusIcon
+        mark={mark}
+        variant={variant}
+        size="sm"
+        className={iconClassName}
+      />
       <span
-        className={cn(
-          "min-w-0 flex-1 truncate text-sm",
-          muted ? "text-fg-subtle" : "text-fg",
-          isMe && "font-medium",
-        )}
+        className="min-w-0 flex-1 truncate text-sm font-semibold text-fg"
         title={person.name}
       >
         {person.name}

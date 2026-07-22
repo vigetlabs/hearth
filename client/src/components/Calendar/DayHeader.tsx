@@ -63,20 +63,25 @@ function PlanningHeader({
           ? "bg-red-500"
           : isSelected
             ? "bg-selected hover:bg-line-selected"
-            : "bg-surface hover:bg-surface-sunk",
+            : "bg-surface hover:bg-surface-sunken",
       )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
           weekdayClass="text-fg"
-          dateNumClass="text-fg-subtle"
+          dateNumClass="text-fg"
         />
 
         <StatusIcon
-          size="lg"
+          size="xl"
           variant="dashed"
-          mark={isSelected ? "confirmed-yes" : "add"}
+          weight="thin"
+          mark={isSelected ? "add" : "planning-yes"}
+          className={cn(
+            "border-2 bg-transparent",
+            isSelected ? "border-strong" : "border-fg",
+          )}
         />
       </span>
 
@@ -109,42 +114,46 @@ function ConfirmedHeader({
     <div
       className={cn(
         headerBase,
-        "border-b",
+        "border-b border-line",
         isConfirmedElsewhere
-          ? "border-red-700 bg-red-500 text-white"
+          ? "bg-red-500 text-white"
           : isSelected
-            ? "border-strong-hover bg-strong text-fg-inverse"
-            : "border-line bg-surface-strong text-fg",
+            ? "bg-strong text-fg-inverse"
+            : "bg-surface-strong text-fg",
       )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          weekdayClass={isConfirmedElsewhere ? "text-white" : ""}
+          weekdayClass={
+            isConfirmedElsewhere
+              ? "text-white"
+              : isSelected
+                ? ""
+                : "text-[#8A7A6E]"
+          }
           dateNumClass={
             isConfirmedElsewhere
               ? "text-white/80"
               : isSelected
                 ? "text-fg-inverse-muted"
-                : "text-fg-subtle"
+                : "text-[#8A7A6E]"
           }
         />
 
         <span
           className={cn(
             iconCircle,
-            isConfirmedElsewhere
-              ? "border-white text-white"
-              : isSelected
-                ? "border-fg-inverse text-fg-inverse"
-                : "border-strong text-fg",
+            isSelected
+              ? "border-[#451811] bg-[#451811] text-white"
+              : "border-fg-muted bg-transparent text-fg-muted",
           )}
           aria-hidden="true"
         >
           {isSelected ? (
-            <CheckIcon className="h-3.5 w-3.5" />
+            <CheckIcon className="h-5 w-5" weight="thin" />
           ) : (
-            <MinusIcon className="h-3.5 w-3.5" />
+            <MinusIcon className="h-5 w-5" weight="thin" />
           )}
         </span>
       </span>
@@ -224,7 +233,7 @@ function BadgeStack({
 const headerBase = "block w-full shrink-0 px-4 pb-3 pt-4 text-left";
 
 const iconCircle =
-  "flex h-7 w-7 items-center justify-center rounded-full border";
+  "flex h-8 w-8 items-center justify-center rounded-full border-2";
 
 const badge =
   "inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wide";

@@ -1,8 +1,14 @@
 type MinusIconProps = {
   className?: string;
+  /** "thick" (default) for the marks next to names, "thin" for day-header icons. */
+  weight?: "thick" | "thin";
 };
 
-export default function MinusIcon({ className }: MinusIconProps) {
+export default function MinusIcon({
+  className,
+  weight = "thick",
+}: MinusIconProps) {
+  const thin = weight === "thin";
   return (
     <svg
       aria-hidden="true"
@@ -11,10 +17,11 @@ export default function MinusIcon({ className }: MinusIconProps) {
       className={className}
     >
       <path
-        d="M3.5 8h9"
+        d={thin ? "M3.5 8h9" : "M4 8h8"}
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth={thin ? "1.5" : "3"}
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
