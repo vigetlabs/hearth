@@ -74,7 +74,7 @@
   --color-strong-hover: #6e2417; /* Brand/Confirmed border */
 
   /* Attendance toggle — in/out of office active states (day cell roster tabs) */
-  --color-in-office: #e8863c; /* "In Office" tab active */
+  --color-in-office: #c25706; /* "In Office" tab active */
   --color-out-office: #b44820; /* "Not in Office" tab active */
 
   /* Fill — deep terracotta for auth & onboarding CTAs */

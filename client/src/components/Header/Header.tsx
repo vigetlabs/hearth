@@ -9,7 +9,7 @@ import { useAuth } from "@/util/auth/useAuth";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
-// The header is part of the authenticated shell: it renders on every page while
+// The header is part of the authenticated shell: it only renders while
 // a user is logged in and disappears entirely once they are not.
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
@@ -37,7 +37,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 border-b border-line bg-surface shadow-[0px_6px_15px_0px_#84392314]">
       <div className="flex items-center justify-between px-6 py-4">
         <Link to="/calendar" className="flex items-center gap-3">
-          <WordLogo className="h-6 text-fg" />
+          <WordLogo className="h-6 text-strong" />
         </Link>
 
         <div className="flex items-center gap-6">

@@ -4,16 +4,17 @@ import type { RosterUser } from "@/types/calendar/calendar";
 
 interface DayCellProps {
   date: Date;
+  /** Id of the office currently being viewed. Threaded to the roster so it can
+      reset its In/Out tab whenever the user switches offices. */
+  officeId: number;
   /** The full office roster with each person's status for this day. */
   rosterUsers: RosterUser[];
   myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */
   isMine: boolean;
-  /** How many people are confirmed this day. */
+  /** How many visitors from other offices are in the office this day. */
   visitorCount: number;
-  /** Total office roster size, the denominator for the confirmed count. */
-  total: number;
   /** Whether this is the week's busiest day (the "hot spot"). */
   isHotSpot: boolean;
   /** Whether the week is confirmed (locked). Swaps the interactive header for a
@@ -23,10 +24,14 @@ interface DayCellProps {
   onToggleMine: () => void;
   isConfirmedElsewhere: boolean;
   externalOfficeName: string;
+  externalOfficeEmoji: string;
+  /** Name of the office currently being viewed. */
+  currentOfficeName: string;
 }
 
 export function DayCell({
   date,
+  officeId,
   rosterUsers,
   myUserId,
   isMine,
@@ -36,6 +41,8 @@ export function DayCell({
   onToggleMine,
   isConfirmedElsewhere,
   externalOfficeName,
+  externalOfficeEmoji,
+  currentOfficeName,
 }: DayCellProps) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -54,9 +61,17 @@ export function DayCell({
         // )}
         isConfirmedElsewhere={isConfirmedElsewhere}
         externalOfficeName={externalOfficeName}
+        externalOfficeEmoji={externalOfficeEmoji}
+        currentOfficeName={currentOfficeName}
       />
 
-      <DayRoster date={date} rosterUsers={rosterUsers} myUserId={myUserId} />
+      <DayRoster
+        date={date}
+        officeId={officeId}
+        rosterUsers={rosterUsers}
+        myUserId={myUserId}
+        locked={locked}
+      />
     </div>
   );
 }
