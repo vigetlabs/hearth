@@ -89,8 +89,6 @@ export default function CalendarPage() {
   const isRemote = activeOffice?.name.toLowerCase() === "remote";
 
   function changeOffice(nextOffice: Office): void {
-    setEditingWeekId(null);
-
     setSearchParams((currentParams) => {
       const nextParams = new URLSearchParams(currentParams);
 
@@ -127,7 +125,6 @@ export default function CalendarPage() {
   function changeFocusedWeek(nextWeekStart: Date): void {
     const normalizedWeekStart = startOfWeek(nextWeekStart);
 
-    setEditingWeekId(null);
     setFocusedWeekStartDate(normalizedWeekStart);
 
     setSearchParams((currentParams) => {
@@ -162,29 +159,6 @@ export default function CalendarPage() {
   );
 
   const isCurrentWeek = focusedWeekStartDateKey === currentStartingWeekKey;
-
-  /* === EDITING WEEK LOGIC ===
-   *
-   * This logic handles when a calendar should be locked for a user. Calendar becomes locked when
-   * a user "confirms" their week or when there is an existing `AttendanceConfirmation` record
-   * in the currently viewing date range and office
-   */
-  const [editingWeekId, setEditingWeekId] = useState<string | null>(null);
-  const currentEditingWeekId: string | null =
-    activeOfficeId === undefined
-      ? null
-      : generateEditingWeekId(activeOfficeId, focusedWeekStartDateKey);
-
-  const isEditingWeek =
-    currentEditingWeekId !== null && editingWeekId === currentEditingWeekId;
-
-  function editWeek(): void {
-    if (currentEditingWeekId === null) {
-      return;
-    }
-
-    setEditingWeekId(currentEditingWeekId);
-  }
 
   /* === VISITS LOGIC ===
    *
@@ -244,8 +218,6 @@ export default function CalendarPage() {
 
   const isWeekConfirmed = user !== undefined && confirmedUserIds.has(user.id);
 
-  const isCalendarLocked = isWeekConfirmed && !isEditingWeek;
-
   const createAttendanceConfirmationMutation = useWeekAttendanceConfirmation();
 
   /*
@@ -259,16 +231,42 @@ export default function CalendarPage() {
     isConnected: isPlanningConnected,
     selectDate,
     deselectDate,
-    clearDates,
   } = useOfficePlanning({
     officeId: activeOfficeId ?? null,
     currentUserId: user?.id ?? null,
     dates: planningWeekDateKeys,
   });
 
-  useOfficeAttending({
+  const {
+    editingUserIds,
+    startEditing,
+    isConnected: isAttendanceConnected,
+  } = useOfficeAttending({
     officeId: activeOfficeId ?? null,
+    weekStart: focusedWeekStartDateKey,
+    currentUserId: user?.id ?? null,
   });
+
+  /*
+   * Redis/Action Cable is the source of truth for editing state. This keeps
+   * every tab and every connected calendar in the same mode for a user.
+   */
+  const isEditingWeek = user !== undefined && editingUserIds.has(user.id);
+
+  const isCalendarLocked = isWeekConfirmed && !isEditingWeek;
+
+  function editWeek(): void {
+    if (
+      user === undefined ||
+      !isWeekConfirmed ||
+      !isAttendanceConnected ||
+      !isPlanningConnected
+    ) {
+      return;
+    }
+
+    startEditing();
+  }
 
   const handlePlanningToggle = useCallback(
     (date: string, attending: boolean) => {
@@ -320,16 +318,16 @@ export default function CalendarPage() {
           (rosterUser) => rosterUser.userId === user.id,
         );
 
-        const planningState: TogglePlanningOverrideState =
+        const planningState: TogglePlanningOverrideState | undefined =
           planningStatesByDate[dateKey];
 
         const hasCurUserSelectedDate: boolean = isCurrentUserInPlanningState(
-          planningState.selected,
+          planningState?.selected ?? [],
           user.id,
         );
 
         const hasCurUserDeselectedDate: boolean = isCurrentUserInPlanningState(
-          planningState.deselected,
+          planningState?.deselected ?? [],
           user.id,
         );
 
@@ -356,8 +354,6 @@ export default function CalendarPage() {
 
     createAttendanceConfirmationMutation.mutate(payload, {
       onSuccess: async () => {
-        clearDates(planningWeekDateKeys);
-
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: generateAttendanceConfirmationKey(
@@ -379,8 +375,6 @@ export default function CalendarPage() {
             ),
           }),
         ]);
-
-        setEditingWeekId(null);
       },
     });
   }
@@ -462,8 +456,8 @@ export default function CalendarPage() {
               <p className="text-sm text-fg-subtle">
                 {isEditingWeek ? (
                   <>
-                    <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
-                    Unlock Week to make changes.
+                    <span className="font-bold text-fg">Editing.</span> Confirm
+                    the week to save your changes.
                   </>
                 ) : isWeekConfirmed ? (
                   <span className="font-bold text-fg">Confirmed.</span>
@@ -479,6 +473,7 @@ export default function CalendarPage() {
                 <button
                   type="button"
                   onClick={editWeek}
+                  disabled={!isAttendanceConnected || !isPlanningConnected}
                   className={unlockButton}
                 >
                   <LockIcon className="h-3.5 w-3.5" />
@@ -507,13 +502,13 @@ export default function CalendarPage() {
             office={activeOffice}
             days={weekDates}
             locked={isCalendarLocked}
-            editingConfirmedWeek={isEditingWeek}
             user={user}
             planningByDate={planningStatesByDate}
             isPlanningConnected={isPlanningConnected}
             onPlanningToggle={handlePlanningToggle}
             currentUserExternalVisitsByDate={currentUserExternalVisitsByDate}
             externalOfficeNamesByDate={externalOfficeNamesByDate}
+            editingUserIds={editingUserIds}
           />
         </div>
       </div>
@@ -571,13 +566,6 @@ function setDateSearchParams(params: URLSearchParams, date: Date): void {
   params.set("year", String(date.getFullYear()));
   params.set("month", String(date.getMonth() + 1));
   params.set("day", String(date.getDate()));
-}
-
-function generateEditingWeekId(
-  activeOfficeId: number,
-  focusedWeekStartDateKey: string,
-): string {
-  return `${activeOfficeId}:${focusedWeekStartDateKey}`;
 }
 
 function useConfirmedUserIds(

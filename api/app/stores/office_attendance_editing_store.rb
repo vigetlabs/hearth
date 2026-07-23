@@ -76,7 +76,7 @@ class OfficeAttendanceEditingStore
       "office",
       @office_id,
       "week",
-      week_start,
+      normalized_week_start,
       "editing"
     ].join(":")
   end

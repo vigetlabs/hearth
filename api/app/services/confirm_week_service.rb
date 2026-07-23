@@ -51,6 +51,12 @@ class ConfirmWeekService
       visits: visits
     )
 
+    OfficeAttendanceChannel.finish_editing(
+      office: @office,
+      week_start: normalized_week_start,
+      user_id: @user.id
+    )
+
     OfficeAttendanceChannel.broadcast_attendance_confirmation(
       office: @office,
       confirmation: confirmation_result.confirmation

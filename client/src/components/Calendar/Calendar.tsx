@@ -37,9 +37,9 @@ interface CalendarProps {
   planningByDate: OfficeDatesPlanningOverrideStates;
   isPlanningConnected: boolean;
   onPlanningToggle: (date: string, attending: boolean) => void;
-  editingConfirmedWeek: boolean;
   currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>;
   externalOfficeNamesByDate: ReadonlyMap<string, string>;
+  editingUserIds: ReadonlySet<number>;
 }
 
 export function Calendar({
@@ -51,45 +51,62 @@ export function Calendar({
   planningByDate,
   isPlanningConnected,
   onPlanningToggle,
-  editingConfirmedWeek,
   currentUserExternalVisitsByDate,
   externalOfficeNamesByDate,
+  editingUserIds,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
   function getDayData(key: string): RosterUser[] {
-    const rosterUsers: RosterUser[] = schedule[key] ?? EMPTY_DAY;
+    const rosterUsers = schedule[key] ?? EMPTY_DAY;
+
     const overrides: TogglePlanningOverrideState = planningByDate[key];
 
     const resolvedScheduledPeople = rosterUsers.map(
       (rosterUser): RosterUser => {
-        const planningOverrideState: PlanningOverrideState =
-          planningOverrideStateForUser(overrides, rosterUser.userId);
-
         if (rosterUser.status === "confirmed-elsewhere") {
           return rosterUser;
         }
 
-        if (planningOverrideState === "selected") {
-          return {
-            ...rosterUser,
-            status: "planning-yes",
-          };
+        const { hasConfirmedVisit, isDefaultScheduleDay } =
+          baseAttendanceForUser({
+            day: rosterUsers,
+            userId: rosterUser.userId,
+          });
+
+        const planningOverrideState: PlanningOverrideState =
+          planningOverrideStateForUser(overrides, rosterUser.userId);
+
+        const isEditing = editingUserIds.has(rosterUser.userId);
+
+        const hasConfirmedWeekStatus =
+          rosterUser.status === "confirmed-yes" ||
+          rosterUser.status === "confirmed-no";
+
+        if (!isEditing && hasConfirmedWeekStatus) {
+          return rosterUser;
         }
 
-        if (planningOverrideState === "deselected") {
-          return {
-            ...rosterUser,
-            status: "planning-no",
-          };
-        }
+        const currentlyAttending = isEditing
+          ? resolveEditingAttendance({
+              hasConfirmedVisit,
+              planningOverrideState,
+            })
+          : resolveAttendance({
+              hasConfirmedVisit,
+              planningOverrideState,
+              isDefaultScheduleDay,
+            });
 
-        return rosterUser;
+        return {
+          ...rosterUser,
+          status: currentlyAttending ? "planning-yes" : "planning-no",
+        };
       },
     );
 
     const scheduledUserIds = new Set(
-      rosterUsers.map((rosterUser: RosterUser) => rosterUser.userId),
+      rosterUsers.map((rosterUser) => rosterUser.userId),
     );
 
     const additionalSelectedUsers =
@@ -112,26 +129,20 @@ export function Calendar({
       return;
     }
 
-    const externalVisit = currentUserExternalVisitsByDate.get(key);
-
-    if (externalVisit) {
+    if (currentUserExternalVisitsByDate.has(key)) {
       return;
     }
 
     const baseDay = schedule[key] ?? EMPTY_DAY;
-
-    // const currentPerson = baseDay.find((person) => person.userId === user.id);
-
-    // if (currentPerson?.status === "confirmed-elsewhere") {
-    //   return;
-    // }
 
     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
       day: baseDay,
       userId: user.id,
     });
 
-    if (hasConfirmedVisit && !editingConfirmedWeek) {
+    const isEditing = editingUserIds.has(user.id);
+
+    if (hasConfirmedVisit && !isEditing) {
       return;
     }
 
@@ -140,7 +151,7 @@ export function Calendar({
       user.id,
     );
 
-    const currentlyAttending = editingConfirmedWeek
+    const currentlyAttending = isEditing
       ? resolveEditingAttendance({
           hasConfirmedVisit,
           planningOverrideState,

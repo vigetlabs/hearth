@@ -54,94 +54,121 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
     )
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
-  def snapshot(data)
-    week_start = normalized_week_start_from(
-      data
+  # Function only called in `confirm_week_service.rb` after
+  # a week confirmation has succesfully been saved
+  sig do
+    params(
+      office: Office,
+      week_start: Date,
+      user_id: Integer
+    ).void
+  end
+  def self.finish_editing(
+    office:,
+    week_start:,
+    user_id:
+  )
+    normalized_week_start =
+      week_start.beginning_of_week(:monday)
+
+    week_start_key = normalized_week_start.iso8601
+    week_dates = DateUtility.week_dates(normalized_week_start)
+
+    editing_store =
+      OfficeAttendanceEditingStore.new(
+        office_id: office.id
+      )
+
+    editing_store.stop_editing(
+      week_start: week_start_key,
+      user_id:
     )
+
+    OfficePlanningStore
+      .new(office_id: office.id)
+      .clear(
+        dates: week_dates,
+        user_id:
+      )
+
+    broadcast_to(
+      office,
+      {
+        type: "attendance.editing.updated",
+        office_id: office.id,
+        week_start: week_start_key,
+        editing_user_ids:
+          editing_store.editing_user_ids(
+            week_start: week_start_key
+          )
+      }
+    )
+
+    week_dates.each do |date|
+      OfficePlanningBroadcaster.broadcast_date(
+        office:,
+        date:
+      )
+    end
+  end
+
+  # Action cable inspects action's arity to decide whether to pass data hash..
+  # T::Sig::WithoutRuntime is necessary here so that Sorbet does not wrap
+  # the methods and obscure the arity
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
+  def snapshot(data)
+    week_start =
+      DateUtility.normalized_week_start(data["week_start"])
 
     transmit_editing_snapshot(
       week_start: week_start.iso8601
     )
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def start_editing(data)
-    week_start = normalized_week_start_from(
-      data
-    )
+    week_start =
+      DateUtility.normalized_week_start(data["week_start"])
 
     normalized_week_start = week_start.iso8601
 
-    week_dates = T.let(
-      DateUtility.week_dates(
-        week_start
-      ),
-      T::Array[String]
-    )
+    week_dates = DateUtility.week_dates(week_start)
 
     confirmed_dates = confirmed_visit_dates(
       week_dates:
     )
 
-    office_attendance_editing_store.start_editing(
-      week_start: normalized_week_start,
-      user_id: current_user.id
-    )
-
+    # selects and deselects depending on the user's confirmed dates
     initialize_planning_draft(
       week_dates:,
       confirmed_dates:
     )
 
-    broadcast_planning_dates(
-      dates: week_dates
-    )
-
-    broadcast_editing_snapshot(
-      week_start: normalized_week_start
-    )
-  end
-
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
-  def stop_editing(data)
-    week_start = normalized_week_start_from(
-      data
-    )
-
-    normalized_week_start = week_start.iso8601
-
-    week_dates = T.let(
-      DateUtility.week_dates(
-        week_start
-      ),
-      T::Array[String]
-    )
-
-    office_attendance_editing_store.stop_editing(
+    # stores in redis sorted set with expiration
+    office_attendance_editing_store.start_editing(
       week_start: normalized_week_start,
       user_id: current_user.id
     )
 
-    planning_store.clear(
-      dates: week_dates,
-      user_id: current_user.id
+    broadcast_planning_dates(
+      dates: week_dates
     )
 
     broadcast_editing_snapshot(
       week_start: normalized_week_start
     )
-
-    broadcast_planning_dates(
-      dates: week_dates
-    )
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def heartbeat(data)
-    week_start = normalized_week_start_from(
-      data
-    )
+    week_start =
+      DateUtility.normalized_week_start(data["week_start"])
 
     office_attendance_editing_store.heartbeat(
       week_start: week_start.iso8601,
@@ -158,20 +185,6 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
 
   sig do
     params(
-      data: ApplicationCable::Types::ChannelData
-    ).returns(Date)
-  end
-  def normalized_week_start_from(data)
-    T.let(
-      DateUtility.normalized_week_start(
-        data["week_start"]
-      ),
-      Date
-    )
-  end
-
-  sig do
-    params(
       week_dates: T::Array[String]
     ).returns(T::Set[String])
   end
@@ -181,7 +194,6 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
         .where(
           user: current_user,
           office:,
-          status: :confirmed,
           visit_date: week_dates
         )
         .pluck(:visit_date)
