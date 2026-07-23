@@ -165,7 +165,6 @@ export function DayRoster({
               <RosterSection
                 title="Planning to Come In"
                 count={planningInCount}
-                titleClassName="text-fg-muted"
               >
                 {planning.map((person) => (
                   <RosterRow
@@ -195,7 +194,7 @@ export function DayRoster({
                   myUserId={myUserId}
                   mark="confirmed-no"
                   variant="solid"
-                  iconClassName="border-fg bg-fg"
+                  iconClassName="border-[#77685d] bg-[#77685d]"
                 />
               ))}
             </RosterSection>
@@ -204,6 +203,7 @@ export function DayRoster({
             <RosterSection
               title="Planning Not to Come In"
               count={planningOutCount}
+              titleClassName="text-fg-muted"
             >
               {plannedOut.map((person) => (
                 <RosterRow
