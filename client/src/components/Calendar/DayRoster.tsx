@@ -45,22 +45,23 @@ export function DayRoster({
   // Only nudge for upcoming days — today and past days are too late.
   const canNudge = isFuture(date);
 
+  const meFirst = byMeThenName(myUserId);
   const confirmed = rosterUsers
     .filter((rosterUser) => rosterUser.status === "confirmed-yes")
-    .sort(byName);
+    .sort(meFirst);
   const planning = rosterUsers
     .filter((rosterUser) => rosterUser.status === "planning-yes")
-    .sort(byName);
+    .sort(meFirst);
   const confirmedOut = rosterUsers
     .filter(
       (rosterUser) =>
         rosterUser.status === "confirmed-no" ||
         rosterUser.status === "confirmed-elsewhere",
     )
-    .sort(byName);
+    .sort(meFirst);
   const plannedOut = rosterUsers
     .filter((rosterUser) => rosterUser.status === "planning-no")
-    .sort(byName);
+    .sort(meFirst);
 
   const confirmedInCount = confirmed.length;
   const planningInCount = planning.length;
@@ -225,7 +226,13 @@ export function DayRoster({
   );
 }
 
-const byName = (a: RosterUser, b: RosterUser) => a.name.localeCompare(b.name);
+// Floats the current user to the top of their section; everyone else keeps
+// their existing name order.
+const byMeThenName = (myUserId: number) => (a: RosterUser, b: RosterUser) => {
+  if (a.userId === myUserId) return -1;
+  if (b.userId === myUserId) return 1;
+  return a.name.localeCompare(b.name);
+};
 
 function TabButton({
   active,

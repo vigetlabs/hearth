@@ -105,7 +105,11 @@ function PlanningHeader({
       <BadgeStack
         visitorCount={visitorCount}
         isHotSpot={isHotSpot}
-        visitorClass="bg-strong text-fg-inverse"
+        visitorClass={
+          isConfirmedElsewhere
+            ? "bg-surface text-fg"
+            : "bg-strong text-fg-inverse"
+        }
         hotSpotClass="bg-strong text-fg-inverse"
         className={isConfirmedElsewhere ? badgeStackElsewhere : undefined}
       />
