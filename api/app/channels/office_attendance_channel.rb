@@ -40,6 +40,15 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
   end
 
   sig { params(data: ApplicationCable::Types::ChannelData).void }
+  def snapshot(data)
+    week_start  = T.let(
+      DateUtility.normalized_week_start(data["week_start"]),
+      Date
+    )
+    # @NOTE: TRANSMIT
+  end
+
+  sig { params(data: ApplicationCable::Types::ChannelData).void }
   def start_editing(data)
     week_start = T.let(
       DateUtility.normalized_week_start(data["week_start"]),
@@ -55,7 +64,7 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
       Visit
         .where(
           user: current_user,
-          office: @office,
+          office: office,
           visit_date: week_dates
         )
         .pluck(:visit_date)
@@ -81,10 +90,78 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
     end
   end
 
+  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  def stop_editing(data)
+    week_start = T.let(
+      DateUtility.normalized_week_start(data["week_start"]),
+      Date
+    )
+
+    week_dates = T.let(
+      DateUtility.week_dates(week_start),
+      T::Array[String]
+    )
+
+    normalized_week_start = DateUtility.normalize_to_string(week_start)
+    raise ArgumentError, "Invalid week start" if normalized_week_start.nil?
+
+    office_attendance_editing_store.stop_editing(
+      week_start: normalized_week_start,
+      user_id: current_user.id
+    )
+
+    planning_store.clear(
+      dates: week_dates,
+      user_id: current_user.id
+    )
+  end
+
+  private
+
+  sig { returns(Office) }
+  def office
+    T.must(@office)
+  end
+
+  sig { params(week_start: String).void }
+  def transmit_editing_snapshot(week_start:)
+    transmit(
+      editing_snapshot_payload(
+        week_start:
+      )
+    )
+  end
+
+  sig { params(week_start: String).void }
+  def broadcast_editing_snapshot(week_start:)
+    self.class.broadcast_to(
+      office,
+      editing_snapshot_payload(
+        week_start:
+      )
+    )
+  end
+
+  sig do
+    params(
+      week_start: String,
+    ).returns(T::Hash[Symbol, T.untyped])
+  end
+  def editing_snapshot_payload(week_start:)
+    {
+      type: "attendance.editing.updated",
+      office_id: office.id,
+      week_start:,
+      editing_user_ids: office_attendance_editing_store.editing_user_ids(
+        week_start:
+      )
+    }
+  end
+
   sig { returns(OfficeAttendanceEditingStore) }
   def office_attendance_editing_store
     @office_attendance_editing_store ||= T.let(
-      OfficeAttendanceEditingStore.new(office_id: T.must(@office).id),
+      OfficeAttendanceEditingStore.new(office_id: office.id),
       T.nilable(OfficeAttendanceEditingStore)
     )
   end
@@ -92,7 +169,7 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
   sig { returns(OfficePlanningStore) }
   def planning_store
     @planning_store ||= T.let(
-      OfficePlanningStore.new(office_id: T.must(@office).id),
+      OfficePlanningStore.new(office_id: office.id),
       T.nilable(OfficePlanningStore)
     )
   end
