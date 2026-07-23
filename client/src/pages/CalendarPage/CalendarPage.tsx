@@ -63,14 +63,10 @@ export default function CalendarPage() {
     [officesQuery.data],
   );
 
-  const fallbackOffice = offices.find(
-    (office) => office.name.toLowerCase() !== "remote",
-  );
-
   const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
     ? parsedOfficeId
     : user?.office?.name.toLowerCase() === "remote"
-      ? fallbackOffice?.id
+      ? offices[0]?.id
       : user?.office?.id;
 
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
