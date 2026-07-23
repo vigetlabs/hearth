@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router";
 
 import { Calendar } from "@/components/Calendar/Calendar";
+import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
 import Loader from "@/components/Loader/Loader";
@@ -248,6 +249,16 @@ export default function CalendarPage() {
 
   const createAttendanceConfirmationMutation = useWeekAttendanceConfirmation();
 
+  // Warn before confirming an in-office visit at a non-default office, so
+  // visiting a non-home office is always a deliberate choice. The warning fires
+  // only when the user is actually scheduling a day there, and only once per
+  // office — tracked here so navigating between weeks doesn't re-prompt.
+  const [isNonDefaultOfficeModalOpen, setIsNonDefaultOfficeModalOpen] =
+    useState(false);
+  const [officesWarnedForVisit, setOfficesWarnedForVisit] = useState<
+    Set<number>
+  >(() => new Set());
+
   // === Live updates: real-time planning + attendance over Rails Action Cable (Redis adapter) ===
   const {
     planningStatesByDate,
@@ -323,12 +334,17 @@ export default function CalendarPage() {
     ],
   );
 
-  function confirmWeek(): void {
-    if (!user || activeOfficeId === undefined) {
-      return;
+  // The `YYYY-MM-DD` keys of the days the current user has chosen to attend this
+  // office this week — derived from their roster status plus any live planning
+  // toggles, and excluding days they're already confirmed at another office.
+  // Shared by the confirm action and the non-default-office warning, which only
+  // fires when this is non-empty (i.e. they're actually scheduling a visit).
+  const selectedDates: string[] = useMemo(() => {
+    if (!user) {
+      return [];
     }
 
-    const selectedDates: string[] = weekDates
+    return weekDates
       .filter((date: Date) => {
         const dateKey: string = generateDateKey(date);
         const rosterUsers: RosterUser[] = schedule[dateKey] ?? [];
@@ -368,6 +384,18 @@ export default function CalendarPage() {
         );
       })
       .map(generateDateKey);
+  }, [
+    user,
+    weekDates,
+    schedule,
+    currentUserExternalVisitsByDate,
+    planningStatesByDate,
+  ]);
+
+  function confirmWeek(): void {
+    if (!user || activeOfficeId === undefined) {
+      return;
+    }
 
     const payload = createAttendanceConfirmationObjectPayload({
       officeId: activeOfficeId,
@@ -400,6 +428,29 @@ export default function CalendarPage() {
         ]);
       },
     });
+  }
+
+  // Only warn when confirming an *in-office visit* at a non-default office —
+  // and only the first time for that office. If the user isn't scheduling any
+  // days (confirming "no"), or the default office, or we've already warned for
+  // this office, confirm straight through with no modal.
+  function handleConfirmWeekClick(): void {
+    if (activeOfficeId === undefined) {
+      return;
+    }
+
+    const isNonDefaultOffice =
+      !defaultOffice || activeOfficeId !== defaultOffice.id;
+    const isSchedulingVisit = selectedDates.length > 0;
+    const alreadyWarned = officesWarnedForVisit.has(activeOfficeId);
+
+    if (isNonDefaultOffice && isSchedulingVisit && !alreadyWarned) {
+      setOfficesWarnedForVisit((prev) => new Set(prev).add(activeOfficeId));
+      setIsNonDefaultOfficeModalOpen(true);
+      return;
+    }
+
+    confirmWeek();
   }
 
   if (
@@ -482,24 +533,24 @@ export default function CalendarPage() {
               <div className="h-4 w-0.5 bg-line" />
 
               <p className="text-sm text-fg">
-                {externalOfficeSummaries.length >= 1 ? (
-                  <>
-                    <span className="font-bold text-fg">
-                      Planning for {capitalizeOfficeName(activeOffice.name)}.
-                    </span>{" "}
-                    {confirmedElsewhereText(externalOfficeSummaries)}
-                  </>
-                ) : isCalendarLocked ? (
-                  <>
-                    <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
-                    Edit Week to make changes.
-                  </>
-                ) : (
-                  <>
-                    <span className="font-bold text-fg">Planning.</span> Select
-                    your days, then confirm.
-                  </>
-                )}
+                <span className="font-bold text-fg">
+                  {isCalendarLocked
+                    ? externalOfficeSummaries.length >= 1
+                      ? `Confirmed for ${capitalizeOfficeName(
+                          activeOffice.name,
+                        )} ✓`
+                      : "Confirmed ✓"
+                    : externalOfficeSummaries.length >= 1
+                      ? `Planning for ${capitalizeOfficeName(
+                          activeOffice.name,
+                        )}.`
+                      : "Planning."}
+                </span>{" "}
+                {externalOfficeSummaries.length >= 1
+                  ? confirmedElsewhereText(externalOfficeSummaries)
+                  : isCalendarLocked
+                    ? "Edit Week to make changes."
+                    : "Select your days, then confirm."}
               </p>
 
               {isWeekConfirmed && !isEditingWeek ? (
@@ -515,7 +566,7 @@ export default function CalendarPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={confirmWeek}
+                  onClick={handleConfirmWeekClick}
                   disabled={
                     createAttendanceConfirmationMutation.isPending ||
                     !isPlanningConnected
@@ -546,12 +597,29 @@ export default function CalendarPage() {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        open={isNonDefaultOfficeModalOpen}
+        title={`Your default office is ${capitalizeOfficeName(
+          defaultOffice?.name ?? "",
+        )}`}
+        description={`Are you sure you want to schedule an in-office visit to ${capitalizeOfficeName(
+          activeOffice.name,
+        )}?`}
+        confirmLabel="Yes"
+        cancelLabel="Go back"
+        onConfirm={() => {
+          setIsNonDefaultOfficeModalOpen(false);
+          confirmWeek();
+        }}
+        onCancel={() => setIsNonDefaultOfficeModalOpen(false)}
+      />
     </div>
   );
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center text-fg transition-colors hover:text-fg-subtle";
+  "flex h-8 w-8 items-center justify-center text-fg-subtle transition-colors hover:text-fg";
 
 const pillButton =
   "inline-flex h-11 items-center rounded-full border-2 border-line bg-surface px-5 text-sm text-fg transition-colors hover:bg-surface-sunken";
