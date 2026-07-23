@@ -41,7 +41,7 @@ export default function RemotePage() {
               <button
                 key={office.id}
                 type="button"
-                onClick={() => navigate("/calendar")}
+                onClick={() => navigate(`/calendar?office=${office.id}`)}
                 className="relative capitalize flex min-h-[16rem] flex-col justify-between rounded-2xl bg-surface-strong bg-cover bg-center p-4 text-left shadow-sm transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
                 style={
                   {
