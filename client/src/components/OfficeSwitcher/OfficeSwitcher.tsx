@@ -26,7 +26,7 @@ export default function OfficeSwitcher({
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm capitalize text-[#807166] transition-colors hover:text-fg focus:outline-none">
+      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm capitalize text-fg transition-colors hover:text-black focus:outline-none">
         view offices
         <ChevronDownIcon className="h-3 w-3" />
       </DropdownMenu.Trigger>
