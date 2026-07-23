@@ -15,6 +15,15 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
     }
   end
 
+  VisitsRemovedPayload = T.type_alias do
+    {
+      type: String,
+      office_id: Integer,
+      week_start: String,
+      user_id: Integer
+    }
+  end
+
   sig { void }
   def subscribed
     found_office = find_office(params[:office_id])
@@ -142,6 +151,14 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
       week_dates:
     )
 
+    remove_stale_visit_dates(
+      week_dates:
+    )
+
+    broadcast_visits_removed(
+      week_start: normalized_week_start
+    )
+
     # selects and deselects depending on the user's confirmed dates
     initialize_planning_draft(
       week_dates:,
@@ -205,6 +222,21 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
 
   sig do
     params(
+      week_dates: T::Array[String]
+    ).void
+  end
+  def remove_stale_visit_dates(week_dates:)
+    Visit
+      .where(
+        user: current_user,
+        office:,
+        visit_date: week_dates
+      )
+      .destroy_all
+  end
+
+  sig do
+    params(
       week_dates: T::Array[String],
       confirmed_dates: T::Set[String]
     ).void
@@ -254,6 +286,24 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
       editing_snapshot_payload(
         week_start:
       )
+    )
+  end
+
+  sig { params(week_start: String).void }
+  def broadcast_visits_removed(week_start:)
+    payload = T.let(
+      {
+        type: "attendance.visits.removed",
+        office_id: office.id,
+        week_start:,
+        user_id: current_user.id
+      },
+      VisitsRemovedPayload
+    )
+
+    self.class.broadcast_to(
+      office,
+      payload
     )
   end
 

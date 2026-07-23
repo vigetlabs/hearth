@@ -7,6 +7,7 @@ import {
 } from "../sharedSubscription";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
 import { generateVisitsKey } from "@/util/api/keys/visitKeys";
+import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";
 
 interface UseOfficeAttendingOptions {
   officeId: number | null;
@@ -176,6 +177,33 @@ export function useOfficeAttending({
               return;
             }
 
+            case "attendance.visits.removed": {
+              const invalidations = [
+                queryClient.invalidateQueries({
+                  queryKey: generateVisitsKey({
+                    date: msg.week_start,
+                    view: "week",
+                    office_id: msg.office_id,
+                  }),
+                }),
+              ];
+
+              if (msg.user_id === currentUserId) {
+                invalidations.push(
+                  queryClient.invalidateQueries({
+                    queryKey: generateCurrentUserVisitsKey(
+                      msg.week_start,
+                      "week",
+                    ),
+                  }),
+                );
+              }
+
+              void Promise.all(invalidations);
+
+              return;
+            }
+
             default: {
               const exhaustiveCheck: never = msg;
               return exhaustiveCheck;
@@ -194,7 +222,7 @@ export function useOfficeAttending({
 
       subscription.unsubscribe();
     };
-  }, [officeId, weekStart, queryClient]);
+  }, [currentUserId, officeId, weekStart, queryClient]);
 
   const isCurrentUserEditing =
     currentUserId !== null && editingUserIds.has(currentUserId);
