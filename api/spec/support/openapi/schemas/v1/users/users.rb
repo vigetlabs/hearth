@@ -12,16 +12,24 @@ module OpenApi::Schemas::V1::Users
       email
       first_name
       last_name
-      office_id
+      office
     ],
     properties: {
       id: { type: :integer },
       email: { type: :string, format: :email },
       first_name: { type: :string },
       last_name: { type: :string },
-      office_id: {
-        type: :integer,
-        nullable: true
+      office: {
+        type: :object,
+        nullable: true,
+        required: %w[
+          id
+          name
+        ],
+        properties: {
+          id: { type: :integer },
+          name: { type: :string }
+        }
       },
       default_schedule: {
         nullable: true,

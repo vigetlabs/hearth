@@ -61,18 +61,13 @@ class OfficePresenceChannel < ApplicationCable::Channel
   end
 
   def active_office_users
-    User
+    users = User
       .where(id: presence_store.active_user_ids)
-      .includes(:default_schedule)
-      .map do |user|
-        {
-          id: user.id,
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          office_id: user.office_id,
-          default_schedule: user.default_schedule
-        }
-      end
+      .includes(:default_schedule, :office)
+
+    UserSerializer
+      .new(users)
+      .serializable_hash[:data]
+      .map { |user| user[:attributes] }
   end
 end

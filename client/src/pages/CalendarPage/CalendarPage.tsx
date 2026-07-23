@@ -56,15 +56,22 @@ export default function CalendarPage() {
   const parsedOfficeId: number | undefined = officeIdParam
     ? Number(officeIdParam)
     : undefined;
-  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
-    ? parsedOfficeId
-    : (user?.office_id ?? undefined);
 
   const officesQuery = useOfficesQuery();
   const offices: Office[] = useMemo(
     () => officesQuery.data ?? [],
     [officesQuery.data],
   );
+
+  const fallbackOffice = offices.find(
+    (office) => office.name.toLowerCase() !== "remote",
+  );
+
+  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
+    ? parsedOfficeId
+    : user?.office?.name.toLowerCase() === "remote"
+      ? fallbackOffice?.id
+      : user?.office?.id;
 
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
@@ -79,8 +86,8 @@ export default function CalendarPage() {
   /*
    * Derive the effective office id from the resolved office so it stays in sync
    * with what the calendar actually displays. Users without an assigned office
-   * (office_id === null) fall back to the default office instead of leaking a
-   * null office id into the API requests.
+   * (office === null) fall back to the default office instead of leaking an
+   * undefined office id into the API requests.
    */
   const activeOfficeId: number | undefined = activeOffice?.id;
 
@@ -779,7 +786,7 @@ function findCurrentUserOffice(
   currentUser: User,
 ): Office | null {
   return (
-    offices.find((office) => office.id === currentUser.office_id) ??
+    offices.find((office) => office.id === currentUser.office?.id) ??
     offices[0] ??
     null
   );

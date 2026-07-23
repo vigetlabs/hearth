@@ -7,7 +7,6 @@ import type {
 } from "@/types/calendar/calendar";
 import { generateDateKey } from "@/util/dates/date";
 import { userDisplayName } from "../auth/displayName";
-import type { ChannelSerializedUser } from "@/types/cable/officePlanning";
 
 const WEEKDAY_FIELDS = [
   "sunday",
@@ -26,7 +25,7 @@ function generateUserIdVisitKey(userId: number, visitDate: string): string {
 }
 
 function buildRosterUser(
-  user: ChannelSerializedUser,
+  user: Pick<User, "id" | "first_name" | "last_name">,
   status: AttendanceStatus,
   isVisitor: boolean,
 ): RosterUser {
@@ -115,13 +114,7 @@ export function buildWeekSchedule(
           visit.visit_date === dateKey && !rosterUserIds.has(visit.user.id),
       )
       .map((visit): RosterUser => {
-        const channelUser: ChannelSerializedUser = {
-          id: visit.user.id,
-          first_name: visit.user.first_name,
-          last_name: visit.user.last_name,
-          office_id: visit.office_id,
-        };
-        return buildRosterUser(channelUser, "confirmed-yes", true);
+        return buildRosterUser(visit.user, "confirmed-yes", true);
       });
     schedule[dateKey] = [...visitingGuests, ...rosterPeople];
   }

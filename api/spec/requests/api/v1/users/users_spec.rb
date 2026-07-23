@@ -27,7 +27,14 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
 
           returned_users = json["data"]["users"]
           expect(returned_users.length).to eq(4)
-          expect(returned_users.pluck("office_id")).to all(eq(office.id))
+          expect(returned_users.pluck("office")).to all(
+            eq(
+              {
+                "id" => office.id,
+                "name" => office.name
+              }
+            )
+          )
         end
       end
     end
@@ -160,7 +167,10 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
             "email" => user.email,
             "first_name"=> user.first_name,
             "last_name" => user.last_name,
-            "office_id" => office.id
+            "office" => {
+              "id" => office.id,
+              "name" => office.name
+            }
           )
         end
       end
@@ -168,7 +178,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
       context "when the user does not belong to an office" do
         let(:office) { nil }
 
-        it "returns a null office_id" do
+        it "returns a null office" do
           get api_path("/users/me"), headers: headers
 
           expect(response).to have_http_status(:ok)
@@ -179,7 +189,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
             "email" => user.email,
             "first_name" => user.first_name,
             "last_name" => user.last_name,
-            "office_id" => nil
+            "office" => nil
           )
         end
       end
