@@ -65,10 +65,6 @@ export default function CalendarPage() {
     [officesQuery.data],
   );
 
-  const activeOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
-    ? parsedOfficeId
-    : (user?.office_id ?? offices[0]?.id);
-
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
   const officesById = useMemo(
