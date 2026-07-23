@@ -70,7 +70,7 @@ export default function ConfirmationModal({
 
           <div className="mt-8 flex justify-center gap-3">
             <AlertDialog.Cancel
-              className={`rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-fg focus:outline-none ${cancelClasses}`}
+              className={`rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-fg transition-colors focus:outline-none ${cancelClasses}`}
             >
               {cancelLabel}
             </AlertDialog.Cancel>
@@ -78,7 +78,7 @@ export default function ConfirmationModal({
               onClick={() => {
                 confirmingRef.current = true;
               }}
-              className={`rounded-lg px-4 py-2 text-sm font-medium focus:outline-none ${confirmClasses}`}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${confirmClasses}`}
             >
               {confirmLabel}
             </AlertDialog.Action>

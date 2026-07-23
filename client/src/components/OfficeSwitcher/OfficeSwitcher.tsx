@@ -26,7 +26,7 @@ export default function OfficeSwitcher({
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm capitalize text-fg-muted hover:text-fg focus:outline-none">
+      <DropdownMenu.Trigger className="flex items-center gap-1 text-sm capitalize text-[#807166] transition-colors hover:text-fg focus:outline-none">
         view offices
         <ChevronDownIcon className="h-3 w-3" />
       </DropdownMenu.Trigger>
@@ -42,7 +42,7 @@ export default function OfficeSwitcher({
               {index > 0 && <DropdownMenu.Separator className="h-px bg-line" />}
               <DropdownMenu.Item
                 onSelect={() => setOffice(option)}
-                className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-left outline-none data-[highlighted]:bg-surface-muted"
+                className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-left outline-none transition-colors data-[highlighted]:bg-surface-muted"
               >
                 <span className="text-lg" aria-hidden="true">
                   {option.emoji}

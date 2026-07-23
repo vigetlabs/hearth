@@ -2,6 +2,7 @@ import { DayCell } from "@/components/Calendar/DayCell";
 
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
+import type { Visit } from "@/types/api/visits";
 import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 import type {
   ChannelSerializedUser,
@@ -20,13 +21,19 @@ import {
   resolveAttendance,
   resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
-import type { Visit } from "@/types/api/visits";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
 
+// The "Most confirmed" hot spot is about the busiest day overall, so it counts
+// everyone confirmed in — this is intentionally independent of the visitor
+// badge, which counts only confirmed visitors from other offices.
 const confirmedCountOf = (day: RosterUser[]): number =>
   day.filter((person) => person.status === "confirmed-yes").length;
+
+const visitorCountOf = (day: RosterUser[]): number =>
+  day.filter((person) => person.status === "confirmed-yes" && person.isVisitor)
+    .length;
 
 interface CalendarProps {
   schedule: WeekSchedule;
@@ -40,6 +47,7 @@ interface CalendarProps {
   currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>;
   externalOfficeNamesByDate: ReadonlyMap<string, string>;
   editingUserIds: ReadonlySet<number>;
+  externalOfficeEmojisByDate: ReadonlyMap<string, string>;
 }
 
 export function Calendar({
@@ -54,6 +62,7 @@ export function Calendar({
   currentUserExternalVisitsByDate,
   externalOfficeNamesByDate,
   editingUserIds,
+  externalOfficeEmojisByDate,
 }: CalendarProps) {
   const myName = userDisplayName(user);
 
@@ -119,6 +128,7 @@ export function Calendar({
           userId: planningUser.id,
           name: userDisplayName(planningUser),
           status: "planning-yes",
+          isVisitor: false,
         })) ?? [];
 
     return [...additionalSelectedUsers, ...resolvedScheduledPeople];
@@ -173,8 +183,15 @@ export function Calendar({
     }),
   ) as WeekSchedule;
 
-  const counts = days.map((day) =>
+  // Confirmed counts drive the "Most confirmed" hot spot; visitor counts drive
+  // the visitor badge. They're computed separately so one badge's presence never
+  // depends on the other's.
+  const confirmedCounts = days.map((day) =>
     confirmedCountOf(attendance[generateDateKey(day)] ?? EMPTY_DAY),
+  );
+
+  const visitorCounts = days.map((day) =>
+    visitorCountOf(attendance[generateDateKey(day)] ?? EMPTY_DAY),
   );
 
   const planningCounts = days.map(
@@ -184,14 +201,14 @@ export function Calendar({
       ).length,
   );
 
-  const maxCount = Math.max(0, ...counts);
+  const maxCount = Math.max(0, ...confirmedCounts);
 
   const hotSpotDays = new Set<number>();
 
   if (maxCount > 0) {
-    const topConfirmed = counts
+    const topConfirmed = confirmedCounts
       .map((_, index) => index)
-      .filter((index) => counts[index] === maxCount);
+      .filter((index) => confirmedCounts[index] === maxCount);
 
     const maxPlanning = Math.max(
       ...topConfirmed.map((index) => planningCounts[index]),
@@ -206,6 +223,10 @@ export function Calendar({
 
   const todayIndex = days.findIndex((day) => isSameDay(day, new Date()));
 
+  // The visitor badge shows on any office's calendar. The "Most confirmed" hot
+  // spot likewise shows on any office's calendar (and for remote users viewing
+  // them) — it's suppressed only per-day when you're confirmed elsewhere, where
+  // the darker header would make it look cluttered.
   const isRemote = office.name.toLowerCase() === "remote";
 
   if (isRemote) {
@@ -220,11 +241,7 @@ export function Calendar({
     <div className="relative flex min-h-0 flex-1 flex-col">
       {todayIndex !== -1 && (
         <span
-          className={`pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            locked
-              ? "border border-strong bg-surface text-fg"
-              : "bg-strong text-fg-inverse"
-          }`}
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fg px-3 py-1 text-[0.625rem] font-semibold text-fg-inverse"
           style={{
             left: `${((todayIndex + 0.5) / WEEKDAYS_PER_WEEK) * 100}%`,
           }}
@@ -234,7 +251,7 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 divide-x divide-line overflow-hidden rounded-xl border border-line"
+        className="grid min-h-0 flex-1 divide-x-2 divide-line overflow-hidden rounded-xl border-2 border-line"
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",
@@ -245,7 +262,7 @@ export function Calendar({
 
           const rosterUsers: RosterUser[] = attendance[key] ?? EMPTY_DAY;
 
-          const visitorCount = counts[index];
+          const visitorCount = visitorCounts[index];
 
           const externalVisit = currentUserExternalVisitsByDate.get(key);
           const isElsewhere = externalVisit !== undefined;
@@ -254,6 +271,7 @@ export function Calendar({
             <DayCell
               key={key}
               date={day}
+              officeId={office.id}
               rosterUsers={rosterUsers}
               myUserId={user.id}
               isMine={
@@ -264,12 +282,13 @@ export function Calendar({
                 )
               }
               visitorCount={visitorCount}
-              total={rosterUsers.length}
-              isHotSpot={hotSpotDays.has(index)}
+              isHotSpot={hotSpotDays.has(index) && !isElsewhere}
               locked={locked}
               onToggleMine={() => toggleMine(key)}
               isConfirmedElsewhere={isElsewhere}
               externalOfficeName={externalOfficeNamesByDate.get(key)}
+              externalOfficeEmoji={externalOfficeEmojisByDate.get(key)}
+              currentOfficeName={office.name}
             />
           );
         })}

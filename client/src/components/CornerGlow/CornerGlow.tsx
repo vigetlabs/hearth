@@ -14,12 +14,12 @@ export default function CornerGlow() {
       <img
         src="/images/corner-glow.svg"
         alt=""
-        className="absolute bottom-0 left-0 w-[635px] max-w-[80%]"
+        className="absolute bottom-0 left-0 w-[635px] max-w-[80%] opacity-60"
       />
       <img
         src="/images/corner-glow.svg"
         alt=""
-        className="absolute -top-10 -right-24 w-[635px] max-w-[80%] rotate-180"
+        className="absolute -top-10 -right-24 w-[635px] max-w-[80%] rotate-180 opacity-80"
       />
     </div>
   );

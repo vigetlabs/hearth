@@ -1,10 +1,10 @@
-import type { Subscription } from "@rails/actioncable";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { cable } from "../cable";
-
 import type { OfficeAttendanceMessage } from "@/types/cable/officeAttendance";
+import {
+  subscribeShared,
+  type SharedSubscription,
+} from "../sharedSubscription";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
 import { generateVisitsKey } from "@/util/api/keys/visitKeys";
 
@@ -55,7 +55,7 @@ export function useOfficeAttending({
       ? editingUsersState.userIds
       : EMPTY_EDITING_USER_IDS;
 
-  const subscriptionRef = useRef<Subscription | null>(null);
+  const subscriptionRef = useRef<SharedSubscription | null>(null);
 
   const isConnected =
     officeId !== null &&
@@ -103,7 +103,7 @@ export function useOfficeAttending({
     const subscribedOfficeId = officeId;
     const subscribedWeekStart = weekStart;
 
-    const subscription = cable.subscriptions.create(
+    const subscription = subscribeShared<OfficeAttendanceMessage>(
       {
         channel: "OfficeAttendanceChannel",
         office_id: subscribedOfficeId,

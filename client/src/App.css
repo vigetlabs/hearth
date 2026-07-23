@@ -26,6 +26,11 @@
   ============================================================================
 */
 @theme {
+  /* Motion — default fade speed for `transition-*` utilities (a touch slower
+     than Tailwind's 150ms default). Utilities with an explicit `duration-*`
+     still override this. */
+  --default-transition-duration: 250ms;
+
   /* Typography — app-wide sans font */
   --font-sans:
     "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif,
@@ -67,6 +72,10 @@
   /* Emphasis — terracotta brand accent (primary actions, active cells, badges) */
   --color-strong: #b44820; /* Brand/Confirmed */
   --color-strong-hover: #6e2417; /* Brand/Confirmed border */
+
+  /* Attendance toggle — in/out of office active states (day cell roster tabs) */
+  --color-in-office: #c25706; /* "In Office" tab active */
+  --color-out-office: #b44820; /* "Not in Office" tab active */
 
   /* Fill — deep terracotta for auth & onboarding CTAs */
   --color-fill: #8e3320; /* Confirmed office (outside) */

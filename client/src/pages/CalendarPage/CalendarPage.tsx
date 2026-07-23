@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 import { Calendar } from "@/components/Calendar/Calendar";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import LockIcon from "@/components/icons/LockIcon";
+import PencilIcon from "@/components/icons/PencilIcon";
 import Loader from "@/components/Loader/Loader";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 
@@ -13,6 +13,7 @@ import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
 
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
+import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";
 import { generateVisitsKey } from "@/util/api/keys/visitKeys";
 import { useWeekAttendanceConfirmation } from "@/util/api/mutations/attendanceConfirmations/attendanceConfirmations";
 import { useAttendanceConfirmationsQuery } from "@/util/api/queries/attendanceConfirmationQueries";
@@ -28,13 +29,12 @@ import { buildWeekSchedule } from "@/util/calendar/schedule";
 import { addDays, startOfWeek, generateDateKey } from "@/util/dates/date";
 import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations";
 import type { User } from "@/types/api/users";
+import type { Visit } from "@/types/api/visits";
 import type {
   ChannelSerializedUser,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
-import type { Visit } from "@/types/api/visits";
-import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -43,36 +43,27 @@ const rangeFormat = new Intl.DateTimeFormat(undefined, {
   day: "numeric",
 });
 
-/*
- * Most of the variables are separated into a specific category for easier readability.
- * However, some of the logic crosses between categories.
- */
+// The logic is grouped into labelled sections below; a few pieces cross between them.
 export default function CalendarPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  /* === GENERAL INITIALIZATION LOGIC ===
-   *
-   * This logic contains the general initialization logic that determines what the user sees
-   * when the page is first rendered. The variables in this section is used to derive other states /
-   * influence what is rendered
-   */
+  // === Initialization: resolve the office to display from the URL param (or the user's default) ===
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const officeIdParam: string = searchParams.get("office");
-  const parsedOfficeId: number | null = officeIdParam
+  const officeIdParam: string | null = searchParams.get("office");
+  const parsedOfficeId: number | undefined = officeIdParam
     ? Number(officeIdParam)
     : undefined;
+  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
+    ? parsedOfficeId
+    : (user?.office_id ?? undefined);
 
   const officesQuery = useOfficesQuery();
   const offices: Office[] = useMemo(
     () => officesQuery.data ?? [],
     [officesQuery.data],
   );
-
-  const activeOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
-    ? parsedOfficeId
-    : (user?.office_id ?? offices[0]?.id);
 
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
@@ -82,7 +73,15 @@ export default function CalendarPage() {
   );
 
   const activeOffice: Office =
-    findActiveOffice(offices, activeOfficeId) ?? defaultOffice;
+    findActiveOffice(offices, requestedOfficeId) ?? defaultOffice;
+
+  /*
+   * Derive the effective office id from the resolved office so it stays in sync
+   * with what the calendar actually displays. Users without an assigned office
+   * (office_id === null) fall back to the default office instead of leaking a
+   * null office id into the API requests.
+   */
+  const activeOfficeId: number | undefined = activeOffice?.id;
 
   const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
 
@@ -98,15 +97,8 @@ export default function CalendarPage() {
     });
   }
 
-  /* === DATE LOGIC ===
-   *
-   * This logic determines how the dates are handled in the calendar, such as jumping to today,
-   * viewing the next or previous week, and determining what the beginning date of the week is.
-   *
-   * Date keys typically operate operate in strings, otherwise, date related variables typically are
-   * in the type of `Date`.
-   */
-
+  // === Dates: the focused week, its navigation, and the range label ===
+  // Convention: date *keys* are `YYYY-MM-DD` strings; everything else is a `Date`.
   const [focusedWeekStartDate, setFocusedWeekStartDate] = useState<Date>(() =>
     getWeekStartFromSearchParams(searchParams),
   );
@@ -201,12 +193,48 @@ export default function CalendarPage() {
     [currentUserExternalVisitsByDate, officesById],
   );
 
-  /* === ATTENDANCE LOGIC ===
-   *
-   * This logic handles the attendance statuses within the calendar page. These are the following possible
-   * states that a user can be categorized in: `confirmed-yes`, `confirmed-no`, `planning-yes`, and
-   * `planning-no`.
-   */
+  const externalOfficeEmojisByDate = useMemo(
+    () =>
+      new Map(
+        [...currentUserExternalVisitsByDate].map(([date, visit]) => [
+          date,
+          officesById.get(visit.office_id)?.emoji ?? "",
+        ]),
+      ),
+    [currentUserExternalVisitsByDate, officesById],
+  );
+
+  // The *other* offices (besides the one being viewed) the user is confirmed
+  // at this week, each with the date keys they're confirmed there. External
+  // visits are already confirmed records filtered to other offices, so we just
+  // group them by office id. Offices are ordered by their earliest confirmed
+  // day, and each office's days are sorted, so the rendered status reads in
+  // chronological order.
+  const externalOfficeSummaries: OtherOfficeSummary[] = useMemo(() => {
+    const byOffice = new Map<number, OtherOfficeSummary>();
+
+    for (const [dateKey, visit] of currentUserExternalVisitsByDate) {
+      const existing = byOffice.get(visit.office_id);
+
+      if (existing) {
+        existing.dateKeys.push(dateKey);
+        continue;
+      }
+
+      byOffice.set(visit.office_id, {
+        id: visit.office_id,
+        name: officesById.get(visit.office_id)?.name ?? "[NO NAME]",
+        dateKeys: [dateKey],
+      });
+    }
+
+    return [...byOffice.values()]
+      .map((office) => ({ ...office, dateKeys: [...office.dateKeys].sort() }))
+      .sort((a, b) => a.dateKeys[0].localeCompare(b.dateKeys[0]));
+  }, [currentUserExternalVisitsByDate, officesById]);
+
+  // === Attendance: confirmation state ===
+  // A user's status resolves to one of: confirmed-yes, confirmed-no, planning-yes, planning-no.
   const attendanceConfirmationsQuery = useAttendanceConfirmationsQuery({
     officeId: activeOfficeId,
     startsOn: focusedWeekStartDateKey,
@@ -220,12 +248,7 @@ export default function CalendarPage() {
 
   const createAttendanceConfirmationMutation = useWeekAttendanceConfirmation();
 
-  /*
-   * === ACTION CABLE CHANNEL LOGIC ===
-   *
-   * This logic handles the the live functionality of the calendar that comes from Rails Action Cable
-   * and Redis adapter
-   */
+  // === Live updates: real-time planning + attendance over Rails Action Cable (Redis adapter) ===
   const {
     planningStatesByDate,
     isConnected: isPlanningConnected,
@@ -406,9 +429,14 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-page">
-      <div className="mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
-        <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-[0px_11.42px_34.26px_0px_#0000000F]">
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
+      />
+
+      <div className="relative mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
+        <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-card">
           <div className="flex items-center gap-3 pb-5">
             <h2 className="flex items-center gap-2 text-2xl font-bold capitalize text-fg">
               {activeOffice.name}
@@ -421,7 +449,7 @@ export default function CalendarPage() {
 
           {!isRemote && (
             <div className="flex items-center gap-4 pb-5">
-              <div className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
+              <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
                 <button
                   type="button"
                   onClick={goPrevWeek}
@@ -431,7 +459,7 @@ export default function CalendarPage() {
                   <ChevronDownIcon className="h-3.5 w-3.5 rotate-90" />
                 </button>
 
-                <span className="px-2 text-sm font-bold text-fg">
+                <span className="px-2 text-sm font-normal text-fg">
                   {rangeLabel}
                 </span>
 
@@ -451,20 +479,25 @@ export default function CalendarPage() {
                 </button>
               )}
 
-              <div className="h-6 w-px bg-line" />
+              <div className="h-4 w-0.5 bg-line" />
 
-              <p className="text-sm text-fg-subtle">
-                {isEditingWeek ? (
+              <p className="text-sm text-fg">
+                {externalOfficeSummaries.length >= 1 ? (
                   <>
-                    <span className="font-bold text-fg">Editing.</span> Confirm
-                    the week to save your changes.
+                    <span className="font-bold text-fg">
+                      Planning for {capitalizeOfficeName(activeOffice.name)}.
+                    </span>{" "}
+                    {confirmedElsewhereText(externalOfficeSummaries)}
                   </>
-                ) : isWeekConfirmed ? (
-                  <span className="font-bold text-fg">Confirmed.</span>
+                ) : isCalendarLocked ? (
+                  <>
+                    <span className="font-bold text-fg">Week Confirmed ✓</span>{" "}
+                    Edit Week to make changes.
+                  </>
                 ) : (
                   <>
-                    <span className="font-bold text-fg">Planning.</span> Yet to
-                    be confirmed
+                    <span className="font-bold text-fg">Planning.</span> Select
+                    your days, then confirm.
                   </>
                 )}
               </p>
@@ -476,8 +509,8 @@ export default function CalendarPage() {
                   disabled={!isAttendanceConnected || !isPlanningConnected}
                   className={unlockButton}
                 >
-                  <LockIcon className="h-3.5 w-3.5" />
                   Edit Week
+                  <PencilIcon className="h-3.5 w-3.5" />
                 </button>
               ) : (
                 <button
@@ -509,6 +542,7 @@ export default function CalendarPage() {
             currentUserExternalVisitsByDate={currentUserExternalVisitsByDate}
             externalOfficeNamesByDate={externalOfficeNamesByDate}
             editingUserIds={editingUserIds}
+            externalOfficeEmojisByDate={externalOfficeEmojisByDate}
           />
         </div>
       </div>
@@ -517,19 +551,95 @@ export default function CalendarPage() {
 }
 
 const arrowButton =
-  "flex h-8 w-8 items-center justify-center text-fg-strong hover:text-fg";
+  "flex h-8 w-8 items-center justify-center text-fg transition-colors hover:text-fg-subtle";
 
 const pillButton =
-  "rounded-full border border-line bg-surface px-5 py-2 text-sm text-fg hover:bg-surface-sunken";
+  "inline-flex h-11 items-center rounded-full border-2 border-line bg-surface px-5 text-sm text-fg transition-colors hover:bg-surface-sunken";
 
-const todayButton = `${pillButton} font-semibold`;
+const todayButton = `${pillButton} font-bold`;
 
 const darkPillButton =
-  "flex items-center gap-2 rounded-full bg-strong px-5 py-2 text-sm font-bold text-fg-inverse hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
+  "flex h-11 items-center gap-2 rounded-full bg-strong px-5 text-sm font-bold text-fg-inverse transition-colors hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
 
-const confirmButton = `ml-auto ${darkPillButton}`;
+const confirmButton = `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
 
-const unlockButton = `ml-auto ${darkPillButton}`;
+const unlockButton = `ml-auto ${darkPillButton} bg-[#6f281d]! hover:bg-fg!`;
+
+/** One other office the user is confirmed at this week, with the `YYYY-MM-DD`
+    keys of the days they're confirmed there (sorted ascending). */
+interface OtherOfficeSummary {
+  id: number;
+  name: string;
+  dateKeys: string[];
+}
+
+const weekdayFormat = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+
+const officeListFormat = new Intl.ListFormat(undefined, {
+  style: "long",
+  type: "conjunction",
+});
+
+/** Parse a local `YYYY-MM-DD` key into a `Date` without timezone drift. */
+function parseDateKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/** Title-case an office name for display (e.g. "falls church" -> "Falls
+    Church"), so status text reads consistently regardless of stored casing. */
+function capitalizeOfficeName(name: string): string {
+  return name.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/** A linked office name within the unbolded status note: colored, underlined,
+    and pointing at that office's calendar so the user can jump straight there. */
+function officeLink(office: OtherOfficeSummary): ReactNode {
+  return (
+    <Link
+      key={office.id}
+      to={`/calendar?office=${office.id}`}
+      className="text-strong underline"
+    >
+      {capitalizeOfficeName(office.name)}
+    </Link>
+  );
+}
+
+/** The unbolded note following "Planning for [office].", describing the other
+    offices the user is confirmed at this week. With a single other office it
+    lists the specific days; with several it just names them. Each office name is
+    a link to that office's calendar. Assumes at least one office (the caller
+    only renders it when there is). */
+function confirmedElsewhereText(offices: OtherOfficeSummary[]): ReactNode {
+  if (offices.length === 1) {
+    const office = offices[0];
+    const days = office.dateKeys
+      .map((key) => weekdayFormat.format(parseDateKey(key)))
+      .join(", ");
+
+    return (
+      <>
+        You&apos;re at {officeLink(office)} {days} 🔒
+      </>
+    );
+  }
+
+  // Interleave the linked office names with the list-format connectors ("," and
+  // "and") so the styled links sit inside otherwise plain conjunction text.
+  let elementIndex = 0;
+  const nameNodes = officeListFormat
+    .formatToParts(offices.map((office) => capitalizeOfficeName(office.name)))
+    .map((part, i) =>
+      part.type === "element" ? (
+        officeLink(offices[elementIndex++])
+      ) : (
+        <span key={`sep-${i}`}>{part.value}</span>
+      ),
+    );
+
+  return <>You&apos;re at {nameNodes} this week 🔒</>;
+}
 
 function getWeekStartFromSearchParams(searchParams: URLSearchParams): Date {
   const year = Number(searchParams.get("year"));
@@ -599,9 +709,9 @@ function findCurrentUserOffice(
 
 function findActiveOffice(
   offices: Office[],
-  activeOfficeId: number,
+  activeOfficeId: number | undefined,
 ): Office | null {
-  return offices.find((office) => office.id === activeOfficeId);
+  return offices.find((office) => office.id === activeOfficeId) ?? null;
 }
 
 function isCurrentUserInPlanningState(

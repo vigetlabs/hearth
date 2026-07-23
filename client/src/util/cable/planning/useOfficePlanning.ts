@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { Subscription } from "@rails/actioncable";
-
 import type {
   ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
@@ -9,7 +7,10 @@ import type {
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
 
-import { cable } from "../cable";
+import {
+  subscribeShared,
+  type SharedSubscription,
+} from "../sharedSubscription";
 
 const EMPTY_PLANNING_DATES: OfficeDatesPlanningOverrideStates = {};
 
@@ -86,7 +87,7 @@ export function useOfficePlanning({
     connectionState?.officeId === officeId &&
     connectionState.connected;
 
-  const subscriptionRef = useRef<Subscription | null>(null);
+  const subscriptionRef = useRef<SharedSubscription | null>(null);
   const datesRef = useRef(dates);
 
   const datesKey = useMemo(() => [...dates].sort().join(","), [dates]);
@@ -141,7 +142,7 @@ export function useOfficePlanning({
 
     const subscribedOfficeId = officeId;
 
-    const subscription = cable.subscriptions.create(
+    const subscription = subscribeShared<OfficePlanningMessage>(
       {
         channel: "OfficePlanningChannel",
         office_id: subscribedOfficeId,

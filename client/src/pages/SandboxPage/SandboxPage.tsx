@@ -93,7 +93,7 @@ export default function SandboxPage() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-strong px-4 py-2 text-sm font-medium text-fg-inverse hover:bg-strong-hover"
+          className="rounded-lg bg-strong px-4 py-2 text-sm font-medium text-fg-inverse transition-colors hover:bg-strong-hover"
         >
           Open modal
         </button>
@@ -109,7 +109,7 @@ export default function SandboxPage() {
         <button
           type="button"
           onClick={() => setModalOpenWarning(true)}
-          className="rounded-lg bg-strong px-4 py-2 text-sm font-medium text-fg-inverse hover:bg-strong-hover"
+          className="rounded-lg bg-strong px-4 py-2 text-sm font-medium text-fg-inverse transition-colors hover:bg-strong-hover"
         >
           Open modal (warning style/destructive action)
         </button>
