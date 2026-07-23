@@ -63,9 +63,6 @@ export default function OfficePicker() {
     (office) => office.name.toLowerCase() === "remote",
   );
 
-  const isRemoteSelected =
-    !!remoteOffice && String(remoteOffice.id) === selectedOfficeId;
-
   function heroIdForOffice(office: Office): string {
     // Remote has no hero photo of its own, so fall back to the default hero
     // rather than requesting a missing image and flashing the placeholder.
@@ -114,19 +111,13 @@ export default function OfficePicker() {
     setSelectedOfficeId(newOfficeId);
   }
 
-  function handleContinue() {
-    if (!selectedOfficeId) return;
-
-    const selectedOffice = findOffice(selectedOfficeId);
-
-    if (!selectedOffice) return;
-
-    const isRemote = selectedOffice.name.toLowerCase() === "remote";
+  function persistOfficeAndNavigate(office: Office) {
+    const isRemote = office.name.toLowerCase() === "remote";
 
     const payload: PatchUserRequest = createUpdateUserObjectPayload(
       undefined,
       undefined,
-      selectedOffice.id,
+      office.id,
     );
 
     updateUserMutation.mutate(payload, {
@@ -141,11 +132,33 @@ export default function OfficePicker() {
         }
 
         navigate("/users/schedule", {
-          state: { office: selectedOffice },
+          state: { office },
         });
       },
     });
   }
+
+  function handleContinue() {
+    if (!selectedOfficeId) return;
+
+    const selectedOffice = findOffice(selectedOfficeId);
+
+    if (!selectedOffice) return;
+
+    persistOfficeAndNavigate(selectedOffice);
+  }
+
+  // Which office card is currently on screen, so the breadcrumb dots can mark it.
+  // Before anything is picked, the default hero is showing, so point at its slot —
+  // the same fallback handleSelectOffice uses to decide the slide direction.
+  const defaultOfficeIndex = officeCards.findIndex(
+    (office) =>
+      heroIdForOffice(office) === heroIdForOfficeName(DEFAULT_OFFICE_NAME),
+  );
+
+  const activeOfficeIndex = selectedOfficeId
+    ? officeCards.findIndex((office) => String(office.id) === selectedOfficeId)
+    : defaultOfficeIndex;
 
   const selectedHeroOfficeId = heroIdForOfficeId(selectedOfficeId);
   const previousHeroOfficeId = heroIdForOfficeId(previousOfficeId);
@@ -221,16 +234,10 @@ export default function OfficePicker() {
             <button
               type="button"
               onClick={() => {
-                if (remoteOffice) handleSelectOffice(String(remoteOffice.id));
+                if (remoteOffice) persistOfficeAndNavigate(remoteOffice);
               }}
               disabled={!remoteOffice || updateUserMutation.isPending}
-              aria-pressed={isRemoteSelected}
-              className={cn(
-                "mt-8 w-full rounded-full border py-3 text-sm font-semibold text-fg transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                isRemoteSelected
-                  ? "border-line-selected bg-selected shadow-[inset_0_0_0_1px_var(--color-line-selected)] hover:border-line-selected hover:bg-selected"
-                  : "border-line bg-surface hover:border-line-faint hover:bg-surface-sunken",
-              )}
+              className="mt-8 w-full rounded-full border border-line bg-surface py-3 text-sm font-semibold text-fg transition-colors hover:border-line-faint hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-60"
             >
               No home office. I'm fully remote.
             </button>
@@ -288,6 +295,26 @@ export default function OfficePicker() {
             <Loader size="h-8 w-8" />
           </div>
         )}
+
+        {/*
+          Breadcrumb-style position indicator: one dot per office hero, with the
+          one currently on screen widened and brightened. This gives the sliding
+          images a sense of place, so the left/right motion reads as moving
+          between fixed positions rather than arbitrary shuffling.
+        */}
+        <div className="absolute inset-x-0 bottom-6 z-10 flex justify-center gap-2">
+          {officeCards.map((office, index) => (
+            <span
+              key={office.id}
+              className={cn(
+                "h-2 rounded-full shadow-sm transition-all duration-300 ease-out",
+                index === activeOfficeIndex
+                  ? "w-5 bg-white"
+                  : "w-2 bg-white/50",
+              )}
+            />
+          ))}
+        </div>
       </HeroPanel>
 
       {/*

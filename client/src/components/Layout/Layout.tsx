@@ -6,7 +6,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const SHOW_HEADER_PATHS = ["/calendar", "/users/profile"];
+const SHOW_HEADER_PATHS = ["/calendar", "/users/profile", "/remote"];
 
 export default function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();

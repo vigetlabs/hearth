@@ -37,7 +37,7 @@ export default function SigninPage() {
         {EMOJI_BADGES.map(({ emoji, position }) => (
           <div
             key={emoji}
-            className={`absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line bg-surface text-[30px] shadow-[0px_10px_24px_-4px_#66381A29] ${position}`}
+            className={`absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line/55 bg-surface text-[30px] shadow-[0px_10px_24px_-4px_#66381A29] ${position}`}
           >
             {/* leading-[0] collapses the line box so flex centers the glyph
                 itself rather than the baseline-aligned text line */}

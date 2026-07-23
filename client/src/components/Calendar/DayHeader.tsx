@@ -22,6 +22,10 @@ interface DayHeaderProps {
   onToggleMine: () => void;
   isConfirmedElsewhere: boolean;
   externalOfficeName: string;
+  /** Emoji of the office the user is confirmed at, shown when confirmed elsewhere. */
+  externalOfficeEmoji: string;
+  /** Name of the office currently being viewed, shown when confirmed elsewhere. */
+  currentOfficeName: string;
 }
 
 export function DayHeader({ locked, ...props }: DayHeaderProps) {
@@ -42,6 +46,8 @@ function PlanningHeader({
   onToggleMine,
   isConfirmedElsewhere,
   externalOfficeName,
+  externalOfficeEmoji,
+  currentOfficeName,
 }: Omit<DayHeaderProps, "locked">) {
   return (
     <button
@@ -60,35 +66,40 @@ function PlanningHeader({
         headerBase,
         "border-b border-line transition-colors disabled:cursor-not-allowed",
         isConfirmedElsewhere
-          ? "bg-red-500"
+          ? "bg-fill"
           : isSelected
-            ? "bg-selected hover:bg-line-selected"
+            ? "bg-selected hover:bg-surface-sunken"
             : "bg-surface hover:bg-surface-sunken",
       )}
     >
       <span className="flex items-start justify-between">
         <DayDateLabel
           date={date}
-          weekdayClass="text-fg"
-          dateNumClass="text-fg"
+          weekdayClass={isConfirmedElsewhere ? "text-white" : "text-fg"}
+          dateNumClass={isConfirmedElsewhere ? "text-white" : "text-fg"}
         />
 
-        <StatusIcon
-          size="xl"
-          variant="dashed"
-          weight="thin"
-          mark={isSelected ? "add" : "planning-yes"}
-          className={cn(
-            "border-2 bg-transparent",
-            isSelected ? "border-strong" : "border-fg",
-          )}
-        />
+        {isConfirmedElsewhere ? (
+          <OfficeEmojiCircle emoji={externalOfficeEmoji} />
+        ) : (
+          <StatusIcon
+            size="xl"
+            variant="dashed"
+            weight="thin"
+            mark={isSelected ? "add" : "planning-yes"}
+            className={cn(
+              "border-2 bg-transparent",
+              isSelected ? "border-strong" : "border-fg",
+            )}
+          />
+        )}
       </span>
 
       {isConfirmedElsewhere && (
-        <span className="mt-2 block text-sm font-semibold">
-          Confirmed at {externalOfficeName}
-        </span>
+        <ConfirmedElsewhereNote
+          externalOfficeName={externalOfficeName}
+          currentOfficeName={currentOfficeName}
+        />
       )}
 
       <BadgeStack
@@ -96,6 +107,7 @@ function PlanningHeader({
         isHotSpot={isHotSpot}
         visitorClass="bg-strong text-fg-inverse"
         hotSpotClass="bg-strong text-fg-inverse"
+        className={isConfirmedElsewhere ? badgeStackElsewhere : undefined}
       />
     </button>
   );
@@ -109,6 +121,8 @@ function ConfirmedHeader({
   isHotSpot,
   isConfirmedElsewhere,
   externalOfficeName,
+  externalOfficeEmoji,
+  currentOfficeName,
 }: Omit<DayHeaderProps, "locked" | "myUserId" | "onToggleMine">) {
   return (
     <div
@@ -116,7 +130,7 @@ function ConfirmedHeader({
         headerBase,
         "border-b border-line",
         isConfirmedElsewhere
-          ? "bg-red-500 text-white"
+          ? "bg-fill text-white"
           : isSelected
             ? "bg-strong text-fg-inverse"
             : "bg-surface-strong text-fg",
@@ -130,38 +144,43 @@ function ConfirmedHeader({
               ? "text-white"
               : isSelected
                 ? ""
-                : "text-[#8A7A6E]"
+                : "text-[#75685d]"
           }
           dateNumClass={
             isConfirmedElsewhere
               ? "text-white/80"
               : isSelected
                 ? "text-fg-inverse-muted"
-                : "text-[#8A7A6E]"
+                : "text-[#75685d]"
           }
         />
 
-        <span
-          className={cn(
-            iconCircle,
-            isSelected
-              ? "border-[#451811] bg-[#451811] text-white"
-              : "border-fg-muted bg-transparent text-fg-muted",
-          )}
-          aria-hidden="true"
-        >
-          {isSelected ? (
-            <CheckIcon className="h-5 w-5" weight="thin" />
-          ) : (
-            <MinusIcon className="h-5 w-5" weight="thin" />
-          )}
-        </span>
+        {isConfirmedElsewhere ? (
+          <OfficeEmojiCircle emoji={externalOfficeEmoji} />
+        ) : (
+          <span
+            className={cn(
+              iconCircle,
+              isSelected
+                ? "border-fg bg-fg text-white"
+                : "border-[#75685d] bg-transparent text-[#75685d]",
+            )}
+            aria-hidden="true"
+          >
+            {isSelected ? (
+              <CheckIcon className="h-5 w-5" weight="thin" />
+            ) : (
+              <MinusIcon className="h-5 w-5" weight="thin" />
+            )}
+          </span>
+        )}
       </span>
 
       {isConfirmedElsewhere && (
-        <span className="mt-2 block text-sm font-semibold">
-          Confirmed at {externalOfficeName}
-        </span>
+        <ConfirmedElsewhereNote
+          externalOfficeName={externalOfficeName}
+          currentOfficeName={currentOfficeName}
+        />
       )}
 
       <BadgeStack
@@ -169,8 +188,45 @@ function ConfirmedHeader({
         isHotSpot={isHotSpot}
         visitorClass="bg-surface text-fg"
         hotSpotClass="bg-surface text-fg"
+        className={isConfirmedElsewhere ? badgeStackElsewhere : undefined}
       />
     </div>
+  );
+}
+
+/** White circle showing the emoji of the office the user is confirmed at,
+    used in place of the status icon when confirmed elsewhere. */
+function OfficeEmojiCircle({ emoji }: { emoji: string }) {
+  return (
+    <span
+      className={cn(iconCircle, "border-white bg-white text-xl leading-none")}
+      aria-hidden="true"
+    >
+      {emoji}
+    </span>
+  );
+}
+
+/** Two-line note shown only when the user is confirmed at another office while
+    viewing this one. Always white so it reads against the dark elsewhere header.
+    Absolutely pinned to the header's bottom-left edge so it never changes the
+    header's height. */
+function ConfirmedElsewhereNote({
+  externalOfficeName,
+  currentOfficeName,
+}: {
+  externalOfficeName: string;
+  currentOfficeName: string;
+}) {
+  return (
+    <span className="absolute bottom-3 left-4 block text-xs text-white">
+      <span className="block font-bold">
+        Confirmed at <span className="capitalize">{externalOfficeName}</span>
+      </span>
+      <span className="block">
+        Viewing <span className="capitalize">{currentOfficeName}</span>
+      </span>
+    </span>
   );
 }
 
@@ -203,18 +259,21 @@ function BadgeStack({
   isHotSpot,
   visitorClass,
   hotSpotClass,
+  className,
 }: {
   visitorCount: number;
   isHotSpot: boolean;
   visitorClass: string;
   hotSpotClass: string;
+  className?: string;
 }) {
   return (
-    <span className="mt-2 flex flex-col items-start gap-2">
+    <span className={cn("mt-2 flex flex-col items-start gap-2", className)}>
       <span className={badgeSlot}>
         {visitorCount > 0 && (
           <span className={cn(badge, visitorClass)}>
-            {visitorCount} visitors
+            {visitorCount} {visitorCount === 1 ? "visitor" : "visitors"}{" "}
+            <span aria-hidden="true">📣</span>
           </span>
         )}
       </span>
@@ -230,7 +289,7 @@ function BadgeStack({
   );
 }
 
-const headerBase = "block w-full shrink-0 px-4 pb-3 pt-4 text-left";
+const headerBase = "relative block w-full shrink-0 px-4 pb-3 pt-4 text-left";
 
 const iconCircle =
   "flex h-8 w-8 items-center justify-center rounded-full border-2";
@@ -240,3 +299,11 @@ const badge =
 
 /** Fixed-height row so an absent badge still reserves its vertical space. */
 const badgeSlot = "flex h-5 items-center";
+
+/** When confirmed elsewhere, the note occupies the bottom-left, so the badges
+    are right-aligned to keep clear of it. Crucially the stack stays in normal
+    flow (not absolute) so it keeps reserving the same vertical space as every
+    other variant — the header height must never change. The reversed column
+    keeps the visitor badge flush to the bottom even though the (always-suppressed
+    here) hot-spot slot still reserves its height above. */
+const badgeStackElsewhere = "flex-col-reverse items-end";
