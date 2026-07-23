@@ -8,10 +8,9 @@ class OfficePlanningStore
   SELECTED = "selected"
   DESELECTED = "deselected"
 
-  sig { params(office_id: Integer, redis: Redis).void }
-  def initialize(office_id:, redis: REDIS)
+  sig { params(office_id: Integer).void }
+  def initialize(office_id:)
     @office_id = office_id
-    @redis = redis
   end
 
   sig { params(date: String, user_id: Integer).void }

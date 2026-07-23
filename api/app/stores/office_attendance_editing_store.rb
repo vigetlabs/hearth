@@ -7,10 +7,9 @@ class OfficeAttendanceEditingStore
 
   STALE_AFTER = T.let(1.minutes, ActiveSupport::Duration)
 
-  sig { params(office_id: Integer, redis: Redis).void }
-  def initialize(office_id:, redis: REDIS)
+  sig { params(office_id: Integer).void }
+  def initialize(office_id:)
     @office_id = office_id
-    @redis = redis
   end
 
   sig { params(week_start: String, user_id: Integer).void }

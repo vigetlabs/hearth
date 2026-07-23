@@ -1,9 +1,8 @@
 class OfficePresenceStore
   STALE_AFTER = 90.seconds
 
-  def initialize(office_id:, redis: REDIS)
+  def initialize(office_id:)
     @office_id = office_id
-    @redis = redis
   end
 
   def register(user_id:, connection_id:)
