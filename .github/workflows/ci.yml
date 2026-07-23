@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://localhost:6379/0
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
@@ -47,6 +47,16 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Install packages

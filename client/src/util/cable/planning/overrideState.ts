@@ -69,13 +69,15 @@ export function resolveAttendance({
   return isDefaultScheduleDay;
 }
 
+interface ResolveEditingAttendanceOptions {
+  hasConfirmedVisit: boolean;
+  planningOverrideState: PlanningOverrideState;
+}
+
 export function resolveEditingAttendance({
   hasConfirmedVisit,
   planningOverrideState,
-}: {
-  hasConfirmedVisit: boolean;
-  planningOverrideState: PlanningOverrideState;
-}): boolean {
+}: ResolveEditingAttendanceOptions): boolean {
   if (planningOverrideState === "selected") {
     return true;
   }
