@@ -9,7 +9,6 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* # subriber wrapper */}
       <Layout>
         <Outlet />
       </Layout>
