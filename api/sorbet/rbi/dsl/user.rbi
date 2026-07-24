@@ -892,10 +892,10 @@ class User
     sig { void }
     def id_will_change!; end
 
-    sig { returns(T.nilable(T::Boolean)) }
+    sig { returns(T::Boolean) }
     def is_onboarding_complete; end
 
-    sig { params(value: T.nilable(T::Boolean)).returns(T.nilable(T::Boolean)) }
+    sig { params(value: T::Boolean).returns(T::Boolean) }
     def is_onboarding_complete=(value); end
 
     sig { returns(T::Boolean) }
@@ -910,10 +910,10 @@ class User
     sig { returns(T::Boolean) }
     def is_onboarding_complete_came_from_user?; end
 
-    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    sig { returns(T.nilable([T::Boolean, T::Boolean])) }
     def is_onboarding_complete_change; end
 
-    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    sig { returns(T.nilable([T::Boolean, T::Boolean])) }
     def is_onboarding_complete_change_to_be_saved; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
@@ -922,7 +922,7 @@ class User
     sig { returns(T.nilable(T::Boolean)) }
     def is_onboarding_complete_in_database; end
 
-    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    sig { returns(T.nilable([T::Boolean, T::Boolean])) }
     def is_onboarding_complete_previous_change; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
@@ -1285,7 +1285,7 @@ class User
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_id_value?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
-    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    sig { returns(T.nilable([T::Boolean, T::Boolean])) }
     def saved_change_to_is_onboarding_complete; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
