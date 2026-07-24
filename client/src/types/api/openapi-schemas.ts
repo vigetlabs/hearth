@@ -1154,6 +1154,7 @@ export interface components {
         sunday: boolean;
       } | null;
       lab?: string;
+      is_onboarding_complete: boolean;
     };
     /** @description Full response body for endpoints that return one user. */
     user_response: {
@@ -1192,6 +1193,7 @@ export interface components {
             sunday: boolean;
           } | null;
           lab?: string;
+          is_onboarding_complete: boolean;
         };
       };
     };
@@ -1231,6 +1233,7 @@ export interface components {
             sunday: boolean;
           } | null;
           lab?: string;
+          is_onboarding_complete: boolean;
         }[];
       };
     };
@@ -1267,6 +1270,8 @@ export interface components {
         last_name?: string;
         /** @example 1 */
         office_id?: number;
+        /** @description Whether the user has completed the calendar onboarding tour */
+        is_onboarding_complete?: boolean;
         default_schedule?: {
           is_default: boolean;
           /** @description Whether the user has selected this day in their schedule */

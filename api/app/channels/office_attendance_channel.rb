@@ -140,8 +140,10 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
     params(data: ApplicationCable::Types::ChannelData).void
   end
   def start_editing(data)
-    week_start =
-      DateUtility.normalized_week_start(data["week_start"])
+    week_start = T.let(
+      DateUtility.normalized_week_start(data["week_start"]),
+      Date
+    )
 
     normalized_week_start = week_start.iso8601
 
@@ -154,6 +156,11 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
     remove_stale_visit_dates(
       week_dates:
     )
+
+    ApplicationRecord.transaction do
+      remove_stale_visit_dates(week_dates:)
+      remove_stale_attendance_confirmation(week_start:)
+    end
 
     broadcast_visits_removed(
       week_start: normalized_week_start
@@ -233,6 +240,18 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
         visit_date: week_dates
       )
       .destroy_all
+  end
+
+  sig { params(week_start: Date).void }
+  def remove_stale_attendance_confirmation(week_start:)
+    confirmation =
+      AttendanceConfirmation.find_by(
+        user: current_user,
+        office:,
+        period_type: :week,
+        starts_on: week_start
+      )
+    confirmation&.destroy!
   end
 
   sig do

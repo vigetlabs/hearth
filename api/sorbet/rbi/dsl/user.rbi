@@ -892,6 +892,51 @@ class User
     sig { void }
     def id_will_change!; end
 
+    sig { returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete; end
+
+    sig { params(value: T.nilable(T::Boolean)).returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete=(value); end
+
+    sig { returns(T::Boolean) }
+    def is_onboarding_complete?; end
+
+    sig { returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete_before_last_save; end
+
+    sig { returns(T.untyped) }
+    def is_onboarding_complete_before_type_cast; end
+
+    sig { returns(T::Boolean) }
+    def is_onboarding_complete_came_from_user?; end
+
+    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    def is_onboarding_complete_change; end
+
+    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    def is_onboarding_complete_change_to_be_saved; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def is_onboarding_complete_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete_in_database; end
+
+    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    def is_onboarding_complete_previous_change; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def is_onboarding_complete_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete_previously_was; end
+
+    sig { returns(T.nilable(T::Boolean)) }
+    def is_onboarding_complete_was; end
+
+    sig { void }
+    def is_onboarding_complete_will_change!; end
+
     sig { returns(::String) }
     def jti; end
 
@@ -1181,6 +1226,9 @@ class User
     def restore_id_value!; end
 
     sig { void }
+    def restore_is_onboarding_complete!; end
+
+    sig { void }
     def restore_jti!; end
 
     sig { void }
@@ -1236,6 +1284,12 @@ class User
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_id_value?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable([T.nilable(T::Boolean), T.nilable(T::Boolean)])) }
+    def saved_change_to_is_onboarding_complete; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def saved_change_to_is_onboarding_complete?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable([::String, ::String])) }
     def saved_change_to_jti; end
@@ -1341,6 +1395,9 @@ class User
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_id_value?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def will_save_change_to_is_onboarding_complete?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_jti?(from: T.unsafe(nil), to: T.unsafe(nil)); end

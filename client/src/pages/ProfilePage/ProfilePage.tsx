@@ -158,12 +158,12 @@ export default function ProfilePage() {
       return;
     }
 
-    const payload: PatchUserRequest = createUpdateUserObjectPayload(
-      firstName,
-      lastName,
-      Number(selectedOfficeId),
-      buildScheduleAttributes(selectedDayIds),
-    );
+    const payload: PatchUserRequest = createUpdateUserObjectPayload({
+      first_name: firstName,
+      last_name: lastName,
+      office_id: Number(selectedOfficeId),
+      default_schedule: buildScheduleAttributes(selectedDayIds),
+    });
 
     updateUserMutation.mutate(payload, {
       onSuccess: async (updatedUser) => {

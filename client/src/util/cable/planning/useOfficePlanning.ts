@@ -11,6 +11,8 @@ import {
   subscribeShared,
   type SharedSubscription,
 } from "../sharedSubscription";
+import { useQueryClient } from "@tanstack/react-query";
+import { generateOfficesUsersKey } from "@/util/api/keys/officeKeys";
 
 const EMPTY_PLANNING_DATES: OfficeDatesPlanningOverrideStates = {};
 
@@ -33,8 +35,13 @@ interface PlanningDateUpdatedMessage {
   overrides: TogglePlanningOverrideState;
 }
 
+interface RosterUpdatedMessage {
+  type: "planning.roster.updated";
+  office_id: number;
+}
+
 type OfficePlanningMessage =
-  PlanningSnapshotMessage | PlanningDateUpdatedMessage;
+  PlanningSnapshotMessage | PlanningDateUpdatedMessage | RosterUpdatedMessage;
 
 interface ConnectionState {
   officeId: number;
@@ -86,6 +93,8 @@ export function useOfficePlanning({
     officeId !== null &&
     connectionState?.officeId === officeId &&
     connectionState.connected;
+
+  const queryClient = useQueryClient();
 
   const subscriptionRef = useRef<SharedSubscription | null>(null);
   const datesRef = useRef(dates);
@@ -179,12 +188,18 @@ export function useOfficePlanning({
           }
 
           switch (message.type) {
+            case "planning.roster.updated":
+              void queryClient.invalidateQueries({
+                queryKey: generateOfficesUsersKey(message.office_id),
+              });
+              break;
+
             case "planning.snapshot":
               setPlanningState({
                 officeId: subscribedOfficeId,
                 dates: message.dates,
               });
-              break;
+              return;
 
             case "planning.date.updated":
               setPlanningState((current) => {
@@ -216,7 +231,7 @@ export function useOfficePlanning({
 
       subscription.unsubscribe();
     };
-  }, [officeId]);
+  }, [officeId, queryClient]);
 
   const currentUserOverrides = useMemo<CurrentUserPlanningOverrideState>(() => {
     if (currentUserId === null) {

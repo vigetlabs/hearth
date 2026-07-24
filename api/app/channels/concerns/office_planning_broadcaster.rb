@@ -57,6 +57,19 @@ class OfficePlanningBroadcaster
     ).broadcast
   end
 
+  sig { params(office: Office).void }
+  def self.broadcast_roster_update(office:)
+    payload = {
+      type: "planning.roster.updated",
+      office_id: office.id
+    }
+
+    OfficePlanningChannel.broadcast_to(
+      office,
+      payload
+    )
+  end
+
   sig do
     params(
       office: Office,

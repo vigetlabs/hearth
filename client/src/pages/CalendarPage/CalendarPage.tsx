@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router";
 
 import { Calendar } from "@/components/Calendar/Calendar";
+import CalendarTour from "@/components/CalendarTour/CalendarTour";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
@@ -573,6 +574,7 @@ export default function CalendarPage() {
             {isWeekConfirmed && !isEditingWeek ? (
               <button
                 type="button"
+                data-tour="confirm-week"
                 onClick={editWeek}
                 disabled={!isAttendanceConnected || !isPlanningConnected}
                 className={unlockButton}
@@ -583,6 +585,7 @@ export default function CalendarPage() {
             ) : (
               <button
                 type="button"
+                data-tour="confirm-week"
                 onClick={handleConfirmWeekClick}
                 disabled={
                   createAttendanceConfirmationMutation.isPending ||
@@ -630,6 +633,10 @@ export default function CalendarPage() {
         }}
         onCancel={() => setIsNonDefaultOfficeModalOpen(false)}
       />
+
+      {!user.is_onboarding_complete && (
+        <CalendarTour firstName={user.first_name} />
+      )}
     </div>
   );
 }
