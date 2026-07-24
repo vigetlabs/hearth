@@ -20,10 +20,10 @@ import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
   Elements are located by `data-tour` attributes so the tour stays decoupled from
   the calendar's markup:
     - day-header  → each day column's header      (Calendar/DayHeader.tsx)
-    - day-cell    → each full day column          (Calendar/DayCell.tsx)
+    - day-roster  → each day column's roster area below the header (Calendar/DayRoster.tsx)
     - today-pill  → the "Today" pill straddling the top of today's column (Calendar/Calendar.tsx)
     - confirm-week→ the Confirm / Edit button      (CalendarPage.tsx)
-  The first two steps fold in `today-pill` so the highlighted area reaches up to
+  The first step folds in `today-pill` so the highlighted area reaches up to
   cover the pill sitting above today's cell (it's a no-op on weeks without today).
 */
 
@@ -44,6 +44,10 @@ interface TourStep {
       its right edge up with the focused area's right edge; `center` (default)
       centers it on the anchor. */
   align?: "center" | "left" | "right";
+  /** When true, the hole's top edge sits flush with the focused area's top
+      instead of overhanging it by `HOLE_PADDING` — used so the roster step lines
+      up right under the day headers rather than creeping up into them. */
+  flushTop?: boolean;
   /** Optional — some steps show only a body. `{name}` is filled with the first name. */
   title?: string;
   body: string;
@@ -61,10 +65,11 @@ const STEPS: TourStep[] = [
     cta: "Next",
   },
   {
-    targets: ["day-cell", "today-pill"],
-    anchor: ["day-header"],
+    targets: ["day-roster"],
+    anchor: ["day-roster"],
     side: "above",
     align: "left",
+    flushTop: true,
     body: "Below each day, switch between In Office and Not in Office to see who has confirmed their plans and who is still planning.",
     cta: "Next",
   },
@@ -276,6 +281,9 @@ export default function CalendarTour({ firstName }: CalendarTourProps) {
   }
 
   const ready = hole !== null && modalPos !== null;
+  // Most steps overhang the focused area equally on all sides; `flushTop` steps
+  // drop the top overhang so the hole's top edge lands right on the target.
+  const topPadding = step.flushTop ? 0 : HOLE_PADDING;
 
   return createPortal(
     <div
@@ -297,10 +305,10 @@ export default function CalendarTour({ firstName }: CalendarTourProps) {
           aria-hidden="true"
           className="pointer-events-none fixed transition-all duration-[400ms] ease-in-out motion-reduce:transition-none"
           style={{
-            top: hole.top - HOLE_PADDING,
+            top: hole.top - topPadding,
             left: hole.left - HOLE_PADDING,
             width: hole.width + HOLE_PADDING * 2,
-            height: hole.height + HOLE_PADDING * 2,
+            height: hole.height + topPadding + HOLE_PADDING,
             boxShadow:
               "0 0 0 9999px rgba(255, 255, 255, 0.7), inset 0 0 18px 6px rgba(255, 255, 255, 0.7)",
           }}

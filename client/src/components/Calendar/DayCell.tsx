@@ -45,7 +45,7 @@ export function DayCell({
   currentOfficeName,
 }: DayCellProps) {
   return (
-    <div data-tour="day-cell" className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <DayHeader
         date={date}
         isSelected={isMine}
