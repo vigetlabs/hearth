@@ -6,8 +6,8 @@ import { Calendar } from "@/components/Calendar/Calendar";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
-import Loader from "@/components/Loader/Loader";
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
+import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
 
 import type { Office } from "@/types/api/offices";
 import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
@@ -459,13 +459,18 @@ export default function CalendarPage() {
     confirmWeek();
   }
 
+  // `isLoading` (pending *and* actively fetching), not `isPending`: the
+  // attendance query is disabled until an office resolves, and a disabled query
+  // is `isPending` forever. Gating on `isPending` would hang the skeleton
+  // indefinitely when there's no office; `isLoading` lets us fall through to the
+  // "No office is available" branch below.
   if (
-    officesQuery.isPending ||
-    officeRosterQuery.isPending ||
-    officeVisitsQuery.isPending ||
-    attendanceConfirmationsQuery.isPending
+    officesQuery.isLoading ||
+    officeRosterQuery.isLoading ||
+    officeVisitsQuery.isLoading ||
+    attendanceConfirmationsQuery.isLoading
   ) {
-    return <Loader />;
+    return <CalendarPageSkeleton />;
   }
 
   if (
