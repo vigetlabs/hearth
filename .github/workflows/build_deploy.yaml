@@ -98,7 +98,7 @@ jobs:
           cache-from: type=gha,scope=ui
           cache-to: type=gha,mode=max,scope=ui
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_UI }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_UI }}:${{ github.sha }}-${{ env.DEPLOY_ENV }}
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY_UI }}:${{ env.DEPLOY_ENV }}
 
   deploy:
@@ -125,7 +125,9 @@ jobs:
         run: |
           ssh deploy@${{ vars.HOST }} "set -e; \
             cd /var/www/hearth/${DEPLOY_ENV}; \
-            printf 'APP_IMAGE_TAG=%s\nUI_IMAGE_TAG=%s\n' '${{ github.sha }}' '${{ github.sha }}' > .env; \
+            printf 'APP_IMAGE_TAG=%s\nUI_IMAGE_TAG=%s\n' \
+              '${{ github.sha }}' \
+              '${{ github.sha }}-${DEPLOY_ENV}' > .env; \
             docker compose pull; \
             docker compose run --rm app ./bin/rails db:prepare; \
             docker compose up -d --remove-orphans"
