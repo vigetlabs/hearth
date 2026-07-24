@@ -56,15 +56,18 @@ export default function CalendarPage() {
   const parsedOfficeId: number | undefined = officeIdParam
     ? Number(officeIdParam)
     : undefined;
-  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
-    ? parsedOfficeId
-    : (user?.office_id ?? undefined);
 
   const officesQuery = useOfficesQuery();
   const offices: Office[] = useMemo(
     () => officesQuery.data ?? [],
     [officesQuery.data],
   );
+
+  const requestedOfficeId: number | undefined = Number.isFinite(parsedOfficeId)
+    ? parsedOfficeId
+    : user?.office?.name.toLowerCase() === "remote"
+      ? offices[0]?.id
+      : user?.office?.id;
 
   const defaultOffice: Office | null = findCurrentUserOffice(offices, user);
 
@@ -79,14 +82,17 @@ export default function CalendarPage() {
   /*
    * Derive the effective office id from the resolved office so it stays in sync
    * with what the calendar actually displays. Users without an assigned office
-   * (office_id === null) fall back to the default office instead of leaking a
-   * null office id into the API requests.
+   * (office === null) fall back to the default office instead of leaking an
+   * undefined office id into the API requests.
    */
   const activeOfficeId: number | undefined = activeOffice?.id;
 
   const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
 
-  const isRemote = activeOffice?.name.toLowerCase() === "remote";
+  // Whether the user's *default* office (not the one currently being viewed) is
+  // remote. Remote-default users get a "Remote View" button above the calendar
+  // that takes them to their remote portal.
+  const isDefaultOfficeRemote = defaultOffice?.name.toLowerCase() === "remote";
 
   function changeOffice(nextOffice: Office): void {
     setSearchParams((currentParams) => {
@@ -486,7 +492,16 @@ export default function CalendarPage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
       />
 
-      <div className="relative mx-auto flex min-h-0 w-[90%] flex-1 flex-col py-8">
+      <div className="relative mx-auto flex min-h-0 w-[90%] flex-1 flex-col pt-6 pb-8">
+        {isDefaultOfficeRemote && (
+          <Link
+            to="/remote"
+            className="mb-4 inline-flex self-start items-center gap-1.5 text-lg font-bold text-fg-subtle transition-colors hover:text-fg"
+          >
+            <span aria-hidden="true">‹</span> Remote View
+          </Link>
+        )}
+
         <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-line bg-surface p-6 shadow-card">
           <div className="flex items-center gap-3 pb-5">
             <h2 className="flex items-center gap-2 text-2xl font-bold capitalize text-fg">
@@ -498,88 +513,84 @@ export default function CalendarPage() {
             <OfficeSwitcher office={activeOffice} setOffice={changeOffice} />
           </div>
 
-          {!isRemote && (
-            <div className="flex items-center gap-4 pb-5">
-              <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
-                <button
-                  type="button"
-                  onClick={goPrevWeek}
-                  className={arrowButton}
-                  aria-label="Previous week"
-                >
-                  <ChevronDownIcon className="h-3.5 w-3.5 rotate-90" />
-                </button>
+          <div className="flex items-center gap-4 pb-5">
+            <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
+              <button
+                type="button"
+                onClick={goPrevWeek}
+                className={arrowButton}
+                aria-label="Previous week"
+              >
+                <ChevronDownIcon className="h-3.5 w-3.5 rotate-90" />
+              </button>
 
-                <span className="px-2 text-sm font-normal text-fg">
-                  {rangeLabel}
-                </span>
+              <span className="px-2 text-sm font-normal text-fg">
+                {rangeLabel}
+              </span>
 
-                <button
-                  type="button"
-                  onClick={goNextWeek}
-                  className={arrowButton}
-                  aria-label="Next week"
-                >
-                  <ChevronDownIcon className="h-3.5 w-3.5 -rotate-90" />
-                </button>
-              </div>
-
-              {!isCurrentWeek && (
-                <button type="button" onClick={goToday} className={todayButton}>
-                  Jump to today
-                </button>
-              )}
-
-              <div className="h-4 w-0.5 bg-line" />
-
-              <p className="text-sm text-fg">
-                <span className="font-bold text-fg">
-                  {isCalendarLocked
-                    ? externalOfficeSummaries.length >= 1
-                      ? `Confirmed for ${capitalizeOfficeName(
-                          activeOffice.name,
-                        )} ✓`
-                      : "Confirmed ✓"
-                    : externalOfficeSummaries.length >= 1
-                      ? `Planning for ${capitalizeOfficeName(
-                          activeOffice.name,
-                        )}.`
-                      : "Planning."}
-                </span>{" "}
-                {externalOfficeSummaries.length >= 1
-                  ? confirmedElsewhereText(externalOfficeSummaries)
-                  : isCalendarLocked
-                    ? "Edit Week to make changes."
-                    : "Select your days, then confirm."}
-              </p>
-
-              {isWeekConfirmed && !isEditingWeek ? (
-                <button
-                  type="button"
-                  onClick={editWeek}
-                  disabled={!isAttendanceConnected || !isPlanningConnected}
-                  className={unlockButton}
-                >
-                  Edit Week
-                  <PencilIcon className="h-3.5 w-3.5" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleConfirmWeekClick}
-                  disabled={
-                    createAttendanceConfirmationMutation.isPending ||
-                    !isPlanningConnected
-                  }
-                  className={confirmButton}
-                >
-                  {createAttendanceConfirmationMutation.isPending
-                    ? "Confirming..."
-                    : "Confirm Week"}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={goNextWeek}
+                className={arrowButton}
+                aria-label="Next week"
+              >
+                <ChevronDownIcon className="h-3.5 w-3.5 -rotate-90" />
+              </button>
             </div>
-          )}
+
+            {!isCurrentWeek && (
+              <button type="button" onClick={goToday} className={todayButton}>
+                Jump to today
+              </button>
+            )}
+
+            <div className="h-4 w-0.5 bg-line" />
+
+            <p className="text-sm text-fg">
+              <span className="font-bold text-fg">
+                {isCalendarLocked
+                  ? externalOfficeSummaries.length >= 1
+                    ? `Confirmed for ${capitalizeOfficeName(
+                        activeOffice.name,
+                      )} ✓`
+                    : "Confirmed ✓"
+                  : externalOfficeSummaries.length >= 1
+                    ? `Planning for ${capitalizeOfficeName(activeOffice.name)}.`
+                    : "Planning."}
+              </span>{" "}
+              {externalOfficeSummaries.length >= 1
+                ? confirmedElsewhereText(externalOfficeSummaries)
+                : isCalendarLocked
+                  ? "Edit Week to make changes."
+                  : "Select your days, then confirm."}
+            </p>
+
+            {isWeekConfirmed && !isEditingWeek ? (
+              <button
+                type="button"
+                onClick={editWeek}
+                disabled={!isAttendanceConnected || !isPlanningConnected}
+                className={unlockButton}
+              >
+                Edit Week
+                <PencilIcon className="h-3.5 w-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConfirmWeekClick}
+                disabled={
+                  createAttendanceConfirmationMutation.isPending ||
+                  !isPlanningConnected
+                }
+                className={confirmButton}
+              >
+                {createAttendanceConfirmationMutation.isPending
+                  ? "Confirming..."
+                  : "Confirm Week"}
+              </button>
+            )}
+          </div>
 
           <Calendar
             schedule={schedule}
@@ -769,7 +780,7 @@ function findCurrentUserOffice(
   currentUser: User,
 ): Office | null {
   return (
-    offices.find((office) => office.id === currentUser.office_id) ??
+    offices.find((office) => office.id === currentUser.office?.id) ??
     offices[0] ??
     null
   );

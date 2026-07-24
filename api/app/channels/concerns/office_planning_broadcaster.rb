@@ -7,12 +7,19 @@ class OfficePlanningBroadcaster
     T::Hash[Integer, User]
   end
 
+  ChannelSerializedOffice = T.type_alias do
+    {
+      id: Integer,
+      name: String
+    }
+  end
+
   ChannelSerializedUser = T.type_alias do
     {
       id: Integer,
       first_name: String,
       last_name: String,
-      office_id: T.nilable(Integer)
+      office: T.nilable(ChannelSerializedOffice)
     }
   end
 
@@ -115,6 +122,7 @@ class OfficePlanningBroadcaster
   sig { params(user_ids: T::Array[Integer]).returns(UserMap) }
   def load_users(user_ids)
     User
+      .includes(:office)
       .where(id: user_ids)
       .select(
         :id,
@@ -140,8 +148,23 @@ class OfficePlanningBroadcaster
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
-        office_id: user.office_id
+        office: serialize_office(user)
       }
     end
+  end
+
+  sig do
+    params(
+      user: User
+    ).returns(T.nilable(ChannelSerializedOffice))
+  end
+  def serialize_office(user)
+    office = user.office
+    return unless office
+
+    {
+      id: office.id,
+      name: office.name
+    }
   end
 end

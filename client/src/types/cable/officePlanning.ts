@@ -2,8 +2,13 @@ import type { User } from "@/types/api/users";
 
 export type ChannelSerializedUser = Pick<
   User,
-  "id" | "first_name" | "last_name" | "office_id"
->;
+  "id" | "first_name" | "last_name"
+> & {
+  office: {
+    id: number;
+    name: string;
+  } | null;
+};
 
 export type PlanningOverrideState = "selected" | "deselected" | null;
 
@@ -25,7 +30,7 @@ export interface OfficePlanningState {
  *         id:
  *         first_name:
  *         last_name:
- *         office_id:
+ *         office:
  *       }
  *     ]
  *   },
@@ -35,7 +40,7 @@ export interface OfficePlanningState {
  *         id:
  *         first_name:
  *         last_name:
- *         office_id:
+ *         office:
  *       }
  *     ]
  *   }

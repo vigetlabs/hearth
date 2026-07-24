@@ -1131,7 +1131,10 @@ export interface components {
       email: string;
       first_name: string;
       last_name: string;
-      office_id: number | null;
+      office: {
+        id: number;
+        name: string;
+      } | null;
       default_schedule?: {
         id: number;
         is_default: boolean;
@@ -1166,7 +1169,10 @@ export interface components {
           email: string;
           first_name: string;
           last_name: string;
-          office_id: number | null;
+          office: {
+            id: number;
+            name: string;
+          } | null;
           default_schedule?: {
             id: number;
             is_default: boolean;
@@ -1202,7 +1208,10 @@ export interface components {
           email: string;
           first_name: string;
           last_name: string;
-          office_id: number | null;
+          office: {
+            id: number;
+            name: string;
+          } | null;
           default_schedule?: {
             id: number;
             is_default: boolean;

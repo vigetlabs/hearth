@@ -10,6 +10,7 @@ class Api::V1::Users::UsersController < ApplicationController
 
   def index
    users = User
+     .includes(:default_schedule, :office)
      .where(office_id: roster_office_id)
      .order(:first_name, :last_name)
 

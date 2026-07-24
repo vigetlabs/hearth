@@ -68,13 +68,18 @@ export default function ProfilePage() {
   const email = user?.email ?? "";
 
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>(
-    user ? String(user.office_id) : "",
+    user?.office ? String(user.office.id) : "",
   );
 
   const selectedOffice = offices.find(
     (office) => String(office.id) === selectedOfficeId,
   );
   const isRemoteSelected = selectedOffice?.name.toLowerCase() === "remote";
+
+  // Where "Go back" returns to: remote users have no home office calendar, so
+  // send them to their remote portal instead of the calendar.
+  const isUserRemote = user?.office?.name.toLowerCase() === "remote";
+  const goBackTo = isUserRemote ? "/remote" : "/calendar";
 
   const [selectedDayIds, setSelectedDayIds] = useState<Set<string>>(
     initialSelectedDayIds,
@@ -181,7 +186,7 @@ export default function ProfilePage() {
         className="mx-auto flex min-h-0 w-full max-w-[780px] flex-1 flex-col px-6 py-6"
       >
         <Link
-          to="/calendar"
+          to={goBackTo}
           className="inline-flex self-start items-center gap-1 text-sm font-bold text-fg-subtle transition-colors hover:text-black"
         >
           <span aria-hidden="true">‹</span> Go back

@@ -1178,7 +1178,7 @@ components:
       - email
       - first_name
       - last_name
-      - office_id
+      - office
       properties:
         id:
           type: integer
@@ -1189,9 +1189,17 @@ components:
           type: string
         last_name:
           type: string
-        office_id:
-          type: integer
+        office:
+          type: object
           nullable: true
+          required:
+          - id
+          - name
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
         default_schedule:
           nullable: true
           allOf:
@@ -1263,7 +1271,7 @@ components:
               - email
               - first_name
               - last_name
-              - office_id
+              - office
               properties:
                 id:
                   type: integer
@@ -1274,9 +1282,17 @@ components:
                   type: string
                 last_name:
                   type: string
-                office_id:
-                  type: integer
+                office:
+                  type: object
                   nullable: true
+                  required:
+                  - id
+                  - name
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
                 default_schedule:
                   nullable: true
                   allOf:
@@ -1357,7 +1373,7 @@ components:
                 - email
                 - first_name
                 - last_name
-                - office_id
+                - office
                 properties:
                   id:
                     type: integer
@@ -1368,9 +1384,17 @@ components:
                     type: string
                   last_name:
                     type: string
-                  office_id:
-                    type: integer
+                  office:
+                    type: object
                     nullable: true
+                    required:
+                    - id
+                    - name
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
                   default_schedule:
                     nullable: true
                     allOf:
