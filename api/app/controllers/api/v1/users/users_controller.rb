@@ -61,6 +61,7 @@ class Api::V1::Users::UsersController < ApplicationController
       :first_name,
       :last_name,
       :office_id,
+      :is_onboarding_complete,
       default_schedule: [
         :is_default,
         :monday,

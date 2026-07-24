@@ -113,6 +113,14 @@ export function createUpdateUserObjectPayload(
   };
 }
 
+export function createOnboardingCompleteUserObjectPayload(): PatchUserRequest {
+  return {
+    user: {
+      is_onboarding_complete: true,
+    },
+  };
+}
+
 export async function updateUser(
   payload: PatchUserRequest,
 ): Promise<UserResponse> {

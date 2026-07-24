@@ -1179,6 +1179,7 @@ components:
       - first_name
       - last_name
       - office
+      - is_onboarding_complete
       properties:
         id:
           type: integer
@@ -1243,6 +1244,8 @@ components:
                 description: Whether the user has selected this day in their schedule
         lab:
           type: string
+        is_onboarding_complete:
+          type: boolean
     user_response:
       type: object
       description: Full response body for endpoints that return one user.
@@ -1272,6 +1275,7 @@ components:
               - first_name
               - last_name
               - office
+              - is_onboarding_complete
               properties:
                 id:
                   type: integer
@@ -1343,6 +1347,8 @@ components:
                           schedule
                 lab:
                   type: string
+                is_onboarding_complete:
+                  type: boolean
     users_response:
       type: object
       description: Full response body for endpoints that return multiple users.
@@ -1374,6 +1380,7 @@ components:
                 - first_name
                 - last_name
                 - office
+                - is_onboarding_complete
                 properties:
                   id:
                     type: integer
@@ -1445,6 +1452,8 @@ components:
                             schedule
                   lab:
                     type: string
+                  is_onboarding_complete:
+                    type: boolean
     create_user_request:
       type: object
       description: Request body for creating a new user account
@@ -1515,6 +1524,10 @@ components:
             office_id:
               type: integer
               example: 1
+            is_onboarding_complete:
+              type: boolean
+              description: Whether the user has completed the calendar onboarding
+                tour
             default_schedule:
               type: object
               required:

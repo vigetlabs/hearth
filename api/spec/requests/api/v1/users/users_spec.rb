@@ -100,8 +100,27 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
             headers: auth_headers_for(user),
             as: :json
 
-            expect(response).to have_http_status(:ok)
-            expect(user.reload.office).to eq(new_office)
+          expect(response).to have_http_status(:ok)
+          expect(user.reload.office).to eq(new_office)
+        end
+
+        it "updates the user's onboarding completion status" do
+          patch api_path("/users/me"),
+            params: {
+              user: {
+                is_onboarding_complete: true
+              }
+            },
+            headers: auth_headers_for(user),
+            as: :json
+
+          expect(response).to have_http_status(:ok)
+          expect(user.reload.is_onboarding_complete).to be(true)
+          expect(response.parsed_body.dig(
+            "data",
+            "user",
+            "is_onboarding_complete"
+          )).to be(true)
         end
 
         it "removes the user's office" do
@@ -167,6 +186,7 @@ RSpec.describe "Api::V1::Users::Users", type: :request do
             "email" => user.email,
             "first_name"=> user.first_name,
             "last_name" => user.last_name,
+            "is_onboarding_complete" => false,
             "office" => {
               "id" => office.id,
               "name" => office.name

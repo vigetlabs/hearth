@@ -242,7 +242,8 @@ users = seed_users.to_h do |attributes|
   user.assign_attributes(
     first_name: attributes.fetch(:first_name),
     last_name: attributes.fetch(:last_name),
-    office: offices.fetch(office_name)
+    office: offices.fetch(office_name),
+    is_onboarding_complete: true
   )
 
   if user.new_record?

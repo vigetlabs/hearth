@@ -13,6 +13,7 @@ module OpenApi::Schemas::V1::Users
       first_name
       last_name
       office
+      is_onboarding_complete
     ],
     properties: {
       id: { type: :integer },
@@ -37,7 +38,8 @@ module OpenApi::Schemas::V1::Users
           OpenApi::Schemas::V1::Schedules::SCHEDULE_OBJECT
         ]
       },
-      lab: { type: :string }
+      lab: { type: :string },
+      is_onboarding_complete: { type: :boolean }
     }
   }
 
@@ -167,6 +169,10 @@ module OpenApi::Schemas::V1::Users
           office_id: {
             type: :integer,
             example: 1
+          },
+          is_onboarding_complete: {
+            type: :boolean,
+            description: "Whether the user has completed the calendar onboarding tour"
           },
           default_schedule: OpenApi::Schemas::V1::Schedules::SCHEDULE_ATTRIBUTES
         }
