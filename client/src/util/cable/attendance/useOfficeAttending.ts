@@ -180,6 +180,12 @@ export function useOfficeAttending({
             case "attendance.visits.removed": {
               const invalidations = [
                 queryClient.invalidateQueries({
+                  queryKey: generateAttendanceConfirmationKey(
+                    msg.office_id,
+                    msg.week_start,
+                  ),
+                }),
+                queryClient.invalidateQueries({
                   queryKey: generateVisitsKey({
                     date: msg.week_start,
                     view: "week",
