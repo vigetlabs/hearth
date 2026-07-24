@@ -179,7 +179,7 @@ export default function CalendarTour({ firstName }: CalendarTourProps) {
 
       return currentStep;
     });
-  }, [current, queryClient, updateUserMutation]);
+  }, [queryClient, updateUserMutation]);
 
   // Position the hole and the modal for the current step, re-measuring on the
   // next frame and whenever the viewport / layout shifts, so both stay aligned.
