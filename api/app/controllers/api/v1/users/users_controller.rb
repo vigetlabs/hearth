@@ -25,8 +25,19 @@ class Api::V1::Users::UsersController < ApplicationController
   end
 
   def update
+    completed_onboarding = false
+    updated_roster_office = nil
+
     ActiveRecord::Base.transaction do
       current_user.update!(user_params.except(:default_schedule))
+
+      completed_onboarding =
+        current_user.saved_change_to_is_onboarding_complete?(
+          from: false,
+          to: true
+        )
+
+      updated_roster_office = current_user.office if completed_onboarding
 
       if (schedule_attributes = user_params[:default_schedule])
         schedule = current_user.default_schedule ||
@@ -34,6 +45,12 @@ class Api::V1::Users::UsersController < ApplicationController
 
         schedule.update!(schedule_attributes.to_h.merge(is_default: true))
       end
+    end
+
+    if completed_onboarding && updated_roster_office
+      OfficePlanningBroadcaster.broadcast_roster_update(
+        office: updated_roster_office
+      )
     end
 
     user = serialize_user(current_user.reload)
