@@ -4,6 +4,8 @@ import { RadioGroup } from "radix-ui";
 import Loader from "@/components/Loader/Loader";
 import OfficeItem from "@/components/OfficeItem/OfficeItem";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
+import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 import {
   StatusIcon,
   type StatusMark,
@@ -123,6 +125,18 @@ export default function SandboxPage() {
           onConfirm={() => setModalOpenWarning(false)}
           onCancel={() => setModalOpenWarning(false)}
         />
+      </Demo>
+
+      <Demo title="NotFoundPage (404 — route does not exist)">
+        <div className="flex h-[32rem] w-full overflow-hidden rounded-xl border border-line">
+          <NotFoundPage />
+        </div>
+      </Demo>
+
+      <Demo title="ErrorPage (generic — something went wrong)">
+        <div className="flex h-[32rem] w-full overflow-hidden rounded-xl border border-line">
+          <ErrorPage />
+        </div>
       </Demo>
 
       <Demo title="Live users">
