@@ -52,6 +52,7 @@ function PlanningHeader({
   return (
     <button
       type="button"
+      data-tour="day-header"
       onClick={onToggleMine}
       disabled={!myUserId || isConfirmedElsewhere}
       aria-pressed={isSelected}
@@ -130,6 +131,7 @@ function ConfirmedHeader({
 }: Omit<DayHeaderProps, "locked" | "myUserId" | "onToggleMine">) {
   return (
     <div
+      data-tour="day-header"
       className={cn(
         headerBase,
         "border-b border-line",
