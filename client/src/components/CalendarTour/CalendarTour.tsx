@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { cn } from "@/util/cn";
+import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
+import { createUpdateUserObjectPayload } from "@/util/api/functions/users";
+import { useQueryClient } from "@tanstack/react-query";
+import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 
 /*
   A three-part intro that walks a first look at the calendar. Each step dims the
@@ -145,16 +149,32 @@ export default function CalendarTour({ firstName }: CalendarTourProps) {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
+  const updateUserMutation = useUpdateUserMutation();
+  const queryClient = useQueryClient();
+
   const next = useCallback(() => {
     setCurrent((currentStep) => {
       if (currentStep < STEPS.length - 1) {
         return currentStep + 1;
       }
 
-      setActive(false);
+      updateUserMutation.mutate(
+        createUpdateUserObjectPayload({
+          is_onboarding_complete: true,
+        }),
+        {
+          onSuccess: async () => {
+            await queryClient.invalidateQueries({
+              queryKey: generateCurrentUserKey(),
+            });
+            setActive(false);
+          },
+        },
+      );
+
       return currentStep;
     });
-  }, []);
+  }, [current, queryClient, updateUserMutation]);
 
   // Position the hole and the modal for the current step, re-measuring on the
   // next frame and whenever the viewport / layout shifts, so both stay aligned.
@@ -336,8 +356,9 @@ export default function CalendarTour({ firstName }: CalendarTourProps) {
           <button
             type="button"
             className="rounded-lg bg-fill px-4 py-1.5 text-[12px] font-semibold text-fg-inverse transition-colors hover:bg-fill-hover"
+            disabled={updateUserMutation.isPending}
           >
-            {step.cta}
+            {updateUserMutation.isPending ? "Preparing..." : step.cta}
           </button>
         </div>
       </div>

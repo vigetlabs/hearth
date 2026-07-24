@@ -97,18 +97,28 @@ export async function logoutUser(): Promise<EmptySuccessResponse> {
   return response;
 }
 
-export function createUpdateUserObjectPayload(
-  first_name?: string,
-  last_name?: string,
-  office_id?: number,
-  default_schedule?: ScheduleAttributes,
-): PatchUserRequest {
+interface CreateUpdateUserObjectPayloadOptions {
+  first_name?: string;
+  last_name?: string;
+  office_id?: number;
+  default_schedule?: ScheduleAttributes;
+  is_onboarding_complete?: boolean;
+}
+
+export function createUpdateUserObjectPayload({
+  first_name,
+  last_name,
+  office_id,
+  default_schedule,
+  is_onboarding_complete,
+}: CreateUpdateUserObjectPayloadOptions): PatchUserRequest {
   return {
     user: {
       first_name,
       last_name,
       office_id,
       default_schedule,
+      is_onboarding_complete,
     },
   };
 }

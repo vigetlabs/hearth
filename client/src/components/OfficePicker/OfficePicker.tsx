@@ -114,11 +114,9 @@ export default function OfficePicker() {
   function persistOfficeAndNavigate(office: Office) {
     const isRemote = office.name.toLowerCase() === "remote";
 
-    const payload: PatchUserRequest = createUpdateUserObjectPayload(
-      undefined,
-      undefined,
-      office.id,
-    );
+    const payload: PatchUserRequest = createUpdateUserObjectPayload({
+      office_id: office.id,
+    });
 
     updateUserMutation.mutate(payload, {
       onSuccess: async () => {

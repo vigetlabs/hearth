@@ -634,7 +634,9 @@ export default function CalendarPage() {
         onCancel={() => setIsNonDefaultOfficeModalOpen(false)}
       />
 
-      <CalendarTour firstName={user.first_name} />
+      {!user.is_onboarding_complete && (
+        <CalendarTour firstName={user.first_name} />
+      )}
     </div>
   );
 }
