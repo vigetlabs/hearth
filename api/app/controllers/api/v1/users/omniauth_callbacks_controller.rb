@@ -9,7 +9,7 @@ class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksCon
 
     redirect_path =
       if user.default_schedule.present? && user.office.present?
-        "/users/calendar"
+        "/calendar"
       elsif user.office.blank?
         "/users/office"
       else
