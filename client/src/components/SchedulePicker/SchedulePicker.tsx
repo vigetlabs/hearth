@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -15,6 +15,7 @@ import { createDefaultScheduleObjectPayload } from "@/util/api/functions/schedul
 import { useCreateDefaultScheduleMutation } from "@/util/api/mutations/schedules/createDefaultScheduleMutation";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import type { User } from "@/types/api/users";
+import { useAuth } from "@/util/auth/useAuth";
 
 export default function SchedulePicker() {
   const location = useLocation();
@@ -24,18 +25,18 @@ export default function SchedulePicker() {
   const createDefaultScheduleMutation = useCreateDefaultScheduleMutation();
 
   // The office is handed over from the office picker via router state. If a user
-  // lands here directly, such as after a refresh, send them back to pick one.
-  const office = (location.state as { office?: Office } | null)?.office;
+  // lands here directly by sso redirect, read their current office
+  const officeLocation: Office = (location.state as { office?: Office } | null)
+    ?.office;
 
+  const { user } = useAuth();
+
+  const officeName: string = officeLocation?.name ?? user?.office?.name;
   const [selectedDayIds, setSelectedDayIds] = useState<Set<string>>(new Set());
-
-  if (!office) {
-    return <Navigate to="/users/office" replace />;
-  }
 
   const canSave = selectedDayIds.size > 0;
 
-  const heroOfficeId = office.name.toLowerCase().trim().replaceAll(" ", "-");
+  const heroOfficeId = officeName?.toLowerCase().trim().replaceAll(" ", "-");
 
   function toggleDay(dayId: string) {
     setSelectedDayIds((previousDayIds) => {
@@ -62,7 +63,7 @@ export default function SchedulePicker() {
         queryClient.setQueryData(generateCurrentUserKey(), (user: User) =>
           user ? { ...user, default_schedule: schedule } : user,
         );
-        navigate("/");
+        navigate("/calendar", { replace: true });
       },
     });
   }
@@ -85,7 +86,7 @@ export default function SchedulePicker() {
           <div className="w-full max-w-[90%]">
             <h1 className="text-2xl leading-snug font-bold text-fg">
               What days are you usually in the{" "}
-              <span className="text-strong capitalize">{office.name}</span>{" "}
+              <span className="text-strong capitalize">{officeName}</span>{" "}
               office?
             </h1>
 

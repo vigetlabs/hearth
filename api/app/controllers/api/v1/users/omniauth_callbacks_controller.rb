@@ -7,7 +7,16 @@ class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksCon
 
     sign_in(user)
 
-    redirect_to frontend_path("/users/office"),
+    redirect_path =
+      if user.default_schedule.present? && user.office.present?
+        "/users/profile"
+      elsif user.office.blank?
+        "/users/office"
+      else
+        "/users/schedule"
+      end
+
+    redirect_to frontend_path(redirect_path),
       allow_other_host: true
   end
 
