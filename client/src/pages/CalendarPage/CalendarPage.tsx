@@ -555,9 +555,7 @@ export default function CalendarPage() {
                       )} ✓`
                     : "Confirmed ✓"
                   : externalOfficeSummaries.length >= 1
-                    ? `Planning for ${capitalizeOfficeName(
-                        activeOffice.name,
-                      )}.`
+                    ? `Planning for ${capitalizeOfficeName(activeOffice.name)}.`
                     : "Planning."}
               </span>{" "}
               {externalOfficeSummaries.length >= 1
