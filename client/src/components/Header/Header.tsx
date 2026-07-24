@@ -25,10 +25,8 @@ export default function Header() {
   function handleLogout() {
     logoutUserMutation.mutate(undefined, {
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: generateCurrentUserKey(),
-        });
-        navigate("/");
+        await navigate("/", { replace: true });
+        queryClient.setQueryData(generateCurrentUserKey(), null);
       },
     });
   }
