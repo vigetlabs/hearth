@@ -1,4 +1,4 @@
-const states = {
+export const machineStates = {
   INITIAL: "INITIAL",
   PLANNING: "PLANNING",
   CONFIRMING: "CONFIRMING",
@@ -8,58 +8,36 @@ const states = {
   // SAVING_EDITS: "SAVING_EDITS"
 } as const;
 
+export type CalendarMachineStatus =
+  (typeof machineStates)[keyof typeof machineStates];
+
 interface CalendarScope {
   officeId: number;
   weekStart: string;
 }
 
 export interface InitialState {
-  status: typeof states.INITIAL;
+  status: typeof machineStates.INITIAL;
   scope: CalendarScope;
 }
 
 export interface PlanningState {
-  status: typeof states.PLANNING;
+  status: typeof machineStates.PLANNING;
   scope: CalendarScope;
   draftDates: ReadonlySet<string>;
 }
 
-export interface InitialState {
-  status: typeof states.INITIAL;
-  scope: CalendarScope;
-}
-
 export interface ConfirmingState {
-  status: typeof states.CONFIRMING;
+  status: typeof machineStates.CONFIRMING;
   scope: CalendarScope;
   draftDates: ReadonlySet<string>;
 }
 
 export interface ConfirmedState {
-  status: typeof states.CONFIRMED;
+  status: typeof machineStates.CONFIRMED;
   scope: CalendarScope;
   confirmedDates: ReadonlySet<string>;
 }
-
-// export interface StartingEditState {
-//   status: typeof states.STARTING_EDIT;
-//   scope: CalendarScope;
-//   confirmedDates: ReadonlySet<string>;
-// }
-
-// export interface EditingState {
-//   status: typeof states.INITIAL;
-//   scope: CalendarScope;
-//   confirmedDates: ReadonlySet<string>;
-//   draftDates: ReadonlySet<string>;
-// }
-
-// export interface SavingEditsState {
-//   status: typeof states.SAVING_EDITS;
-//   scope: CalendarScope;
-//   confirmedDates: ReadonlySet<string>;
-//   draftDates: ReadonlySet<string>;
-// }
 
 export type CalendarMachineState =
   | InitialState
