@@ -3,17 +3,26 @@ set shell := ["bash", "-cu"]
 # default `bash`, which resolves to WSL. Ignored on macOS/Linux.
 set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-cu"]
 
-CUR_BRANCH := `git branch --show-current`
 
-SAFE_BRANCH := `git branch --show-current \
-  | tr '[:upper:]' '[:lower:]' \
-  | sed -E 's/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//'`
-
-CUR_WORKTREE := SAFE_BRANCH
+COMPOSE_PROJECT := `\
+  branch="$(git branch --show-current 2>/dev/null || true)"; \
+  if [ -z "$branch" ] || [[ "$branch" == jj/keep/* ]]; then \
+    if command -v jj >/dev/null 2>&1 && jj root >/dev/null 2>&1; then \
+      name="$(basename "$(jj root)")"; \
+    else \
+      name="$(basename "$PWD")"; \
+    fi; \
+  else \
+    name="$branch"; \
+  fi; \
+  printf '%s' "$name" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//' \
+`
 
 DEV_COMPOSE := "docker-compose.dev.yml"
 
-DDC := "docker compose -p " + CUR_WORKTREE + " -f " + DEV_COMPOSE
+DDC := "docker compose -p " + COMPOSE_PROJECT + " -f " + DEV_COMPOSE
 
 # Show available commands
 help:
