@@ -12,6 +12,8 @@ pkgs.mkShell {
 
     just
     pre-commit
+
+    lazyjj
   ];
 
   shellHook = ''
