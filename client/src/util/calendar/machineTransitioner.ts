@@ -10,7 +10,37 @@ import {
 } from "@/types/calendar/machineState";
 import { validStateTransitions } from "@/types/calendar/machineTransitions";
 
-export function isValidTransition(
+export function calendarMachineTransition(
+  curState: CalendarMachineState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  const nextState: CalendarMachineState = transitionReduce(curState, evt)
+
+  assertValidTransition(curState, evt, nextState);
+
+  return nextState;
+}
+
+function assertValidTransition(
+  before: CalendarMachineState,
+  evt: CalendarMachineEvent,
+  after: CalendarMachineState
+): void {
+  if (isValidTransition(before.status, after.status)) {
+    return;
+  }
+
+  throw new Error(
+    [
+      "Invalid calendar transition.",
+      `State: ${before.status}.`,
+      `Event: ${evt.type}.`,
+      `Result: ${after.status}.`,
+    ].join(" ")
+  )
+}
+
+function isValidTransition(
   before: CalendarMachineStatus,
   after: CalendarMachineStatus
 ): boolean {
@@ -22,6 +52,28 @@ export function isValidTransition(
     validStateTransitions[before];
 
   return allowedTransitions.includes(after);
+}
+
+function transitionReduce(
+  curState: CalendarMachineState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  switch (curState.status) {
+    case machineStates.INITIAL:
+      return transitionFromInitial(curState, evt)
+
+    case machineStates.PLANNING:
+      return transitionFromPlanning(curState, evt)
+
+    case machineStates.CONFIRMING:
+      return transitionFromConfirming(curState, evt)
+
+    case machineStates.CONFIRMED:
+      return transitionFromConfirmed(curState, evt)
+
+    default:
+      console.error("Invalid transition");
+  }
 }
 
 function transitionFromInitial(
@@ -122,6 +174,88 @@ function transitionFromPlanning(
           weekStart: evt.weekStart
         }
       }
+      return nextState;
+    }
+
+    default:
+      console.error("Invalid event");
+  }
+}
+
+function transitionFromConfirming(
+  curState: ConfirmingState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  switch (evt.type) {
+    case "CONFIRM_SUCCEEDED": {
+      const nextState: ConfirmedState = {
+        status: machineStates.CONFIRMED,
+        scope: curState.scope,
+        confirmedDates: new Set(evt.selectedDates)
+      }
+
+      return nextState;
+    }
+
+    case "CONFIRM_FAILED": {
+      const nextState: PlanningState = {
+        status: machineStates.PLANNING,
+        scope: curState.scope,
+        draftDates: curState.draftDates
+      }
+
+      return nextState;
+    }
+
+    case "SCOPE_CHANGED": {
+      const nextState: InitialState = {
+        status: machineStates.INITIAL,
+        scope: {
+          officeId: evt.officeId,
+          weekStart: evt.weekStart
+        }
+      }
+
+      return nextState;
+    }
+
+    default:
+      console.error("Invalid event");
+  }
+}
+
+function transitionFromConfirmed(
+  curState: CalendarMachineState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  switch (evt.type) {
+    case "SERVER_SYNCHRONIZED": {
+      if (!evt.confirmed) {
+        const nextState: PlanningState = {
+          status: machineStates.PLANNING,
+          scope: curState.scope,
+          draftDates: new Set(evt.selectedDates)
+        }
+        return nextState;
+      }
+
+      const nextState: ConfirmedState = {
+        status: machineStates.CONFIRMED,
+        scope: curState.scope,
+        confirmedDates: new Set(evt.selectedDates)
+      }
+      return nextState;
+    }
+
+    case "SCOPE_CHANGED": {
+      const nextState: InitialState = {
+        status: machineStates.INITIAL,
+        scope: {
+          officeId: evt.officeId,
+          weekStart: evt.weekStart
+        }
+      }
+
       return nextState;
     }
 
