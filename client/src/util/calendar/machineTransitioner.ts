@@ -10,7 +10,7 @@ import {
 } from "@/types/calendar/machineState";
 import { validStateTransitions } from "@/types/calendar/machineTransitions";
 
-export function calendarMachineTransition(
+export function calendarMachineReducer(
   curState: CalendarMachineState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {

@@ -11,7 +11,7 @@ export const machineStates = {
 export type CalendarMachineStatus =
   (typeof machineStates)[keyof typeof machineStates];
 
-interface CalendarScope {
+export interface CalendarScope {
   officeId: number;
   weekStart: string;
 }
