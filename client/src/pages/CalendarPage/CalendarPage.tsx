@@ -11,7 +11,7 @@ import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
 import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
 
 import type { Office } from "@/types/api/offices";
-import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
+import type { WeekSchedule } from "@/types/calendar/calendar";
 
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
@@ -32,11 +32,9 @@ import { addDays, startOfWeek, generateDateKey } from "@/util/dates/date";
 import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations";
 import type { User } from "@/types/api/users";
 import type { Visit } from "@/types/api/visits";
-import type {
-  ChannelSerializedUser,
-  TogglePlanningOverrideState,
-} from "@/types/cable/officePlanning";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
+import { useCalendarMachine } from "@/util/calendar/useCalendarMachine";
+import { buildSelectedDatesBootstrap } from "@/util/calendar/dates";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -87,8 +85,9 @@ export default function CalendarPage() {
    * undefined office id into the API requests.
    */
   const activeOfficeId: number | undefined = activeOffice?.id;
+  const effectiveOfficeId = activeOfficeId ?? 1;
 
-  const officeRosterQuery = useOfficeRosterQuery(activeOfficeId ?? 1);
+  const officeRosterQuery = useOfficeRosterQuery(effectiveOfficeId);
 
   // Whether the user's *default* office (not the one currently being viewed) is
   // remote. Remote-default users get a "Remote View" button above the calendar
@@ -111,6 +110,16 @@ export default function CalendarPage() {
     getWeekStartFromSearchParams(searchParams),
   );
   const focusedWeekStartDateKey: string = generateDateKey(focusedWeekStartDate);
+
+
+  // === STATE MACHINE ===
+  const {
+    state: calendarMachineState,
+    dispatch: dispatchCalendarEvent
+  } = useCalendarMachine({
+    officeId: effectiveOfficeId,
+    weekStart: focusedWeekStartDateKey
+  });
 
   const weekDates: Date[] = useMemo(
     () => generateWeekDates(focusedWeekStartDate, WEEKDAYS_PER_WEEK),
@@ -167,7 +176,7 @@ export default function CalendarPage() {
   const officeVisitsQuery = useVisitsQuery({
     date: focusedWeekStartDateKey,
     view: "week",
-    office_id: activeOfficeId ?? 1,
+    office_id: effectiveOfficeId
   });
 
   const currentUserVisitsQuery = useCurrentVisitsQuery({
@@ -184,10 +193,10 @@ export default function CalendarPage() {
     () =>
       new Map(
         currentUserVisits
-          .filter((visit) => visit.office_id !== activeOfficeId)
+          .filter((visit) => visit.office_id !== effectiveOfficeId)
           .map((visit) => [visit.visit_date, visit]),
       ),
-    [currentUserVisits, activeOfficeId],
+    [currentUserVisits, effectiveOfficeId],
   );
 
   const externalOfficeNamesByDate = useMemo(
@@ -244,7 +253,7 @@ export default function CalendarPage() {
   // === Attendance: confirmation state ===
   // A user's status resolves to one of: confirmed-yes, confirmed-no, planning-yes, planning-no.
   const attendanceConfirmationsQuery = useAttendanceConfirmationsQuery({
-    officeId: activeOfficeId,
+    officeId: effectiveOfficeId,
     startsOn: focusedWeekStartDateKey,
   });
 
@@ -273,7 +282,7 @@ export default function CalendarPage() {
     selectDate,
     deselectDate,
   } = useOfficePlanning({
-    officeId: activeOfficeId ?? null,
+    officeId: effectiveOfficeId,
     currentUserId: user?.id ?? null,
     dates: planningWeekDateKeys,
   });
@@ -283,7 +292,7 @@ export default function CalendarPage() {
     startEditing,
     isConnected: isAttendanceConnected,
   } = useOfficeAttending({
-    officeId: activeOfficeId ?? null,
+    officeId: effectiveOfficeId ?? null,
     weekStart: focusedWeekStartDateKey,
     currentUserId: user?.id ?? null,
   });
@@ -341,73 +350,36 @@ export default function CalendarPage() {
     ],
   );
 
-  // The `YYYY-MM-DD` keys of the days the current user has chosen to attend this
-  // office this week — derived from their roster status plus any live planning
-  // toggles, and excluding days they're already confirmed at another office.
-  // Shared by the confirm action and the non-default-office warning, which only
-  // fires when this is non-empty (i.e. they're actually scheduling a visit).
-  const selectedDates: string[] = useMemo(() => {
+  const bootstrapSelectedDates: string[] = useMemo(() => {
     if (!user) {
       return [];
     }
 
-    return weekDates
-      .filter((date: Date) => {
-        const dateKey: string = generateDateKey(date);
-        const rosterUsers: RosterUser[] = schedule[dateKey] ?? [];
-
-        if (currentUserExternalVisitsByDate.has(dateKey)) {
-          return false;
-        }
-
-        const curRosterUser = rosterUsers.find(
-          (rosterUser) => rosterUser.userId === user.id,
-        );
-
-        const planningState: TogglePlanningOverrideState | undefined =
-          planningStatesByDate[dateKey];
-
-        const hasCurUserSelectedDate: boolean = isCurrentUserInPlanningState(
-          planningState?.selected ?? [],
-          user.id,
-        );
-
-        const hasCurUserDeselectedDate: boolean = isCurrentUserInPlanningState(
-          planningState?.deselected ?? [],
-          user.id,
-        );
-
-        if (hasCurUserSelectedDate) {
-          return true;
-        }
-
-        if (hasCurUserDeselectedDate) {
-          return false;
-        }
-
-        return (
-          curRosterUser?.status === "planning-yes" ||
-          curRosterUser?.status === "confirmed-yes"
-        );
-      })
-      .map(generateDateKey);
+    return buildSelectedDatesBootstrap({
+      userId: user.id,
+      weekDates,
+      schedule,
+      planningStatesByDate,
+      externalVisitsByDate: currentUserExternalVisitsByDate
+    });
   }, [
     user,
     weekDates,
     schedule,
-    currentUserExternalVisitsByDate,
     planningStatesByDate,
-  ]);
+    currentUserExternalVisitsByDate
+  ])
+
 
   function confirmWeek(): void {
-    if (!user || activeOfficeId === undefined) {
+    if (!user || effectiveOfficeId === undefined) {
       return;
     }
 
     const payload = createAttendanceConfirmationObjectPayload({
-      officeId: activeOfficeId,
+      officeId: effectiveOfficeId,
       startsOn: focusedWeekStartDateKey,
-      selectedDates,
+      selectedDates: bootstrapSelectedDates,
     });
 
     createAttendanceConfirmationMutation.mutate(payload, {
@@ -415,7 +387,7 @@ export default function CalendarPage() {
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: generateAttendanceConfirmationKey(
-              activeOfficeId,
+              effectiveOfficeId,
               focusedWeekStartDateKey,
             ),
           }),
@@ -423,7 +395,7 @@ export default function CalendarPage() {
             queryKey: generateVisitsKey({
               date: focusedWeekStartDateKey,
               view: "week",
-              office_id: activeOfficeId,
+              office_id: effectiveOfficeId,
             }),
           }),
           queryClient.invalidateQueries({
@@ -442,17 +414,17 @@ export default function CalendarPage() {
   // days (confirming "no"), or the default office, or we've already warned for
   // this office, confirm straight through with no modal.
   function handleConfirmWeekClick(): void {
-    if (activeOfficeId === undefined) {
+    if (effectiveOfficeId === undefined) {
       return;
     }
 
     const isNonDefaultOffice =
-      !defaultOffice || activeOfficeId !== defaultOffice.id;
-    const isSchedulingVisit = selectedDates.length > 0;
-    const alreadyWarned = officesWarnedForVisit.has(activeOfficeId);
+      !defaultOffice || effectiveOfficeId !== defaultOffice.id;
+    const isSchedulingVisit = bootstrapSelectedDates.length > 0;
+    const alreadyWarned = officesWarnedForVisit.has(effectiveOfficeId);
 
     if (isNonDefaultOffice && isSchedulingVisit && !alreadyWarned) {
-      setOfficesWarnedForVisit((prev) => new Set(prev).add(activeOfficeId));
+      setOfficesWarnedForVisit((prev) => new Set(prev).add(effectiveOfficeId));
       setIsNonDefaultOfficeModalOpen(true);
       return;
     }
@@ -483,7 +455,7 @@ export default function CalendarPage() {
     return <div>Unable to load calendar</div>;
   }
 
-  if (!activeOffice || activeOfficeId === undefined) {
+  if (!activeOffice || effectiveOfficeId === undefined) {
     return <div>No office is available</div>;
   }
 
@@ -800,16 +772,7 @@ function findCurrentUserOffice(
 
 function findActiveOffice(
   offices: Office[],
-  activeOfficeId: number | undefined,
+  effectiveOfficeId: number | undefined,
 ): Office | null {
-  return offices.find((office) => office.id === activeOfficeId) ?? null;
-}
-
-function isCurrentUserInPlanningState(
-  planningStateVariationUserList: ChannelSerializedUser[],
-  userId: number,
-): boolean {
-  return planningStateVariationUserList.some(
-    (planningUser) => planningUser.id === userId,
-  );
+  return offices.find((office) => office.id === effectiveOfficeId) ?? null;
 }

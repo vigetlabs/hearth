@@ -1,3 +1,5 @@
+import type { CalendarScope } from "./machineState";
+
 export type CalendarMachineEvent =
   | {
       type: "WEEK_LOADED";
@@ -48,3 +50,9 @@ export type CalendarMachineEvent =
       confirmed: boolean;
       selectedDates: readonly string[];
     }
+
+export interface CalendarMachineBootstrap {
+  scope: CalendarScope;
+  confirmed: boolean;
+  selectedDates: readonly string[];
+}
