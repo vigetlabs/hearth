@@ -4,6 +4,7 @@ import {
   type CalendarMachineState,
   type CalendarMachineStatus, 
   type ConfirmedState, 
+  type ConfirmingState, 
   type InitialState, 
   type PlanningState
 } from "@/types/calendar/machineState";
@@ -25,13 +26,13 @@ export function isValidTransition(
 
 function transitionFromInitial(
   curState: InitialState,
-  event: CalendarMachineEvent
+  evt: CalendarMachineEvent
 ):  CalendarMachineState {
-  switch (event.type) {
+  switch (evt.type) {
     case "WEEK_LOADED": {
-      const dates = new Set(event.selectedDates);
+      const dates = new Set(evt.selectedDates);
 
-      if (event.confirmed) {
+      if (evt.confirmed) {
         const nextState: ConfirmedState = {
           status: machineStates.CONFIRMED,
           scope: curState.scope,
@@ -53,8 +54,72 @@ function transitionFromInitial(
       const nextState: InitialState = {
         status: machineStates.INITIAL,
         scope: {
-          officeId: event.officeId,
-          weekStart: event.weekStart
+          officeId: evt.officeId,
+          weekStart: evt.weekStart
+        }
+      }
+      return nextState;
+    }
+
+    default:
+      console.error("Invalid event");
+  }
+}
+
+function transitionFromPlanning(
+  curState: PlanningState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  switch (evt.type) {
+    case "DATE_SELECTED": {
+      const nextState: PlanningState = {
+        ...curState,
+        draftDates: new Set(curState.draftDates).add(evt.date)
+      }
+
+      return nextState;
+    }
+
+    case "DATE_DESELECTED": {
+      const draftDates: Set<string> = new Set(curState.draftDates);
+      draftDates.delete(evt.date);
+
+      const nextState: PlanningState = {
+        ...curState,
+        draftDates: draftDates
+      }
+
+      return nextState;
+    }
+
+    case "CONFIRM_REQUESTED": {
+      const nextState: ConfirmingState = {
+        status: machineStates.CONFIRMING,
+        scope: curState.scope,
+        draftDates: curState.draftDates
+      }
+
+      return nextState;
+    }
+
+    case "SERVER_SYNCHRONIZED": {
+      if (evt.confirmed)  {
+        const nextState: ConfirmedState = {
+          status: machineStates.CONFIRMED,
+          scope: curState.scope,
+          confirmedDates: new Set(evt.selectedDates)
+        }
+        return nextState;
+      }
+      return curState;
+    }
+
+    case "SCOPE_CHANGED": {
+      const nextState: InitialState = {
+        status: machineStates.INITIAL,
+        scope: {
+          officeId: evt.officeId,
+          weekStart: evt.weekStart
         }
       }
       return nextState;
