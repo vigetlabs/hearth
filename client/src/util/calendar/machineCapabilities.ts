@@ -1,0 +1,34 @@
+import type { CalendarMachineCapabilities } from "@/types/calendar/machineCapabilities";
+import { machineStates, type CalendarMachineState, type CalendarMachineStatus } from "@/types/calendar/machineState";
+
+export function capabilitiesFor(
+  curState: CalendarMachineState
+): CalendarMachineCapabilities {
+  return capabilitiesByStatus[curState.status];
+}
+
+const noCapabilities: CalendarMachineCapabilities = {
+  canChangeDates: false,
+  canConfirm: false,
+  canStartEditing: false,
+}
+
+const capabilitiesByStatus = {
+  [machineStates.INITIAL]: noCapabilities,
+
+  [machineStates.PLANNING]: {
+    ...noCapabilities,
+    canChangeDates: true,
+    canConfirm: true
+  },
+
+  [machineStates.CONFIRMING]: noCapabilities,
+
+  [machineStates.CONFIRMED]: {
+    ...noCapabilities,
+    canStartEditing: true
+  }
+} satisfies Record<
+  CalendarMachineStatus,
+  CalendarMachineCapabilities
+>
