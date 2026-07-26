@@ -1,3 +1,4 @@
+import type { AttendanceStatus } from "@/types/calendar/calendar";
 import { machineStates, type CalendarMachineState, type ConfirmedState, type ConfirmingState, type PlanningState } from "@/types/calendar/machineState";
 
 export function isPlanning(
@@ -37,4 +38,25 @@ export function isBusy(
   curState: CalendarMachineState
 ): boolean {
   return curState.status === machineStates.CONFIRMING;
+}
+
+export function rosterStatusForMachineDate(
+  curState: CalendarMachineState,
+  dateKey: string
+): AttendanceStatus {
+
+  switch (curState.status) {
+    case machineStates.PLANNING:
+    case machineStates.CONFIRMING: {
+      return curState.draftDates.has(dateKey)
+        ? "planning-yes"
+        : "planning-no";
+    }
+
+    case machineStates.CONFIRMED: {
+      return curState.confirmedDates.has(dateKey)
+        ? "confirmed-yes"
+        : "confirmed-no"
+    }
+  }
 }

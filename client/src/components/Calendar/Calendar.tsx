@@ -25,7 +25,7 @@ import { useCalendarMachine } from "@/util/calendar/MachineProvider";
 import { getCapabilitiesFor } from "@/util/calendar/machineCapabilities";
 import type { CalendarMachineCapabilities } from "@/types/calendar/machineCapabilities";
 import { isDateEditableState } from "@/util/calendar/machineGuards";
-import { selectedDatesForMachine } from "@/util/calendar/stateSelectors";
+import { rosterStatusForMachineDate, selectedDatesForMachine } from "@/util/calendar/stateSelectors";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
@@ -87,6 +87,16 @@ export function Calendar({
         if (rosterUser.status === "confirmed-elsewhere") {
           return rosterUser;
         }
+
+        //current user branch
+        if (rosterUser.userId === user.id) {
+          return {
+            ...rosterUser,
+            status: rosterStatusForMachineDate(machineState, key)
+          }
+        }
+
+        //other user branch
 
         const { hasConfirmedVisit, isDefaultScheduleDay } =
           baseAttendanceForUser({
