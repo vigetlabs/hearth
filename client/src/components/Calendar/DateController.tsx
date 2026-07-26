@@ -6,7 +6,7 @@ interface DateControllerProps {
   weekStartFocus: Date;
   weekStartFocusDateKey: string;
   onChangeFocusedWeek: (nexWeekStart: Date) => void;
-  weekDates: Date[];
+  weekDates: readonly Date[];
 }
 
 export default function DateController({

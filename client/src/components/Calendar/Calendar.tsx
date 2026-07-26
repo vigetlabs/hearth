@@ -43,7 +43,7 @@ const visitorCountOf = (day: RosterUser[]): number =>
 interface CalendarProps {
   schedule: WeekSchedule;
   office: Office;
-  days: Date[];
+  days: readonly Date[];
   locked: boolean;
   user: User;
   planningByDate: OfficeDatesPlanningOverrideStates;

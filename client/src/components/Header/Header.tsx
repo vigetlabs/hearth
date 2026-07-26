@@ -5,7 +5,7 @@ import { DropdownMenu } from "radix-ui";
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import WordLogo from "@/components/Logo/WordLogo";
 
-import { useAuth } from "@/util/auth/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 

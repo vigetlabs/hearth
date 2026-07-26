@@ -5,7 +5,7 @@ import { generateDateKey } from "@/util/dates/date";
 
 interface BuildSelectedDatesOptions {
   userId: number;
-  weekDates: Date[];
+  weekDates: readonly Date[];
   schedule: WeekSchedule;
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
   externalVisitsByDate: ReadonlyMap<string, Visit>

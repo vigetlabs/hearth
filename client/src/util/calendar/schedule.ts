@@ -66,7 +66,7 @@ function homeUserStatus({
 export function buildWeekSchedule(
   users: User[],
   visits: Visit[],
-  weekDates: Date[],
+  weekDates: readonly Date[],
   confirmedUserIds: ReadonlySet<number>,
   currentUserId: number,
   currentUserExternalVisitsByDate: ReadonlyMap<string, Visit>,
