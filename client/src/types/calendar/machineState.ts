@@ -1,11 +1,7 @@
 export const machineStates = {
-  INITIAL: "INITIAL",
   PLANNING: "PLANNING",
   CONFIRMING: "CONFIRMING",
   CONFIRMED: "CONFIRMED",
-  // STARTING_EDIT: "STARTING_EDIT",
-  // EDITING: "EDITING",
-  // SAVING_EDITS: "SAVING_EDITS"
 } as const;
 
 export type CalendarMachineStatus =
@@ -14,11 +10,6 @@ export type CalendarMachineStatus =
 export interface CalendarScope {
   officeId: number;
   weekStart: string;
-}
-
-export interface InitialState {
-  status: typeof machineStates.INITIAL;
-  scope: CalendarScope;
 }
 
 export interface PlanningState {
@@ -40,7 +31,6 @@ export interface ConfirmedState {
 }
 
 export type CalendarMachineState =
-  | InitialState
   | PlanningState
   | ConfirmingState
   | ConfirmedState

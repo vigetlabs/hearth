@@ -21,6 +21,7 @@ import {
   resolveAttendance,
   resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
+import { useCalendarMachine } from "@/util/calendar/MachineProvider";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
@@ -228,6 +229,13 @@ export function Calendar({
   // them) — it's suppressed only per-day when you're confirmed elsewhere, where
   // the darker header would make it look cluttered.
   const isRemote = office.name.toLowerCase() === "remote";
+
+  const {
+    state: calendarMachineState,
+    dispatch: dispatchCalendarEvent
+  } = useCalendarMachine();
+
+  console.log("Machine state: ", calendarMachineState);
 
   if (isRemote) {
     return (

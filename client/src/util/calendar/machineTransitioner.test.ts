@@ -6,7 +6,6 @@ import {
   type CalendarScope,
   type ConfirmedState,
   type ConfirmingState,
-  type InitialState,
   type PlanningState,
 } from "@/types/calendar/machineState";
 import type { CalendarMachineEvent } from "@/types/calendar/machineEvent";
@@ -16,51 +15,6 @@ describe("calendarMachineReducer", () => {
     officeId: 7,
     weekStart: "2026-07-20",
   };
-
-  describe("INITIAL", () => {
-    const state: InitialState = {
-      status: machineStates.INITIAL,
-      scope,
-    };
-
-    it("moves to PLANNING when an unconfirmed week loads", () => {
-      const evt: CalendarMachineEvent = {
-        type: "WEEK_LOADED",
-        confirmed: false,
-        selectedDates: ["2026-07-21", "2026-07-23"],
-      };
-
-      const nextState = calendarMachineReducer(state, evt);
-
-      expect(nextState).toEqual({
-        status: machineStates.PLANNING,
-        scope,
-        draftDates: new Set(["2026-07-21", "2026-07-23"]),
-      });
-    });
-
-    it("moves to CONFIRMED when a confirmed week loads", () => {
-      const evt: CalendarMachineEvent = {
-        type: "WEEK_LOADED",
-        confirmed: true,
-        selectedDates: [
-          "2026-07-21",
-          "2026-07-23"
-        ]
-      };
-
-      const nextState = calendarMachineReducer(state, evt);
-
-      expect(nextState).toEqual({
-        status: machineStates.CONFIRMED,
-        scope,
-        confirmedDates: new Set([
-          "2026-07-21",
-          "2026-07-23"
-        ])
-      })
-    })
-  });
 
   describe("PLANNING", () => {
     const state: PlanningState = {
@@ -250,34 +204,6 @@ describe("calendarMachineReducer", () => {
           "2026-07-21",
           "2026-07-23"
         ])
-      });
-    });
-  });
-
-  describe("scope changes", () => {
-    it("moves back to INITIAL with the new scope", () => {
-      const state: PlanningState = {
-        status: machineStates.PLANNING,
-        scope,
-        draftDates: new Set([
-          "2026-07-21"
-        ])
-      }
-
-      const evt: CalendarMachineEvent = {
-        type: "SCOPE_CHANGED",
-        officeId: 9,
-        weekStart: "2026-07-27"
-      }
-
-      const nextState = calendarMachineReducer(state, evt);
-
-      expect(nextState).toEqual({
-        status: machineStates.INITIAL,
-        scope: {
-          officeId: 9,
-          weekStart: "2026-07-27"
-        }
       });
     });
   });

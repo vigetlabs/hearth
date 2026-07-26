@@ -18,16 +18,10 @@ export function isConfirmed(
   return curState.status === machineStates.CONFIRMED;
 }
 
-const EMPTY_DATES: ReadonlySet<string> = new Set<string>();
-
 export function selectedDatesForMachine(
   curState: CalendarMachineState
 ): ReadonlySet<string> {
   switch (curState.status) {
-    case machineStates.INITIAL: {
-      return EMPTY_DATES;
-    }
-
     case machineStates.PLANNING: 
     case machineStates.CONFIRMING: {
       return curState.draftDates;

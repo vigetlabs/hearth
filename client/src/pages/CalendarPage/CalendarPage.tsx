@@ -33,8 +33,9 @@ import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations
 import type { User } from "@/types/api/users";
 import type { Visit } from "@/types/api/visits";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
-import { useCalendarMachine } from "@/util/calendar/useCalendarMachine";
 import { buildSelectedDatesBootstrap } from "@/util/calendar/dates";
+import type { CalendarMachineBootstrap } from "@/types/calendar/machineEvent";
+import { CalendarMachineProvider } from "@/util/calendar/MachineProvider";
 
 const WEEKDAYS_PER_WEEK = 5;
 
@@ -110,16 +111,6 @@ export default function CalendarPage() {
     getWeekStartFromSearchParams(searchParams),
   );
   const focusedWeekStartDateKey: string = generateDateKey(focusedWeekStartDate);
-
-
-  // === STATE MACHINE ===
-  const {
-    state: calendarMachineState,
-    dispatch: dispatchCalendarEvent
-  } = useCalendarMachine({
-    officeId: effectiveOfficeId,
-    weekStart: focusedWeekStartDateKey
-  });
 
   const weekDates: Date[] = useMemo(
     () => generateWeekDates(focusedWeekStartDate, WEEKDAYS_PER_WEEK),
@@ -368,7 +359,7 @@ export default function CalendarPage() {
     schedule,
     planningStatesByDate,
     currentUserExternalVisitsByDate
-  ])
+  ]);
 
 
   function confirmWeek(): void {
@@ -432,11 +423,6 @@ export default function CalendarPage() {
     confirmWeek();
   }
 
-  // `isLoading` (pending *and* actively fetching), not `isPending`: the
-  // attendance query is disabled until an office resolves, and a disabled query
-  // is `isPending` forever. Gating on `isPending` would hang the skeleton
-  // indefinitely when there's no office; `isLoading` lets us fall through to the
-  // "No office is available" branch below.
   if (
     officesQuery.isLoading ||
     officeRosterQuery.isLoading ||
@@ -463,8 +449,22 @@ export default function CalendarPage() {
     return <div>No user is available</div>;
   }
 
+
+  const machineBootstrap: CalendarMachineBootstrap = {
+    scope: {
+      officeId: effectiveOfficeId,
+      weekStart: focusedWeekStartDateKey
+    },
+    confirmed: isWeekConfirmed,
+    selectedDates: bootstrapSelectedDates
+  };
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+      <CalendarMachineProvider
+        key={`${effectiveOfficeId}:${focusedWeekStartDateKey}`}
+        bootstrap={machineBootstrap}
+      >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
@@ -589,6 +589,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      </CalendarMachineProvider>
       <ConfirmationModal
         open={isNonDefaultOfficeModalOpen}
         title={`Your default office is ${capitalizeOfficeName(

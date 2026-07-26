@@ -14,8 +14,6 @@ const noCapabilities: CalendarMachineCapabilities = {
 }
 
 const capabilitiesByStatus = {
-  [machineStates.INITIAL]: noCapabilities,
-
   [machineStates.PLANNING]: {
     ...noCapabilities,
     canChangeDates: true,

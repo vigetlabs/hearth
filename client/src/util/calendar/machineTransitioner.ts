@@ -5,7 +5,6 @@ import {
   type CalendarMachineStatus, 
   type ConfirmedState, 
   type ConfirmingState, 
-  type InitialState, 
   type PlanningState
 } from "@/types/calendar/machineState";
 import { validStateTransitions } from "@/types/calendar/machineTransitions";
@@ -59,9 +58,6 @@ function transitionReduce(
   evt: CalendarMachineEvent
 ): CalendarMachineState {
   switch (curState.status) {
-    case machineStates.INITIAL:
-      return transitionFromInitial(curState, evt)
-
     case machineStates.PLANNING:
       return transitionFromPlanning(curState, evt)
 
@@ -73,48 +69,6 @@ function transitionReduce(
 
     default:
       console.error("Invalid transition");
-  }
-}
-
-function transitionFromInitial(
-  curState: InitialState,
-  evt: CalendarMachineEvent
-):  CalendarMachineState {
-  switch (evt.type) {
-    case "WEEK_LOADED": {
-      const dates = new Set(evt.selectedDates);
-
-      if (evt.confirmed) {
-        const nextState: ConfirmedState = {
-          status: machineStates.CONFIRMED,
-          scope: curState.scope,
-          confirmedDates: dates
-        }
-        return nextState
-      }
-
-      const nextState: PlanningState = {
-        status: machineStates.PLANNING,
-        scope: curState.scope,
-        draftDates: dates
-      }
-
-      return nextState;
-    }
-
-    case "SCOPE_CHANGED": {
-      const nextState: InitialState = {
-        status: machineStates.INITIAL,
-        scope: {
-          officeId: evt.officeId,
-          weekStart: evt.weekStart
-        }
-      }
-      return nextState;
-    }
-
-    default:
-      console.error("Invalid event");
   }
 }
 
@@ -166,17 +120,6 @@ function transitionFromPlanning(
       return curState;
     }
 
-    case "SCOPE_CHANGED": {
-      const nextState: InitialState = {
-        status: machineStates.INITIAL,
-        scope: {
-          officeId: evt.officeId,
-          weekStart: evt.weekStart
-        }
-      }
-      return nextState;
-    }
-
     default:
       console.error("Invalid event");
   }
@@ -207,18 +150,6 @@ function transitionFromConfirming(
       return nextState;
     }
 
-    case "SCOPE_CHANGED": {
-      const nextState: InitialState = {
-        status: machineStates.INITIAL,
-        scope: {
-          officeId: evt.officeId,
-          weekStart: evt.weekStart
-        }
-      }
-
-      return nextState;
-    }
-
     default:
       console.error("Invalid event");
   }
@@ -244,18 +175,6 @@ function transitionFromConfirmed(
         scope: curState.scope,
         confirmedDates: new Set(evt.selectedDates)
       }
-      return nextState;
-    }
-
-    case "SCOPE_CHANGED": {
-      const nextState: InitialState = {
-        status: machineStates.INITIAL,
-        scope: {
-          officeId: evt.officeId,
-          weekStart: evt.weekStart
-        }
-      }
-
       return nextState;
     }
 

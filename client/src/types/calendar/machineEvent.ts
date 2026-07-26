@@ -7,11 +7,6 @@ export type CalendarMachineEvent =
       selectedDates: readonly string[];
     }
   | {
-      type: "SCOPE_CHANGED";
-      officeId: number;
-      weekStart: string;
-    }
-  | {
       type: "DATE_SELECTED";
       date: string;
     }
