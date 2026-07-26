@@ -173,6 +173,13 @@ export function Calendar({
           isDefaultScheduleDay,
         });
 
+    const isAttending = !currentlyAttending
+
+    dispatchCalendarEvent({
+      type: isAttending ? "DATE_SELECTED" : "DATE_DESELECTED",
+      date: key
+    })
+
     onPlanningToggle(key, !currentlyAttending);
   }
 
