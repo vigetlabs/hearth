@@ -22,6 +22,10 @@ import {
   resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
 import { useCalendarMachine } from "@/util/calendar/MachineProvider";
+import { getCapabilitiesFor } from "@/util/calendar/machineCapabilities";
+import type { CalendarMachineCapabilities } from "@/types/calendar/machineCapabilities";
+import { isDateEditableState } from "@/util/calendar/machineGuards";
+import { selectedDatesForMachine } from "@/util/calendar/stateSelectors";
 
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
@@ -66,6 +70,12 @@ export function Calendar({
   externalOfficeEmojisByDate,
 }: CalendarProps) {
   const myName = userDisplayName(user);
+
+  const { state: machineState, dispatch: machineDispatch } = useCalendarMachine();
+
+  const capabilities: CalendarMachineCapabilities = getCapabilitiesFor(machineState);
+
+  const machineSelectedDates = selectedDatesForMachine(machineState);
 
   function getDayData(key: string): RosterUser[] {
     const rosterUsers = schedule[key] ?? EMPTY_DAY;
@@ -136,51 +146,34 @@ export function Calendar({
   }
 
   function toggleMine(key: string): void {
-    if (!myName || locked || !isPlanningConnected) {
+    if (
+      !myName ||
+      !isPlanningConnected ||
+      !capabilities.canChangeDates ||
+      currentUserExternalVisitsByDate.has(key) ||
+      !isDateEditableState(machineState)
+    ) {
       return;
     }
 
-    if (currentUserExternalVisitsByDate.has(key)) {
+    const currentlyAttending = machineSelectedDates.has(key);
+
+    if (currentlyAttending) {
+      machineDispatch({
+        type: "DATE_DESELECTED",
+        date: key
+      });
+
+      onPlanningToggle(key, false);
       return;
     }
 
-    const baseDay = schedule[key] ?? EMPTY_DAY;
-
-    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
-      day: baseDay,
-      userId: user.id,
+    machineDispatch({
+      type: "DATE_SELECTED",
+      date: key
     });
 
-    const isEditing = editingUserIds.has(user.id);
-
-    if (hasConfirmedVisit && !isEditing) {
-      return;
-    }
-
-    const planningOverrideState = planningOverrideStateForUser(
-      planningByDate[key],
-      user.id,
-    );
-
-    const currentlyAttending = isEditing
-      ? resolveEditingAttendance({
-          hasConfirmedVisit,
-          planningOverrideState,
-        })
-      : resolveAttendance({
-          hasConfirmedVisit,
-          planningOverrideState,
-          isDefaultScheduleDay,
-        });
-
-    const isAttending = !currentlyAttending
-
-    dispatchCalendarEvent({
-      type: isAttending ? "DATE_SELECTED" : "DATE_DESELECTED",
-      date: key
-    })
-
-    onPlanningToggle(key, !currentlyAttending);
+    onPlanningToggle(key, true);
   }
 
   const attendance = Object.fromEntries(
@@ -237,12 +230,7 @@ export function Calendar({
   // the darker header would make it look cluttered.
   const isRemote = office.name.toLowerCase() === "remote";
 
-  const {
-    state: calendarMachineState,
-    dispatch: dispatchCalendarEvent
-  } = useCalendarMachine();
-
-  console.log("Machine state: ", calendarMachineState);
+  console.log("Machine state: ", machineState);
 
   if (isRemote) {
     return (

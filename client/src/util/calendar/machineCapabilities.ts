@@ -1,7 +1,7 @@
 import type { CalendarMachineCapabilities } from "@/types/calendar/machineCapabilities";
 import { machineStates, type CalendarMachineState, type CalendarMachineStatus } from "@/types/calendar/machineState";
 
-export function capabilitiesFor(
+export function getCapabilitiesFor(
   curState: CalendarMachineState
 ): CalendarMachineCapabilities {
   return capabilitiesByStatus[curState.status];
