@@ -1,5 +1,5 @@
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
-import { useCalendarScope } from "@/hooks/useCalendarScope";
+import { useCalendarScope } from "@/hooks/useCalendarScopeContext";
 import type { Office } from "@/types/api/offices";
 
 export default function CalendarOfficeHeader() {
