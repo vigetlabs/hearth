@@ -1,5 +1,5 @@
 import { CalendarDataContext } from "./CalendarDataContext";
-import type { CalendarData } from "@/hooks/useCalendarData";
+import type { CalendarData } from "@/hooks/data/useCalendarData";
 
 interface CalendarDataProviderProps {
   value: CalendarData;

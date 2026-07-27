@@ -1,7 +1,7 @@
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
-import { useCalendarToolbar } from "@/hooks/useCalendarToolbar";
 import type { CalendarToolbarViewModel } from "@/util/calendar/viewModel/toolbarBuilder";
+import { useCalendarToolbar } from "@/hooks/data/useCalendarToolbar";
 
 const arrowButton =
   "flex h-7 w-7 items-center justify-center rounded-full text-fg transition-colors hover:bg-surface-subtle";

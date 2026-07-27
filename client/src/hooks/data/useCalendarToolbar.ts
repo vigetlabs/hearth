@@ -2,8 +2,9 @@ import {
   buildCalendarToolbarViewModel,
   type CalendarToolbarViewModel,
 } from "@/util/calendar/viewModel/toolbarBuilder";
-import { useCalendarScope } from "./useCalendarScopeContext";
 import { addDays } from "@/util/dates/date";
+
+import { useCalendarScope } from "../contexts/useCalendarScopeContext";
 
 export interface UseCalendarToolbarResult {
   viewModel: CalendarToolbarViewModel;
