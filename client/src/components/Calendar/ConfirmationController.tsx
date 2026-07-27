@@ -1,19 +1,20 @@
-import type { ReactNode } from "react";
-import { Link } from "react-router";
+import { useMemo } from "react";
 
 import PencilIcon from "@/components/icons/PencilIcon";
 
 import type { CalendarData } from "@/hooks/useCalendarData";
-import { machineStates } from "@/types/calendar/machineState";
 import { useCalendarScope } from "@/util/calendar/CalendarScopeProvider";
 import { getCapabilitiesFor } from "@/util/calendar/machineCapabilities";
 import { useCalendarMachine } from "@/util/calendar/MachineProvider";
+import { machineStates } from "@/types/calendar/machineState";
 
 interface ConfirmationControllerProps {
   data: CalendarData;
+  isPlanningConnected: boolean;
+  isAttendanceConnected: boolean;
 }
 
-interface OtherOfficeSummary {
+interface ExternalOfficeSummary {
   id: number;
   name: string;
   dateKeys: string[];
@@ -22,26 +23,46 @@ interface OtherOfficeSummary {
 const darkPillButton =
   "flex h-11 items-center gap-2 rounded-full bg-strong px-5 text-sm font-bold text-fg-inverse transition-colors hover:bg-strong-hover disabled:cursor-not-allowed disabled:opacity-60";
 
-const confirmButton =
-  `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
+const confirmButton = `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
 
-const unlockButton =
-  `ml-auto ${darkPillButton} bg-[#6f281d]! hover:bg-fg!`;
+const unlockButton = `ml-auto ${darkPillButton} bg-[#6f281d]! hover:bg-fg!`;
 
+function capitalizeOfficeName(name: string): string {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
 
-const weekdayFormat = new Intl.DateTimeFormat(undefined, {
-  weekday: "short",
-});
+function confirmedElsewhereText(
+  summaries: ExternalOfficeSummary[],
+): string {
+  const officeDescriptions = summaries.map((summary) => {
+    const dateCount = summary.dateKeys.length;
 
-const officeListFormat = new Intl.ListFormat(undefined, {
-  style: "long",
-  type: "conjunction",
-});
+    return `${dateCount} ${
+      dateCount === 1 ? "day" : "days"
+    } at ${capitalizeOfficeName(summary.name)}`;
+  });
+
+  if (officeDescriptions.length === 1) {
+    return `You are also confirmed for ${officeDescriptions[0]}.`;
+  }
+
+  const lastDescription = officeDescriptions.at(-1);
+  const precedingDescriptions = officeDescriptions.slice(0, -1);
+
+  return `You are also confirmed for ${precedingDescriptions.join(
+    ", ",
+  )}, and ${lastDescription}.`;
+}
 
 export default function ConfirmationController({
   data,
+  isPlanningConnected,
+  isAttendanceConnected,
 }: ConfirmationControllerProps) {
-  const { offices, activeOffice } = useCalendarScope();
+  const {
+    offices,
+    activeOffice,
+  } = useCalendarScope();
 
   const {
     state: machineState,
@@ -50,35 +71,75 @@ export default function ConfirmationController({
 
   const capabilities = getCapabilitiesFor(machineState);
 
+  const externalOfficeSummaries = useMemo(() => {
+    const summariesByOfficeId = new Map<
+      number,
+      ExternalOfficeSummary
+    >();
+
+    for (const visit of data.currentUserVisits) {
+      if (visit.office_id === activeOffice.id) {
+        continue;
+      }
+
+      const office = offices.find(
+        (candidate) => candidate.id === visit.office_id,
+      );
+
+      if (!office) {
+        continue;
+      }
+
+      const existingSummary = summariesByOfficeId.get(office.id);
+
+      if (existingSummary) {
+        existingSummary.dateKeys.push(visit.visit_date);
+        continue;
+      }
+
+      summariesByOfficeId.set(office.id, {
+        id: office.id,
+        name: office.name,
+        dateKeys: [visit.visit_date],
+      });
+    }
+
+    return [...summariesByOfficeId.values()];
+  }, [
+    activeOffice.id,
+    data.currentUserVisits,
+    offices,
+  ]);
+
   const isConfirmed =
-    machineState.status === machineStates.CONFIRMED;
+    machineState.status === machineStates.CONFIRMED
+
+  const isPlanning =
+    machineState.status === machineStates.PLANNING
 
   const isConfirming =
-    machineState.status === machineStates.CONFIRMING;
+    machineState.status === machineStates.CONFIRMING
 
-  const officesById = new Map(
-    offices.map((office) => [office.id, office]),
-  );
+  const isCalendarLocked =
+    isConfirmed && !isPlanning;
 
-  const externalOfficeSummaries =
-    buildExternalOfficeSummaries({
-      currentUserVisits: data.currentUserVisits,
-      activeOfficeId: activeOffice.id,
-      officesById,
-    });
-
-  const hasExternalVisits =
-    externalOfficeSummaries.length > 0;
-
-  function requestConfirmation(): void {
+  function handleEditClick(): void {
     machineDispatch({
-      type: "CONFIRM_REQUESTED",
+      type: "EDIT_REQUESTED",
     });
   }
 
-  function requestEditing(): void {
+  function handleSubmitClick(): void {
+    if (isPlanning) {
+      machineDispatch({
+        type: "SAVE_EDITS_REQUESTED",
+      });
+
+      return;
+    }
+
     machineDispatch({
-      type: "EDIT_REQUESTED",
+      type: "CONFIRM_REQUESTED",
     });
   }
 
@@ -86,34 +147,36 @@ export default function ConfirmationController({
     <>
       <p className="text-sm text-fg">
         <span className="font-bold text-fg">
-          {isConfirmed
-            ? hasExternalVisits
+          {isCalendarLocked
+            ? externalOfficeSummaries.length >= 1
               ? `Confirmed for ${capitalizeOfficeName(
                   activeOffice.name,
                 )} ✓`
               : "Confirmed ✓"
-            : hasExternalVisits
+            : externalOfficeSummaries.length >= 1
               ? `Planning for ${capitalizeOfficeName(
                   activeOffice.name,
                 )}.`
               : "Planning."}
         </span>{" "}
-        {hasExternalVisits
-          ? confirmedElsewhereText(
-              externalOfficeSummaries,
-            )
-          : isConfirmed
+
+        {externalOfficeSummaries.length >= 1
+          ? confirmedElsewhereText(externalOfficeSummaries)
+          : isCalendarLocked
             ? "Edit Week to make changes."
             : "Select your days, then confirm."}
       </p>
 
-      {isConfirmed ? (
+      {capabilities.canStartEditing ? (
         <button
           type="button"
           data-tour="confirm-week"
-          onClick={requestEditing}
+          onClick={handleEditClick}
+          disabled={
+            !isAttendanceConnected ||
+            !isPlanningConnected
+          }
           className={unlockButton}
-          disabled={!capabilities.canStartEditing}
         >
           Edit Week
           <PencilIcon className="h-3.5 w-3.5" />
@@ -122,152 +185,23 @@ export default function ConfirmationController({
         <button
           type="button"
           data-tour="confirm-week"
-          onClick={requestConfirmation}
-          disabled={!capabilities.canConfirm}
+          onClick={handleSubmitClick}
+          disabled={
+            !capabilities.canConfirm ||
+            isConfirming ||
+            !isPlanningConnected
+          }
           className={confirmButton}
         >
           {isConfirming
             ? "Confirming..."
-            : "Confirm Week"}
+            : isPlanning
+              ? "Saving..."
+              : isPlanning
+                ? "Save Week"
+                : "Confirm Week"}
         </button>
       )}
-    </>
-  );
-}
-
-interface BuildExternalOfficeSummariesOptions {
-  currentUserVisits: CalendarData["currentUserVisits"];
-  activeOfficeId: number;
-  officesById: Map<
-    number,
-    ReturnType<typeof useCalendarScope>["offices"][number]
-  >;
-}
-
-function buildExternalOfficeSummaries({
-  currentUserVisits,
-  activeOfficeId,
-  officesById,
-}: BuildExternalOfficeSummariesOptions): OtherOfficeSummary[] {
-  const summariesByOfficeId = new Map<
-    number,
-    OtherOfficeSummary
-  >();
-
-  for (const visit of currentUserVisits) {
-    if (visit.office_id === activeOfficeId) {
-      continue;
-    }
-
-    const office = officesById.get(visit.office_id);
-
-    if (!office) {
-      continue;
-    }
-
-    const existingSummary =
-      summariesByOfficeId.get(office.id);
-
-    if (existingSummary) {
-      existingSummary.dateKeys.push(
-        visit.visit_date,
-      );
-      continue;
-    }
-
-    summariesByOfficeId.set(office.id, {
-      id: office.id,
-      name: office.name,
-      dateKeys: [visit.visit_date],
-    });
-  }
-
-  return Array.from(
-    summariesByOfficeId.values(),
-  ).map((summary) => ({
-    ...summary,
-    dateKeys: summary.dateKeys.toSorted(),
-  }));
-}
-
-function capitalizeOfficeName(
-  name: string,
-): string {
-  return name.replace(/\b\w/g, (character) =>
-    character.toUpperCase(),
-  );
-}
-
-function parseDateKey(dateKey: string): Date {
-  const [year, month, day] = dateKey
-    .split("-")
-    .map(Number);
-
-  return new Date(year, month - 1, day);
-}
-
-function officeLink(
-  office: OtherOfficeSummary,
-): ReactNode {
-  return (
-    <Link
-      key={office.id}
-      to={`/calendar?office=${office.id}`}
-      className="text-strong underline"
-    >
-      {capitalizeOfficeName(office.name)}
-    </Link>
-  );
-}
-
-function confirmedElsewhereText(
-  offices: OtherOfficeSummary[],
-): ReactNode {
-  if (offices.length === 1) {
-    const office = offices[0];
-
-    const days = office.dateKeys
-      .map((dateKey) =>
-        weekdayFormat.format(
-          parseDateKey(dateKey),
-        ),
-      )
-      .join(", ");
-
-    return (
-      <>
-        You&apos;re at {officeLink(office)}{" "}
-        {days} 🔒
-      </>
-    );
-  }
-
-  let officeIndex = 0;
-
-  const officeNameNodes = officeListFormat
-    .formatToParts(
-      offices.map((office) =>
-        capitalizeOfficeName(office.name),
-      ),
-    )
-    .map((part, partIndex) => {
-      if (part.type === "element") {
-        const office = offices[officeIndex++];
-
-        return officeLink(office);
-      }
-
-      return (
-        <span key={`separator-${partIndex}`}>
-          {part.value}
-        </span>
-      );
-    });
-
-  return (
-    <>
-      You&apos;re at {officeNameNodes} this
-      week 🔒
     </>
   );
 }

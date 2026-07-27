@@ -10,7 +10,6 @@ export default function CalendarMachineBoundary() {
   const {
     user,
     activeOffice,
-    focusedWeekStart,
     focusedWeekStartKey
   } = useCalendarScope();
 
