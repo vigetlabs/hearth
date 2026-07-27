@@ -40,7 +40,13 @@ export default function CalendarPage() {
 
   return (
     <CalendarScopeProvider value={scope}>
-      <CalendarWorkspace />
+      <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
+        />
+        <CalendarWorkspace />
+      </div>
     </CalendarScopeProvider>
   );
 }
