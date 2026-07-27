@@ -12,6 +12,7 @@ import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations
 import type { WeekSchedule } from "@/types/calendar/calendar";
 import type { CalendarMachineBootstrap } from "@/types/calendar/machineEvent";
 
+import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
 import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";

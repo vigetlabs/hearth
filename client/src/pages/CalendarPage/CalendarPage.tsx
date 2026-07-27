@@ -1,10 +1,11 @@
 import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/useCalendarWeekSelection";
-import CalendarPageContent from "@/components/Calendar/CalendarPageContent";
-
-import type { ResolvedOfficeSelection } from "@/types/calendar/hooks";
+import type { CalendarScope } from "@/types/calendar/scope";
+import { CalendarScopeProvider } from "@/util/calendar/CalendarScopeProvider";
+import CalendarMachineBoundary from "@/components/Calendar/CalendarMachineBoundary";
 
 
 export default function CalendarPage() {
@@ -28,12 +29,20 @@ export default function CalendarPage() {
     return <div>No office is available</div>;
   }
 
+  const scope: CalendarScope = {
+    user,
+    offices: officeSelection.offices,
+    activeOffice: officeSelection.activeOffice,
+    focusedWeekStart: weekSelection.weekStart,
+    focusedWeekStartKey: weekSelection.weekStartKey,
+    changeOffice: officeSelection.changeOffice,
+    changeWeek: weekSelection.changeWeek
+  }
+
   return (
-    <CalendarPageContent
-      user={user}
-      officeSelection={officeSelection as ResolvedOfficeSelection}
-      weekSelection={weekSelection}
-    />
+    <CalendarScopeProvider value={scope}>
+      <CalendarMachineBoundary />
+    </CalendarScopeProvider>
   );
 }
 
