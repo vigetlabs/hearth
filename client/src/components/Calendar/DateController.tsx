@@ -1,45 +1,63 @@
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import { addDays } from "@/util/dates/date";
 
-interface DateControllerProps {
-  startingWeekStartFocus: string;
-  weekStartFocus: Date;
-  weekStartFocusDateKey: string;
-  onChangeFocusedWeek: (nexWeekStart: Date) => void;
-  weekDates: readonly Date[];
-}
+import { useCalendarScope } from "@/util/calendar/CalendarScopeProvider";
+import { addDays, startOfWeek } from "@/util/dates/date";
+import { generateDateKey } from "@/util/dates/date";
 
-export default function DateController({
-  startingWeekStartFocus,
-  weekStartFocus,
-  weekStartFocusDateKey,
-  onChangeFocusedWeek,
-  weekDates
-}: DateControllerProps) {
-  function goPrevWeek(): void {
-    onChangeFocusedWeek(addDays(weekStartFocus, -7))
+const arrowButton =
+  "flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-surface-subtle";
+
+const todayButton =
+  "rounded-full px-3 py-2 text-sm font-bold text-fg-subtle transition-colors hover:bg-surface-subtle hover:text-fg";
+
+const rangeFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+export default function DateController() {
+  const {
+    focusedWeekStart,
+    focusedWeekStartKey,
+    changeWeek,
+  } = useCalendarScope();
+
+  const focusedWeekEnd = addDays(
+    focusedWeekStart,
+    4,
+  );
+
+  const rangeLabel = `${rangeFormatter.format(
+    focusedWeekStart,
+  )} – ${rangeFormatter.format(
+    focusedWeekEnd,
+  )}, ${focusedWeekEnd.getFullYear()}`;
+
+  const currentWeekStartKey = generateDateKey(
+    startOfWeek(new Date()),
+  );
+
+  const isCurrentWeek =
+    focusedWeekStartKey === currentWeekStartKey;
+
+  function goPreviousWeek(): void {
+    changeWeek(addDays(focusedWeekStart, -7));
   }
+
   function goNextWeek(): void {
-    onChangeFocusedWeek(addDays(weekStartFocus, 7))
+    changeWeek(addDays(focusedWeekStart, 7));
   }
+
   function goToday(): void {
-    onChangeFocusedWeek(new Date())
+    changeWeek(new Date());
   }
-
-  const isCurrentWeek = weekStartFocusDateKey === startingWeekStartFocus;
-
-  const rangeLabel = `${rangeFormat.format(
-    weekDates[0],
-  )} - ${rangeFormat.format(
-    weekDates[WEEKDAYS_PER_WEEK - 1],
-  )}, ${weekDates[WEEKDAYS_PER_WEEK - 1].getFullYear()}`;
 
   return (
-    <div className="flex items-center gap-3">
+    <>
       <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
         <button
           type="button"
-          onClick={goPrevWeek}
+          onClick={goPreviousWeek}
           className={arrowButton}
           aria-label="Previous week"
         >
@@ -69,21 +87,6 @@ export default function DateController({
           Jump to today
         </button>
       )}
-    </div>
+    </>
   );
 }
-
-const WEEKDAYS_PER_WEEK = 5;
-
-const rangeFormat = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-});
-
-const arrowButton =
-  "flex h-8 w-8 items-center justify-center text-fg-subtle transition-colors hover:text-fg";
-
-const pillButton =
-  "inline-flex h-11 items-center rounded-full border-2 border-line bg-surface px-5 text-sm text-fg transition-colors hover:bg-surface-sunken";
-
-const todayButton = `${pillButton} font-bold`;
