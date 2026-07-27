@@ -44,6 +44,41 @@ function formatSchedule(days: ScheduleDay[]): string {
     .join('\n')
 }
 
+type ActionElements = Extract<KnownBlock, { type: 'actions' }>['elements']
+
+// The row of buttons shared by the weekly prompt and the nudge. "See who's in"
+// stays leftmost in both states (the "look before you decide" step). Once
+// confirmed the Confirm button drops away; Edit always stays so plans can change.
+function scheduleActions(recordId: string, confirmed: boolean): ActionElements {
+  const viewButton: ActionElements[number] = {
+    type: 'button',
+    text: { type: 'plain_text', text: '👀 See who’s in', emoji: true },
+    action_id: VIEW_CALENDAR,
+    url: `${config.webAppUrl}/calendar`,
+  }
+
+  const editButton: ActionElements[number] = {
+    type: 'button',
+    text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
+    action_id: EDIT_SCHEDULE,
+    value: recordId,
+  }
+
+  if (confirmed) return [viewButton, editButton]
+
+  return [
+    viewButton,
+    {
+      type: 'button',
+      text: { type: 'plain_text', text: 'Confirm', emoji: true },
+      action_id: CONFIRM_SCHEDULE,
+      style: 'primary',
+      value: recordId,
+    },
+    editButton,
+  ]
+}
+
 // Renders the weekly DM for a given week. Defaults to defaultWeek() so callers
 // without a stored schedule (e.g. the first send) still work; the interactivity
 // endpoint passes the user's saved week to re-render the message in place.
@@ -57,47 +92,6 @@ export function buildPrompt(
 } {
   const days = nextWeekSchedule(week)
   const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
-
-  type ActionElements = Extract<KnownBlock, { type: 'actions' }>['elements']
-
-  // A url button opening the team calendar. Kept first (leftmost) so it reads as
-  // the "look before you decide" step and holds a stable spot when Confirm drops
-  // away on confirm. Present in both states — seeing who's in is useful either way.
-  const viewButton: ActionElements[number] = {
-    type: 'button',
-    text: { type: 'plain_text', text: '👀 See who’s in', emoji: true },
-    action_id: VIEW_CALENDAR,
-    url: `${config.webAppUrl}/calendar`,
-  }
-
-  // Once confirmed, the Confirm button drops away (it's done) and a small
-  // context line acknowledges it in place; Edit stays so plans can still change.
-  const actionElements: ActionElements = confirmed
-    ? [
-        viewButton,
-        {
-          type: 'button',
-          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
-          action_id: EDIT_SCHEDULE,
-          value: recordId,
-        },
-      ]
-    : [
-        viewButton,
-        {
-          type: 'button',
-          text: { type: 'plain_text', text: 'Confirm', emoji: true },
-          action_id: CONFIRM_SCHEDULE,
-          style: 'primary',
-          value: recordId,
-        },
-        {
-          type: 'button',
-          text: { type: 'plain_text', text: 'Edit Schedule', emoji: true },
-          action_id: EDIT_SCHEDULE,
-          value: recordId,
-        },
-      ]
 
   const blocks: KnownBlock[] = [
     {
@@ -125,10 +119,12 @@ export function buildPrompt(
     },
     {
       type: 'actions',
-      elements: actionElements,
+      elements: scheduleActions(recordId, confirmed),
     },
   ]
 
+  // Once confirmed, a small context line acknowledges it in place (the Confirm
+  // button has already dropped out of the actions row above).
   if (confirmed) {
     blocks.push({
       type: 'context',
@@ -143,6 +139,58 @@ export function buildPrompt(
 
   return {
     text: `Your work locations for next week (${range})`,
+    blocks,
+  }
+}
+
+// Renders the follow-up nudge DM: a lighter poke for someone who hasn't confirmed
+// their schedule for next week yet. It shows the same days and the same
+// Confirm/Edit/See-who's-in actions as the weekly prompt (so it stays actionable
+// in place), but leads with a friendlier reminder header instead of the first-send
+// greeting. Nudges only go to the unconfirmed, so the actions are always the
+// unconfirmed set.
+export function buildNudge(
+  recordId: string,
+  week: WeekSchedule = defaultWeek(),
+): {
+  text: string
+  blocks: KnownBlock[]
+} {
+  const days = nextWeekSchedule(week)
+  const range = `${days[0]!.label} – ${days[days.length - 1]!.label}`
+
+  const blocks: KnownBlock[] = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:bell:  *Quick nudge — you haven't set your office days for next week yet.*`,
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: formatSchedule(days),
+      },
+    },
+    { type: 'divider' },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: '*It only takes a second.* \nConfirm the days above or edit them, and see who else is heading in.',
+      },
+    },
+    {
+      type: 'actions',
+      elements: scheduleActions(recordId, false),
+    },
+  ]
+
+  return {
+    text: `Reminder: confirm your office days for next week (${range})`,
     blocks,
   }
 }
