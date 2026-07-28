@@ -15,6 +15,18 @@ Devise.setup do |config|
     Rails.application.credentials.dig(:google, :google_client_secret),
     scope: "email, profile"
 
+  config.omniauth :openid_connect,
+    name: :slack,
+    scope: %i[openid email profile],
+    response_type: :code,
+    issuer: "https://slack.com",
+    discovery: true,
+    client_options: {
+      identifier: Rails.application.credentials.dig(:slack, :client_id),
+      secret: Rails.application.credentials.dig(:slack, :client_secret),
+      redirect_uri: "#{Rails.configuration.x.api_url}/users/auth/slack/callback"
+    }
+
   config.warden do |manager|
     manager.failure_app = ApiAuthenticationFailure
   end
