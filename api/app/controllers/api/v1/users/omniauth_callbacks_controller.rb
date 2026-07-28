@@ -5,7 +5,7 @@ class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksCon
     authenticate_with(GoogleSsoService)
   end
 
-  def slack
+  def openid_connect
     authenticate_with(SlackSsoService)
   end
 
@@ -24,7 +24,7 @@ class Api::V1::Users::OmniauthCallbacksController < Devise::OmniauthCallbacksCon
 
     redirect_to frontend_path(redirect_path_for(user)),
       allow_other_host: true
-  rescue StandardError => ewrror
+  rescue StandardError => error
     redirect_to frontend_path("/users/login?error=sso_failed"),
       allow_other_host: true
   end

@@ -15,7 +15,7 @@ class SlackSsoService
 
     identity = UserIdentity.find_by(
       provider: "slack",
-      provider_uid: "#{slack_team_id}:{slack_user_id}"
+      provider_uid: "#{slack_team_id}:#{slack_user_id}"
     )
 
     return identity.user if identity
@@ -24,11 +24,13 @@ class SlackSsoService
     
     UserIdentity.create!(
       user: user,
-      provider: auth.provider,
-      provider_uid: auth.uid,
+      provider: "slack",
+      provider_uid: "#{slack_team_id}:#{slack_user_id}",
       email: auth.info.email,
       name: "#{@first_name} #{@last_name}"
     )
+
+    user
   end
 
   private

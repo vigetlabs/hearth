@@ -16,15 +16,16 @@ Devise.setup do |config|
     scope: "email, profile"
 
   config.omniauth :openid_connect,
-    name: :slack,
+    name: :openid_connect,
     scope: %i[openid email profile],
     response_type: :code,
+    response_mode: :form_post,
     issuer: "https://slack.com",
     discovery: true,
     client_options: {
       identifier: Rails.application.credentials.dig(:slack, :client_id),
       secret: Rails.application.credentials.dig(:slack, :client_secret),
-      redirect_uri: "#{Rails.configuration.x.api_url}/users/auth/slack/callback"
+      redirect_uri: "#{Rails.configuration.x.api_url}/api/v1/users/auth/openid_connect/callback"
     }
 
   config.warden do |manager|

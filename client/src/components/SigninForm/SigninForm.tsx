@@ -1,4 +1,5 @@
 import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
+import SlackSsoButton from "../SlackSsoButton/SlackSsoButton";
 
 export default function SigninForm() {
   return (
@@ -18,6 +19,7 @@ export default function SigninForm() {
       </div>
 
       <GoogleSsoButton className="mt-12 w-auto rounded-full border-2 border-line bg-surface px-8 py-3.5 text-base font-bold shadow-card hover:border-line hover:bg-surface-sunken" />
+      <SlackSsoButton />
     </div>
   );
 }
