@@ -1,3 +1,5 @@
+name: hearth-dev
+
 services:
   db:
     image: postgres:16
