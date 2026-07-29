@@ -46,7 +46,7 @@ class SendSlackReminderJob < ApplicationJob
         .includes(:office)
         .where(
           user:,
-          visit_date: week_start..week_start.end_of_week(:friday)
+          visit_date: week_start..week_start.end_of_week(:sunday)
         )
         .order(:visit_date)
 
@@ -81,7 +81,7 @@ class SendSlackReminderJob < ApplicationJob
   def format_default_schedule(default_schedule, week_start:)
     return "No default schedule configured." unless default_schedule
 
-    dates = (week_start..week_start.end_of_week(:friday)).select do |date|
+    dates = (week_start..week_start.end_of_week(:sunday)).select do |date|
       default_schedule.public_send(date.strftime("%A").downcase)
     end
 
