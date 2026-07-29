@@ -12,6 +12,7 @@ Rails.application.configure do
   config.action_cable.allowed_request_origins = [ public_url ]
 
   config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # In the development environment your application's code is reloaded any time
   # it changes. This slows down response time but is perfect for development

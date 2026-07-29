@@ -17,7 +17,7 @@ class SlackClient
 
     attributes[:blocks] = blocks if blocks.present?
 
-    @client.chat.postMessage(**attributes)
+    @client.chat_postMessage(**attributes)
   end
 
   def slack_ids_by_email
