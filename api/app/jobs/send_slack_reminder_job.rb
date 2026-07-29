@@ -68,6 +68,32 @@ class SendSlackReminderJob < ApplicationJob
     MESSAGE
   end
 
+  def default_office_confirmed?(user:, week_start:)
+    AttendanceConfirmation.exists?(
+      user:,
+      office: user.office,
+      period_type: "week",
+      starts_on: week_start
+    )
+  end
+
+  def whole_week_confirmed_elsewhere?(user:, week_start:)
+    possible_dates = (week_start..week_start + 4.days).to_set
+
+    external_visit_dates =
+      Visit
+        .where(
+          user:,
+          visit_date: possible_dates
+        )
+        .where.not(office: user.office)
+        .distinct
+        .pluck(:visit_date)
+        .to_set
+
+    possible_dates.subset?(external_visit_dates)
+  end
+
   def format_visits(visits)
     return "No in-office dates selected." if visits.empty?
 
@@ -97,10 +123,14 @@ class SendSlackReminderJob < ApplicationJob
   end
 
   def attendance_confirmed?(user:, week_start:)
-    AttendanceConfirmation.exists?(
+    return true if default_office_confirmed?(
       user:,
-      period_type: :week,
-      starts_on: week_start
+      week_start:
+    )
+
+    whole_week_confirmed_elsewhere?(
+      user:,
+      week_start:
     )
   end
 end
