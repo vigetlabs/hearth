@@ -81,7 +81,7 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
       week_start.beginning_of_week(:monday)
 
     week_start_key = normalized_week_start.iso8601
-    week_dates = DateUtility.week_dates(normalized_week_start)
+    week_dates = Calendar::DateUtility.week_dates(normalized_week_start)
 
     editing_store =
       OfficeAttendanceEditingStore.new(
@@ -129,7 +129,7 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
   end
   def snapshot(data)
     week_start =
-      DateUtility.normalized_week_start(data["week_start"])
+      Calendar::DateUtility.normalized_week_start(data["week_start"])
 
     transmit_editing_snapshot(
       week_start: week_start.iso8601
@@ -141,13 +141,13 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
   end
   def start_editing(data)
     week_start = T.let(
-      DateUtility.normalized_week_start(data["week_start"]),
+      Calendar::DateUtility.normalized_week_start(data["week_start"]),
       Date
     )
 
     normalized_week_start = week_start.iso8601
 
-    week_dates = DateUtility.week_dates(week_start)
+    week_dates = Calendar::DateUtility.week_dates(week_start)
 
     confirmed_dates = confirmed_visit_dates(
       week_dates:
@@ -192,7 +192,7 @@ class OfficeAttendanceChannel < ApplicationCable::Channel
   end
   def heartbeat(data)
     week_start =
-      DateUtility.normalized_week_start(data["week_start"])
+      Calendar::DateUtility.normalized_week_start(data["week_start"])
 
     office_attendance_editing_store.heartbeat(
       week_start: week_start.iso8601,

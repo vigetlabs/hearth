@@ -25,14 +25,14 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(data: ApplicationCable::Types::ChannelData).void }
   def snapshot(data)
-    dates = DateUtility.validate_dates(data["dates"])
+    dates = Calendar::DateUtility.validate_dates(data["dates"])
 
     transmit_snapshot(dates:)
   end
 
   sig { params(data: ApplicationCable::Types::ChannelData).void }
   def select(data)
-    date = DateUtility.normalize_to_string(data["date"])
+    date = Calendar::DateUtility.normalize_to_string(data["date"])
     return unless date
 
     planning_store.select(
@@ -46,10 +46,10 @@ class OfficePlanningChannel < ApplicationCable::Channel
   sig { params(data: ApplicationCable::Types::ChannelData).void }
   def heartbeat(data)
     selected_dates =
-      DateUtility.validate_dates(data["selected_dates"])
+      Calendar::DateUtility.validate_dates(data["selected_dates"])
 
     deselected_dates =
-      DateUtility.validate_dates(data["deselected_dates"])
+      Calendar::DateUtility.validate_dates(data["deselected_dates"])
 
     planning_store.heartbeat(
       selected_dates:,
@@ -60,7 +60,7 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(data: ApplicationCable::Types::ChannelData).void }
   def deselect(data)
-    date = DateUtility.normalize_to_string(data["date"])
+    date = Calendar::DateUtility.normalize_to_string(data["date"])
     return unless date
 
     planning_store.deselect(
@@ -73,7 +73,7 @@ class OfficePlanningChannel < ApplicationCable::Channel
 
   sig { params(data: ApplicationCable::Types::ChannelData).void }
   def clear(data)
-    dates = DateUtility.validate_dates(data["dates"])
+    dates = Calendar::DateUtility.validate_dates(data["dates"])
 
     planning_store.clear(
       dates:,

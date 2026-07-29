@@ -162,7 +162,7 @@ class OfficePlanningStore
 
   sig { params(date: String, variation: String).returns(String) }
   def create_office_planning_key(date:, variation:)
-    normalized_date = DateUtility.normalize_to_string(date)
+    normalized_date = Calendar::DateUtility.normalize_to_string(date)
 
     raise ArgumentError, "Invalid date provided for Redis key" if normalized_date.nil?
 
