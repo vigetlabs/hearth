@@ -11,6 +11,8 @@ Rails.application.configure do
   config.hosts << URI.parse(public_url).host
   config.action_cable.allowed_request_origins = [ public_url ]
 
+  config.active_job.queue_adapter = :solid_queue
+
   # In the development environment your application's code is reloaded any time
   # it changes. This slows down response time but is perfect for development
   # since you don't have to restart the web server when you make code changes.
