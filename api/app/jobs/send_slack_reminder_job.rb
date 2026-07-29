@@ -5,7 +5,7 @@ class SendSlackReminderJob < ApplicationJob
     slack_client = SlackClient.new
     slack_ids_by_email = slack_client.slack_ids_by_email
 
-    week_start = Date.current.beginning_of_week(:monday)
+    week_start = Date.current.next_week
 
     Office.find_each do |office|
       users_to_notify(office:, week_start:).find_each do |user|
