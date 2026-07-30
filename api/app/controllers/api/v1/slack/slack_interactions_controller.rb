@@ -28,6 +28,9 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
     week_range = week_start..(week_start + 4.days)
     office = user.office
 
+    message_ts = payload.dig("message", "ts")
+    channel_id = payload.dig("channel", "id")
+
     visits = user.visits
       .includes(:office)
       .where(visit_date: week_range)
@@ -45,7 +48,9 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
       week_start:,
       office:,
       selected_dates:,
-      external_visits:
+      external_visits:,
+      channel_id:,
+      message_ts:
     ).call
 
     slack_client.views_open(
@@ -66,14 +71,31 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
     week_start = Date.iso8601(metadata.fetch("week_start"))
     user = User.find(metadata.fetch("user_id"))
     office = Office.find(metadata.fetch("office_id"))
+
+    channel_id = metadata.fetch("channel_id")
+    message_ts = metadata.fetch("message_ts")
+
     selected_dates = selected_dates_from(view)
 
-    ConfirmWeekService.new(
+    confirm_result = ConfirmWeekService.new(
       user:,
       office:,
       week_start:,
       selected_dates:
     ).call
+
+    msg = Slack::ReminderMsgBuilder.new(
+      user:,
+      week_start:,
+      confirmed: true
+    ).call
+
+    slack_client.update_message(
+      channel: channel_id,
+      ts: message_ts,
+      text: msg.fetch(:text),
+      blocks: msg.fetch(:blocks)
+    )
   end
 
   def slack_client

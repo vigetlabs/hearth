@@ -43,6 +43,18 @@ class SlackClient
     )
   end
 
+  def update_message(channel:, ts:, text:, blocks: nil)
+    attributes = {
+      channel:,
+      ts:,
+      text:
+    }
+
+    attributes[:blocks] = blocks if blocks.present?
+
+    @client.chat_update(**attributes)
+  end
+
   private
 
   def workspace_users

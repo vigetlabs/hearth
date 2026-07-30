@@ -5,7 +5,9 @@ module Slack
       week_start:,
       office:,
       selected_dates:,
-      external_visits:
+      external_visits:,
+      channel_id:,
+      message_ts:
     )
       @user_id = user_id
       @week_start = normalize_date(week_start)
@@ -14,6 +16,8 @@ module Slack
       @external_visits = external_visits.transform_keys do |date|
         normalize_date(date)
       end
+      @channel_id = channel_id
+      @message_ts = message_ts
     end
 
     def call
@@ -38,7 +42,9 @@ module Slack
       :week_start,
       :office,
       :selected_dates,
-      :external_visits
+      :external_visits,
+      :channel_id,
+      :message_ts
     )
 
     def introduction_block
@@ -99,7 +105,9 @@ module Slack
       {
         user_id:,
         week_start: week_start.iso8601,
-        office_id: office.id
+        office_id: office.id,
+        channel_id: channel_id,
+        message_ts: message_ts
       }
     end
 
