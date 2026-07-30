@@ -68,6 +68,7 @@ export function DayCell({
       <DayRoster
         date={date}
         officeId={officeId}
+        officeName={currentOfficeName}
         rosterUsers={rosterUsers}
         myUserId={myUserId}
         locked={locked}

@@ -6,10 +6,15 @@ import type {
   StatusMark,
   StatusVariant,
 } from "@/components/Calendar/StatusIcon";
+import DayRosterModal from "@/components/DayRosterModal/DayRosterModal";
+import type { RosterSectionKey } from "@/components/DayRosterModal/DayRosterModal";
 import NudgeIcon from "@/components/icons/NudgeIcon";
+import MoreAttendeesChip from "@/components/MoreAttendeesChip/MoreAttendeesChip";
 import type { RosterUser } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";
+import { fitRoster, untruncated } from "@/util/calendar/rosterFit";
 import { isFuture } from "@/util/dates/date";
+import { useMeasuredHeight } from "@/util/dom/useMeasuredHeight";
 import { cn } from "@/util/cn";
 
 // Nudge feature is built but hidden for now. Flip to true to re-enable the
@@ -22,6 +27,8 @@ interface DayRosterProps {
   /** Id of the office currently being viewed. Switching offices resets the tab
       back to "In Office". */
   officeId: number;
+  /** Name of the office currently being viewed. Titles the expanded modal. */
+  officeName: string;
   /** The full office roster with each person's status for this day. */
   rosterUsers: RosterUser[];
   myUserId: number;
@@ -38,6 +45,7 @@ type Tab = "in" | "out";
 export function DayRoster({
   date,
   officeId,
+  officeName,
   rosterUsers,
   myUserId,
   locked,
@@ -74,6 +82,23 @@ export function DayRoster({
   //     pick for this day.
   // Otherwise it stays wherever the user leaves it.
   const [tab, setTab] = useState<Tab>("in");
+
+  // Which in-office section is expanded into the modal, or null when closed.
+  // The day column can't show a long roster in full, so a truncated section
+  // offers a "+N more" chip that reopens it full size.
+  const [expandedSection, setExpandedSection] =
+    useState<RosterSectionKey | null>(null);
+
+  // The in-office sections share one fixed-height column: whichever asks for
+  // less room is satisfied first, and the other takes what's left. Until the
+  // column has been measured we render both lists in full — the measurement
+  // lands before paint, so nothing flashes.
+  const [inSectionsRef, availableHeight] = useMeasuredHeight<HTMLDivElement>();
+  const counts = { confirmed: confirmedInCount, planning: planningInCount };
+  const fit =
+    availableHeight === null
+      ? untruncated(counts)
+      : fitRoster(counts, availableHeight);
 
   const amInOffice = rosterUsers.some(
     (rosterUser) =>
@@ -125,11 +150,11 @@ export function DayRoster({
   return (
     <div
       data-tour="day-roster"
-      className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
+      className="flex min-h-0 flex-1 flex-col px-4 py-3"
     >
       <div
         role="tablist"
-        className="mx-auto mb-4 flex w-fit rounded-full bg-surface-muted p-1 text-xs font-bold"
+        className="mx-auto mb-4 flex w-fit shrink-0 rounded-full bg-surface-muted p-1 text-xs font-bold"
       >
         <TabButton
           active={tab === "in"}
@@ -148,46 +173,70 @@ export function DayRoster({
       </div>
 
       {tab === "in" ? (
-        confirmedInCount > 0 || planningInCount > 0 ? (
-          <div className="space-y-4">
-            {confirmed.length > 0 && (
-              <RosterSection title="Confirmed In" count={confirmedInCount}>
-                {confirmed.map((person) => (
-                  <RosterRow
-                    key={person.userId}
-                    person={person}
-                    myUserId={myUserId}
-                    mark="confirmed-yes"
-                    variant="solid"
-                    iconClassName="border-fg bg-fg"
-                  />
-                ))}
-              </RosterSection>
-            )}
-            {planning.length > 0 && (
-              <RosterSection
-                title="Planning to Come In"
-                count={planningInCount}
-              >
-                {planning.map((person) => (
-                  <RosterRow
-                    key={person.userId}
-                    person={person}
-                    myUserId={myUserId}
-                    mark="confirmed-yes"
-                    variant="outline"
-                    iconClassName="border-strong text-fg"
-                    nudgeable={canNudge}
-                  />
-                ))}
-              </RosterSection>
-            )}
-          </div>
-        ) : (
-          <EmptyState>No one's in the office yet.</EmptyState>
-        )
+        // Never scrolls: the sections are sized to the room this box has.
+        <div ref={inSectionsRef} className="min-h-0 flex-1 overflow-hidden">
+          {confirmedInCount > 0 || planningInCount > 0 ? (
+            <div className="space-y-4">
+              {confirmed.length > 0 && (
+                <RosterSection
+                  title="Confirmed In"
+                  count={confirmedInCount}
+                  footer={
+                    fit.confirmed.hidden > 0 && (
+                      <MoreAttendeesChip
+                        count={fit.confirmed.hidden}
+                        ariaLabel={`View all ${confirmedInCount} people confirmed in`}
+                        onClick={() => setExpandedSection("confirmed-in")}
+                      />
+                    )
+                  }
+                >
+                  {confirmed.slice(0, fit.confirmed.shown).map((person) => (
+                    <RosterRow
+                      key={person.userId}
+                      person={person}
+                      myUserId={myUserId}
+                      mark="confirmed-yes"
+                      variant="solid"
+                      iconClassName="border-fg bg-fg"
+                    />
+                  ))}
+                </RosterSection>
+              )}
+              {planning.length > 0 && (
+                <RosterSection
+                  title="Planning to Come In"
+                  count={planningInCount}
+                  footer={
+                    fit.planning.hidden > 0 && (
+                      <MoreAttendeesChip
+                        count={fit.planning.hidden}
+                        ariaLabel={`View all ${planningInCount} people planning to come in`}
+                        onClick={() => setExpandedSection("planning-in")}
+                      />
+                    )
+                  }
+                >
+                  {planning.slice(0, fit.planning.shown).map((person) => (
+                    <RosterRow
+                      key={person.userId}
+                      person={person}
+                      myUserId={myUserId}
+                      mark="confirmed-yes"
+                      variant="outline"
+                      iconClassName="border-strong text-fg"
+                      nudgeable={canNudge}
+                    />
+                  ))}
+                </RosterSection>
+              )}
+            </div>
+          ) : (
+            <EmptyState>No one's in the office yet.</EmptyState>
+          )}
+        </div>
       ) : confirmedOutCount > 0 || planningOutCount > 0 ? (
-        <div className="space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
           {confirmedOut.length > 0 && (
             <RosterSection title="Confirmed Out" count={confirmedOutCount}>
               {confirmedOut.map((person) => (
@@ -224,6 +273,17 @@ export function DayRoster({
         </div>
       ) : (
         <EmptyState>Everyone's in the office.</EmptyState>
+      )}
+
+      {expandedSection && (
+        <DayRosterModal
+          open
+          date={date}
+          officeName={officeName}
+          section={expandedSection}
+          rosterUsers={rosterUsers}
+          onClose={() => setExpandedSection(null)}
+        />
       )}
     </div>
   );
@@ -269,11 +329,14 @@ function RosterSection({
   count,
   children,
   titleClassName,
+  footer,
 }: {
   title: string;
   count: number;
   children: ReactNode;
   titleClassName?: string;
+  /** Rendered below the last name — the section's "View all" chip. */
+  footer?: ReactNode;
 }) {
   return (
     <div>
@@ -283,6 +346,7 @@ function RosterSection({
         {title} ({count})
       </h3>
       <ul>{children}</ul>
+      {footer && <div className="mt-1.5">{footer}</div>}
     </div>
   );
 }
@@ -316,7 +380,7 @@ function RosterRow({
       />
       <span className="flex min-w-0 flex-1 items-center gap-1">
         <span
-          className="min-w-0 truncate text-sm font-semibold text-fg"
+          className="min-w-0 truncate text-sm font-medium text-fg"
           title={person.name}
         >
           {person.name}
