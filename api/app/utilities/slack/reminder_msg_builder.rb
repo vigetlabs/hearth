@@ -96,10 +96,14 @@ module Slack
     end
 
     def edit_schedule_button
-      Slack::InteractionKit.url_button(
+      Slack::InteractionKit.modal_button(
         text: "Edit Schedule",
         action_id: "edit_schedule",
-          url: calendar_url
+        value: {
+          user_id: user.id,
+          week_start: week_start.iso8601
+        }.to_json,
+        style: "primary"
       )
     end
 

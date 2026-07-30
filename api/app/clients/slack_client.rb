@@ -36,6 +36,15 @@ class SlackClient
     lookup
   end
 
+  def views_open(trigger_id:, view:)
+    @client.views_open(
+      trigger_id:,
+      view: view.to_json
+    )
+  end
+
+  private
+
   def workspace_users
     members = []
     cursor = nil

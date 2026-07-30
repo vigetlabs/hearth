@@ -14,6 +14,20 @@ module Slack
       }
     end
 
+    def self.modal_button(text:, action_id:, value: nil, **attributes)
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: text,
+          emoji: true
+        },
+        action_id: action_id,
+        value:,
+        **attributes
+      }.compact
+    end
+
     def self.actions_section(block_id:, elements:)
       {
         type: "actions",
