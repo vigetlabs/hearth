@@ -8,7 +8,7 @@ class SlackClient
   def authentication_info
     @client.auth_test
   end
-  
+
   def post_message(channel:, text:, blocks: nil)
     attributes = {
       channel:,

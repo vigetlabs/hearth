@@ -71,11 +71,11 @@ module Slack
       element = {
         type: "checkboxes",
         action_id: "selected_date",
-        options: [option]
+        options: [ option ]
       }
 
       if selected_dates.include?(date)
-        element[:initial_options] = [option]
+        element[:initial_options] = [ option ]
       end
 
       {

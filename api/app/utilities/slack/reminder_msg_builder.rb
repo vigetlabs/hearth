@@ -90,6 +90,7 @@ module Slack
         text: "Confirm",
         action_id: "confirm_schedule",
         value: {
+          user_id: user.id,
           office_id: user.office_id,
           week_start: week_start.iso8601,
           selected_dates: selected_dates.map(&:iso8601)

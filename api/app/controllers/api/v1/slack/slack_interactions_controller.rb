@@ -19,8 +19,15 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
   def handle_block_actions(payload)
     action = payload.fetch("actions").first
 
-    return unless action.fetch("action_id") == "edit_schedule"
+    case action.fetch("action_id")
+    when "edit_schedule"
+      handle_edit_schedule(payload, action)
+    when "confirm_schedule"
+      handle_confirm_schedule(payload, action)
+    end
+  end
 
+  def handle_edit_schedule(payload, action)
     action_data = JSON.parse(action.fetch("value"))
 
     user = User.find(action_data.fetch("user_id"))
@@ -59,14 +66,55 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
     )
   end
 
+  def handle_confirm_schedule(payload, action)
+    action_data = JSON.parse(action.fetch("value"))
+
+    user = User.find(action_data.fetch("user_id"))
+    office = Office.find(action_data.fetch("office_id"))
+    week_start = Date.iso8601(action_data.fetch("week_start"))
+
+    selected_dates = action_data
+      .fetch("selected_dates")
+      .map { |date| Date.iso8601(date) }
+
+    ConfirmWeekService.new(
+      user:,
+      office:,
+      week_start:,
+      selected_dates:
+    ).call
+
+    update_confirmed_message(
+      payload:,
+      user:,
+      week_start:
+    )
+  end
+
+  def update_confirmed_message(payload:, user:, week_start:)
+    channel_id = payload.dig("channel", "id")
+    message_ts = payload.dig("message", "ts")
+
+    message = Slack::ReminderMsgBuilder.new(
+      user:,
+      week_start:,
+      confirmed: true
+    ).call
+
+    slack_client.update_message(
+      channel: channel_id,
+      ts: message_ts,
+      text: message.fetch(:text),
+      blocks: message.fetch(:blocks)
+    )
+  end
+
   def handle_view_submission(payload)
     view = payload.fetch("view")
 
     return unless view.fetch("callback_id") == "edit_schedule_modal"
 
-    metadata = JSON.parse(
-      payload.dig("view", "private_metadata")
-    )
+    metadata = JSON.parse(view.fetch("private_metadata"))
 
     week_start = Date.iso8601(metadata.fetch("week_start"))
     user = User.find(metadata.fetch("user_id"))
@@ -77,14 +125,14 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
 
     selected_dates = selected_dates_from(view)
 
-    confirm_result = ConfirmWeekService.new(
+    ConfirmWeekService.new(
       user:,
       office:,
       week_start:,
       selected_dates:
     ).call
 
-    msg = Slack::ReminderMsgBuilder.new(
+    message = Slack::ReminderMsgBuilder.new(
       user:,
       week_start:,
       confirmed: true
@@ -93,8 +141,8 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
     slack_client.update_message(
       channel: channel_id,
       ts: message_ts,
-      text: msg.fetch(:text),
-      blocks: msg.fetch(:blocks)
+      text: message.fetch(:text),
+      blocks: message.fetch(:blocks)
     )
   end
 
@@ -103,22 +151,20 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
   end
 
   def selected_dates_from(view)
-  values = view
-    .fetch("state")
-    .fetch("values")
+    values = view
+      .fetch("state")
+      .fetch("values")
 
-  values.filter_map do |block_id, actions|
-    next unless block_id.start_with?("schedule_day_")
+    values.filter_map do |block_id, actions|
+      next unless block_id.start_with?("schedule_day_")
 
-    selected_options = actions
-      .fetch("selected_date")
-      .fetch("selected_options", [])
+      selected_value = actions
+        .fetch("selected_date")
+        .fetch("selected_options", [])
+        .first
+        &.fetch("value", nil)
 
-    selected_value = selected_options
-      .first
-      &.fetch("value", nil)
-
-    Date.iso8601(selected_value) if selected_value
+      Date.iso8601(selected_value) if selected_value
+    end
   end
-end
 end
