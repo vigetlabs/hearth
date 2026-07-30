@@ -19,13 +19,27 @@ module Slack
         type: "button",
         text: {
           type: "plain_text",
-          text: text,
+          text:,
           emoji: true
         },
-        action_id: action_id,
+        action_id:,
         value:,
         **attributes
       }.compact
+    end
+
+    def self.action_button(text:, action_id:, value:, **attributes)
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text:,
+          emoji: true
+        },
+        action_id:,
+        value:,
+        **attributes
+      }
     end
 
     def self.actions_section(block_id:, elements:)

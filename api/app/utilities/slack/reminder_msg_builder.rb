@@ -58,7 +58,7 @@ module Slack
     def unconfirmed_blocks
       [
         Slack::BlockKit.header_block(
-          ":wave: *#{user.first_name}, make sure to confirm your schedule for next week!* #{(formatted_week_range)}"
+          ":wave: *#{user.first_name}, make sure to confirm your schedule for next week!* _(#{formatted_week_range})_"
         ),
         Slack::BlockKit.divider_block,
         Slack::BlockKit.schedule_block(format_week_schedule),
@@ -87,10 +87,14 @@ module Slack
     end
 
     def confirm_schedule_button
-      Slack::InteractionKit.url_button(
+      Slack::InteractionKit.action_button(
         text: "Confirm",
         action_id: "confirm_schedule",
-        url: calendar_url,
+        value: {
+          office_id: user.office_id,
+          week_start: week_start.iso8601,
+          selected_dates: selected_dates.map(&:iso8601)
+        }.to_json,
         style: "primary"
       )
     end
@@ -129,6 +133,14 @@ module Slack
           )
           .order(:visit_date)
     end
+
+    def selected_dates
+      @selected_dates ||=
+        visits
+          .select { |visit| visit.office_id == user.office_id }
+          .map(&:visit_date)
+    end
+
 
     def possible_dates
       @possible_dates ||= (week_start..week_start + 4.days).to_a
