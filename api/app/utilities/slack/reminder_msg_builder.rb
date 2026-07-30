@@ -7,7 +7,7 @@ module Slack
     end
 
     def call
-      if @confirmed
+      if confirmed
         confirmed_message
       else
         unconfirmed_message
@@ -16,14 +16,13 @@ module Slack
 
     private
 
-    attr_reader :user, :week_start
+    attr_reader :user, :week_start, :confirmed
 
     def confirmed_message
       {
         text: "#{user.first_name}, your schedule is confirmed for next week.",
         blocks: confirmed_blocks
       }
-
     end
 
     def unconfirmed_message
@@ -68,11 +67,11 @@ module Slack
           description: "See who else is heading in that week, then confirm or edit your days."
         ),
         Slack::InteractionKit.actions_section(
-          block_id:action_block_id("unconfirmed"),
+          block_id: action_block_id("unconfirmed"),
           elements: [
             view_calendar_button,
             confirm_schedule_button,
-            edit_schedule_button,
+            edit_schedule_button
           ]
         )
       ]
@@ -114,14 +113,15 @@ module Slack
     def format_week_schedule
       Slack::WeekScheduleFormatter.new(
         dates: possible_dates,
-        visits:
+        visits:,
+        selected_dates:,
+        default_office: user.office
       ).call
     end
 
     def action_block_id(status)
       "schedule_actions_#{status}_#{user.id}_#{week_start}"
     end
-
 
     def visits
       @visits ||=
@@ -135,12 +135,41 @@ module Slack
     end
 
     def selected_dates
-      @selected_dates ||=
-        visits
-          .select { |visit| visit.office_id == user.office_id }
-          .map(&:visit_date)
+      @selected_dates ||= if confirmed
+        confirmed_selected_dates
+      else
+        proposed_selected_dates
+      end
     end
 
+    def confirmed_selected_dates
+      visits
+        .select { |visit| visit.office_id == user.office_id }
+        .map(&:visit_date)
+    end
+
+    def proposed_selected_dates
+      possible_dates.select do |date|
+        visit = visits_by_date[date]
+
+        if visit
+          visit.office_id == user.office_id
+        else
+          default_schedule_day?(date)
+        end
+      end
+    end
+
+    def default_schedule_day?(date)
+      schedule = user.default_schedule
+      return false unless schedule
+
+      schedule.public_send(date.strftime("%A").downcase)
+    end
+
+    def visits_by_date
+      @visits_by_date ||= visits.index_by(&:visit_date)
+    end
 
     def possible_dates
       @possible_dates ||= (week_start..week_start + 4.days).to_a
