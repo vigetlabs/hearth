@@ -55,17 +55,48 @@ class Api::V1::Slack::SlackInteractionsController < ApplicationController
   end
 
   def handle_view_submission(payload)
-    return unless payload.dig("view", "callback_id") == "edit_schedule_modal"
+    view = payload.fetch("view")
+
+    return unless view.fetch("callback_id") == "edit_schedule_modal"
 
     metadata = JSON.parse(
       payload.dig("view", "private_metadata")
     )
 
-    slack_user_id = metadata.fetch("slack_user_id")
-    week_start = metadata.fetch("week_start")
+    week_start = Date.iso8601(metadata.fetch("week_start"))
+    user = User.find(metadata.fetch("user_id"))
+    office = Office.find(metadata.fetch("office_id"))
+    selected_dates = selected_dates_from(view)
+
+    ConfirmWeekService.new(
+      user:,
+      office:,
+      week_start:,
+      selected_dates:
+    ).call
   end
 
   def slack_client
     @slack_client ||= SlackClient.new
   end
+
+  def selected_dates_from(view)
+  values = view
+    .fetch("state")
+    .fetch("values")
+
+  values.filter_map do |block_id, actions|
+    next unless block_id.start_with?("schedule_day_")
+
+    selected_options = actions
+      .fetch("selected_date")
+      .fetch("selected_options", [])
+
+    selected_value = selected_options
+      .first
+      &.fetch("value", nil)
+
+    Date.iso8601(selected_value) if selected_value
+  end
+end
 end

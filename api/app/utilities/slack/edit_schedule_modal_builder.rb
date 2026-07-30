@@ -26,9 +26,8 @@ module Slack
         close: plain_text("Cancel"),
         blocks: [
           introduction_block,
-          schedule_input_block,
-          *external_visit_blocks
-        ].compact
+          *schedule_day_blocks
+        ]
       }
     end
 
@@ -43,28 +42,55 @@ module Slack
     )
 
     def introduction_block
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "Which days are you in the #{office.emoji} *#{office.name.titleize}* office next week?"
-        }
-      }
+      Slack::BlockKit.header_block(
+        "Which days are you in the #{office.emoji} *#{office.name.titleize}* office next week?"
+      )
     end
 
-    def schedule_input_block
-      return if date_options.empty?
+    def schedule_day_blocks
+      weekdays.map do |date|
+        external_visit = external_visits[date]
+
+        if external_visit
+          external_visit_block(date, external_visit)
+        else
+          editable_date_block(date)
+        end
+      end
+    end
+
+    def editable_date_block(date)
+      option = date_option(date)
+
+      element = {
+        type: "checkboxes",
+        action_id: "selected_date",
+        options: [option]
+      }
+
+      if selected_dates.include?(date)
+        element[:initial_options] = [option]
+      end
 
       {
         type: "input",
-        block_id: "schedule_days",
+        block_id: date_block_id(date),
         optional: true,
-        label: plain_text("In office?"),
-        element: {
-          type: "checkboxes",
-          action_id: "selected_dates",
-          options: date_options,
-          initial_options: initial_date_options
+        label: plain_text(format_date(date)),
+        element:
+      }
+    end
+
+    def external_visit_block(date, visit)
+      {
+        type: "section",
+        block_id: external_visit_block_id(date),
+        text: {
+          type: "mrkdwn",
+          text: <<~TEXT.strip
+            *#{format_date(date)}*
+            :lock: Scheduled at #{visit.office.emoji} *#{visit.office.name.titleize}*
+          TEXT
         }
       }
     end
@@ -77,47 +103,19 @@ module Slack
       }
     end
 
-    def date_options
-      editable_weekdays.map { |date| date_option(date) }
-    end
-
-    def initial_date_options
-      date_options.select do |option|
-        selected_dates.any? do |date|
-          date.iso8601 == option.fetch(:value)
-        end
-      end
-    end
-
-    def editable_weekdays
-      weekdays.reject do |date|
-        external_visits.key?(date)
-      end
-    end
-
-    def external_visit_blocks
-      weekdays.filter_map do |date|
-        visit = external_visits[date]
-        next unless visit
-
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: <<~TEXT.strip
-              :lock: *#{format_date(date)}*
-              Already scheduled at #{visit.office.emoji} *#{visit.office.name.titleize}*
-            TEXT
-          }
-        }
-      end
-    end
-
     def date_option(date)
       {
-        text: plain_text(format_date(date)),
+        text: plain_text("In office"),
         value: date.iso8601
       }
+    end
+
+    def date_block_id(date)
+      "schedule_day_#{date.iso8601}"
+    end
+
+    def external_visit_block_id(date)
+      "external_visit_#{date.iso8601}"
     end
 
     def format_date(date)
@@ -125,7 +123,9 @@ module Slack
     end
 
     def weekdays
-      (0..4).map { |offset| week_start + offset.days }
+      (0..4).map do |offset|
+        week_start + offset.days
+      end
     end
 
     def plain_text(text)

@@ -36,7 +36,7 @@ module Slack
     def confirmed_blocks
       [
         Slack::BlockKit.header_block(
-          ":white_check_mark: Here’s your confirmed office schedule for next week!"
+          ":white_check_mark: *Here’s your confirmed office schedule for next week!*"
         ),
         Slack::BlockKit.divider_block,
         Slack::BlockKit.schedule_block(format_week_schedule),
@@ -58,7 +58,7 @@ module Slack
     def unconfirmed_blocks
       [
         Slack::BlockKit.header_block(
-          ":wave: #{user.first_name}, make sure to confirm your schedule for next week!"
+          ":wave: *#{user.first_name}, make sure to confirm your schedule for next week!*"
         ),
         Slack::BlockKit.divider_block,
         Slack::BlockKit.schedule_block(format_week_schedule),

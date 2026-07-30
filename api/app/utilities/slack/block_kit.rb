@@ -5,7 +5,7 @@ module Slack
         type: "section",
         text: {
           type: "mrkdwn",
-          text: "*#{text}*"
+          text: "#{text}"
         }
       }
     end
@@ -38,6 +38,5 @@ module Slack
         }
       }
     end
-
   end
 end
