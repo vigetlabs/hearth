@@ -92,14 +92,6 @@ dsl:
   {{DDC}} exec -T api sh -c \
     'bundle exec tapioca dsl && bundle exec srb tc'
 
-# Slack bot: weekly scheduler (long-running, Fridays 12:00 ET)
-slack-schedule:
-  cd services/slack-bot && node --env-file=.env src/scheduler.ts
+dev-slack-remind-now:
+  {{DDC}} exec -T api sh -c 'rails runner "SendSlackReminderJob.perform_now"'
 
-# Slack bot: send the weekly DM to the group right now
-slack-send-now:
-  cd services/slack-bot && node --env-file=.env src/send_now.ts
-
-# Slack bot: interactivity endpoint for the Edit Schedule button (needs ngrok)
-slack-server:
-  cd services/slack-bot && node --env-file=.env src/server.ts
