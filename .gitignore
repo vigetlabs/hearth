@@ -30,6 +30,8 @@ api/coverage/
 # Ignore master key for decrypting credentials and more.
 api/config/master.key
 
+api/config/credentials/*.key
+
 # === SERVICES ===
 
 # === CLIENT ===
