@@ -38,6 +38,8 @@ staging:
     <<: *default
     database: <%= ENV.fetch("QUEUE_DATABASE_NAME", "hearth_queue_staging") %>
     migrations_paths: db/queue_migrate
+    username: api
+    password: <%= ENV["API_DATABASE_PASSWORD"] %>
 
 production:
   primary:
@@ -52,3 +54,5 @@ production:
     <<: *default
     database: <%= ENV.fetch("QUEUE_DATABASE_NAME", "hearth_queue_staging") %>
     migrations_paths: db/queue_migrate
+    username: api
+    password: <%= ENV["API_DATABASE_PASSWORD"] %>
