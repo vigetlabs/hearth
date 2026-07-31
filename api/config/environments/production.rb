@@ -6,6 +6,8 @@ Rails.application.configure do
     config.x.frontend_url
   ]
   config.action_cable.url = "wss://api.hearth.vigetx.com/cable"
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -70,7 +72,6 @@ Rails.application.configure do
   # config.cache_store = :mem_cache_store
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter = :resque
   # config.active_job.queue_name_prefix = "api_production"
 
   # Disable caching for Action Mailer templates even if Action Controller

@@ -56,3 +56,7 @@ gem "omniauth-rails_csrf_protection", "~> 2.0"
 gem "shoulda-matchers", "~> 8.0"
 
 gem "redis", "~> 5.4"
+
+gem "slack-ruby-client", "~> 3.2"
+
+gem "solid_queue", "~> 1.5"

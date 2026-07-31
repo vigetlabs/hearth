@@ -3,8 +3,6 @@
 class OfficeAttendanceEditingStore
   extend T::Sig
 
-  include TtlCalculator
-
   STALE_AFTER = T.let(1.minutes, ActiveSupport::Duration)
 
   sig { params(office_id: Integer).void }
@@ -17,7 +15,7 @@ class OfficeAttendanceEditingStore
     ApplicationRedis.with do |redis|
       redis.zadd(
         create_office_attendance_editing_key(week_start:),
-        expires_at(STALE_AFTER),
+        Calendar::TtlCalculator.expires_at(STALE_AFTER),
         user_id
       )
     end
@@ -67,7 +65,7 @@ class OfficeAttendanceEditingStore
 
   sig { params(week_start: String).returns(String) }
   def create_office_attendance_editing_key(week_start:)
-    normalized_week_start = DateUtility.normalize_to_string(week_start)
+    normalized_week_start = Calendar::DateUtility.normalize_to_string(week_start)
     raise ArgumentError, "Invalid data provided for Redis key" if normalized_week_start.nil?
 
     [

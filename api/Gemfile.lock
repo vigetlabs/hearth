@@ -121,6 +121,8 @@ GEM
       zeitwerk (~> 2.6)
     erb (6.0.4)
     erubi (1.13.1)
+    et-orbi (1.4.0)
+      tzinfo
     factory_bot (6.6.0)
       activesupport (>= 6.1.0)
     factory_bot_rails (6.5.1)
@@ -130,8 +132,18 @@ GEM
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
+    faraday-mashify (1.0.2)
+      faraday (~> 2.0)
+      hashie
+    faraday-multipart (1.2.0)
+      multipart-post (~> 2.0)
     faraday-net_http (3.4.4)
       net-http (~> 0.5)
+    fugit (1.13.0)
+      et-orbi (~> 1.4)
+      raabro (~> 1.4)
+    gli (2.22.2)
+      ostruct
     globalid (1.4.0)
       activesupport (>= 6.1)
     hashie (5.1.0)
@@ -170,6 +182,7 @@ GEM
     msgpack (1.8.3)
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
+    multipart-post (2.4.1)
     net-http (0.9.1)
       uri (>= 0.11.1)
     net-imap (0.6.4.1)
@@ -245,6 +258,7 @@ GEM
     public_suffix (7.0.5)
     puma (8.0.2)
       nio4r (~> 2.0)
+    raabro (1.5.0)
     racc (1.8.1)
     rack (3.2.6)
     rack-cors (3.0.0)
@@ -387,9 +401,23 @@ GEM
     shoulda-matchers (8.0.1)
       activesupport (>= 7.2)
     simplecov (1.0.1)
+    slack-ruby-client (3.2.0)
+      faraday (>= 2.0.1)
+      faraday-mashify
+      faraday-multipart
+      gli
+      hashie
+      logger
     snaky_hash (2.0.6)
       hashie (>= 0.1.0, < 6)
       version_gem (>= 1.1.8, < 3)
+    solid_queue (1.5.1)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (>= 1.3.1)
+      fugit (~> 1.11)
+      railties (>= 7.1)
+      thor (>= 1.3.1)
     sorbet (0.6.13342)
       sorbet-static (= 0.6.13342)
     sorbet-runtime (0.6.13342)
@@ -477,6 +505,8 @@ DEPENDENCIES
   rubocop-rails-omakase
   shoulda-matchers (~> 8.0)
   simplecov
+  slack-ruby-client (~> 3.2)
+  solid_queue (~> 1.5)
   sorbet (~> 0.6.13342)
   sorbet-runtime (~> 0.6.13342)
   tapioca (~> 0.19.2)

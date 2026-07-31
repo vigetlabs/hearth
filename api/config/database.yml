@@ -14,6 +14,11 @@ development:
     <<: *default
     database: <%= ENV.fetch("DATABASE_NAME", "dev_db") %>
 
+  queue:
+    <<: *default
+    database: hearth_queue_development
+    migrations_paths: db/queue_migrate
+
 test:
   primary:
     <<: *default
@@ -29,6 +34,11 @@ staging:
     username: api
     password: <%= ENV["API_DATABASE_PASSWORD"] %>
 
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("QUEUE_DATABASE_NAME", "hearth_queue_staging") %>
+    migrations_paths: db/queue_migrate
+
 production:
   primary:
     <<: *default
@@ -37,3 +47,8 @@ production:
     port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
     username: api
     password: <%= ENV["API_DATABASE_PASSWORD"] %>
+
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("QUEUE_DATABASE_NAME", "hearth_queue_staging") %>
+    migrations_paths: db/queue_migrate
