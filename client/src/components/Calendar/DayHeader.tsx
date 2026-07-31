@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import FlameIcon from "@/components/icons/FlameIcon";
@@ -49,11 +51,21 @@ function PlanningHeader({
   externalOfficeEmoji,
   currentOfficeName,
 }: Omit<DayHeaderProps, "locked">) {
+  /** The pointer is still sitting on the header right after a click, so the
+      hover color would immediately paint over the freshly applied selected
+      color. Suppress hover until the pointer leaves and comes back, letting the
+      selection read clearly first. */
+  const [hoverSuppressed, setHoverSuppressed] = useState(false);
+
   return (
     <button
       type="button"
       data-tour="day-header"
-      onClick={onToggleMine}
+      onClick={() => {
+        setHoverSuppressed(true);
+        onToggleMine();
+      }}
+      onMouseLeave={() => setHoverSuppressed(false)}
       disabled={!myUserId || isConfirmedElsewhere}
       aria-pressed={isSelected}
       aria-label={
@@ -69,8 +81,8 @@ function PlanningHeader({
         isConfirmedElsewhere
           ? "bg-fill"
           : isSelected
-            ? "bg-selected hover:bg-surface-sunken"
-            : "bg-surface hover:bg-surface-sunken",
+            ? cn("bg-selected", !hoverSuppressed && "hover:bg-surface-sunken")
+            : cn("bg-surface", !hoverSuppressed && "hover:bg-surface-sunken"),
       )}
     >
       <span className="flex items-start justify-between">
