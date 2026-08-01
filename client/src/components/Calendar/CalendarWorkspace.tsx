@@ -4,8 +4,8 @@ import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
 import CalendarGrid from "./CalendarGrid";
 import CalendarOfficeHeader from "./CalendarOfficeHeader";
 import CalendarToolbar from "./CalendarToolbar";
-import CalendarContainer from "./CalendarContainer";
 import { CalendarDataProvider } from "@/contexts/CalendarDataProvider";
+import CalendarContainer from "./CalendarContainer";
 
 export default function CalendarWorkspace() {
   const scope = useCalendarScope();
