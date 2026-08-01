@@ -1,8 +1,8 @@
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
-import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
-import { useCalendarToolbar } from "@/hooks/data/useCalendarToolbar";
 import type { CalendarToolbarViewModel } from "@/util/calendar/viewModel/toolbarBuilder";
+import { useCalendarToolbar } from "@/hooks/data/useCalendarToolbar";
+import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 
 const arrowButton =
   "flex h-7 w-7 items-center justify-center rounded-full text-fg transition-colors hover:bg-surface-subtle";
@@ -97,9 +97,7 @@ function CalendarToolbarView({
       <div className="h-4 w-0.5 bg-line" />
 
       <p className="text-sm text-fg">
-        <span className="font-bold text-fg">
-          {viewModel.status.heading}
-        </span>{" "}
+        <span className="font-bold text-fg">{viewModel.status.heading}</span>{" "}
         {viewModel.status.description}
       </p>
 
@@ -107,8 +105,8 @@ function CalendarToolbarView({
         <button
           type="button"
           data-tour="confirm-week"
-          disabled={viewModel.primaryAction.disabled}
           onClick={onEditWeek}
+          disabled={viewModel.primaryAction.disabled}
           className={unlockButton}
         >
           {viewModel.primaryAction.label}
@@ -118,8 +116,8 @@ function CalendarToolbarView({
         <button
           type="button"
           data-tour="confirm-week"
-          disabled={viewModel.primaryAction.disabled}
           onClick={onConfirmWeek}
+          disabled={viewModel.primaryAction.disabled}
           className={confirmButton}
         >
           {viewModel.primaryAction.label}

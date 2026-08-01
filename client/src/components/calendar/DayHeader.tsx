@@ -1,4 +1,4 @@
-import { StatusIcon } from "@/components/Calendar/StatusIcon";
+import { StatusIcon } from "@/components/calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import FlameIcon from "@/components/icons/FlameIcon";
 import MinusIcon from "@/components/icons/MinusIcon";

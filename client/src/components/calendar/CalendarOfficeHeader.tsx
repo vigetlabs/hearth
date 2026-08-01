@@ -1,5 +1,5 @@
 import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
-import { useCalendarScope } from "@/hooks/useCalendarScopeContext";
+import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Office } from "@/types/api/offices";
 
 export default function CalendarOfficeHeader() {
@@ -8,7 +8,7 @@ export default function CalendarOfficeHeader() {
   function handleOfficeChange(office: Office) {
     scope.changeOffice(office);
   }
-  
+
   return (
     <div className="flex items-center gap-3 pb-5">
       <h2 className="flex items-center gap-2 text-2xl font-bold capitalize text-fg">

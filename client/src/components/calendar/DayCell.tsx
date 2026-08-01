@@ -1,5 +1,5 @@
-import { DayHeader } from "@/components/Calendar/DayHeader";
-import { DayRoster } from "@/components/Calendar/DayRoster";
+import { DayHeader } from "@/components/calendar/DayHeader";
+import { DayRoster } from "@/components/calendar/DayRoster";
 import type { RosterUser } from "@/types/calendar/calendar";
 
 interface DayCellProps {

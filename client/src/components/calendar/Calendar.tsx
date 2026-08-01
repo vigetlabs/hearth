@@ -1,4 +1,4 @@
-import { DayCell } from "@/components/Calendar/DayCell";
+import { DayCell } from "@/components/calendar/DayCell";
 
 import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";

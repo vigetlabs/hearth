@@ -1,5 +1,5 @@
 interface CalendarContainer {
-   children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export default function CalendarContainer({ children }: CalendarContainer) {
