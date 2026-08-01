@@ -1,10 +1,10 @@
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import { useCalendarData } from "@/hooks/data/useCalendarData";
+import CalendarOfficeHeader from "@/components/calendar/layout/CalendarOfficeHeader";
+import CalendarContainer from "@/components/calendar/layout/CalendarContainer";
+import CalendarGrid from "@/components/calendar/layout/CalendarGrid";
 import CalendarPageSkeleton from "@/components/feedback/CalendarSkeletonLoader";
-import CalendarGrid from "./layout/CalendarGrid";
-import CalendarOfficeHeader from "./layout/CalendarOfficeHeader";
-import CalendarToolbar from "./layout/CalendarToolbar";
-import CalendarContainer from "./layout/CalendarContainer";
+import CalendarToolbar from "@/components/calendar/layout/CalendarToolbar";
 import { CalendarDataProvider } from "@/contexts/CalendarDataProvider";
 
 export default function CalendarWorkspace() {
