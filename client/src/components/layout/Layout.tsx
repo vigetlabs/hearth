@@ -1,5 +1,5 @@
 import AppAuthProvider from "@/contexts/AppAuthProvider";
-import Header from "@/components/Header/Header";
+import Header from "./Header.tsx";
 import { useLocation } from "react-router";
 
 interface LayoutProps {
