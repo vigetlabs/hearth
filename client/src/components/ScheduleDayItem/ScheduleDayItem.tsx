@@ -1,4 +1,4 @@
-import PickerItem from "@/components/PickerItem/PickerItem";
+import PickerItem from "@/components/shared/PickerItem";
 import type { Weekday } from "@/types/schedule/schedule";
 import { cn } from "@/util/cn";
 
