@@ -15,15 +15,15 @@ export interface UseCalendarToolbarResult {
 }
 
 interface UseCalendarToolbarOptions {
-  activeOffice: Office,
-  focusedWeekStart: Date,
+  activeOffice: Office;
+  focusedWeekStart: Date;
   changeWeek: (nextWeek: Date) => void;
 }
 
 export function useCalendarToolbar({
   activeOffice,
   focusedWeekStart,
-  changeWeek
+  changeWeek,
 }: UseCalendarToolbarOptions): UseCalendarToolbarResult {
   /*
    * Temporary sources.
@@ -59,6 +59,7 @@ export function useCalendarToolbar({
   }
 
   function confirmWeek() {
+    console.log("HELLO FROM TOOLBAR CALLBACK");
     // Connect confirmation mutation later.
   }
 

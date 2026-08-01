@@ -30,7 +30,7 @@ export default function CalendarToolbar() {
   } = useCalendarToolbar({
     activeOffice: scope.activeOffice,
     focusedWeekStart: scope.focusedWeekStart,
-    changeWeek: scope.changeWeek
+    changeWeek: scope.changeWeek,
   });
 
   return (
@@ -47,7 +47,7 @@ export default function CalendarToolbar() {
 }
 
 interface CalendarToolbarViewProps {
-  viewModel: CalendarToolbarViewModel,
+  viewModel: CalendarToolbarViewModel;
   onPreviousWeek: () => void;
   onNextWeek: () => void;
   onToday: () => void;
@@ -63,7 +63,6 @@ function CalendarToolbarView({
   onEditWeek,
   onConfirmWeek,
 }: CalendarToolbarViewProps) {
-
   return (
     <div className="flex items-center gap-4 pb-5">
       <div className="flex items-center gap-1 rounded-full border-2 border-line bg-surface p-1">
@@ -94,7 +93,7 @@ function CalendarToolbarView({
       </div>
 
       {viewModel.showJumpToToday && (
-         <button type="button" onClick={onToday} className={todayButton}>
+        <button type="button" onClick={onToday} className={todayButton}>
           Jump to today
         </button>
       )}
@@ -102,10 +101,8 @@ function CalendarToolbarView({
       <div className="h-4 w-0.5 bg-line" />
 
       <p className="text-sm text-fg">
-         <span className="font-bold text-fg">
-           {viewModel.status.heading}
-         </span>{" "}
-           {viewModel.status.description}
+        <span className="font-bold text-fg">{viewModel.status.heading}</span>{" "}
+        {viewModel.status.description}
       </p>
 
       {viewModel.primaryAction.variation === "edit" ? (
