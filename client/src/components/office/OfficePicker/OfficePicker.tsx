@@ -10,7 +10,7 @@ import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMuta
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { cn } from "@/util/cn";
 import WordLogo from "@/components/Logo/WordLogo";
-import Loader from "@/components/Loader/Loader";
+import Loader from "@/components/feedback/Loader";
 import HeroLayer from "@/components/Hero/HeroLayer";
 import HeroPanel from "@/components/Hero/HeroPanel";
 import CornerGlow from "@/components/CornerGlow/CornerGlow";

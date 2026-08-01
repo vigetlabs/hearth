@@ -1,4 +1,4 @@
-import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
+import CalendarPageSkeleton from "@/components/feedback/CalendarSkeletonLoader";
 import CalendarWorkspace from "@/components/calendar/CalendarWorkspace";
 import { CalendarScopeProvider } from "@/contexts/CalendarScopeProvider";
 import type { CalendarScope } from "@/contexts/CalendarScopeContext";

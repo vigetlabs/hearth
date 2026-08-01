@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import ErrorScreen from "@/components/ErrorScreen/ErrorScreen";
+import ErrorScreen from "@/components/feedback/ErrorScreen";
 
 // Shown when a user lands on a route that doesn't exist (404). Not yet wired
 // into the router — see SandboxPage for a preview.

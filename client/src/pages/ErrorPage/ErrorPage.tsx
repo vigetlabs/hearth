@@ -1,4 +1,4 @@
-import ErrorScreen from "@/components/ErrorScreen/ErrorScreen";
+import ErrorScreen from "@/components/feedback/ErrorScreen";
 
 // Generic catch-all fallback for unexpected failures (a thrown render error,
 // a failed load, etc.) shown instead of the raw error text. Not yet wired into

@@ -1,6 +1,6 @@
 import { AppAuthContext } from "./AppAuthContext";
 import { useCurrentUserQuery } from "@/util/api/queries/userQueries";
-import Loader from "@/components/Loader/Loader";
+import Loader from "@/components/feedback/Loader";
 
 import type { User } from "@/types/api/users";
 
