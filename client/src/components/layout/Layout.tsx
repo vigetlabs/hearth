@@ -1,4 +1,4 @@
-import AuthProvider from "@/components/AuthProvider/AuthProvider";
+import AppAuthProvider from "@/contexts/AppAuthProvider";
 import Header from "@/components/Header/Header";
 import { useLocation } from "react-router";
 
@@ -13,11 +13,11 @@ export default function Layout({ children }: LayoutProps) {
   const showHeader = SHOW_HEADER_PATHS.includes(pathname);
 
   return (
-    <AuthProvider>
+    <AppAuthProvider>
       <div className="flex min-h-screen flex-col">
         {showHeader && <Header />}
         {children}
       </div>
-    </AuthProvider>
+    </AppAuthProvider>
   );
 }

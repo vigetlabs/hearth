@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useBlocker } from "react-router";
 
-import { useAuth } from "@/util/auth/useAuth";
+import { useAuth } from "@/hooks/contexts/useAuth";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
 import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";

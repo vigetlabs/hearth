@@ -1,14 +1,14 @@
-import { AppAuthContext } from "@/util/auth/appAuthContext";
+import { AppAuthContext } from "./AppAuthContext";
 import { useCurrentUserQuery } from "@/util/api/queries/userQueries";
 import Loader from "@/components/Loader/Loader";
 
 import type { User } from "@/types/api/users";
 
-interface AuthProviderProps {
+interface AppAuthProviderProps {
   children: React.ReactNode;
 }
 
-export default function AuthProvider({ children }: AuthProviderProps) {
+export default function AppAuthProvider({ children }: AppAuthProviderProps) {
   const currentUserQuery = useCurrentUserQuery();
 
   if (currentUserQuery.isPending) {

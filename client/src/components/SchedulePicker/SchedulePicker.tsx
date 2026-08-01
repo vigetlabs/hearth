@@ -15,7 +15,7 @@ import { createDefaultScheduleObjectPayload } from "@/util/api/functions/schedul
 import { useCreateDefaultScheduleMutation } from "@/util/api/mutations/schedules/createDefaultScheduleMutation";
 import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import type { User } from "@/types/api/users";
-import { useAuth } from "@/util/auth/useAuth";
+import { useAuth } from "@/hooks/contexts/useAuth";
 
 export default function SchedulePicker() {
   const location = useLocation();
