@@ -2,6 +2,7 @@ import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
 import PencilIcon from "@/components/icons/PencilIcon";
 import type { CalendarToolbarViewModel } from "@/util/calendar/viewModel/toolbarBuilder";
 import { useCalendarToolbar } from "@/hooks/data/useCalendarToolbar";
+import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 
 const arrowButton =
   "flex h-7 w-7 items-center justify-center rounded-full text-fg transition-colors hover:bg-surface-subtle";
@@ -17,6 +18,8 @@ const confirmButton = `ml-auto ${darkPillButton} bg-fill hover:bg-fill-hover`;
 const unlockButton = `ml-auto ${darkPillButton} bg-[#6f281d]! hover:bg-fg!`;
 
 export default function CalendarToolbar() {
+  const scope = useCalendarScope();
+
   const {
     viewModel,
     goToPreviousWeek,
@@ -24,7 +27,11 @@ export default function CalendarToolbar() {
     goToToday,
     confirmWeek,
     editWeek,
-  } = useCalendarToolbar();
+  } = useCalendarToolbar({
+    activeOffice: scope.activeOffice,
+    focusedWeekStart: scope.focusedWeekStart,
+    changeWeek: scope.changeWeek
+  });
 
   return (
     <CalendarToolbarView

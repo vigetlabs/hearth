@@ -1,25 +1,30 @@
+import type { Office } from "@/types/api/offices";
 import {
   buildCalendarToolbarViewModel,
   type CalendarToolbarViewModel,
 } from "@/util/calendar/viewModel/toolbarBuilder";
 import { addDays } from "@/util/dates/date";
 
-import { useCalendarScope } from "../contexts/useCalendarScopeContext";
-
 export interface UseCalendarToolbarResult {
   viewModel: CalendarToolbarViewModel;
-
   goToPreviousWeek: () => void;
   goToNextWeek: () => void;
   goToToday: () => void;
-
   confirmWeek: () => void;
   editWeek: () => void;
 }
 
-export function useCalendarToolbar(): UseCalendarToolbarResult {
-  const scope = useCalendarScope();
+interface UseCalendarToolbarOptions {
+  activeOffice: Office,
+  focusedWeekStart: Date,
+  changeWeek: (nextWeek: Date) => void;
+}
 
+export function useCalendarToolbar({
+  activeOffice,
+  focusedWeekStart,
+  changeWeek
+}: UseCalendarToolbarOptions): UseCalendarToolbarResult {
   /*
    * Temporary sources.
    */
@@ -30,8 +35,8 @@ export function useCalendarToolbar(): UseCalendarToolbarResult {
   const isAttendanceConnected = true;
 
   const viewModel = buildCalendarToolbarViewModel({
-    activeOffice: scope.activeOffice,
-    focusedWeekStart: scope.focusedWeekStart,
+    activeOffice: activeOffice,
+    focusedWeekStart: focusedWeekStart,
 
     isWeekConfirmed,
     isEditingWeek,
@@ -42,15 +47,15 @@ export function useCalendarToolbar(): UseCalendarToolbarResult {
   });
 
   function goToPreviousWeek() {
-    scope.changeWeek(addDays(scope.focusedWeekStart, -7));
+    changeWeek(addDays(focusedWeekStart, -7));
   }
 
   function goToNextWeek() {
-    scope.changeWeek(addDays(scope.focusedWeekStart, 7));
+    changeWeek(addDays(focusedWeekStart, 7));
   }
 
   function goToToday() {
-    scope.changeWeek(new Date());
+    changeWeek(new Date());
   }
 
   function confirmWeek() {
