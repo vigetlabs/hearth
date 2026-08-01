@@ -49,7 +49,6 @@ export default function CalendarToolbar() {
       onEditWeek={editWeek}
       onConfirmWeek={confirmWeek}
     />
-
   );
 }
 
@@ -109,10 +108,10 @@ function CalendarToolbarView({
         <span className="px-2 text-sm font-normal text-fg">
           {viewModel.rangeLabel}
         </span>
-        -        <span className="px-2 text-sm font-normal text-fg">{rangeLabel}</span>
-        +        <span className="px-2 text-sm font-normal text-fg">
-          +          {rangeLabel}
-          +        </span>
+-        <span className="px-2 text-sm font-normal text-fg">
+-          {rangeLabel}
+-        </span>
++        <span className="px-2 text-sm font-normal text-fg">{rangeLabel}</span>
         <button
           type="button"
           onClick={onNextWeek}
