@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-import { StatusIcon } from "@/components/calendar/extras/StatusIcon";
-import type {
-  StatusMark,
-  StatusVariant,
-} from "@/components/calendar/extras/StatusIcon";
+import { StatusIcon } from "@/components/icons/StatusIcon";
+import type { StatusMark, StatusVariant } from "@/components/icons/StatusIcon";
 import NudgeIcon from "@/components/icons/NudgeIcon";
 import type { RosterUser } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";

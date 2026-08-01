@@ -10,7 +10,7 @@ import {
   StatusIcon,
   type StatusMark,
   type StatusVariant,
-} from "@/components/calendar/extras/StatusIcon";
+} from "@/components/icons/StatusIcon";
 import type { Office } from "@/types/api/offices";
 
 import { useOfficePresence } from "@/util/cable/useOfficePresence";
