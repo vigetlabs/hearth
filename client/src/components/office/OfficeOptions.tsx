@@ -1,5 +1,5 @@
 import { RadioGroup } from "radix-ui";
-import OfficeItem from "../OfficeItem/OfficeItem";
+import OfficeItem from "./OfficeItem";
 import type { Office } from "@/types/api/offices";
 import { cn } from "@/util/cn";
 

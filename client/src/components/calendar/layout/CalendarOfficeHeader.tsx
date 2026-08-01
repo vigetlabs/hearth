@@ -1,4 +1,4 @@
-import OfficeSwitcher from "@/components/OfficeSwitcher/OfficeSwitcher";
+import OfficeSwitcher from "@/components/office/OfficeSwitcher";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Office } from "@/types/api/offices";
 

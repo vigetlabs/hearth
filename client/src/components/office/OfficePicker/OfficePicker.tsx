@@ -22,7 +22,7 @@ import {
 } from "./heroImage";
 
 import "./OfficePicker.css";
-import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
+import OfficeOptions from "@/components/office/OfficeOptions";
 
 export default function OfficePicker() {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>("");

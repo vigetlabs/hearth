@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RadioGroup } from "radix-ui";
 
 import Loader from "@/components/Loader/Loader";
-import OfficeItem from "@/components/OfficeItem/OfficeItem";
+import OfficeItem from "@/components/office/OfficeItem";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import ErrorPage from "@/pages/ErrorPage/ErrorPage";

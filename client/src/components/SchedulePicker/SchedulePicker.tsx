@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { heroImageFor } from "@/components/OfficePicker/heroImage";
+import { heroImageFor } from "@/components/office/OfficePicker/heroImage";
 import HeroLayer from "@/components/Hero/HeroLayer";
 import HeroPanel from "@/components/Hero/HeroPanel";
 import CornerGlow from "@/components/CornerGlow/CornerGlow";

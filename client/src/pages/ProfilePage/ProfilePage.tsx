@@ -4,7 +4,7 @@ import { Link, useBlocker } from "react-router";
 import { useAuth } from "@/hooks/contexts/useAuth";
 import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
-import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
+import OfficeOptions from "@/components/office/OfficeOptions";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
 import type { PatchUserRequest } from "@/types/api/users";

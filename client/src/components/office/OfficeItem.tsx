@@ -1,6 +1,6 @@
 import { RadioGroup } from "radix-ui";
 
-import PickerItem from "@/components/PickerItem/PickerItem";
+import PickerItem from "@/components/shared/PickerItem";
 import type { Office } from "@/types/api/offices";
 import { cn } from "@/util/cn";
 
