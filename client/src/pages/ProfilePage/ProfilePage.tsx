@@ -13,7 +13,7 @@ import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Schedule } from "@/types/api/schedules";
 import { WEEKDAYS } from "@/types/schedule/schedule";
-import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
+import ScheduleDayItem from "@/components/schedule/ScheduleDayItem";
 import { buildScheduleAttributes } from "@/util/api/functions/schedules";
 import { cn } from "@/util/cn";
 
