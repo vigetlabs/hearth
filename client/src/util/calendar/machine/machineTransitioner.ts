@@ -81,6 +81,17 @@ function transitionFromPlanning(
       }
       return nextState;
     }
+
+    case "DATE_DESELECTED": {
+      const draftDates = new Set(currentState.draftDates);
+      draftDates.delete(evt.date);
+
+      const nextState: PlanningState = {
+        ...currentState,
+        draftDates: draftDates
+      }
+      return nextState;
+    }
   }
 }
 

@@ -1,10 +1,6 @@
-export type CalendarMachineEvent =
-  | {
-      type: "WEEK_LOADED";
-      isConfirmed: boolean;
-      selectedDates: readonly string[];
-    }
-  | {
-      type: "DATE_SELECTED";
-      date: string;
-    }
+import type { calendarEvents } from "@/util/calendar/machine/calendarEvents";
+
+type CalendarEventGenerator = 
+  (typeof calendarEvents)[keyof typeof calendarEvents];
+
+export type CalendarMachineEvent = ReturnType<CalendarEventGenerator>;

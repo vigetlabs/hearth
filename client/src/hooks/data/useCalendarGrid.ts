@@ -20,6 +20,7 @@ import {
 } from "@/util/calendar/viewModel/gridBuilder";
 import { addDays, generateDateKey } from "@/util/dates/date";
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
+import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 
 export interface UseCalendarGridResult {
   viewModel: CalendarGridViewModel;
@@ -199,12 +200,18 @@ export function useCalendarGrid({
 
       if (currentlyAttending) {
         deselectDate(dateKey);
+        dispatch(
+          calendarEvents.dateDeselected(
+            dateKey
+          )
+        );
       } else {
         selectDate(dateKey);
-        dispatch({
-          type: "DATE_SELECTED",
-          date: dateKey
-        });
+        dispatch(
+          calendarEvents.dateSelected(
+            dateKey
+          )
+        );
       }
     },
     [
