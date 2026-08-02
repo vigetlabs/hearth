@@ -3,7 +3,7 @@ import { CalendarMachineProvider } from "@/contexts/CalendarMachineProvider";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { CalendarMachineBootstrap } from "@/types/calendar/machine/machineBootstrap";
 import { useAttendanceConfirmationsQuery } from "@/util/api/queries/attendanceConfirmationQueries";
-import { useVisitsQuery } from "@/util/api/queries/visitQueries";
+import { useCurrentVisitsQuery, useVisitsQuery } from "@/util/api/queries/visitQueries";
 
 
 interface CalendarMachineDataBoundaryProps {
@@ -20,10 +20,9 @@ export default function CalendarMachineDataBoundary({
     startsOn: scope.focusedWeekStartKey
   });
 
-  const visits = useVisitsQuery({
+  const visits = useCurrentVisitsQuery({
     date: scope.focusedWeekStartKey,
     view: "week",
-    office_id: scope.activeOffice.id
   })
 
   if (attendanceConfirmation.isLoading || visits.isLoading)  {
