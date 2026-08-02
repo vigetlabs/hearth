@@ -27,7 +27,7 @@ export interface ConfirmingState {
 export interface ConfirmedState {
   status: typeof machineStates.CONFIRMED;
   scope: CalendarMachineScope;
-  draftDates: ReadonlySet<string>;
+  confirmedDates: ReadonlySet<string>;
 }
 
 export type CalendarMachineState =

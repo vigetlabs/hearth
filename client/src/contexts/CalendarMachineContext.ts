@@ -7,5 +7,5 @@ interface CalendarMachineContext {
   dispatch: Dispatch<CalendarMachineEvent>
 }
 
-const CalendarMachineContext =
+export const CalendarMachineContext =
   createContext<CalendarMachineContext | null>(null);
