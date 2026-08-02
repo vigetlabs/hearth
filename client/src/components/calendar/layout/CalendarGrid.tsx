@@ -1,5 +1,6 @@
 import { DayCell } from "@/components/calendar/day/DayCell";
 import TodayMarker from "@/components/calendar/extras/TodayMarker";
+import { useCalendarMachineContext } from "@/hooks/contexts/useCalendarMachineContext";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import { useCalendarGrid } from "@/hooks/data/useCalendarGrid";
 import { WEEKDAYS_PER_WEEK } from "@/util/calendar/viewModel/gridBuilder";
@@ -11,8 +12,12 @@ const gridColumns = {
 
 export default function CalendarGrid() {
   const scope = useCalendarScope();
+  const { dispatch } = useCalendarMachineContext();
 
-  const { viewModel, toggleCurrentUser } = useCalendarGrid();
+  //@ TODO: PASS SCOPE INTO CALENDAR GRID HOOK FOR EXPLICIT (LIKE OTHERS)
+  const { viewModel, toggleCurrentUser } = useCalendarGrid({
+    dispatch
+  });
 
   if (scope.activeOffice.name.toLowerCase() === "remote") {
     return (

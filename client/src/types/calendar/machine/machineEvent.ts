@@ -4,3 +4,7 @@ export type CalendarMachineEvent =
       isConfirmed: boolean;
       selectedDates: readonly string[];
     }
+  | {
+      type: "DATE_SELECTED";
+      date: string;
+    }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type Dispatch } from "react";
 
 import { useCalendarDataContext } from "@/hooks/contexts/useCalendarDataContext";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
@@ -19,13 +19,20 @@ import {
   WEEKDAYS_PER_WEEK,
 } from "@/util/calendar/viewModel/gridBuilder";
 import { addDays, generateDateKey } from "@/util/dates/date";
+import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
 
 export interface UseCalendarGridResult {
   viewModel: CalendarGridViewModel;
   toggleCurrentUser: (dateKey: string) => void;
 }
 
-export function useCalendarGrid(): UseCalendarGridResult {
+interface UseCalendarGridOptions {
+  dispatch: Dispatch<CalendarMachineEvent>;
+}
+
+export function useCalendarGrid({
+  dispatch,
+}: UseCalendarGridOptions): UseCalendarGridResult {
   const scope = useCalendarScope();
   const data = useCalendarDataContext();
 
@@ -194,6 +201,10 @@ export function useCalendarGrid(): UseCalendarGridResult {
         deselectDate(dateKey);
       } else {
         selectDate(dateKey);
+        dispatch({
+          type: "DATE_SELECTED",
+          date: dateKey
+        });
       }
     },
     [

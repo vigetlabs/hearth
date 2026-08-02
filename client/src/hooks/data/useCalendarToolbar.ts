@@ -59,7 +59,6 @@ export function useCalendarToolbar({
   }
 
   function confirmWeek() {
-    console.log("HELLO FROM TOOLBAR CALLBACK");
     // Connect confirmation mutation later.
   }
 

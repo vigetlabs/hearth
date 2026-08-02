@@ -54,7 +54,7 @@ function transitionReduce(
 ): CalendarMachineState {
   switch (currentState.status) {
     case machineStates.PLANNING: {
-      return transitionFromConfirmed(currentState, evt)
+      return transitionFromPlanning(currentState, evt)
     }
     case machineStates.CONFIRMING: {
       return trasitionFromConfirming(currentState, evt)
@@ -73,7 +73,15 @@ function transitionFromPlanning(
   currentState: PlanningState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {
-  return currentState
+  switch (evt.type) {
+    case "DATE_SELECTED": {
+      const nextState: PlanningState = {
+        ...currentState,
+        draftDates: new Set(currentState.draftDates).add(evt.date)
+      }
+      return nextState;
+    }
+  }
 }
 
 function trasitionFromConfirming(

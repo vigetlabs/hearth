@@ -39,9 +39,11 @@ export default function CalendarMachineDataBoundary({
       activeOfficeId: scope.activeOffice.id,
       focusedWeekStartKey: scope.focusedWeekStartKey
     },
-    isConfirmed: attendanceConfirmation.data !== null,
+    isConfirmed: attendanceConfirmation.data.length > 0,
     selectedDates: visits.data.map((visit) => visit.visit_date)
   }
+
+  console.log(bootstrap);
 
   return (
     <CalendarMachineProvider bootstrap={bootstrap}>
