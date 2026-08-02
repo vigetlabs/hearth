@@ -1,1 +1,1 @@
-export { default } from "./CalendarSkeletonLoader.tsx"
+export { default } from "./CalendarSkeletonLoader.tsx";
