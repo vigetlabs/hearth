@@ -5,6 +5,7 @@ import type { CalendarScope } from "@/contexts/CalendarScopeContext";
 import { useAuth } from "@/hooks/contexts/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/selection/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/selection/useCalendarWeekSelection";
+import CalendarMachineDataBoundary from "@/components/calendar/machine/CalendarMachineDataBoundary";
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -40,13 +41,15 @@ export default function CalendarPage() {
 
   return (
     <CalendarScopeProvider value={scope}>
-      <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
-        />
-        <CalendarWorkspace />
-      </div>
+      <CalendarMachineDataBoundary>
+        <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
+          />
+          <CalendarWorkspace />
+        </div>
+      </CalendarMachineDataBoundary>
     </CalendarScopeProvider>
   );
 }
