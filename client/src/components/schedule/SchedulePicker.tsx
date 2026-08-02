@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { heroImageFor } from "@/components/office/OfficePicker/heroImage";
-import HeroLayer from "@/components/Hero/HeroLayer";
-import HeroPanel from "@/components/Hero/HeroPanel";
-import CornerGlow from "@/components/CornerGlow/CornerGlow";
+import HeroLayer from "@/components/landing/Hero/HeroLayer";
+import HeroPanel from "@/components/landing/Hero/HeroPanel";
+import CornerGlow from "@/components/decorative/CornerGlow";
 import ScheduleDayItem from "@/components/schedule/ScheduleDayItem";
 import type { CreateScheduleRequest } from "@/types/api/schedules";
 import type { Office } from "@/types/api/offices";

@@ -3,7 +3,7 @@ import { RadioGroup } from "radix-ui";
 
 import Loader from "@/components/feedback/Loader";
 import OfficeItem from "@/components/office/OfficeItem";
-import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 import {

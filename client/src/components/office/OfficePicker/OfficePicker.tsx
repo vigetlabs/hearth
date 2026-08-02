@@ -9,11 +9,11 @@ import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { cn } from "@/util/cn";
-import WordLogo from "@/components/Logo/WordLogo";
+import WordLogo from "@/components/landing/Logo/WordLogo";
 import Loader from "@/components/feedback/Loader";
-import HeroLayer from "@/components/Hero/HeroLayer";
-import HeroPanel from "@/components/Hero/HeroPanel";
-import CornerGlow from "@/components/CornerGlow/CornerGlow";
+import HeroLayer from "@/components/landing/Hero/HeroLayer";
+import HeroPanel from "@/components/landing/Hero/HeroPanel";
+import CornerGlow from "@/components/decorative/CornerGlow";
 
 import {
   DEFAULT_OFFICE_NAME,

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu } from "radix-ui";
 
 import ChevronDownIcon from "@/components/icons/ChevronDownIcon";
-import WordLogo from "@/components/Logo/WordLogo";
+import WordLogo from "@/components/landing/Logo/WordLogo";
 
 import { useAuth } from "@/hooks/contexts/useAuth";
 import { useLogoutUserMutation } from "@/util/api/mutations/users/deleteLogoutMutation";

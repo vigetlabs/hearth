@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useBlocker } from "react-router";
 
 import { useAuth } from "@/hooks/contexts/useAuth";
-import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
 import OfficeOptions from "@/components/office/OfficeOptions";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";

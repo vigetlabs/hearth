@@ -1,6 +1,6 @@
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import { useCalendarData } from "@/hooks/data/useCalendarData";
-import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
+import CalendarPageSkeleton from "@/components/feedback/CalendarSkeletonLoader";
 import CalendarGrid from "./layout/CalendarGrid";
 import CalendarOfficeHeader from "./layout/CalendarOfficeHeader";
 import CalendarToolbar from "./layout/CalendarToolbar";

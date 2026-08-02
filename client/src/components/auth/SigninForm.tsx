@@ -1,4 +1,4 @@
-import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
+import GoogleSsoButton from "@/components/auth/GoogleSsoButton";
 
 export default function SigninForm() {
   return (

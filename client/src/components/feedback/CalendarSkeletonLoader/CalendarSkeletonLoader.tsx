@@ -1,4 +1,4 @@
-import "@/pages/CalendarPage/CalendarPageSkeleton.css";
+import "./CalendarSkeletonLoader.css";
 
 const WEEKDAYS_PER_WEEK = 5;
 
