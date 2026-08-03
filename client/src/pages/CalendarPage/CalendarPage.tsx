@@ -5,7 +5,7 @@ import type { CalendarScope } from "@/contexts/CalendarScopeContext";
 import { useAuth } from "@/hooks/contexts/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/selection/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/selection/useCalendarWeekSelection";
-import CalendarMachineDataBoundary from "@/components/calendar/machine/CalendarMachineDataBoundary";
+import CalendarWorkspaceRoot from "@/components/calendar/layout/CalendarWorkspaceRoot";
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -41,7 +41,7 @@ export default function CalendarPage() {
 
   return (
     <CalendarScopeProvider value={scope}>
-      <CalendarMachineDataBoundary>
+      <CalendarWorkspaceRoot>
         <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
           <div
             aria-hidden="true"
@@ -49,7 +49,7 @@ export default function CalendarPage() {
           />
           <CalendarWorkspace />
         </div>
-      </CalendarMachineDataBoundary>
+      </CalendarWorkspaceRoot>
     </CalendarScopeProvider>
   );
 }
