@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/contexts/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/selection/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/selection/useCalendarWeekSelection";
 import CalendarWorkspaceRoot from "@/components/calendar/layout/CalendarWorkspaceRoot";
+import { getWeekDays } from "@/util/calendar/dates/calendarDayUtil";
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ export default function CalendarPage() {
     focusedWeekStartKey: weekSelection.weekStartKey,
     changeOffice: officeSelection.changeOffice,
     changeWeek: weekSelection.changeWeek,
+    weekDates: getWeekDays(weekSelection.weekStart)
   };
 
   return (

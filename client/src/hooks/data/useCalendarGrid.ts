@@ -16,9 +16,7 @@ import { buildWeekSchedule } from "@/util/calendar/schedule";
 import {
   buildCalendarGridViewModel,
   type CalendarGridViewModel,
-  WEEKDAYS_PER_WEEK,
 } from "@/util/calendar/viewModel/gridBuilder";
-import { addDays, generateDateKey } from "@/util/dates/date";
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 
@@ -37,18 +35,8 @@ export function useCalendarGrid({
   const scope = useCalendarScope();
   const data = useCalendarDataContext();
 
-  const weekDates = useMemo(
-    () =>
-      Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
-        addDays(scope.focusedWeekStart, index),
-      ),
-    [scope.focusedWeekStart],
-  );
-
-  const weekDateKeys = useMemo(
-    () => weekDates.map(generateDateKey),
-    [weekDates],
-  );
+  const weekDateKeys = scope.weekDates.map((day) => day.key);
+  const weekDates = scope.weekDates.map((day) => day.date);
 
   const confirmedUserIds = useMemo(
     () =>
