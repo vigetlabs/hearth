@@ -25,6 +25,17 @@ import {
 const WEEKDAYS_PER_WEEK = 5;
 const EMPTY_DAY: RosterUser[] = [];
 
+// Every header and roster draws its own 1px border, so the grid itself has none:
+// lines double to 2px wherever two of them meet and stay 1px on the outer edge.
+// The four outer corners round themselves so that edge still follows the grid's
+// rounded shape.
+const gridCornerRounding = [
+  "[&>*:first-child>:first-child]:rounded-tl-xl",
+  "[&>*:first-child>:last-child]:rounded-bl-xl",
+  "[&>*:last-child>:first-child]:rounded-tr-xl",
+  "[&>*:last-child>:last-child]:rounded-br-xl",
+].join(" ");
+
 // The "Most confirmed" hot spot is about the busiest day overall, so it counts
 // everyone confirmed in — this is intentionally independent of the visitor
 // badge, which counts only confirmed visitors from other offices.
@@ -252,7 +263,7 @@ export function Calendar({
       )}
 
       <div
-        className="grid min-h-0 flex-1 divide-x-2 divide-line overflow-hidden rounded-xl border-2 border-line"
+        className={`grid min-h-0 flex-1 overflow-hidden rounded-xl ${gridCornerRounding}`}
         style={{
           gridTemplateColumns: `repeat(${WEEKDAYS_PER_WEEK}, minmax(0, 1fr))`,
           gridTemplateRows: "1fr",

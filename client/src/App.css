@@ -65,6 +65,12 @@
   --color-line-strong: #d8cdbe; /* Border/Strong — input borders, tracks */
   --color-line-faint: #d8cdbe; /* dashed / decorative (Border/Strong) */
   --color-line-selected: #de8e6e; /* State/Selected border */
+  --color-border-strong: #d8cdbe; /* Border/Strong — outlines the gray "not in
+                                     office" day header once the week is
+                                     confirmed */
+  --color-confirmed-border: #6e2417; /* Brand/Confirmed border — outlines a day
+                                        header once that day is confirmed, for
+                                        this office or another */
 
   /* State — light "selected" fill (pairs with line-selected border) */
   --color-selected: #f6d8c7; /* State/Selected */

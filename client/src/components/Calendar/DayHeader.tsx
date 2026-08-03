@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { StatusIcon } from "@/components/Calendar/StatusIcon";
 import CheckIcon from "@/components/icons/CheckIcon";
 import FlameIcon from "@/components/icons/FlameIcon";
@@ -49,11 +51,21 @@ function PlanningHeader({
   externalOfficeEmoji,
   currentOfficeName,
 }: Omit<DayHeaderProps, "locked">) {
+  /** The pointer is still sitting on the header right after a click, so the
+      hover color would immediately paint over the freshly applied selected
+      color. Suppress hover until the pointer leaves and comes back, letting the
+      selection read clearly first. */
+  const [hoverSuppressed, setHoverSuppressed] = useState(false);
+
   return (
     <button
       type="button"
       data-tour="day-header"
-      onClick={onToggleMine}
+      onClick={() => {
+        setHoverSuppressed(true);
+        onToggleMine();
+      }}
+      onMouseLeave={() => setHoverSuppressed(false)}
       disabled={!myUserId || isConfirmedElsewhere}
       aria-pressed={isSelected}
       aria-label={
@@ -65,12 +77,13 @@ function PlanningHeader({
       }
       className={cn(
         headerBase,
-        "border-b border-line transition-colors disabled:cursor-not-allowed",
+        isConfirmedElsewhere ? headerBorderConfirmed : headerBorder,
+        "transition-colors disabled:cursor-not-allowed",
         isConfirmedElsewhere
           ? "bg-fill"
           : isSelected
-            ? "bg-selected hover:bg-surface-sunken"
-            : "bg-surface hover:bg-surface-sunken",
+            ? cn("bg-selected", !hoverSuppressed && "hover:bg-surface-sunken")
+            : cn("bg-surface", !hoverSuppressed && "hover:bg-surface-sunken"),
       )}
     >
       <span className="flex items-start justify-between">
@@ -132,12 +145,14 @@ function ConfirmedHeader({
       data-tour="day-header"
       className={cn(
         headerBase,
-        "border-b border-line",
+        isConfirmedElsewhere || isSelected
+          ? headerBorderConfirmed
+          : headerBorderStrong,
         isConfirmedElsewhere
           ? "bg-fill text-white"
           : isSelected
             ? "bg-strong text-fg-inverse"
-            : "bg-surface-strong text-fg",
+            : "bg-surface-muted text-fg-muted",
       )}
     >
       <span className="flex items-start justify-between">
@@ -148,14 +163,14 @@ function ConfirmedHeader({
               ? "text-white"
               : isSelected
                 ? ""
-                : "text-[#75685d]"
+                : "text-fg-muted"
           }
           dateNumClass={
             isConfirmedElsewhere
               ? "text-white/80"
               : isSelected
                 ? "text-fg-inverse-muted"
-                : "text-[#75685d]"
+                : "text-fg-muted"
           }
         />
 
@@ -167,7 +182,7 @@ function ConfirmedHeader({
               iconCircle,
               isSelected
                 ? "border-fg bg-fg text-white"
-                : "border-[#75685d] bg-transparent text-[#75685d]",
+                : "border-fg-muted bg-transparent text-fg-muted",
             )}
             aria-hidden="true"
           >
@@ -294,6 +309,41 @@ function BadgeStack({
 }
 
 const headerBase = "relative block w-full shrink-0 px-4 pb-3 pt-4 text-left";
+
+/** Each side of the header's 1px border is spelled out on its own line so it can
+    be restyled independently of the other three.
+
+    What a side is worth depends on where it lands in the grid. The bottom always
+    butts against the roster's own top border, and the left/right of every
+    interior column butt against the neighbouring header's — those pairs stack
+    into a single 2px line, so restyling one side there repaints only half its
+    thickness. On the grid's outer edge (every header's top, plus the left of the
+    first column and the right of the last) the side is the entire 1px line, so
+    restyling it changes the whole thing. */
+const headerBorder = [
+  "border-t border-t-line",
+  "border-r border-r-line",
+  "border-b border-b-line",
+  "border-l border-l-line",
+].join(" ");
+
+/** The same four sides in the deeper confirmed brown, used once the day is
+    confirmed — whether for the office being viewed or another one. */
+const headerBorderConfirmed = [
+  "border-t border-t-confirmed-border",
+  "border-r border-r-confirmed-border",
+  "border-b border-b-confirmed-border",
+  "border-l border-l-confirmed-border",
+].join(" ");
+
+/** The same four sides in Border/Strong, used only for the gray "not in office"
+    header once the week is confirmed. */
+const headerBorderStrong = [
+  "border-t border-t-border-strong",
+  "border-r border-r-border-strong",
+  "border-b border-b-border-strong",
+  "border-l border-l-border-strong",
+].join(" ");
 
 const iconCircle =
   "flex h-8 w-8 items-center justify-center rounded-full border-2";
