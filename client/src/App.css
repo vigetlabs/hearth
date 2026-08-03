@@ -51,6 +51,10 @@
   ); /* text/icons on the terracotta accent */
   --color-fg-inverse-muted: #f0dfce; /* muted text on the terracotta accent */
 
+  /* Footer — text on the deep brown marketing footer */
+  --color-footer-muted: #c7a894; /* tagline, link lists */
+  --color-footer-faint: #9e806e; /* column headings, legal line */
+
   /* Surfaces — backgrounds */
   --color-page: #f8f1e9; /* App background — pages, onboarding screens */
   --color-surface: var(

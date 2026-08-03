@@ -1,0 +1,187 @@
+/*
+  ============================================================================
+  Hero wordmark sizing (Home)
+
+  The giant "Hearth" watermark sits at the bottom of the hero, deliberately
+  cropped by the fold: a bit over half of it shows on first load and the rest
+  is revealed as the page scrolls. Driving both the mark's size and the hero's
+  height from one variable is what makes that ratio hold on every screen — the
+  hero is exactly one viewport plus the slice of the mark that hangs below it,
+  so the crop can't drift with the window size.
+
+  Width is what drives the size: the mark spans 92% of the viewport, running
+  wider than the decorative rules at 8%/92% and stopping just short of either
+  edge. The wordmark is ~4.15x as wide as it is tall (viewBox 477x115), so that
+  works out to a height of 92 / 4.15 = 22.2vw. The 48vh term is only a backstop
+  for short, wide windows, where a mark sized purely off the width would eat the
+  viewport. Keeping both here rather than as a `max-width` on the SVG means the
+  hero always knows the mark's real rendered height.
+  ============================================================================
+*/
+.signin-hero {
+  --wordmark-h: min(22.2vw, 48vh);
+  /* The portion left below the fold on first load — 45%, so slightly more than
+     half of the word reads as visible. */
+  --wordmark-hidden: calc(var(--wordmark-h) * 0.45);
+
+  /*
+    Where each decorative rule stops: the exact point it meets the top of the
+    letter it crosses. Measured off the wordmark path rather than eyeballed —
+    the four rules cross four different glyphs at four different heights.
+
+    Because the mark is sized off the viewport width (22.2vw, ~92.1vw across
+    once the 4.148 aspect ratio is applied) and centered, a rule at a fixed
+    percentage of the viewport always meets the same point of the same glyph,
+    whatever the window size. That makes these constants rather than something
+    to recompute on resize. Each is a fraction of the mark's height measured up
+    from its baseline edge, which is also the hero's bottom edge — so they drop
+    straight into `bottom`:
+
+      rule    viewBox x   glyph            ink top y (of viewBox 7 10 477 115)
+      8%       27.9       H, left stem      11.17
+      35%     167.8       e, right shoulder 45.69
+      65%     323.2       r, arm            41.18
+      92%     462.7       h, shoulder       41.08
+
+    The one case these don't hold for is a window wider than ~2.16:1, where
+    `--wordmark-h` falls back to the 48vh cap, the mark narrows, and the rules
+    start crossing the letters somewhere else.
+  */
+  --rule-stop-1: calc(var(--wordmark-h) * 0.9898);
+  --rule-stop-2: calc(var(--wordmark-h) * 0.6897);
+  --rule-stop-3: calc(var(--wordmark-h) * 0.7289);
+  --rule-stop-4: calc(var(--wordmark-h) * 0.7298);
+}
+
+/*
+  ============================================================================
+  Tagline sizing (Home)
+
+  The tagline is locked to two lines, split after "for" so the pill always
+  opens the second line. Each line is a `nowrap` block, so the break can't
+  move — which means the only thing that can go wrong is a line running wider
+  than the screen. So the type is sized off the viewport width instead of the
+  breakpoint scale, and the lines keep the same proportions at every size.
+
+  The second line is the longer of the two. Measured in Plus Jakarta Sans at
+  the sentence's own font size (call it 1em), with the -0.025em tracking taken
+  off each character:
+
+    pill box     "hybrid teams" at 0.8em, +0.42em padding a side   5.53em
+    pill margins 0.1em a side at 0.8em                             0.16em
+    rest         " to make office days count." at 1em             12.24em
+                                                                  -------
+                                                                  17.93em
+
+  So at 4.6vw the line spans ~82% of the viewport — a touch inside the
+  decorative rules at 8%/92% — and the 4rem cap stops it growing on very wide
+  screens, where it drifts narrower rather than tracking the width forever.
+  The 0.75rem floor only ever binds below ~280px of viewport.
+
+  Everything the pill owns is in `em` so it scales as one piece with the
+  sentence; a fixed `rem` padding would fatten the pill on small screens and
+  push the line past the numbers above.
+  ============================================================================
+*/
+.signin-tagline {
+  font-size: clamp(0.75rem, 4.6vw, 4rem);
+}
+
+.signin-tagline-pill {
+  font-size: 0.8em;
+  margin-inline: 0.1em;
+  padding-inline: 0.42em;
+  /* Optically centers the glyphs in the box — they sit high in the line box. */
+  padding-block: 0.083em 0.125em;
+}
+
+/*
+  ============================================================================
+  Floating emoji badges (Home)
+
+  Each badge drifts slowly around its resting position without ever migrating
+  away from it: every keyframe track starts and ends at translate(0, 0) so the
+  motion loops seamlessly and stays centered on the badge's absolute position.
+  The waypoints use offset x/y values and a touch of rotation to read as an
+  organic, non-repeating wander. Four distinct tracks (plus varied durations
+  and delays per badge) keep the badges from moving in visible unison.
+  ============================================================================
+*/
+@keyframes badge-float-a {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -14px) rotate(3deg);
+  }
+  50% {
+    transform: translate(-8px, -6px) rotate(-2deg);
+  }
+  75% {
+    transform: translate(6px, 12px) rotate(2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-b {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-12px, 8px) rotate(-3deg);
+  }
+  45% {
+    transform: translate(9px, 13px) rotate(2deg);
+  }
+  70% {
+    transform: translate(13px, -9px) rotate(3deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-c {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  30% {
+    transform: translate(7px, 11px) rotate(2deg);
+  }
+  55% {
+    transform: translate(14px, -7px) rotate(-2deg);
+  }
+  80% {
+    transform: translate(-9px, -12px) rotate(-3deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-d {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate(-10px, -11px) rotate(3deg);
+  }
+  48% {
+    transform: translate(-13px, 7px) rotate(-2deg);
+  }
+  74% {
+    transform: translate(8px, 10px) rotate(2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* Respect users who prefer minimal motion — hold the badges still. */
+@media (prefers-reduced-motion: reduce) {
+  .badge-float {
+    animation: none !important;
+  }
+}
