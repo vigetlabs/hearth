@@ -125,7 +125,7 @@ export function DayRoster({
   return (
     <div
       data-tour="day-roster"
-      className="min-h-0 flex-1 overflow-y-auto px-4 py-3"
+      className="min-h-0 flex-1 overflow-y-auto border border-line px-4 py-3"
     >
       <div
         role="tablist"
