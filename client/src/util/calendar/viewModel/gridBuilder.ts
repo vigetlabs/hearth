@@ -3,7 +3,8 @@ import type {
   OfficeDatesPlanningOverrideStates,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
-import type { RosterUser, WeekSchedule } from "@/types/calendar/calendar";
+import type { RosterUser } from "@/types/calendar/calendar";
+import type { CalendarScheduleEntry, WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
 import { userDisplayName } from "@/util/auth/displayName";
 import {
   baseAttendanceForUser,
@@ -119,17 +120,17 @@ export function buildCalendarGridViewModel({
 }
 
 function resolveRosterUsers(
-  rosterUsers: RosterUser[],
+  calendarEntries: CalendarScheduleEntry[],
   overrides: TogglePlanningOverrideState | undefined,
   editingUserIds: ReadonlySet<number>,
 ): RosterUser[] {
-  const resolvedRosterUsers = rosterUsers.map((rosterUser): RosterUser => {
+  const resolvedRosterUsers = calendarEntries.map((rosterUser): RosterUser => {
     if (rosterUser.status === "confirmed-elsewhere") {
       return rosterUser;
     }
 
     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
-      day: rosterUsers,
+      day: calendarEntries,
       userId: rosterUser.userId,
     });
 

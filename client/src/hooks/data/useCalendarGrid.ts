@@ -3,7 +3,7 @@ import { useCallback, useMemo, type Dispatch } from "react";
 import { useCalendarDataContext } from "@/hooks/contexts/useCalendarDataContext";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
-import type { WeekSchedule } from "@/types/calendar/calendar";
+import { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
 import {
   baseAttendanceForUser,
@@ -12,7 +12,7 @@ import {
   resolveEditingAttendance,
 } from "@/util/cable/planning/overrideState";
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
-import { buildWeekSchedule } from "@/util/calendar/schedule";
+import { buildWeekSchedule } from "@/util/calendar/schedule/scheduleBuilder";
 import {
   buildCalendarGridViewModel,
   type CalendarGridViewModel,
@@ -104,14 +104,15 @@ export function useCalendarGrid({
 
   const schedule = useMemo<WeekSchedule>(
     () =>
-      buildWeekSchedule(
-        data.rosterUsers,
-        data.visits,
-        weekDates,
-        confirmedUserIds,
-        scope.user.id,
-        currentUserExternalVisitsByDate,
-      ),
+      buildWeekSchedule({
+        officeUsers: data.rosterUsers,
+        officeVisits: data.visits,
+        weekDateKeys: weekDateKeys,
+        confirmedUserIds: confirmedUserIds,
+        editingUserIds: editingUserIds,
+        planningStatesByDate: planningStatesByDate,
+        activeOfficeId: scope.activeOffice.id
+      }),
     [
       data.rosterUsers,
       data.visits,
