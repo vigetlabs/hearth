@@ -13,12 +13,12 @@ import "./Home.css";
 const EMOJI_BADGES = [
   {
     emoji: "🐂",
-    position: "left-[19%] top-[27%]",
+    position: "left-[19%] top-[22%]",
     float: { animation: "badge-float-a 8s ease-in-out infinite", delay: "0s" },
   },
   {
     emoji: "🌸",
-    position: "right-[13%] top-[34%]",
+    position: "right-[13%] top-[29%]",
     float: {
       animation: "badge-float-b 10s ease-in-out infinite",
       delay: "-4s",
@@ -26,7 +26,7 @@ const EMOJI_BADGES = [
   },
   {
     emoji: "🚂",
-    position: "left-[7%] top-[55%]",
+    position: "left-[7%] top-[50%]",
     float: {
       animation: "badge-float-c 9s ease-in-out infinite",
       delay: "-9s",
@@ -34,7 +34,7 @@ const EMOJI_BADGES = [
   },
   {
     emoji: "⛰️",
-    position: "right-[8%] top-[57%]",
+    position: "right-[8%] top-[52%]",
     float: {
       animation: "badge-float-d 11s ease-in-out infinite",
       delay: "-6s",

@@ -41,7 +41,7 @@ export default function SigninForm() {
         </h1>
 
         <div className="relative mx-auto mt-10 max-w-2xl">
-          <p className="text-xl font-semibold text-fill sm:text-2xl">
+          <p className="text-xl font-medium text-fill sm:text-2xl">
             Make the most of your in-office days by seeing who&rsquo;ll be
             there.
           </p>
