@@ -35,45 +35,16 @@ export function buildWeekSchedule({
   for (const dateKey of weekDateKeys) {
     const entries: CalendarScheduleEntry[] = [];
 
-    for (const user of officeUsers)  {
-      const userVisitsOnDate = findUserVisitsOnDate(
-        dateKey, 
-        user.id, 
-        officeVisits
-      );
-
-      const userHasVisitHere: boolean = hasVisitAtOffice(
-        userVisitsOnDate,
-        activeOfficeId
-      );
-
-      const userHasExternalVisit: boolean = hasExternalVisit(
-        userVisitsOnDate,
-        activeOfficeId
-      );
-
-      const defaultScheduled: boolean = isDefaultScheduleDay(
-        user,
-        new Date(dateKey)
-      );
-
-      const planningOverrideForDate = planningOverrideStateForUser(
-        planningStatesByDate[dateKey],
-        user.id
-      );
-
-      const mode = resolveAttendanceMode({
-        isEditing: editingUserIds.has(user.id),
-        isConfirmed: confirmedUserIds.has(user.id)
+    for (const user of officeUsers) {
+      const facts = buildCalendarFacts({
+        officeVisits,
+        confirmedUserIds,
+        editingUserIds,
+        planningStatesByDate,
+        activeOfficeId,
+        dateKey,
+        user
       });
-
-      const facts: CalendarDateAttendanceFacts = {
-        mode: mode,
-        hasVisitHere: userHasVisitHere,
-        hasVisitElsewhere: userHasExternalVisit,
-        defaultScheduled: defaultScheduled,
-        planningOverride: planningOverrideForDate
-      }
 
       const resolution: CalendarAttendanceResolution = resolveAttendanceStatus(facts);
 
@@ -86,4 +57,64 @@ export function buildWeekSchedule({
     schedule[dateKey] = entries;
   }
   return schedule
+}
+
+interface BuildCalendarFactsInput {
+  officeVisits: Visit[],
+  confirmedUserIds: ReadonlySet<number>;
+  editingUserIds: ReadonlySet<number>;
+  planningStatesByDate: OfficeDatesPlanningOverrideStates,
+  activeOfficeId: number,
+  dateKey: string,
+  user: User
+}
+
+function buildCalendarFacts({
+  officeVisits,
+  confirmedUserIds,
+  editingUserIds,
+  planningStatesByDate,
+  activeOfficeId,
+  dateKey,
+  user
+}: BuildCalendarFactsInput): CalendarDateAttendanceFacts {
+  const userVisitsOnDate = findUserVisitsOnDate(
+    dateKey,
+    user.id,
+    officeVisits
+  );
+
+  const userHasVisitHere: boolean = hasVisitAtOffice(
+    userVisitsOnDate,
+    activeOfficeId
+  );
+
+  const userHasExternalVisit: boolean = hasExternalVisit(
+    userVisitsOnDate,
+    activeOfficeId
+  );
+
+  const defaultScheduled: boolean = isDefaultScheduleDay(
+    user,
+    new Date(dateKey)
+  );
+
+  const planningOverrideForDate = planningOverrideStateForUser(
+    planningStatesByDate[dateKey],
+    user.id
+  );
+
+  const mode = resolveAttendanceMode({
+    isEditing: editingUserIds.has(user.id),
+    isConfirmed: confirmedUserIds.has(user.id)
+  });
+
+  return {
+    mode: mode,
+    hasVisitHere: userHasVisitHere,
+    hasVisitElsewhere: userHasExternalVisit,
+    defaultScheduled: defaultScheduled,
+    planningOverride: planningOverrideForDate
+  }
+
 }

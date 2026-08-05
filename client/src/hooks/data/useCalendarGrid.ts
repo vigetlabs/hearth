@@ -3,7 +3,7 @@ import { useCallback, useMemo, type Dispatch } from "react";
 import { useCalendarDataContext } from "@/hooks/contexts/useCalendarDataContext";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
-import { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
+import type { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
 import {
   baseAttendanceForUser,
