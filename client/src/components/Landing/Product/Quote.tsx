@@ -21,12 +21,12 @@ const QUOTE_BADGES = [
 // Client quote, sitting directly below the product demo.
 //
 // The panel carries on the terracotta gradient the Product section starts: that
-// section runs #B44820 down to #9D3C20, and this one picks up at #9D3C20 and
-// finishes at #8C3320, so the two read as one continuous wash behind the demo
-// and the quote rather than as two panels butted together.
+// section runs `strong` down to `strong-deep`, and this one picks up at
+// `strong-deep` and finishes at `fill`, so the two read as one continuous wash
+// behind the demo and the quote rather than as two panels butted together.
 export default function Quote() {
   return (
-    <section className="quote-section relative flex flex-col items-center overflow-hidden bg-[linear-gradient(to_bottom,#9D3C20_0%,#8C3320_100%)] px-4 pb-28 pt-20 text-center sm:pb-64 sm:pt-40">
+    <section className="quote-section relative flex flex-col items-center overflow-hidden bg-[linear-gradient(to_bottom,var(--color-strong-deep)_0%,var(--color-fill)_100%)] px-4 pb-28 pt-20 text-center sm:pb-64 sm:pt-40">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 hidden lg:block"
@@ -34,7 +34,7 @@ export default function Quote() {
         {QUOTE_BADGES.map(({ emoji, position, tilt }) => (
           <div
             key={emoji}
-            className={`absolute flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[1.125rem] bg-surface text-[1.625rem] shadow-[0_10px_24px_-6px_#3A130A66] ${position} ${tilt}`}
+            className={`absolute flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[1.125rem] bg-surface text-[1.625rem] shadow-badge-panel ${position} ${tilt}`}
           >
             {/* leading-[0] collapses the line box so flex centers the glyph
                 itself rather than the baseline-aligned text line */}

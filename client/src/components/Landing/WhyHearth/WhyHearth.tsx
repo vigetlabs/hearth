@@ -76,7 +76,7 @@ export default function WhyHearth() {
 
       <h2 className="why-hearth-heading mt-6 font-semibold leading-[1.05] tracking-tight text-fg">
         Spot the best day{" "}
-        <span className="text-[#C33E09]">before you commute</span>
+        <span className="text-strong-vivid">before you commute</span>
       </h2>
 
       {/* Measure is set in WhyHearth.css, off the heading's own line width, so
@@ -116,7 +116,7 @@ export default function WhyHearth() {
                   and shrinks with the gap instead of being a fixed length. */}
               <span
                 aria-hidden="true"
-                className="hidden h-[2px] flex-1 bg-[#A9572F] lg:block"
+                className="hidden h-[2px] flex-1 bg-line-accent lg:block"
               />
             </li>
           ))}
@@ -126,7 +126,7 @@ export default function WhyHearth() {
           {PILLS.map(({ label, emoji, position, tilt }) => (
             <li
               key={label}
-              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] font-semibold text-fg shadow-[0_8px_22px_-4px_#66381A24] lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
+              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] font-semibold text-fg shadow-badge lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
             >
               <span>{label}</span>
               {/* leading-[0] collapses the line box so the glyph sits centered

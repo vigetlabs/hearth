@@ -91,10 +91,10 @@ export default function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 top-[9.5rem]"
         >
-          <div className="absolute bottom-[var(--rule-stop-1)] left-[8%] top-0 w-px bg-[#E0D4BF]" />
-          <div className="absolute bottom-[var(--rule-stop-2)] left-[35%] top-0 w-px bg-[#E0D4BF]" />
-          <div className="absolute bottom-[var(--rule-stop-3)] left-[65%] top-0 w-px bg-[#E0D4BF]" />
-          <div className="absolute bottom-[var(--rule-stop-4)] right-[8%] top-0 w-px bg-[#E0D4BF]" />
+          <div className="absolute bottom-[var(--rule-stop-1)] left-[8%] top-0 w-px bg-rule" />
+          <div className="absolute bottom-[var(--rule-stop-2)] left-[35%] top-0 w-px bg-rule" />
+          <div className="absolute bottom-[var(--rule-stop-3)] left-[65%] top-0 w-px bg-rule" />
+          <div className="absolute bottom-[var(--rule-stop-4)] right-[8%] top-0 w-px bg-rule" />
         </div>
 
         {/* Giant wordmark watermark, resting on the bottom edge of the hero —
@@ -105,7 +105,7 @@ export default function Home() {
             bottom padding. */}
         <WordLogo
           decorative
-          className="pointer-events-none absolute bottom-0 left-1/2 h-[var(--wordmark-h)] w-auto -translate-x-1/2 text-[#EDE2D1]"
+          className="pointer-events-none absolute bottom-0 left-1/2 h-[var(--wordmark-h)] w-auto -translate-x-1/2 text-watermark"
         />
 
         {/* Floating emoji badges. Their resting spots are percentages of this
@@ -120,7 +120,7 @@ export default function Home() {
           {EMOJI_BADGES.map(({ emoji, position, float }) => (
             <div
               key={emoji}
-              className={`badge-float absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line/55 bg-surface text-[30px] shadow-[0px_10px_24px_-4px_#66381A29] ${position}`}
+              className={`badge-float absolute flex h-[70px] w-[70px] items-center justify-center rounded-full border-2 border-line/55 bg-surface text-[30px] shadow-badge ${position}`}
               style={{
                 animation: float.animation,
                 animationDelay: float.delay,
@@ -156,7 +156,7 @@ export default function Home() {
       <section className="px-4 py-20 sm:py-28">
         <p className="landing-tagline mx-auto text-center font-medium leading-[1.45] text-fg">
           A shared office planning tool for{" "}
-          <span className="landing-tagline-pill inline-flex items-center rounded-full bg-[#9E3B20] align-middle font-bold leading-[1.6] text-fg-inverse">
+          <span className="landing-tagline-pill inline-flex items-center rounded-full bg-strong-deep align-middle font-bold leading-[1.6] text-fg-inverse">
             <span className="inline-block scale-[0.85]">hybrid teams</span>
           </span>{" "}
           to make office days count.

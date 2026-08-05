@@ -68,5 +68,5 @@
    arrival. */
 .why-hearth-shot {
   aspect-ratio: 510 / 1182;
-  box-shadow: 0 18px 44px -8px rgba(89, 41, 18, 0.14);
+  box-shadow: var(--shadow-shot);
 }

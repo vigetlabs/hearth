@@ -55,7 +55,7 @@ export default function Slack() {
   }
 
   return (
-    <section className="slack-section flex min-h-screen items-center justify-center bg-[#451811] px-4 py-24 sm:py-32">
+    <section className="slack-section flex min-h-screen items-center justify-center bg-fg px-4 py-24 sm:py-32">
       <div className="flex w-full max-w-[71rem] flex-col items-center gap-16 lg:flex-row lg:items-center lg:gap-20">
         {/* The card's column. `slack-card-frame` is what the card's `cqw` type
             size measures itself against (see Slack.css), so the box that sets
@@ -71,7 +71,7 @@ export default function Slack() {
               border and shadow stay in px: a hairline and a cast shadow read
               the same at any card width, and scaling them would only thicken
               the line and bloat the blur on wide screens. */}
-          <div className="slack-card rounded-[1.2em] border border-white/[0.08] bg-[#1A1D21] p-[1.9em] text-left shadow-[0_24px_60px_-12px_#00000080]">
+          <div className="slack-card rounded-[1.2em] border border-white/[0.08] bg-slack-surface p-[1.9em] text-left shadow-slack-card">
             <div className="flex items-center gap-[0.65em]">
               <img
                 src="/images/slack-icon.png"
@@ -79,20 +79,20 @@ export default function Slack() {
                 className="h-[2.6em] w-[2.6em] rounded-[0.5em]"
               />
 
-              <span className="font-bold text-[#F6F2EF]">Hearth</span>
+              <span className="font-bold text-slack-fg">Hearth</span>
 
-              <span className="rounded-[0.3em] bg-[#3F3F41] px-[0.5em] py-[0.15em] text-[0.62em] font-bold uppercase tracking-[0.06em] text-[#B5B2B0]">
+              <span className="rounded-[0.3em] bg-slack-badge px-[0.5em] py-[0.15em] text-[0.62em] font-bold uppercase tracking-[0.06em] text-slack-badge-fg">
                 App
               </span>
 
-              <span className="text-[0.8em] text-[#9A9694]">10:30 AM</span>
+              <span className="text-[0.8em] text-slack-fg-muted">10:30 AM</span>
             </div>
 
             {/* Confirming rewrites the greeting and the days under it in place, similar
                 behavior inside Slack DM. This means any changes within the Slack card
                 or edit modal are announced instead of simply changing.*/}
             <div aria-live="polite">
-              <p className="mt-[1.2em] font-bold text-[#F1ECE8]">
+              <p className="mt-[1.2em] font-bold text-slack-fg">
                 {/* leading-[0] collapses the line box so the glyph sits centered
                     on the sentence rather than on its baseline */}
                 <span aria-hidden="true" className="mr-[0.35em] leading-[0]">
@@ -109,11 +109,11 @@ export default function Slack() {
 
               <hr className="mt-[1.2em] border-0 border-t border-white/10" />
 
-              <ul className="mt-[1.1em] flex flex-col gap-[0.85em] text-[#EAE4E0]">
+              <ul className="mt-[1.1em] flex flex-col gap-[0.85em] text-slack-fg-body">
                 {WEEK_DATES.map((day, index) => (
                   <li key={day} className="flex items-center gap-[0.45em]">
                     <span className="font-semibold">{day}</span>
-                    <span aria-hidden="true" className="text-[#8E8A87]">
+                    <span aria-hidden="true" className="text-slack-fg-faint">
                       &mdash;
                     </span>
                     <span aria-hidden="true" className="leading-[0]">
@@ -127,13 +127,13 @@ export default function Slack() {
 
             <hr className="mt-[1.1em] border-0 border-t border-white/10" />
 
-            <p className="mt-[1.1em] font-semibold text-[#F1ECE8]">
+            <p className="mt-[1.1em] font-semibold text-slack-fg">
               {confirmed
                 ? "Need to make a change?"
                 : "Coordinating with your team?"}
             </p>
 
-            <p className="mt-[0.5em] text-[0.87em] leading-[1.45] text-[#9A9694]">
+            <p className="mt-[0.5em] text-[0.87em] leading-[1.45] text-slack-fg-muted">
               {confirmed
                 ? "See who else is heading in that week, or edit your schedule."
                 : "See who else is heading in that week, then confirm or edit your days."}
@@ -143,7 +143,7 @@ export default function Slack() {
               <button
                 type="button"
                 onClick={redirectToGoogleSso}
-                className={`${ACTION} border-[#5A5755] text-[#EAE4E0] hover:bg-white/5`}
+                className={`${ACTION} border-slack-border text-slack-fg-body hover:bg-white/5`}
               >
                 <span aria-hidden="true" className="mr-[0.35em] leading-[0]">
                   👀
@@ -157,7 +157,7 @@ export default function Slack() {
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className={`${ACTION} border-transparent bg-[#007A5A] text-white hover:bg-[#148567]`}
+                  className={`${ACTION} border-transparent bg-slack-primary text-white hover:bg-slack-primary-hover`}
                 >
                   Confirm
                 </button>
@@ -167,7 +167,7 @@ export default function Slack() {
                 ref={editButtonRef}
                 type="button"
                 onClick={() => setEditing(true)}
-                className={`${ACTION} border-[#5A5755] text-[#EAE4E0] hover:bg-white/5`}
+                className={`${ACTION} border-slack-border text-slack-fg-body hover:bg-white/5`}
               >
                 Edit Schedule
               </button>
@@ -192,29 +192,29 @@ export default function Slack() {
             each of the three claims — so every break between blocks is the same
             height and the column reads as one evenly-set list of statements. */}
         <div className="flex w-full max-w-[32rem] flex-col gap-6 text-left lg:max-w-none lg:pl-8">
-          <p className="slack-eyebrow font-semibold uppercase tracking-[0.22em] text-[#F2B88C]">
+          <p className="slack-eyebrow font-semibold uppercase tracking-[0.22em] text-panel-eyebrow">
             Slack-centric
           </p>
 
-          <h2 className="slack-heading font-bold leading-[1.05] tracking-tight text-[#F8F1E9]">
+          <h2 className="slack-heading font-bold leading-[1.05] tracking-tight text-panel-heading">
             Viget&rsquo;s main communication tool
           </h2>
 
-          <p className="slack-body font-medium leading-[1.5] text-[#D9B8A1]">
+          <p className="slack-body font-medium leading-[1.5] text-panel-body">
             Every Friday, Hearth drops next week&rsquo;s schedule into your
             Slack DMs. Confirm it, tweak it, or peek at who else is heading in
             without opening another tab.
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-[#F8F1E9]">
+          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
             A weekly nudge at the right time
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-[#F8F1E9]">
+          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
             Confirm or edit straight from the message
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-[#F8F1E9]">
+          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
             One tap to see who&rsquo;s in
           </p>
         </div>

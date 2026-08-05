@@ -23,6 +23,11 @@
   Not tokenized on purpose: brand logo colors (GoogleIcon/SlackIcon) and pure
   black/white alpha overlays (e.g. `bg-black/40`, `bg-white/25`), which are
   effects rather than palette colors.
+
+  One group at the bottom — `slack-*` — is deliberately *not* part of the
+  palette above. It is the Slack DM mocked on the sign-in page, which has to
+  look like Slack rather than like Hearth, so those values are grouped and
+  labelled as borrowed instead of being reconciled with the ramp.
   ============================================================================
 */
 @theme {
@@ -46,6 +51,9 @@
   --color-fg-muted: #8a7a6e; /* Text/Muted — secondary text */
   --color-fg-subtle: #a08f81; /* tertiary text — tint of Text/Muted */
   --color-fg-faint: #b8a99b; /* placeholder, disabled — tint of Text/Muted */
+  --color-fg-warm: #6b4536; /* secondary marketing copy on cream (article body,
+                               cohort captions) — lighter than `fg`, but warm
+                               rather than desaturated like `fg-muted` */
   --color-fg-inverse: var(
     --color-white
   ); /* text/icons on the terracotta accent */
@@ -55,9 +63,11 @@
   --color-footer-muted: #c7a894; /* tagline, link lists */
   --color-footer-faint: #9e806e; /* column headings, legal line */
 
-  /* Panel — text on the terracotta marketing panels (sign-in page). Lighter
-     and warmer than the `fg-inverse` pair, which sits on the flat accent
-     rather than on the gradient. */
+  /* Panel — text on the dark marketing panels (sign-in page): the terracotta
+     gradient behind Product/Quote and the deep brown `fg` panel behind the
+     Slack section, which share this type treatment. Lighter and warmer than
+     the `fg-inverse` pair, which sits on the flat accent rather than on the
+     gradient. */
   --color-panel-eyebrow: #f2b88c; /* section eyebrow */
   --color-panel-heading: var(--color-page); /* section heading */
   --color-panel-body: #d9b8a1; /* section subhead */
@@ -71,11 +81,19 @@
   --color-surface-muted: #efeae1; /* Surface/Inactive — chips, wells, page bg */
   --color-surface-strong: #d8cdbe; /* raised neutral (day headers, dashed icon) */
 
+  /* Decorative — the two watermark layers behind the sign-in hero. Both are
+     cream-on-cream: barely-there shapes that sit under the copy rather than
+     structure it, so they are their own pair rather than borrowed from the
+     `line` tokens they land near. */
+  --color-watermark: #ede2d1; /* giant "Hearth" wordmark at the fold */
+  --color-rule: #e0d4bf; /* vertical background rules, a step darker */
+
   /* Lines — borders & dividers */
   --color-line: #f0e0ce; /* Border/Default — dividers, default borders */
   --color-line-strong: #d8cdbe; /* Border/Strong — input borders, tracks */
   --color-line-faint: #d8cdbe; /* dashed / decorative (Border/Strong) */
   --color-line-selected: #de8e6e; /* State/Selected border */
+  --color-line-accent: #a9572f; /* terracotta leader rules (Why Hearth callouts) */
 
   /* State — light "selected" fill (pairs with line-selected border) */
   --color-selected: #f6d8c7; /* State/Selected */
@@ -85,6 +103,10 @@
   --color-strong-hover: #6e2417; /* Brand/Confirmed border */
   --color-strong-deep: #9d3c20; /* mid-point of the marketing panel ramp,
                                    between `strong` and `fill` */
+  --color-strong-vivid: #c33e09; /* the ramp's most saturated step — highlighted
+                                    phrases inside marketing headings */
+  --color-strong-soft: #de8e6e; /* the ramp's lightest step — hover preview on
+                                   marketing nav links (State/Selected border) */
 
   /* Attendance toggle — in/out of office active states (day cell roster tabs) */
   --color-in-office: #c25706; /* "In Office" tab active */
@@ -104,12 +126,56 @@
   /* Form validation error (existing brand red) */
   --color-error: #df3530;
 
+  /* Slack message mock (sign-in page) — Slack's dark UI palette, deliberately
+     outside the terracotta ramp above. These are somebody else's brand colors,
+     picked so the mocked DM and its edit sheet read as a real Slack message
+     rather than as a Hearth surface, and they should not be reached for
+     anywhere else in the app. They live here rather than inline only so the
+     mock can be retuned in one place. */
+  --color-slack-surface: #1a1d21; /* message card & edit sheet */
+  --color-slack-scrim: #0b0c0e; /* dims the card under the edit sheet */
+  --color-slack-fg: #f1ece8; /* sender name, headings, weekday names */
+  --color-slack-fg-body: #eae4e0; /* message body, button labels */
+  --color-slack-fg-muted: #9a9694; /* timestamp, secondary copy, chrome icons */
+  --color-slack-fg-faint: #8e8a87; /* dashes and other separators */
+  --color-slack-badge: #3f3f41; /* "App" tag fill */
+  --color-slack-badge-fg: #b5b2b0; /* "App" tag label */
+  --color-slack-border: #5a5755; /* outlined button borders */
+  --color-slack-primary: #007a5a; /* Slack green — Confirm / Save */
+  --color-slack-primary-hover: #148567;
+  --color-slack-check: #1164a3; /* checked checkbox fill & border */
+  --color-slack-check-border: #8d8d8d; /* unchecked checkbox border */
+  --color-slack-focus: #1d9bd1; /* focus ring inside the mock */
+
   /* Elevation — soft card/button lift (Figma drop shadow) */
   --shadow-card: 0px 11.42px 34.26px 0px #0000000f;
 
   /* Elevation — soft drop under the product demo, lifting it off the
      terracotta panel without giving it a border or card of its own */
   --shadow-demo: 0 30px 70px -20px #3a130a99;
+
+  /* Elevation — the marketing page's floating nav bar */
+  --shadow-nav: 0 10px 30px -8px #592e141a;
+
+  /* Elevation — the small emoji cards dropped into the sign-in page's margins.
+     `badge` is the drop on the cream page, shared by the hero badges and the
+     Why Hearth pills; `badge-panel` is the same drop on the terracotta quote
+     panel, where a deeper, heavier ink is what makes it read at all. */
+  --shadow-badge: 0 10px 24px -4px #66381a29;
+  --shadow-badge-panel: 0 10px 24px -6px #3a130a66;
+
+  /* Elevation — the day-view screenshot in Why Hearth */
+  --shadow-shot: 0 18px 44px -8px #59291224;
+
+  /* Elevation — the terracotta sign-off card resting on the cream page */
+  --shadow-signoff: 0 24px 60px -24px #66381a66;
+
+  /* Elevation — the Slack mock's card and the edit sheet over it. Neutral black
+     rather than the warm ink above, for the same reason the `slack-*` colors
+     sit apart from the palette: the mock is lit like Slack, not like Hearth.
+     The sheet's is the heavier of the two, so it reads as the nearer layer. */
+  --shadow-slack-card: 0 24px 60px -12px #00000080;
+  --shadow-slack-modal: 0 24px 60px -12px #000000b3;
 }
 
 /* App background — every screen sits on the warm cream page color */

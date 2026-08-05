@@ -51,7 +51,7 @@ export default function VigetArticle() {
 
           {/* Measure is set in VigetArticle.css, off the body's own size, so
               this holds the mock's two lines as the type scales. */}
-          <p className="article-body mt-6 font-medium leading-[1.5] text-[#6B4536]">
+          <p className="article-body mt-6 font-medium leading-[1.5] text-fg-warm">
             Hearth is a three-week intern sprint project created by
             Viget&rsquo;s 2026 intern cohort.
           </p>
@@ -92,11 +92,11 @@ export default function VigetArticle() {
                 className="aspect-square w-full max-w-[10.25rem] object-cover"
               />
 
-              <p className="article-name mt-4 font-bold leading-[1.35] text-[#6B4536]">
+              <p className="article-name mt-4 font-bold leading-[1.35] text-fg-warm">
                 {name}
               </p>
 
-              <p className="article-role mt-1 font-medium leading-[1.35] text-[#6B4536]">
+              <p className="article-role mt-1 font-medium leading-[1.35] text-fg-warm">
                 {role}
               </p>
             </li>

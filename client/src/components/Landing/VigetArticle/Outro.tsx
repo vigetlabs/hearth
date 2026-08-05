@@ -10,7 +10,7 @@ export default function Outro() {
     <section className="flex justify-center bg-page px-4 pb-24 sm:pb-32">
       {/* No top padding: the article section above ends on its own `py`, which
           is the gap the mock shows between the captions and the card. */}
-      <div className="outro-card relative flex w-full max-w-[71rem] flex-col items-center justify-center overflow-hidden rounded-4xl bg-[linear-gradient(to_bottom,#B44820_0%,#8C3320_100%)] px-6 py-16 text-center shadow-[0_24px_60px_-24px_#66381A66]">
+      <div className="outro-card relative flex w-full max-w-[71rem] flex-col items-center justify-center overflow-hidden rounded-4xl bg-[linear-gradient(to_bottom,var(--color-strong)_0%,var(--color-fill)_100%)] px-6 py-16 text-center shadow-signoff">
         {/* The hearth H mark in the bottom right of the Outro box.
             Purely ornamental, so it's hidden from assistive tech. Anchored to
             the card's bottom edge and set at 81.5% across, which puts the

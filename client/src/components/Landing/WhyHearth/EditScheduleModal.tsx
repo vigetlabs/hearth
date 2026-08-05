@@ -34,7 +34,7 @@ interface EditScheduleModalProps {
 // stylesheet.
 const CONTROL = "rounded-[0.4em] px-[0.9em] py-[0.55em]";
 const FOCUS =
-  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1D9BD1]";
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-slack-focus";
 
 // Each boolean here is just asking yes or no for the default office.
 // Like the real Slack DM, if a user wants to do more in depth changes,
@@ -47,8 +47,8 @@ type DraftWeek = readonly boolean[];
 // input block per weekday holding a single "In office" checkbox, and a
 // Cancel/Save footer.
 //
-// The sheet is the same #1A1D21 as the message card so it reads as another
-// layer of the same app. It mounts into the message card's own frame instead of
+// The sheet is the same `slack-surface` as the message card so it reads as
+// another layer of the same app. It mounts into the card's own frame instead of
 // the viewport, so it covers the DM the way it would inside Slack — the section
 // around it stays put, and the dimmed card is still visible underneath. Radix
 // Dialog handles the rest of what a modal owes: focus is trapped inside the
@@ -94,7 +94,7 @@ export default function EditScheduleModal({
         {/* Dims the card underneath. It matches the card's radius because it
             covers exactly the card's box — the frame is the card's own
             column. */}
-        <Dialog.Overlay className="absolute inset-0 z-10 rounded-[1.2em] bg-[#0B0C0E]/70" />
+        <Dialog.Overlay className="absolute inset-0 z-10 rounded-[1.2em] bg-slack-scrim/70" />
 
         {/* Inset by the same amount on all four sides, so the sheet is the
             card's own shape a step smaller and floats centered over it rather
@@ -104,7 +104,7 @@ export default function EditScheduleModal({
             than the group inside it. `slack-modal` gives the sheet the card's
             `em` scale (see Slack.css) so everything inside — this inset
             included — sizes off the same type. */}
-        <Dialog.Content className="slack-modal absolute inset-[1.6em] z-20 flex flex-col overflow-hidden rounded-[1em] border border-white/[0.08] bg-[#1A1D21] text-left shadow-[0_24px_60px_-12px_#000000B3] focus:outline-none">
+        <Dialog.Content className="slack-modal absolute inset-[1.6em] z-20 flex flex-col overflow-hidden rounded-[1em] border border-white/[0.08] bg-slack-surface text-left shadow-slack-modal focus:outline-none">
           <div className="flex shrink-0 items-center gap-[0.7em] border-b border-white/10 px-[1.4em] py-[1.05em]">
             {/* The same app tile the message card is posted under, so the sheet
                 is visibly the same app's — Slack sets an app's icon beside the
@@ -115,17 +115,17 @@ export default function EditScheduleModal({
               className="h-[2em] w-[2em] shrink-0 rounded-[0.4em]"
             />
 
-            <Dialog.Title className="mr-auto text-[1.15em] font-bold text-[#F1ECE8]">
+            <Dialog.Title className="mr-auto text-[1.15em] font-bold text-slack-fg">
               Edit Schedule
             </Dialog.Title>
 
             {/* Slack's pop-out control sits left of the close button. It is
                 chrome, not part of the form, so it is drawn and not wired.
                 It doesn't make sense for the button to do anything in this context.*/}
-            <PopOutIcon className="h-[1.1em] w-[1.1em] shrink-0 text-[#9A9694]" />
+            <PopOutIcon className="h-[1.1em] w-[1.1em] shrink-0 text-slack-fg-muted" />
 
             <Dialog.Close
-              className={`rounded-[0.35em] p-[0.35em] text-[#9A9694] transition-colors hover:bg-white/5 hover:text-[#EAE4E0] ${FOCUS}`}
+              className={`rounded-[0.35em] p-[0.35em] text-slack-fg-muted transition-colors hover:bg-white/5 hover:text-slack-fg-body ${FOCUS}`}
             >
               <XIcon className="h-[1.1em] w-[1.1em]" />
               <span className="sr-only">Close</span>
@@ -133,7 +133,7 @@ export default function EditScheduleModal({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-[1.4em] py-[1.15em]">
-            <Dialog.Description className="text-[#EAE4E0]">
+            <Dialog.Description className="text-slack-fg-body">
               Which days are you in the{" "}
               <span className="font-bold">
                 <span aria-hidden="true" className="leading-[0]">
@@ -150,22 +150,22 @@ export default function EditScheduleModal({
                 carrying that label, so a screen reader reaches the box already
                 knowing which day it belongs to — "Monday, In office"
                 rather than five identically named checkboxes. */}
-            <div className="mt-[1.2em] flex flex-col gap-[1em] text-[#EAE4E0]">
+            <div className="mt-[1.2em] flex flex-col gap-[1em] text-slack-fg-body">
               {WEEK.map((day, index) => {
                 const id = `edit-schedule-day-${index}`;
                 const labelId = `${id}-label`;
 
                 return (
                   <div key={day.full} role="group" aria-labelledby={labelId}>
-                    <p id={labelId} className="text-[0.93em] text-[#F1ECE8]">
+                    <p id={labelId} className="text-[0.93em] text-slack-fg">
                       <span className="font-bold">{day.full}</span>
                       <span
                         aria-hidden="true"
-                        className="px-[0.35em] font-bold text-[#8E8A87]"
+                        className="px-[0.35em] font-bold text-slack-fg-faint"
                       >
                         &middot;
                       </span>
-                      <span className="pl-[0.4em] text-[#9A9694]">
+                      <span className="pl-[0.4em] text-slack-fg-muted">
                         (optional)
                       </span>
                     </p>
@@ -175,7 +175,7 @@ export default function EditScheduleModal({
                         id={id}
                         checked={draft[index]}
                         onCheckedChange={(next) => setDay(index, next === true)}
-                        className={`flex h-[1.15em] w-[1.15em] shrink-0 items-center justify-center rounded-[0.2em] border border-[#8D8D8D] transition-colors data-[state=checked]:border-[#1164A3] data-[state=checked]:bg-[#1164A3] ${FOCUS}`}
+                        className={`flex h-[1.15em] w-[1.15em] shrink-0 items-center justify-center rounded-[0.2em] border border-slack-check-border transition-colors data-[state=checked]:border-slack-check data-[state=checked]:bg-slack-check ${FOCUS}`}
                       >
                         <Checkbox.Indicator className="text-white">
                           <CheckIcon className="h-[0.85em] w-[0.85em]" />
@@ -199,7 +199,7 @@ export default function EditScheduleModal({
 
           <div className="flex shrink-0 justify-end gap-[0.55em] border-t border-white/10 px-[1.4em] py-[1.05em] text-[0.87em] font-semibold">
             <Dialog.Close
-              className={`border border-[#5A5755] text-[#EAE4E0] transition-colors hover:bg-white/5 ${CONTROL} ${FOCUS}`}
+              className={`border border-slack-border text-slack-fg-body transition-colors hover:bg-white/5 ${CONTROL} ${FOCUS}`}
             >
               Cancel
             </Dialog.Close>
@@ -207,7 +207,7 @@ export default function EditScheduleModal({
             <button
               type="button"
               onClick={handleSave}
-              className={`border border-transparent bg-[#007A5A] text-white transition-colors hover:bg-[#148567] ${CONTROL} ${FOCUS}`}
+              className={`border border-transparent bg-slack-primary text-white transition-colors hover:bg-slack-primary-hover ${CONTROL} ${FOCUS}`}
             >
               Save
             </button>

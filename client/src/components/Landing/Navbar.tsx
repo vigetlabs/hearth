@@ -83,18 +83,18 @@ export default function Navbar() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center px-4 pt-6 sm:pt-8">
-      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-[0_10px_30px_-8px_rgba(89,46,20,0.10)] backdrop-blur-md sm:pl-10 sm:pr-6">
+      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-nav backdrop-blur-md sm:pl-10 sm:pr-6">
         <WordLogo className="h-6 text-fg sm:h-7" />
 
         <div className="flex items-center gap-6 sm:gap-8">
           {/* The section the page is parked on holds the full terracotta the
-              rest of the page accents with, so the bar always says where you
-              are. Hovering an *unselected* label previews that move in the
-              palette's lighter terracotta (the same tint as the State/Selected
-              border) — lighter than the selected color, so a hovered label can
-              never be mistaken for the selected one. The selected label takes
-              no hover at all: it is already at the end of that ramp, and
-              lightening it on hover would read as it switching off. */}
+              rest of the page accents with (`strong`), so the bar always says
+              where you are. Hovering an *unselected* label previews that move
+              in the ramp's lightest step (`strong-soft`) — lighter than the
+              selected color, so a hovered label can never be mistaken for the
+              selected one. The selected label takes no hover at all: it is
+              already at the end of that ramp, and lightening it on hover would
+              read as it switching off. */}
           {NAV_LINKS.map(({ label, targetId }) => {
             const active = targetId === activeId;
 
@@ -105,7 +105,7 @@ export default function Navbar() {
                 aria-current={active ? "true" : undefined}
                 className={cn(
                   "hidden cursor-pointer text-base font-medium transition-colors sm:block",
-                  active ? "text-[#BC4A1F]" : "text-fg hover:text-[#DE8E6E]",
+                  active ? "text-strong" : "text-fg hover:text-strong-soft",
                 )}
               >
                 {label}
