@@ -71,7 +71,7 @@ export function useCalendarToolbar({
   }
 
   function editWeek() {
-    // Connect editing behavior later.
+    dispatch(calendarEvents.editWeekRequested());
   }
 
   return {

@@ -7,6 +7,12 @@ export function calendarMachineReducer(
   currentState: CalendarMachineState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {
+  console.log("Calendar transition:", {
+    state: currentState.status,
+    event: evt.type,
+    evt,
+  });
+
   const nextState = transitionReduce(currentState, evt);
   console.log(nextState);
 
@@ -134,8 +140,22 @@ function trasitionFromConfirming(
 }
 
 function transitionFromConfirmed(
-  currentState: CalendarMachineState,
+  currentState: ConfirmedState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {
-  return currentState
+  switch (evt.type) {
+    case "EDIT_WEEK_REQUESTED":
+    case "EDIT_WEEK_FAILED":
+    case "EDIT_WEEK_COMPLETED": {
+      const nextState: PlanningState = {
+        ...currentState,
+        status: machineStates.PLANNING,
+        draftDates: [...currentState.confirmedDates]
+      }
+      return nextState
+    }
+
+    default:
+      return currentState;
+  }
 }

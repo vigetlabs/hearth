@@ -25,5 +25,20 @@ export const calendarEvents = {
     return {
       type: "CONFIRM_WEEK_FAILED" as const
     }
-  }
+  },
+  editWeekRequested() {
+    return {
+      type: "EDIT_WEEK_REQUESTED" as const
+    }
+  },
+  editWeekCompleted() {
+    return {
+      type: "EDIT_WEEK_COMPLETED" as const
+    }
+  },
+  editWeekFailed() {
+    return {
+      type: "EDIT_WEEK_FAILED" as const
+    }
+  },
 };
