@@ -1,6 +1,6 @@
 import type { Office } from "@/types/api/offices";
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import type { CalendarMachineState } from "@/types/calendar/machine/machineState";
+import { machineStates, type CalendarMachineState } from "@/types/calendar/machine/machineState";
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import {
   buildCalendarToolbarViewModel,
@@ -36,9 +36,9 @@ export function useCalendarToolbar({
   /*
    * Temporary sources.
    */
-  const isWeekConfirmed = false;
-  const isEditingWeek = false;
-  const isConfirmationPending = false;
+  const isWeekConfirmed = machineState.status === machineStates.CONFIRMED;
+  const isEditingWeek = machineState.status === machineStates.PLANNING;
+  const isConfirmationPending = machineState.status === machineStates.CONFIRMING;
   const isPlanningConnected = true;
   const isAttendanceConnected = true;
 
