@@ -75,12 +75,16 @@ function useActiveSection() {
 // so it holds the same spot on screen while the page scrolls from the hero down
 // to the footer. The full-width wrapper only exists to center the bar, so it
 // stays click-through and the bar itself takes the pointer events.
+//
+// The bar runs 2rem wider than the 71rem the page's panels below it are capped
+// at — a hair of overhang on each side, enough that it reads as floating over
+// the page rather than as one more panel in the same column.
 export default function Navbar() {
   const activeId = useActiveSection();
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center px-4 pt-6 sm:pt-8">
-      <nav className="pointer-events-auto flex w-full max-w-[71rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-[0_10px_30px_-8px_rgba(89,46,20,0.10)] backdrop-blur-md sm:pl-10 sm:pr-6">
+      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-[0_10px_30px_-8px_rgba(89,46,20,0.10)] backdrop-blur-md sm:pl-10 sm:pr-6">
         <WordLogo className="h-6 text-fg sm:h-7" />
 
         <div className="flex items-center gap-6 sm:gap-8">
