@@ -116,5 +116,40 @@ function buildCalendarFacts({
     defaultScheduled: defaultScheduled,
     planningOverride: planningOverrideForDate
   }
+}
 
+interface FindAllUsersForDateAndOffice {
+  officeUsers: User[],
+  officeVisits: Visit[],
+  planningStatesByDate: OfficeDatesPlanningOverrideStates,
+  activeOfficeId: number,
+  dateKey: string
+}
+
+function findAllUsersForDateAndOffice({
+  officeUsers,
+  officeVisits,
+  planningStatesByDate,
+  activeOfficeId,
+  dateKey
+}: FindAllUsersForDateAndOffice) {
+
+  const usersById = new Map<number, User>(
+    officeUsers.map((user): [number, User] => [user.id, user]),
+  );
+
+  for (const user of officeUsers) {
+    usersById.set(user.id, user);
+  }
+
+  for (const visit of officeVisits) {
+    usersById.set(visit.user.id, visit.user)
+  }
+
+  const selectedPlanningUsers =
+    planningStatesByDate[dateKey]?.selected ?? [];
+
+  for (const user of selectedPlanningUsers) {
+    usersById.set(user.id, user);
+  }
 }
