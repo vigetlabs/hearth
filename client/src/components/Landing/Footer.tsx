@@ -1,14 +1,12 @@
 import WordLogo from "@/components/Logo/WordLogo";
 import { ARTICLE_URL, VIGET_URL } from "@/components/Landing/links";
 
-import { scrollToSection } from "@/util/scrollToSection";
-
-// A footer link is one of two things, and which one decides both what it does
-// and what it renders as: a jump to a section of this page (a button — there is
-// no URL behind it and nothing to open in a new tab), or a trip off-site (a real
-// link, which middle-clicks and opens in a new tab like any other).
-type FooterLink =
-  { label: string; targetId: string } | { label: string; href: string };
+// A footer link is one of two things: a jump to a section of this page, or a
+// trip off-site. Both render as real links — a section jump has a URL behind it
+// (`#product`), so it middle-clicks and opens in a new tab like any other. The
+// only thing the destination decides is whether that new tab is the default
+// (off-site) or has to be asked for (same-page).
+type FooterLink = { label: string; destination: string };
 
 // The About column repeats the nav bar's section links, minus the article — the
 // article gets a link of its own under Company, pointing at the write-up rather
@@ -17,16 +15,16 @@ const LINK_COLUMNS: { heading: string; links: FooterLink[] }[] = [
   {
     heading: "About",
     links: [
-      { label: "Home", targetId: "home" },
-      { label: "Product", targetId: "product" },
-      { label: "Why Hearth", targetId: "why-hearth" },
+      { label: "Home", destination: "#home" },
+      { label: "Product", destination: "#product" },
+      { label: "Why Hearth", destination: "#why-hearth" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "Article", href: ARTICLE_URL },
-      { label: "Viget", href: VIGET_URL },
+      { label: "Article", destination: ARTICLE_URL },
+      { label: "Viget", destination: VIGET_URL },
     ],
   },
 ];
@@ -67,26 +65,18 @@ export default function Footer() {
                 <ul className="mt-3 space-y-2">
                   {links.map((link) => (
                     <li key={link.label}>
-                      {"href" in link ? (
-                        // Leaves the app, so it opens in its own tab and leaves
-                        // the page where it is.
-                        <a
-                          href={link.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={LINK_CLASSES}
-                        >
-                          {link.label}
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => scrollToSection(link.targetId)}
-                          className={LINK_CLASSES}
-                        >
-                          {link.label}
-                        </button>
-                      )}
+                      <a
+                        href={link.destination}
+                        target={
+                          link.destination.startsWith("http")
+                            ? "_blank"
+                            : "_self"
+                        }
+                        rel="noreferrer"
+                        className={LINK_CLASSES}
+                      >
+                        {link.label}
+                      </a>
                     </li>
                   ))}
                 </ul>

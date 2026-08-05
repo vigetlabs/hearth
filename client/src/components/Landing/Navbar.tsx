@@ -4,7 +4,6 @@ import WordLogo from "@/components/Logo/WordLogo";
 
 import { redirectToGoogleSso } from "@/util/auth/redirectToGoogleSso";
 import { cn } from "@/util/cn";
-import { scrollToSection } from "@/util/scrollToSection";
 
 const NAV_LINKS = [
   { label: "Home", targetId: "home" },
@@ -100,10 +99,9 @@ export default function Navbar() {
             const active = targetId === activeId;
 
             return (
-              <button
+              <a
                 key={label}
-                type="button"
-                onClick={() => scrollToSection(targetId)}
+                href={`#${targetId}`}
                 aria-current={active ? "true" : undefined}
                 className={cn(
                   "hidden cursor-pointer text-base font-medium transition-colors sm:block",
@@ -111,7 +109,7 @@ export default function Navbar() {
                 )}
               >
                 {label}
-              </button>
+              </a>
             );
           })}
 

@@ -116,3 +116,15 @@
 body {
   background-color: var(--color-page);
 }
+
+/* Fragment links — the marketing page's nav bar and footer both jump to
+   sections by `#id`, on a page tall enough that a jump can cover several
+   viewports, where an instant cut leaves no sense of how far you moved. Easing
+   the travel is exactly the kind of motion `prefers-reduced-motion` exists to
+   defuse, so this is gated rather than set outright: visitors who ask for less
+   of it keep the browser's default instant jump. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
