@@ -60,6 +60,7 @@ interface UseOfficePlanningOptions {
 
 interface UseOfficePlanningResult {
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
+  hasInitialSnapshot: boolean;
   isConnected: boolean;
   selectDate: (date: string) => void;
   deselectDate: (date: string) => void;
@@ -77,6 +78,9 @@ export function useOfficePlanning({
   currentUserId,
   dates,
 }: UseOfficePlanningOptions): UseOfficePlanningResult {
+  const [hasInitialSnapshot, setHasInitialSnapshot] =
+    useState<boolean>(false);
+
   const [planningState, setPlanningState] =
     useState<OfficePlanningState | null>(null);
 
@@ -99,6 +103,10 @@ export function useOfficePlanning({
   const datesRef = useRef(dates);
 
   const datesKey = useMemo(() => [...dates].sort().join(","), [dates]);
+
+  useEffect(() => {
+    setHasInitialSnapshot(false);
+  }, [officeId, datesKey]);
 
   useEffect(() => {
     datesRef.current = dates;
@@ -194,6 +202,7 @@ export function useOfficePlanning({
                 officeId: subscribedOfficeId,
                 dates: message.dates,
               });
+              setHasInitialSnapshot(true);
               return;
 
             case "planning.date.updated":
@@ -301,6 +310,7 @@ export function useOfficePlanning({
 
   return {
     planningStatesByDate,
+    hasInitialSnapshot,
     isConnected,
     selectDate,
     deselectDate,
