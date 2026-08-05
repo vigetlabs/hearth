@@ -207,14 +207,26 @@ export default function Slack() {
           </p>
 
           <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1 rounded-full bg-current align-middle mx-2"
+            />
             A weekly nudge at the right time
           </p>
 
           <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1 rounded-full bg-current align-middle mx-2"
+            />
             Confirm or edit straight from the message
           </p>
 
           <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1 rounded-full bg-current align-middle mx-2"
+            />
             One tap to see who&rsquo;s in
           </p>
         </div>
