@@ -9,7 +9,9 @@ import { type CalendarData, CalendarDataProvider } from "@/contexts/CalendarData
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { useMemo } from "react";
 import { CalendarRedisPlanningProvider } from "@/contexts/CalendarRedisPlanningProvider";
-import { resolvePlanningSelectedDates } from "@/util/calendar/machine/bootstrapRedisDateResolver";
+import { resolvePlanningSelectedDates } from "@/util/calendar/machine/bootstrapSelectedDatesResolver";
+import { isDefaultScheduleDay } from "@/util/calendar/schedule/scheduleFilter";
+import { generateDateKey } from "@/util/dates/date";
 
 interface CalendarWorkspaceRootProps {
   children: React.ReactNode;
@@ -22,6 +24,10 @@ export default function CalendarWorkspaceRoot({
 
   const weekDateKeys = useMemo(
     () => scope.weekDates.map((day) => day.key),
+    [scope.weekDates]
+  );
+  const weekDates = useMemo(
+    () => scope.weekDates.map((day) => day.date),
     [scope.weekDates]
   );
 
@@ -68,10 +74,23 @@ export default function CalendarWorkspaceRoot({
     return <div>Unable to load calendar</div>
   }
 
-  const baseSelectedDates = currentUserVisitsQuery.data.map((visit) => visit.visit_date)
+  const baseSelectedDates = new Set(
+    currentUserVisitsQuery.data
+      .filter((visit) => visit.office_id === scope.activeOffice.id)
+      .map((visit) => visit.visit_date),
+  );
 
-  const selectedDates: string[] = resolvePlanningSelectedDates({
-    baseSelectedDates: baseSelectedDates,
+  for (const date of weekDates) {
+    if (isDefaultScheduleDay(scope.user, date)) {
+      baseSelectedDates.add(generateDateKey(date));
+    }
+  }
+
+  const persistedSelectedDates = [...baseSelectedDates];
+
+
+  const allSelectedDates: string[] = resolvePlanningSelectedDates({
+    baseSelectedDates: persistedSelectedDates,
     planningStatesByDate: planning.planningStatesByDate,
     currentUserId: scope.user.id,
     weekDateKeys: weekDateKeys
@@ -83,7 +102,7 @@ export default function CalendarWorkspaceRoot({
       focusedWeekStartKey: scope.focusedWeekStartKey
     },
     isConfirmed: attendanceConfirmationsQuery.data.length > 0,
-    selectedDates: selectedDates
+    selectedDates: allSelectedDates
   }
 
   const calendarData: CalendarData = {
