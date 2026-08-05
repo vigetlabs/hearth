@@ -36,7 +36,6 @@ class OfficePlanningBroadcaster
       last_name: String,
       office: T.nilable(ChannelSerializedOffice),
       default_schedule: T.nilable(ChannelSerializedSchedule),
-      is_onboarding_complete: T::Boolean
     }
   end
 
@@ -172,9 +171,19 @@ class OfficePlanningBroadcaster
       .new(users)
       .serializable_hash[:data]
 
-    serialized_users.map do |serialized_user |
-      T.cast(
-        serialized_user[:attributes],
+    serialized_users.map do |serialized_user|
+      attributes = serialized_user[:attributes]
+      schedule = attributes[:default_schedule]
+
+      T.let(
+        {
+          id: attributes[:id],
+          email: attributes[:email],
+          first_name: attributes[:first_name],
+          last_name: attributes[:last_name],
+          office: attributes[:office],
+          default_schedule: serialize_schedule(schedule)
+        },
         ChannelSerializedUser
       )
     end
@@ -192,6 +201,27 @@ class OfficePlanningBroadcaster
     {
       id: office.id,
       name: office.name
+    }
+  end
+
+  sig do
+    params(
+      schedule: T.nilable(Schedule)
+    ).returns(T.nilable(ChannelSerializedSchedule))
+  end
+  def serialize_schedule(schedule)
+    return unless schedule
+
+    {
+      id: schedule.id,
+      is_default: schedule.is_default,
+      monday: schedule.monday,
+      tuesday: schedule.tuesday,
+      wednesday: schedule.wednesday,
+      thursday: schedule.thursday,
+      friday: schedule.friday,
+      saturday: schedule.saturday,
+      sunday: schedule.sunday,
     }
   end
 end
