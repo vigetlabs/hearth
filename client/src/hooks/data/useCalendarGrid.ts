@@ -35,8 +35,14 @@ export function useCalendarGrid({
   const scope = useCalendarScope();
   const data = useCalendarDataContext();
 
-  const weekDateKeys = scope.weekDates.map((day) => day.key);
-  const weekDates = scope.weekDates.map((day) => day.date);
+  const weekDateKeys = useMemo(
+    () => scope.weekDates.map((day) => day.key),
+    [scope.weekDates]
+  )
+  const weekDates = useMemo(
+    () => scope.weekDates.map((day) => day.date),
+    [scope.weekDates]
+  )
 
   const confirmedUserIds = useMemo(
     () =>
