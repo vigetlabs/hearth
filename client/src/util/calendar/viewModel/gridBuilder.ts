@@ -1,5 +1,4 @@
 import type {
-  ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
@@ -71,25 +70,21 @@ export function buildCalendarGridViewModel({
     (_, index) => {
       const date = addDays(focusedWeekStart, index);
       const key = generateDateKey(date);
-      const rosterUsers = resolveRosterUsers(
-        schedule[key] ?? [],
-        planningByDate[key],
-        editingUserIds,
+      const calendarEntries: CalendarScheduleEntry[] = schedule[key] ?? [];
+
+      const currentUser = calendarEntries.find(
+        (entry) => entry.user.id === currentUserId
       );
+
+      const isConfirmedElsewhere = currentUser?.status === "confirmed-elsewhere";
 
       return {
         key,
         date,
-        rosterUsers,
-        confirmedCount: countConfirmedPeople(rosterUsers),
-        planningCount: countPlanningPeople(rosterUsers),
-        isConfirmedElsewhere:
-          externalOfficeNamesByDate.has(key) ||
-          rosterUsers.some(
-            (person) =>
-              person.userId === currentUserId &&
-              person.status === "confirmed-elsewhere",
-          ),
+        calendarEntries,
+        confirmedCount: countConfirmedPeople(calendarEntries),
+        planningCount: countPlanningPeople(calendarEntries),
+        isConfirmedElsewhere,
       };
     },
   );
@@ -119,78 +114,78 @@ export function buildCalendarGridViewModel({
   };
 }
 
-function resolveRosterUsers(
-  calendarEntries: CalendarScheduleEntry[],
-  overrides: TogglePlanningOverrideState | undefined,
-  editingUserIds: ReadonlySet<number>,
-): RosterUser[] {
-  const resolvedRosterUsers = calendarEntries.map((rosterUser): RosterUser => {
-    if (rosterUser.status === "confirmed-elsewhere") {
-      return rosterUser;
-    }
+// function resolveRosterUsers(
+//   calendarEntries: CalendarScheduleEntry[],
+//   overrides: TogglePlanningOverrideState | undefined,
+//   editingUserIds: ReadonlySet<number>,
+// ): RosterUser[] {
+//   const resolvedRosterUsers = calendarEntries.map((rosterUser): RosterUser => {
+//     if (rosterUser.status === "confirmed-elsewhere") {
+//       return rosterUser;
+//     }
+//
+//     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
+//       day: calendarEntries,
+//       userId: rosterUser.userId,
+//     });
+//
+//     const isEditing = editingUserIds.has(rosterUser.userId);
+//     const hasConfirmedWeekStatus =
+//       rosterUser.status === "confirmed-yes" ||
+//       rosterUser.status === "confirmed-no";
+//
+//     if (!isEditing && hasConfirmedWeekStatus) {
+//       return rosterUser;
+//     }
+//
+//     const planningOverrideState = planningOverrideStateForUser(
+//       overrides,
+//       rosterUser.userId,
+//     );
+//
+//     const attending = isEditing
+//       ? resolveEditingAttendance({
+//           hasConfirmedVisit,
+//           planningOverrideState,
+//         })
+//       : resolveAttendance({
+//           hasConfirmedVisit,
+//           planningOverrideState,
+//           isDefaultScheduleDay,
+//         });
+//
+//     return {
+//       ...rosterUser,
+//       status: attending ? "planning-yes" : "planning-no",
+//     };
+//   });
+//
+//   const rosterUserIds = new Set(
+//     rosterUsers.map((rosterUser) => rosterUser.userId),
+//   );
+//
+//   const additionalSelectedUsers =
+//     overrides?.selected
+//       .filter(
+//         (planningUser: ChannelSerializedUser) =>
+//           !rosterUserIds.has(planningUser.id),
+//       )
+//       .map((planningUser: ChannelSerializedUser): RosterUser => ({
+//         userId: planningUser.id,
+//         name: userDisplayName(planningUser),
+//         status: "planning-yes",
+//         isVisitor: false,
+//       })) ?? [];
+//
+//   return [...additionalSelectedUsers, ...resolvedRosterUsers];
+// }
 
-    const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
-      day: calendarEntries,
-      userId: rosterUser.userId,
-    });
-
-    const isEditing = editingUserIds.has(rosterUser.userId);
-    const hasConfirmedWeekStatus =
-      rosterUser.status === "confirmed-yes" ||
-      rosterUser.status === "confirmed-no";
-
-    if (!isEditing && hasConfirmedWeekStatus) {
-      return rosterUser;
-    }
-
-    const planningOverrideState = planningOverrideStateForUser(
-      overrides,
-      rosterUser.userId,
-    );
-
-    const attending = isEditing
-      ? resolveEditingAttendance({
-          hasConfirmedVisit,
-          planningOverrideState,
-        })
-      : resolveAttendance({
-          hasConfirmedVisit,
-          planningOverrideState,
-          isDefaultScheduleDay,
-        });
-
-    return {
-      ...rosterUser,
-      status: attending ? "planning-yes" : "planning-no",
-    };
-  });
-
-  const rosterUserIds = new Set(
-    rosterUsers.map((rosterUser) => rosterUser.userId),
-  );
-
-  const additionalSelectedUsers =
-    overrides?.selected
-      .filter(
-        (planningUser: ChannelSerializedUser) =>
-          !rosterUserIds.has(planningUser.id),
-      )
-      .map((planningUser: ChannelSerializedUser): RosterUser => ({
-        userId: planningUser.id,
-        name: userDisplayName(planningUser),
-        status: "planning-yes",
-        isVisitor: false,
-      })) ?? [];
-
-  return [...additionalSelectedUsers, ...resolvedRosterUsers];
+function countConfirmedPeople(entries: CalendarScheduleEntry[]): number {
+  return entries.filter((entry) => entry.status === "confirmed-yes").length;
 }
 
-function countConfirmedPeople(people: RosterUser[]): number {
-  return people.filter((person) => person.status === "confirmed-yes").length;
-}
-
-function countPlanningPeople(people: RosterUser[]): number {
-  return people.filter((person) => person.status === "planning-yes").length;
+function countPlanningPeople(entries: CalendarScheduleEntry[]): number {
+  return entries.filter((entry) => entry.status === "planning-yes").length;
 }
 
 function countConfirmedVisitors(people: RosterUser[]): number {

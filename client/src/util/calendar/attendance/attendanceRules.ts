@@ -58,9 +58,9 @@ export const ATTENDANCE_RULES = [
   //   matches: (facts: Facts) => facts.defaultScheduled,
   //   status: "confirmed-elsewhere"
   // },
-  // {
-  //   id: "default-schedule",
-  //   matches: () => true,
-  //   status: "confirmed-elsewhere"
-  // },
+  {
+    id: "fallback",
+    matches: () => true,
+    status: "planning-no"
+  },
 ] satisfies readonly CalendarAttendanceRule[];

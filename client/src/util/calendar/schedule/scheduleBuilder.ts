@@ -1,129 +1,162 @@
+import type { Office } from "@/types/api/offices";
 import type { User } from "@/types/api/users";
 import type { Visit } from "@/types/api/visits";
 import type { OfficeDatesPlanningOverrideStates } from "@/types/cable/officePlanning";
-import type { CalendarScheduleEntry, WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
-import { findUserVisitsOnDate, hasExternalVisit, hasVisitAtOffice } from "./visitsFilter";
-import { isDefaultScheduleDay } from "./scheduleFilter";
-import { planningOverrideStateForUser } from "@/util/cable/planning/overrideState";
-import { resolveAttendanceMode } from "./modeFilter";
 import type { CalendarDateAttendanceFacts } from "@/types/calendar/attendance/attendanceFacts";
-import { resolveAttendanceStatus } from "../attendance/attendanceStatusResolver";
 import type { CalendarAttendanceResolution } from "@/types/calendar/attendance/attendanceRules";
+import type {
+  CalendarScheduleEntry,
+  WeekSchedule,
+} from "@/types/calendar/schedule/weekSchedule";
+import { planningOverrideStateForUser } from "@/util/cable/planning/overrideState";
+import { resolveAttendanceStatus } from "../attendance/attendanceStatusResolver";
+import { resolveAttendanceMode } from "./modeFilter";
+import { isDefaultScheduleDay } from "./scheduleFilter";
+import { findUserVisitsOnDate } from "./visitsFilter";
 
+type ScheduleOffice = Pick<Office, "id" | "name" | "emoji">;
 
 interface BuildWeekScheduleInput {
   officeUsers: User[];
   officeVisits: Visit[];
+  officesById: ReadonlyMap<number, ScheduleOffice>;
   weekDateKeys: readonly string[];
   confirmedUserIds: ReadonlySet<number>;
   editingUserIds: ReadonlySet<number>;
-  planningStatesByDate: OfficeDatesPlanningOverrideStates
-  activeOfficeId: number
+  planningStatesByDate: OfficeDatesPlanningOverrideStates;
+  activeOfficeId: number;
 }
 
 export function buildWeekSchedule({
   officeUsers,
   officeVisits,
+  officesById,
   weekDateKeys,
   confirmedUserIds,
   editingUserIds,
   planningStatesByDate,
-  activeOfficeId
-}: BuildWeekScheduleInput) {
+  activeOfficeId,
+}: BuildWeekScheduleInput): WeekSchedule {
   const schedule: WeekSchedule = {};
 
   for (const dateKey of weekDateKeys) {
     const entries: CalendarScheduleEntry[] = [];
 
-    for (const user of officeUsers) {
-      const facts = buildCalendarFacts({
+    const users = findAllUsersForDateAndOffice({
+      officeUsers,
+      officeVisits,
+      planningStatesByDate,
+      activeOfficeId,
+      dateKey,
+    });
+
+    for (const user of users) {
+      const userVisitsOnDate = findUserVisitsOnDate(
+        dateKey,
+        user.id,
         officeVisits,
+      );
+
+      const visitHere = userVisitsOnDate.find(
+        (visit) => visit.office_id === activeOfficeId,
+      );
+
+      const externalVisit = userVisitsOnDate.find(
+        (visit) => visit.office_id !== activeOfficeId,
+      );
+
+      const facts = buildCalendarFacts({
+        user,
+        userVisitsOnDate,
         confirmedUserIds,
         editingUserIds,
         planningStatesByDate,
         activeOfficeId,
         dateKey,
-        user
       });
 
-      const resolution: CalendarAttendanceResolution = resolveAttendanceStatus(facts);
+      const resolution: CalendarAttendanceResolution =
+        resolveAttendanceStatus(facts);
+
+      const externalOffice =
+        resolution.status === "confirmed-elsewhere" && externalVisit
+          ? officesById.get(externalVisit.office_id) ?? null
+          : null;
 
       entries.push({
         user,
         status: resolution.status,
-        resolvedBy: resolution.matchedRule
+        resolvedBy: resolution.matchedRule,
+        isVisitor:
+          visitHere !== undefined &&
+          user.office?.id !== activeOfficeId,
+        externalOffice,
       });
     }
+
     schedule[dateKey] = entries;
   }
-  return schedule
+
+  return schedule;
 }
 
 interface BuildCalendarFactsInput {
-  officeVisits: Visit[],
+  user: User;
+  userVisitsOnDate: Visit[];
   confirmedUserIds: ReadonlySet<number>;
   editingUserIds: ReadonlySet<number>;
-  planningStatesByDate: OfficeDatesPlanningOverrideStates,
-  activeOfficeId: number,
-  dateKey: string,
-  user: User
+  planningStatesByDate: OfficeDatesPlanningOverrideStates;
+  activeOfficeId: number;
+  dateKey: string;
 }
 
 function buildCalendarFacts({
-  officeVisits,
+  user,
+  userVisitsOnDate,
   confirmedUserIds,
   editingUserIds,
   planningStatesByDate,
   activeOfficeId,
   dateKey,
-  user
 }: BuildCalendarFactsInput): CalendarDateAttendanceFacts {
-  const userVisitsOnDate = findUserVisitsOnDate(
-    dateKey,
-    user.id,
-    officeVisits
+  const hasVisitHere = userVisitsOnDate.some(
+    (visit) => visit.office_id === activeOfficeId,
   );
 
-  const userHasVisitHere: boolean = hasVisitAtOffice(
-    userVisitsOnDate,
-    activeOfficeId
+  const hasVisitElsewhere = userVisitsOnDate.some(
+    (visit) => visit.office_id !== activeOfficeId,
   );
 
-  const userHasExternalVisit: boolean = hasExternalVisit(
-    userVisitsOnDate,
-    activeOfficeId
-  );
-
-  const defaultScheduled: boolean = isDefaultScheduleDay(
+  const defaultScheduled = isDefaultScheduleDay(
     user,
-    new Date(dateKey)
+    new Date(`${dateKey}T00:00:00`),
   );
 
-  const planningOverrideForDate = planningOverrideStateForUser(
+  const planningOverride = planningOverrideStateForUser(
     planningStatesByDate[dateKey],
-    user.id
+    user.id,
   );
 
   const mode = resolveAttendanceMode({
     isEditing: editingUserIds.has(user.id),
-    isConfirmed: confirmedUserIds.has(user.id)
+    isConfirmed: confirmedUserIds.has(user.id),
   });
 
   return {
-    mode: mode,
-    hasVisitHere: userHasVisitHere,
-    hasVisitElsewhere: userHasExternalVisit,
-    defaultScheduled: defaultScheduled,
-    planningOverride: planningOverrideForDate
-  }
+    mode,
+    hasVisitHere,
+    hasVisitElsewhere,
+    defaultScheduled,
+    planningOverride,
+  };
 }
 
-interface FindAllUsersForDateAndOffice {
-  officeUsers: User[],
-  officeVisits: Visit[],
-  planningStatesByDate: OfficeDatesPlanningOverrideStates,
-  activeOfficeId: number,
-  dateKey: string
+interface FindAllUsersForDateAndOfficeInput {
+  officeUsers: User[];
+  officeVisits: Visit[];
+  planningStatesByDate: OfficeDatesPlanningOverrideStates;
+  activeOfficeId: number;
+  dateKey: string;
 }
 
 function findAllUsersForDateAndOffice({
@@ -131,19 +164,19 @@ function findAllUsersForDateAndOffice({
   officeVisits,
   planningStatesByDate,
   activeOfficeId,
-  dateKey
-}: FindAllUsersForDateAndOffice) {
-
+  dateKey,
+}: FindAllUsersForDateAndOfficeInput): User[] {
   const usersById = new Map<number, User>(
-    officeUsers.map((user): [number, User] => [user.id, user]),
+    officeUsers.map((user) => [user.id, user]),
   );
 
-  for (const user of officeUsers) {
-    usersById.set(user.id, user);
-  }
-
   for (const visit of officeVisits) {
-    usersById.set(visit.user.id, visit.user)
+    if (
+      visit.visit_date === dateKey &&
+      visit.office_id === activeOfficeId
+    ) {
+      usersById.set(visit.user.id, visit.user);
+    }
   }
 
   const selectedPlanningUsers =
@@ -152,4 +185,6 @@ function findAllUsersForDateAndOffice({
   for (const user of selectedPlanningUsers) {
     usersById.set(user.id, user);
   }
+
+  return [...usersById.values()];
 }
