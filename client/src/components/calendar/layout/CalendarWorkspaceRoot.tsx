@@ -96,12 +96,16 @@ export default function CalendarWorkspaceRoot({
     weekDateKeys: weekDateKeys
   });
 
+  const isCurrentUserConfirmed: boolean = attendanceConfirmationsQuery.data.some(
+    (confirmation) => confirmation.user_id === scope.user.id
+  );
+
   const bootstrap: CalendarMachineBootstrap = {
     scope: {
       activeOfficeId: scope.activeOffice.id,
       focusedWeekStartKey: scope.focusedWeekStartKey
     },
-    isConfirmed: attendanceConfirmationsQuery.data.length > 0,
+    isConfirmed: isCurrentUserConfirmed,
     selectedDates: allSelectedDates
   }
 
