@@ -55,6 +55,13 @@
   --color-footer-muted: #c7a894; /* tagline, link lists */
   --color-footer-faint: #9e806e; /* column headings, legal line */
 
+  /* Panel — text on the terracotta marketing panels (sign-in page). Lighter
+     and warmer than the `fg-inverse` pair, which sits on the flat accent
+     rather than on the gradient. */
+  --color-panel-eyebrow: #f2b88c; /* section eyebrow */
+  --color-panel-heading: var(--color-page); /* section heading */
+  --color-panel-body: #d9b8a1; /* section subhead */
+
   /* Surfaces — backgrounds */
   --color-page: #f8f1e9; /* App background — pages, onboarding screens */
   --color-surface: var(
@@ -76,6 +83,8 @@
   /* Emphasis — terracotta brand accent (primary actions, active cells, badges) */
   --color-strong: #b44820; /* Brand/Confirmed */
   --color-strong-hover: #6e2417; /* Brand/Confirmed border */
+  --color-strong-deep: #9d3c20; /* mid-point of the marketing panel ramp,
+                                   between `strong` and `fill` */
 
   /* Attendance toggle — in/out of office active states (day cell roster tabs) */
   --color-in-office: #c25706; /* "In Office" tab active */
@@ -97,6 +106,10 @@
 
   /* Elevation — soft card/button lift (Figma drop shadow) */
   --shadow-card: 0px 11.42px 34.26px 0px #0000000f;
+
+  /* Elevation — soft drop under the product demo, lifting it off the
+     terracotta panel without giving it a border or card of its own */
+  --shadow-demo: 0 30px 70px -20px #3a130a99;
 }
 
 /* App background — every screen sits on the warm cream page color */

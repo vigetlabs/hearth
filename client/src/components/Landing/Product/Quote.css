@@ -1,0 +1,45 @@
+/*
+  ============================================================================
+  Quote section type scale
+
+  Like the Product panel it continues, this section is sized off the viewport
+  width rather than the breakpoint scale, so the mark, the quote and the
+  attribution keep their proportions to each other — and to the panel — at
+  every window size.
+
+  Measured off the mock at a 1440px frame: the quote reads at ~34px, which is
+  34 / 1440 = 2.35vw. The 2.375rem cap stops it growing past ~1620px of
+  viewport (it drifts narrower instead), and the 1.125rem floor only binds
+  below ~765px, where the quote is allowed to wrap onto more lines rather than
+  shrink any further.
+  ============================================================================
+*/
+.quote-section {
+  --quote-size: clamp(1.125rem, 2.35vw, 2.375rem);
+}
+
+/* The mark is a plain “ set large. Its ink is only about a quarter of its font
+   size, so 2.45x the quote size lands the visible glyph at the ~21px tall the
+   mock shows. `line-height: 1` trims the em box back so the gap below the mark
+   is set by the quote's own margin rather than by leading. */
+.quote-mark {
+  font-size: calc(2.45 * var(--quote-size));
+  line-height: 1;
+}
+
+/* 25em is the mock's measure (~845px at a 1440px frame) expressed against the
+   quote's own size, so it can't drift as the type scales. It leaves the quote
+   breaking onto the two lines the mock shows; `text-balance` on the element is
+   what evens those two out instead of leaving a long line and a short one. */
+.quote-text {
+  font-size: var(--quote-size);
+  line-height: 1.35;
+  max-width: 25em;
+}
+
+/* The attribution reads at ~19px against the 34px quote — 0.56 of it. The
+   avatar next to it is sized in `em` from here, so the name and the face scale
+   as one unit. */
+.quote-attribution {
+  font-size: calc(0.56 * var(--quote-size));
+}

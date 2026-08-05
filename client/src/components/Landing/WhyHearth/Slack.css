@@ -1,0 +1,85 @@
+/*
+  ============================================================================
+  Slack section type scale
+
+  The copy column is sized off the viewport width like the Product, Quote and
+  Why Hearth panels above it, so the eyebrow, heading, body and highlights keep
+  the same proportions to each other at every window size.
+
+  Heading: measured off the mock, "communication tool" — the longer of the two
+  lines — spans ~9.4x its own font size in Plus Jakarta Sans at this weight and
+  tracking. The mock sets that line at ~26% of the frame, which works out to
+  26 / 9.4 = 2.75vw. The 2.875rem cap stops it growing past ~1670px of viewport
+  (it drifts narrower instead), and the 1.75rem floor binds below ~1020px —
+  just under the breakpoint where the two columns stack and the heading gets
+  the full width to itself anyway.
+  ============================================================================
+*/
+.slack-section {
+  --slack-heading-size: clamp(1.75rem, 2.75vw, 2.875rem);
+}
+
+/* 11em holds "communication tool" (~9.4em) on one line but not "Viget's main
+   communication" (~14em), so the heading always breaks after "main" the way
+   the mock shows, at every size the type scales to. */
+.slack-heading {
+  font-size: var(--slack-heading-size);
+  max-width: 11em;
+}
+
+/* Matches the Product and Why Hearth eyebrows exactly — all three read as the
+   same label a scroll apart, so they share a scale rather than each deriving
+   one. */
+.slack-eyebrow {
+  font-size: clamp(0.6875rem, 1vw, 0.9375rem);
+}
+
+/* 0.39 of the heading, scaled down alongside it so the two keep their
+   proportions. 25em is the mock's measure (~445px against its 18px body)
+   expressed against the body's own size, so the paragraph breaks onto the same
+   three lines as the type scales rather than drifting wider or narrower. */
+.slack-body {
+  font-size: clamp(0.9375rem, 1.3vw, 1.125rem);
+  max-width: 25em;
+}
+
+/* One step up from the body — 0.37 of the heading.*/
+.slack-highlight {
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+}
+
+/*
+  ============================================================================
+  Slack message mock
+
+  Everything inside the card is sized in `em` off this one font size, so the
+  card scales as a single piece — padding, gaps, the avatar tile and the
+  buttons all track the type instead of each needing their own breakpoints.
+
+  That size comes from the card's own width rather than the viewport's, because
+  unlike the sections above it the card is a column, not the full frame: at `lg`
+  it takes a fixed share of the row, so a viewport-based size would leave it
+  reading small in its own box just below that breakpoint and cramped just
+  above. The mock's card is ~519px wide with ~15px type in it, so 15 / 519 =
+  2.9cqw holds those proportions at any column width. The clamp keeps the type
+  legible at the extremes, where the card is allowed to look a little roomier or
+  tighter than the mock instead of scaling without limit.
+  ============================================================================
+*/
+.slack-card-frame {
+  container-type: inline-size;
+}
+
+.slack-card {
+  font-size: clamp(0.75rem, 2.9cqw, 0.9375rem);
+}
+
+/* The edit modal sizes off the same rule. It mounts inside the frame, over the
+   card rather than in it, so it can't inherit the card's font size — but it is
+   a sheet in the same app over the same column, and the two only read as the
+   same surface if their type, padding and controls come out the same size. It
+   is also what the modal's inset is measured in, so the margin it floats on
+   scales with the card instead of holding one pixel width at every size. */
+.slack-modal {
+  font-size: clamp(0.75rem, 2.9cqw, 0.9375rem);
+}

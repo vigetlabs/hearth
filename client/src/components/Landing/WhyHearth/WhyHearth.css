@@ -1,0 +1,72 @@
+/*
+  ============================================================================
+  Why Hearth section type scale
+
+  Sized off the viewport width like the Product and Quote panels above it, so
+  the header, the screenshot and the callouts around it keep the same
+  proportions to each other at every window size.
+
+  Heading: measured off the mock, "Spot the best day before you commute" spans
+  ~17.3x its own font size in Plus Jakarta Sans at this weight and tracking.
+  The mock runs that line across ~56% of the frame, which works out to
+  56 / 17.3 = 3.25vw. The 3rem cap stops it growing past ~1475px of viewport
+  (it drifts narrower instead), and the 1.375rem floor only binds below ~675px,
+  where the line is allowed to wrap to two rather than shrink any further.
+  ============================================================================
+*/
+.why-hearth-section {
+  --why-heading-size: clamp(1.375rem, 3.25vw, 3rem);
+
+  /* The heading's rendered line width, from the same ~17.3x measurement above.
+     Holds whenever the heading fits on one line, which is everywhere the
+     3.25vw term is doing the work. */
+  --why-heading-measure: calc(17.3 * var(--why-heading-size));
+}
+
+.why-hearth-heading {
+  font-size: var(--why-heading-size);
+}
+
+/* Matches the Product eyebrow exactly — the two sections sit a scroll apart
+   and their eyebrows read as the same label, so they share a scale rather than
+   each deriving one. */
+.why-hearth-eyebrow {
+  font-size: clamp(0.6875rem, 1vw, 0.9375rem);
+}
+
+/* Scaled down alongside the heading so the two keep their proportions — well
+   above the mock's 0.44 of the heading, at 0.55.
+
+   The measure is tied to the heading's own line width rather than to a ch
+   count, so the subhead tracks the heading instead of drifting as the two font
+   sizes scale. It's held just inside that line at 0.92 of it, so the two lines
+   break a touch earlier and the block reads as sitting under the heading rather
+   than running the same width as it — still wider than the mock's 0.87. It
+   re-wraps freely on narrower screens. */
+.why-hearth-subhead {
+  font-size: clamp(1rem, 1.8vw, 1.3125rem);
+  max-width: calc(0.92 * var(--why-heading-measure));
+}
+
+/* The callouts are the smallest type in the section — 0.345 of the heading —
+   and the pills one step up from them, at 0.415. Both run a little larger than
+   the mock's 0.32 and 0.385 so they hold their own against the screenshot;
+   since the pills are sized in `em`, the step up takes their padding and their
+   gap with it and the bubble grows as a whole. Both are set from the viewport
+   for the same reason the header is: they have to stay pinned to the same
+   features of the screenshot as everything scales. */
+.why-hearth-note {
+  font-size: clamp(0.8125rem, 1.12vw, 1rem);
+}
+
+.why-hearth-pill {
+  font-size: clamp(0.875rem, 1.35vw, 1.1875rem);
+}
+
+/* The screenshot's own 510x1182 shape, so the section reserves the full height
+   of the image before it loads and the callouts pinned to it don't jump on
+   arrival. */
+.why-hearth-shot {
+  aspect-ratio: 510 / 1182;
+  box-shadow: 0 18px 44px -8px rgba(89, 41, 18, 0.14);
+}

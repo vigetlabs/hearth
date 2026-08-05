@@ -1,0 +1,63 @@
+/*
+  ============================================================================
+  Sign-off card type scale
+
+  Sized off the viewport width like every panel above it, so the card's height,
+  its heading and the button under it keep the same proportions to each other at
+  every window size.
+
+  Heading: measured off the mock, "See you around :)" spans ~8.2x its own font
+  size in Plus Jakarta Sans at this weight and tracking. The mock runs that line
+  across ~32.5% of the frame, which works out to 32.5 / 8.2 = 4vw. The 3.75rem
+  cap stops it growing past ~1500px of viewport (it drifts narrower instead),
+  and the 2rem floor binds below ~800px, where the line still fits across the
+  card at its own width.
+  ============================================================================
+*/
+.outro-card {
+  /* The mock's card is ~550px tall against a 1440px frame — 38vw — with the
+     clamp keeping it from collapsing on narrow screens or running to a full
+     screen of empty terracotta on wide ones. It's a minimum rather than a
+     fixed height so the card still grows if the copy inside it ever wraps to
+     more lines than the mock shows. */
+  min-height: clamp(22rem, 38vw, 34rem);
+}
+
+.outro-heading {
+  font-size: clamp(2rem, 4vw, 3.75rem);
+}
+
+/* 0.3 of the heading — the same scale the Slack and article body copy is set
+   at, so the one line under the headline reads at the page's normal body size
+   rather than as a scaled-down piece of the headline. */
+.outro-sub {
+  font-size: clamp(0.9375rem, 1.3vw, 1.125rem);
+}
+
+/*
+  ============================================================================
+  Corner mark
+
+  The Hearth mark, blown up and hung off the card's bottom-right corner so it
+  runs off the edge — the card clips it. Drawn as a mask over a flat color
+  rather than as an `<img>`, so the one `favicon.svg` on disk stays the single
+  copy of the mark and the tint here is a plain background color: the mock's
+  mark is lighter than the terracotta under it, which an `<img>` of a
+  terracotta-filled SVG can't be without a filter stack.
+
+  The mask is unprefixed plus `-webkit-`: Safari only dropped the prefix in
+  15.4, and the mark silently fills the corner as a solid block without it.
+
+  `aspect-ratio` matches the asset's own 22x29 box, so setting the height alone
+  sizes the mark and `mask-size: contain` has nothing to letterbox.
+  ============================================================================
+*/
+.outro-mark {
+  -webkit-mask-image: url("/favicon.svg");
+  mask-image: url("/favicon.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  aspect-ratio: 22 / 29;
+}
