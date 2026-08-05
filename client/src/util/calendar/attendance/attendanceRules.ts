@@ -53,11 +53,11 @@ export const ATTENDANCE_RULES = [
   //   matches: (facts: Facts) => facts.mode === "editing",
   //   status: "planning-no"
   // },
-  // {
-  //   id: "default-schedule",
-  //   matches: (facts: Facts) => facts.defaultScheduled,
-  //   status: "confirmed-elsewhere"
-  // },
+  {
+    id: "default-schedule",
+    matches: (facts: Facts) => facts.defaultScheduled,
+    status: "planning-yes"
+  },
   {
     id: "fallback",
     matches: () => true,
