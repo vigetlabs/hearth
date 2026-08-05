@@ -6,20 +6,6 @@ module OpenApi::Schemas::V1::Visits
     example: "2026-07-10"
   }
 
-  VISITS_USER_SUMMARY = {
-    type: :object,
-    required: %w[
-      id
-      first_name
-      last_name
-    ],
-    properties: {
-      id: { type: :integer },
-      first_name: { type: :string },
-      last_name: { type: :string }
-    }
-  }
-
   # VISIT_OBJECT: Public visit object returned by the API
   #
   # This is not a full response body. It only describes the visit resource itself.
@@ -36,7 +22,7 @@ module OpenApi::Schemas::V1::Visits
     ],
     properties: {
       id: { type: :integer },
-      user: VISITS_USER_SUMMARY,
+      user: OpenApi::Schemas::V1::Users::USER_OBJECT,
       visit_date: VISIT_DATE,
       created_at: {
         type: :string,

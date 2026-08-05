@@ -7,10 +7,7 @@ class VisitSerializer
              :updated_at
 
   attribute :user do |visit|
-    {
-      id: visit.user.id,
-      first_name: visit.user.first_name,
-      last_name: visit.user.last_name
-    }
+    UserSerializer.new(visit.user).serializable_hash[:data][:attributes]
+      .merge(id: visit.user.id)
   end
 end

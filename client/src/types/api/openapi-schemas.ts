@@ -4,1406 +4,1510 @@
  */
 
 export interface paths {
-  "/api/v1/attendance_confirmations": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/attendance_confirmations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch attendance confirmations */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The office whose confirmations should be returned. */
+                    office_id: number;
+                    /** @description Any date within the requested week. The API normalizes this value to the Monday of that week. */
+                    starts_on: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description attendance confirmations fetched successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["attendance_confirmations_response"];
+                    };
+                };
+                /** @description parameter has an invalid format */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description authentication is required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+                /** @description office was not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["not_found_error_response"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Confirm attendance for a week */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["create_attendance_confirmation_request"];
+                };
+            };
+            responses: {
+                /** @description attendance confirmed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["create_attendance_confirmation_response"];
+                    };
+                };
+                /** @description request contains invalid selected dates */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description authentication is required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+                /** @description office was not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["not_found_error_response"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Fetch attendance confirmations */
-    get: {
-      parameters: {
-        query: {
-          /** @description The office whose confirmations should be returned. */
-          office_id: number;
-          /** @description Any date within the requested week. The API normalizes this value to the Monday of that week. */
-          starts_on: string;
+    "/api/v1/offices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description attendance confirmations fetched successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["attendance_confirmations_response"];
-          };
+        /** Fetches all offices */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description offices fetched successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["offices_response"];
+                    };
+                };
+            };
         };
-        /** @description parameter has an invalid format */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description authentication is required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-        /** @description office was not found */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["not_found_error_response"];
-          };
-        };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    /** Confirm attendance for a week */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["create_attendance_confirmation_request"];
+    "/api/v1/schedules/default": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description attendance confirmed successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["create_attendance_confirmation_response"];
-          };
+        /** Fetches the current user's default schedule */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description fetched default schedule successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["schedule_response"];
+                    };
+                };
+                /** @description authentication required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+            };
         };
-        /** @description request contains invalid selected dates */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description authentication is required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-        /** @description office was not found */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["not_found_error_response"];
-          };
-        };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/offices": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Creates a schedule */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["create_schedule_request"];
+                };
+            };
+            responses: {
+                /** @description schedule created successfully */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["schedule_response"];
+                    };
+                };
+                /** @description missing schedule parameter */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description authentication required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+                /** @description invalid schedule parameters */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["validation_error_response"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Fetches all offices */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description offices fetched successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["offices_response"];
-          };
+    "/api/v1/users/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        /** Starts the Google SSO */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description redirects to the Google OAuth authorization flow */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/schedules/default": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/users/auth/failure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Handles failed Google SSO attempt */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description redirects to the frontend with an error path in URL */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Fetches the current user's default schedule */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description fetched default schedule successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["schedule_response"];
-          };
+    "/api/v1/users/auth/google_oauth2/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        /** @description authentication required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
+        /** Handles the Google OAuth callback */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description sets the JWT cookie and redirects to the frontend profile */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/schedules": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Creates a user account */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["create_user_request"];
+                };
+            };
+            responses: {
+                /** @description user created successfully */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["user_response"];
+                    };
+                };
+                /** @description missing user parameter */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description invalid user params */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["validation_error_response"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Creates a schedule */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["create_schedule_request"];
+    "/api/v1/users/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description schedule created successfully */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["schedule_response"];
-          };
+        get?: never;
+        put?: never;
+        /** Logs in a user to their account */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["login_user_request"];
+                };
+            };
+            responses: {
+                /** @description logged in successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["user_response"];
+                    };
+                };
+                /** @description missing required login parameters */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+            };
         };
-        /** @description missing schedule parameter */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description authentication required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-        /** @description invalid schedule parameters */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["validation_error_response"];
-          };
-        };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/auth/google": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/users/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Logs out a user from their active authenticated session */
+        delete: {
+            parameters: {
+                query?: never;
+                header: {
+                    Cookie: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description logged out user successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["empty_success_response"];
+                    };
+                };
+                /** @description invalid active session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Starts the Google SSO */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description redirects to the Google OAuth authorization flow */
-        302: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
+    "/api/v1/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        /** Fetches user information for current authenticated user */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description fetched user successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["user_response"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Updates user information for current authenticated user */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["patch_user_request"];
+                };
+            };
+            responses: {
+                /** @description updated user successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["user_response"];
+                    };
+                };
+                /** @description invalid active session */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+            };
+        };
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/auth/failure": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/visits/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieves the authenticated user's visits for a calendar range */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Anchor date for the calendar range. Defaults to the current date. */
+                    date?: components["schemas"]["visit_date"];
+                    /** @description Calendar view used to calculate the returned range. */
+                    view?: "week";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description user visits fetched successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "Application/json": components["schemas"]["visits_response"];
+                    };
+                };
+                /** @description invalid query parameters */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "Application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Handles failed Google SSO attempt */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description redirects to the frontend with an error path in URL */
-        302: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
+    "/api/v1/visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        /** Retrieves visits for a calendar range */
+        get: {
+            parameters: {
+                query: {
+                    /** @description Anchor date for the calendar range. Defaults to the current date. */
+                    date?: components["schemas"]["visit_date"];
+                    /** @description Calendar view used to calculate the returned range. */
+                    view?: "week";
+                    /** @description ID of the office whose visits should be returned. */
+                    office_id: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description invalid query parameters */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description authentication required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Creates user visits */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["create_visits_request"];
+                };
+            };
+            responses: {
+                /** @description visits created successfully */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["visits_response"];
+                    };
+                };
+                /** @description missing visits parameter */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["bad_request_error_response"];
+                    };
+                };
+                /** @description authentication required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["authentication_error_response"];
+                    };
+                };
+                /** @description invalid visits parameters */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["validation_error_response"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/auth/google_oauth2/callback": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Handles the Google OAuth callback */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description sets the JWT cookie and redirects to the frontend profile */
-        302: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Creates a user account */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["create_user_request"];
-        };
-      };
-      responses: {
-        /** @description user created successfully */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["user_response"];
-          };
-        };
-        /** @description missing user parameter */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description invalid user params */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["validation_error_response"];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Logs in a user to their account */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["login_user_request"];
-        };
-      };
-      responses: {
-        /** @description logged in successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["user_response"];
-          };
-        };
-        /** @description missing required login parameters */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/logout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Logs out a user from their active authenticated session */
-    delete: {
-      parameters: {
-        query?: never;
-        header: {
-          Cookie: string;
-        };
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description logged out user successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["empty_success_response"];
-          };
-        };
-        /** @description invalid active session */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-      };
-    };
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Fetches user information for current authenticated user */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description fetched user successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["user_response"];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Updates user information for current authenticated user */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["patch_user_request"];
-        };
-      };
-      responses: {
-        /** @description updated user successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["user_response"];
-          };
-        };
-        /** @description invalid active session */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-      };
-    };
-    trace?: never;
-  };
-  "/api/v1/visits/mine": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Retrieves the authenticated user's visits for a calendar range */
-    get: {
-      parameters: {
-        query?: {
-          /** @description Anchor date for the calendar range. Defaults to the current date. */
-          date?: components["schemas"]["visit_date"];
-          /** @description Calendar view used to calculate the returned range. */
-          view?: "week";
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description user visits fetched successfully */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "Application/json": components["schemas"]["visits_response"];
-          };
-        };
-        /** @description invalid query parameters */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "Application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/visits": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Retrieves visits for a calendar range */
-    get: {
-      parameters: {
-        query: {
-          /** @description Anchor date for the calendar range. Defaults to the current date. */
-          date?: components["schemas"]["visit_date"];
-          /** @description Calendar view used to calculate the returned range. */
-          view?: "week";
-          /** @description ID of the office whose visits should be returned. */
-          office_id: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description invalid query parameters */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description authentication required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-      };
-    };
-    put?: never;
-    /** Creates user visits */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["create_visits_request"];
-        };
-      };
-      responses: {
-        /** @description visits created successfully */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["visits_response"];
-          };
-        };
-        /** @description missing visits parameter */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["bad_request_error_response"];
-          };
-        };
-        /** @description authentication required */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["authentication_error_response"];
-          };
-        };
-        /** @description invalid visits parameters */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            "application/json": components["schemas"]["validation_error_response"];
-          };
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** @description Shared status metadata returned by API responses. */
-    status: {
-      message: string;
-    };
-    /** @description One individual field error, usually used inside an errors array. */
-    field_error: {
-      field: string;
-      message: string;
-    };
-    /** @description Full response body for validation errors with field-level details. */
-    validation_error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      error: {
-        /** @enum {string} */
-        type: "validation_error";
-        /** @enum {string} */
-        code: "invalid_attributes";
-        details: {
-          field: string;
-          message: string;
-        }[];
-      };
-    };
-    /** @description Full response body for invalid active sessions. */
-    authentication_error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      error: {
-        /** @enum {string} */
-        type: "authentication_error";
-        /** @enum {string} */
-        code: "authentication_required" | "invalid_credentials";
-      };
-    };
-    /** @description Full response body for record not found errors. */
-    not_found_error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      error: {
-        /** @enum {string} */
-        type: "not_found_error";
-        /** @enum {string} */
-        code: "resource_not_found";
-        /** @enum {string} */
-        resource: "user" | "office" | "schedule" | "visit";
-      };
-    };
-    /** @description Full response body for malformed request bodies. */
-    bad_request_error_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      error: {
-        /** @enum {string} */
-        type: "bad_request_error";
-        /** @enum {string} */
-        code:
-          | "bad_request"
-          | "missing_parameter"
-          | "malformed_json"
-          | "invalid_parameter_format";
-        /** @example user */
-        field?: string | null;
-      };
-    };
-    /** @description Generic success response body */
-    empty_success_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      /**
-       * @description No resource payload is returned for this response
-       * @example null
-       */
-      data: unknown;
-    };
-    /** @description Public schedule data returned by the API. */
-    schedule: {
-      id: number;
-      is_default: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      monday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      tuesday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      wednesday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      thursday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      friday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      saturday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      sunday: boolean;
-    };
-    schedule_attributes: {
-      is_default: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      monday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      tuesday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      wednesday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      thursday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      friday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      saturday: boolean;
-      /** @description Whether the user has selected this day in their schedule */
-      sunday: boolean;
-    };
-    /** @description Request body for creating a new schedule */
-    create_schedule_request: {
-      schedule: {
-        is_default: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        monday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        tuesday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        wednesday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        thursday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        friday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        saturday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        sunday: boolean;
-      };
-    };
-    /** @description Full response body for endpoints that return a single schedule. */
-    schedule_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
+    schemas: {
+        /** @description Shared status metadata returned by API responses. */
+        status: {
+            message: string;
+        };
+        /** @description One individual field error, usually used inside an errors array. */
+        field_error: {
+            field: string;
+            message: string;
+        };
+        /** @description Full response body for validation errors with field-level details. */
+        validation_error_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            error: {
+                /** @enum {string} */
+                type: "validation_error";
+                /** @enum {string} */
+                code: "invalid_attributes";
+                details: {
+                    field: string;
+                    message: string;
+                }[];
+            };
+        };
+        /** @description Full response body for invalid active sessions. */
+        authentication_error_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            error: {
+                /** @enum {string} */
+                type: "authentication_error";
+                /** @enum {string} */
+                code: "authentication_required" | "invalid_credentials";
+            };
+        };
+        /** @description Full response body for record not found errors. */
+        not_found_error_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            error: {
+                /** @enum {string} */
+                type: "not_found_error";
+                /** @enum {string} */
+                code: "resource_not_found";
+                /** @enum {string} */
+                resource: "user" | "office" | "schedule" | "visit";
+            };
+        };
+        /** @description Full response body for malformed request bodies. */
+        bad_request_error_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            error: {
+                /** @enum {string} */
+                type: "bad_request_error";
+                /** @enum {string} */
+                code: "bad_request" | "missing_parameter" | "malformed_json" | "invalid_parameter_format";
+                /** @example user */
+                field?: string | null;
+            };
+        };
+        /** @description Generic success response body */
+        empty_success_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            /**
+             * @description No resource payload is returned for this response
+             * @example null
+             */
+            data: unknown;
+        };
         /** @description Public schedule data returned by the API. */
         schedule: {
-          id: number;
-          is_default: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          monday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          tuesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          wednesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          thursday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          friday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          saturday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          sunday: boolean;
+            id: number;
+            is_default: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            monday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            tuesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            wednesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            thursday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            friday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            saturday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            sunday: boolean;
         };
-      };
-    };
-    /** @description Full response body for endpoints that return multiple schedules. */
-    schedules_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        schedules: {
-          id: number;
-          is_default: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          monday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          tuesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          wednesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          thursday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          friday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          saturday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          sunday: boolean;
-        }[];
-      };
-    };
-    /** @description Public office data returned by the API. */
-    office: {
-      id: number;
-      name: string;
-      /** @example Boulder */
-      city: string;
-      /** @example CO */
-      state: string;
-      /** @example America/Denver */
-      timezone: string;
-      /** @example 🏔️ */
-      emoji: string;
-    };
-    /** @description Full response body for endpoints that return a single office. */
-    office_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
+        schedule_attributes: {
+            is_default: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            monday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            tuesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            wednesday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            thursday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            friday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            saturday: boolean;
+            /** @description Whether the user has selected this day in their schedule */
+            sunday: boolean;
+        };
+        /** @description Request body for creating a new schedule */
+        create_schedule_request: {
+            schedule: {
+                is_default: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                monday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                tuesday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                wednesday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                thursday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                friday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                saturday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                sunday: boolean;
+            };
+        };
+        /** @description Full response body for endpoints that return a single schedule. */
+        schedule_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                /** @description Public schedule data returned by the API. */
+                schedule: {
+                    id: number;
+                    is_default: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    monday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    tuesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    wednesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    thursday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    friday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    saturday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    sunday: boolean;
+                };
+            };
+        };
+        /** @description Full response body for endpoints that return multiple schedules. */
+        schedules_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                schedules: {
+                    id: number;
+                    is_default: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    monday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    tuesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    wednesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    thursday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    friday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    saturday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    sunday: boolean;
+                }[];
+            };
+        };
         /** @description Public office data returned by the API. */
         office: {
-          id: number;
-          name: string;
-          /** @example Boulder */
-          city: string;
-          /** @example CO */
-          state: string;
-          /** @example America/Denver */
-          timezone: string;
-          /** @example 🏔️ */
-          emoji: string;
+            id: number;
+            name: string;
+            /** @example Boulder */
+            city: string;
+            /** @example CO */
+            state: string;
+            /** @example America/Denver */
+            timezone: string;
+            /** @example 🏔️ */
+            emoji: string;
         };
-      };
-    };
-    /** @description Full response body for endpoints that return a single office. */
-    offices_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        offices: {
-          id: number;
-          name: string;
-          /** @example Boulder */
-          city: string;
-          /** @example CO */
-          state: string;
-          /** @example America/Denver */
-          timezone: string;
-          /** @example 🏔️ */
-          emoji: string;
-        }[];
-      };
-    };
-    /** @description Public visit data returned by the API. */
-    visit: {
-      id: number;
-      user: {
-        id: number;
-        first_name: string;
-        last_name: string;
-      };
-      /**
-       * Format: date
-       * @description Calendar date only with no timezone (YYYY-MM-DD)
-       * @example 2026-07-10
-       */
-      visit_date: string;
-      /**
-       * Format: date-time
-       * @description Created-at time in ISO 8601 format
-       * @example 2026-07-10T13:42:18.123Z
-       */
-      created_at: string;
-      /**
-       * Format: date-time
-       * @description Updated-at time in ISO 8601 format
-       * @example 2026-07-10T13:42:18.123Z
-       */
-      updated_at: string;
-      office_id: number;
-    };
-    /**
-     * Format: date
-     * @description Calendar date only with no timezone (YYYY-MM-DD)
-     * @example 2026-07-10
-     */
-    visit_date: string;
-    /** @description Request body for creating a new visit */
-    create_visits_request: {
-      visits: {
+        /** @description Full response body for endpoints that return a single office. */
+        office_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                /** @description Public office data returned by the API. */
+                office: {
+                    id: number;
+                    name: string;
+                    /** @example Boulder */
+                    city: string;
+                    /** @example CO */
+                    state: string;
+                    /** @example America/Denver */
+                    timezone: string;
+                    /** @example 🏔️ */
+                    emoji: string;
+                };
+            };
+        };
+        /** @description Full response body for endpoints that return a single office. */
+        offices_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                offices: {
+                    id: number;
+                    name: string;
+                    /** @example Boulder */
+                    city: string;
+                    /** @example CO */
+                    state: string;
+                    /** @example America/Denver */
+                    timezone: string;
+                    /** @example 🏔️ */
+                    emoji: string;
+                }[];
+            };
+        };
+        /** @description Public visit data returned by the API. */
+        visit: {
+            id: number;
+            /** @description Public user account data returned by the API. */
+            user: {
+                id: number;
+                /** Format: email */
+                email: string;
+                first_name: string;
+                last_name: string;
+                office: {
+                    id: number;
+                    name: string;
+                } | null;
+                default_schedule?: {
+                    id: number;
+                    is_default: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    monday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    tuesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    wednesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    thursday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    friday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    saturday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    sunday: boolean;
+                } | null;
+                lab?: string;
+                is_onboarding_complete: boolean;
+            };
+            /**
+             * Format: date
+             * @description Calendar date only with no timezone (YYYY-MM-DD)
+             * @example 2026-07-10
+             */
+            visit_date: string;
+            /**
+             * Format: date-time
+             * @description Created-at time in ISO 8601 format
+             * @example 2026-07-10T13:42:18.123Z
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Updated-at time in ISO 8601 format
+             * @example 2026-07-10T13:42:18.123Z
+             */
+            updated_at: string;
+            office_id: number;
+        };
         /**
          * Format: date
          * @description Calendar date only with no timezone (YYYY-MM-DD)
          * @example 2026-07-10
          */
         visit_date: string;
-        office_id: number;
-      }[];
-    };
-    /** @description Full response body for endpoints that return a single visit. */
-    visit_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        /** @description Public visit data returned by the API. */
-        visit: {
-          id: number;
-          user: {
-            id: number;
-            first_name: string;
-            last_name: string;
-          };
-          /**
-           * Format: date
-           * @description Calendar date only with no timezone (YYYY-MM-DD)
-           * @example 2026-07-10
-           */
-          visit_date: string;
-          /**
-           * Format: date-time
-           * @description Created-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          created_at: string;
-          /**
-           * Format: date-time
-           * @description Updated-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          updated_at: string;
-          office_id: number;
+        /** @description Request body for creating a new visit */
+        create_visits_request: {
+            visits: {
+                /**
+                 * Format: date
+                 * @description Calendar date only with no timezone (YYYY-MM-DD)
+                 * @example 2026-07-10
+                 */
+                visit_date: string;
+                office_id: number;
+            }[];
         };
-      };
-    };
-    /** @description Full response body for endpoints that return a single visit. */
-    visits_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        visits: {
-          id: number;
-          user: {
-            id: number;
-            first_name: string;
-            last_name: string;
-          };
-          /**
-           * Format: date
-           * @description Calendar date only with no timezone (YYYY-MM-DD)
-           * @example 2026-07-10
-           */
-          visit_date: string;
-          /**
-           * Format: date-time
-           * @description Created-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          created_at: string;
-          /**
-           * Format: date-time
-           * @description Updated-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          updated_at: string;
-          office_id: number;
-        }[];
-      };
-    };
-    /** @description Public user account data returned by the API. */
-    user: {
-      id: number;
-      /** Format: email */
-      email: string;
-      first_name: string;
-      last_name: string;
-      office: {
-        id: number;
-        name: string;
-      } | null;
-      default_schedule?: {
-        id: number;
-        is_default: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        monday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        tuesday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        wednesday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        thursday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        friday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        saturday: boolean;
-        /** @description Whether the user has selected this day in their schedule */
-        sunday: boolean;
-      } | null;
-      lab?: string;
-      is_onboarding_complete: boolean;
-    };
-    /** @description Full response body for endpoints that return one user. */
-    user_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
+        /** @description Full response body for endpoints that return a single visit. */
+        visit_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                /** @description Public visit data returned by the API. */
+                visit: {
+                    id: number;
+                    /** @description Public user account data returned by the API. */
+                    user: {
+                        id: number;
+                        /** Format: email */
+                        email: string;
+                        first_name: string;
+                        last_name: string;
+                        office: {
+                            id: number;
+                            name: string;
+                        } | null;
+                        default_schedule?: {
+                            id: number;
+                            is_default: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            monday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            tuesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            wednesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            thursday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            friday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            saturday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            sunday: boolean;
+                        } | null;
+                        lab?: string;
+                        is_onboarding_complete: boolean;
+                    };
+                    /**
+                     * Format: date
+                     * @description Calendar date only with no timezone (YYYY-MM-DD)
+                     * @example 2026-07-10
+                     */
+                    visit_date: string;
+                    /**
+                     * Format: date-time
+                     * @description Created-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    created_at: string;
+                    /**
+                     * Format: date-time
+                     * @description Updated-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    updated_at: string;
+                    office_id: number;
+                };
+            };
+        };
+        /** @description Full response body for endpoints that return a single visit. */
+        visits_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                visits: {
+                    id: number;
+                    /** @description Public user account data returned by the API. */
+                    user: {
+                        id: number;
+                        /** Format: email */
+                        email: string;
+                        first_name: string;
+                        last_name: string;
+                        office: {
+                            id: number;
+                            name: string;
+                        } | null;
+                        default_schedule?: {
+                            id: number;
+                            is_default: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            monday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            tuesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            wednesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            thursday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            friday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            saturday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            sunday: boolean;
+                        } | null;
+                        lab?: string;
+                        is_onboarding_complete: boolean;
+                    };
+                    /**
+                     * Format: date
+                     * @description Calendar date only with no timezone (YYYY-MM-DD)
+                     * @example 2026-07-10
+                     */
+                    visit_date: string;
+                    /**
+                     * Format: date-time
+                     * @description Created-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    created_at: string;
+                    /**
+                     * Format: date-time
+                     * @description Updated-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    updated_at: string;
+                    office_id: number;
+                }[];
+            };
+        };
         /** @description Public user account data returned by the API. */
         user: {
-          id: number;
-          /** Format: email */
-          email: string;
-          first_name: string;
-          last_name: string;
-          office: {
             id: number;
-            name: string;
-          } | null;
-          default_schedule?: {
-            id: number;
-            is_default: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            monday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            tuesday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            wednesday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            thursday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            friday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            saturday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            sunday: boolean;
-          } | null;
-          lab?: string;
-          is_onboarding_complete: boolean;
-        };
-      };
-    };
-    /** @description Full response body for endpoints that return multiple users. */
-    users_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        users: {
-          id: number;
-          /** Format: email */
-          email: string;
-          first_name: string;
-          last_name: string;
-          office: {
-            id: number;
-            name: string;
-          } | null;
-          default_schedule?: {
-            id: number;
-            is_default: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            monday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            tuesday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            wednesday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            thursday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            friday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            saturday: boolean;
-            /** @description Whether the user has selected this day in their schedule */
-            sunday: boolean;
-          } | null;
-          lab?: string;
-          is_onboarding_complete: boolean;
-        }[];
-      };
-    };
-    /** @description Request body for creating a new user account */
-    create_user_request: {
-      user: {
-        /** Format: email */
-        email: string;
-        first_name: string;
-        last_name: string;
-        /** Format: password */
-        password: string;
-        /** Format: password */
-        password_confirmation: string;
-      };
-    };
-    /** @description Request body for logging in to a user account. */
-    login_user_request: {
-      /** @description Credentials for the user account being authenticated. */
-      user: {
-        /** Format: email */
-        email: string;
-        /** Format: password */
-        password: string;
-      };
-    };
-    /** @description Request body for updating the current user's account information. */
-    patch_user_request: {
-      /** @description User attributes available to be updated. */
-      user: {
-        /** @example Ryan */
-        first_name?: string;
-        /** @example Dioneda */
-        last_name?: string;
-        /** @example 1 */
-        office_id?: number;
-        /** @description Whether the user has completed the calendar onboarding tour */
-        is_onboarding_complete?: boolean;
-        default_schedule?: {
-          is_default: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          monday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          tuesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          wednesday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          thursday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          friday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          saturday: boolean;
-          /** @description Whether the user has selected this day in their schedule */
-          sunday: boolean;
-        };
-      };
-    };
-    /** @description An attendance confirmation for a specific time period. */
-    attendance_confirmation: {
-      id: number;
-      user_id: number;
-      office_id: number;
-      /** @enum {string} */
-      period_type: "week";
-      /**
-       * Format: date
-       * @description The normalized start date of the confirmation period.
-       */
-      starts_on: string;
-      /** Format: date-time */
-      created_at?: string;
-      /** Format: date-time */
-      updated_at?: string;
-    };
-    /** @description Request body for confirming attendance for a week. */
-    create_attendance_confirmation_request: {
-      /** @description The office for which attendance is being confirmed. */
-      office_id: number;
-      /**
-       * Format: date
-       * @description Any date within the week being confirmed. The API normalizes this value to the Monday of that week.
-       */
-      starts_on: string;
-      /** @description The dates for which visits should exist. An empty array confirms the week without creating visits. */
-      selected_dates: string[];
-    };
-    /** @description Response containing attendance confirmations for an office and week. */
-    attendance_confirmations_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        confirmations: {
-          id: number;
-          user_id: number;
-          office_id: number;
-          /** @enum {string} */
-          period_type: "week";
-          /**
-           * Format: date
-           * @description The normalized start date of the confirmation period.
-           */
-          starts_on: string;
-          /** Format: date-time */
-          created_at?: string;
-          /** Format: date-time */
-          updated_at?: string;
-        }[];
-      };
-    };
-    /** @description Response returned after confirming attendance for a week. */
-    create_attendance_confirmation_response: {
-      /** @description Shared status metadata returned by API responses. */
-      status: {
-        message: string;
-      };
-      data: {
-        /** @description An attendance confirmation for a specific time period. */
-        attendance_confirmation: {
-          id: number;
-          user_id: number;
-          office_id: number;
-          /** @enum {string} */
-          period_type: "week";
-          /**
-           * Format: date
-           * @description The normalized start date of the confirmation period.
-           */
-          starts_on: string;
-          /** Format: date-time */
-          created_at?: string;
-          /** Format: date-time */
-          updated_at?: string;
-        };
-        visits: {
-          id: number;
-          user: {
-            id: number;
+            /** Format: email */
+            email: string;
             first_name: string;
             last_name: string;
-          };
-          /**
-           * Format: date
-           * @description Calendar date only with no timezone (YYYY-MM-DD)
-           * @example 2026-07-10
-           */
-          visit_date: string;
-          /**
-           * Format: date-time
-           * @description Created-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          created_at: string;
-          /**
-           * Format: date-time
-           * @description Updated-at time in ISO 8601 format
-           * @example 2026-07-10T13:42:18.123Z
-           */
-          updated_at: string;
-          office_id: number;
-        }[];
-      };
+            office: {
+                id: number;
+                name: string;
+            } | null;
+            default_schedule?: {
+                id: number;
+                is_default: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                monday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                tuesday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                wednesday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                thursday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                friday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                saturday: boolean;
+                /** @description Whether the user has selected this day in their schedule */
+                sunday: boolean;
+            } | null;
+            lab?: string;
+            is_onboarding_complete: boolean;
+        };
+        /** @description Full response body for endpoints that return one user. */
+        user_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                /** @description Public user account data returned by the API. */
+                user: {
+                    id: number;
+                    /** Format: email */
+                    email: string;
+                    first_name: string;
+                    last_name: string;
+                    office: {
+                        id: number;
+                        name: string;
+                    } | null;
+                    default_schedule?: {
+                        id: number;
+                        is_default: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        monday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        tuesday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        wednesday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        thursday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        friday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        saturday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        sunday: boolean;
+                    } | null;
+                    lab?: string;
+                    is_onboarding_complete: boolean;
+                };
+            };
+        };
+        /** @description Full response body for endpoints that return multiple users. */
+        users_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                users: {
+                    id: number;
+                    /** Format: email */
+                    email: string;
+                    first_name: string;
+                    last_name: string;
+                    office: {
+                        id: number;
+                        name: string;
+                    } | null;
+                    default_schedule?: {
+                        id: number;
+                        is_default: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        monday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        tuesday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        wednesday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        thursday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        friday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        saturday: boolean;
+                        /** @description Whether the user has selected this day in their schedule */
+                        sunday: boolean;
+                    } | null;
+                    lab?: string;
+                    is_onboarding_complete: boolean;
+                }[];
+            };
+        };
+        /** @description Request body for creating a new user account */
+        create_user_request: {
+            user: {
+                /** Format: email */
+                email: string;
+                first_name: string;
+                last_name: string;
+                /** Format: password */
+                password: string;
+                /** Format: password */
+                password_confirmation: string;
+            };
+        };
+        /** @description Request body for logging in to a user account. */
+        login_user_request: {
+            /** @description Credentials for the user account being authenticated. */
+            user: {
+                /** Format: email */
+                email: string;
+                /** Format: password */
+                password: string;
+            };
+        };
+        /** @description Request body for updating the current user's account information. */
+        patch_user_request: {
+            /** @description User attributes available to be updated. */
+            user: {
+                /** @example Ryan */
+                first_name?: string;
+                /** @example Dioneda */
+                last_name?: string;
+                /** @example 1 */
+                office_id?: number;
+                /** @description Whether the user has completed the calendar onboarding tour */
+                is_onboarding_complete?: boolean;
+                default_schedule?: {
+                    is_default: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    monday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    tuesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    wednesday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    thursday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    friday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    saturday: boolean;
+                    /** @description Whether the user has selected this day in their schedule */
+                    sunday: boolean;
+                };
+            };
+        };
+        /** @description An attendance confirmation for a specific time period. */
+        attendance_confirmation: {
+            id: number;
+            user_id: number;
+            office_id: number;
+            /** @enum {string} */
+            period_type: "week";
+            /**
+             * Format: date
+             * @description The normalized start date of the confirmation period.
+             */
+            starts_on: string;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        /** @description Request body for confirming attendance for a week. */
+        create_attendance_confirmation_request: {
+            /** @description The office for which attendance is being confirmed. */
+            office_id: number;
+            /**
+             * Format: date
+             * @description Any date within the week being confirmed. The API normalizes this value to the Monday of that week.
+             */
+            starts_on: string;
+            /** @description The dates for which visits should exist. An empty array confirms the week without creating visits. */
+            selected_dates: string[];
+        };
+        /** @description Response containing attendance confirmations for an office and week. */
+        attendance_confirmations_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                confirmations: {
+                    id: number;
+                    user_id: number;
+                    office_id: number;
+                    /** @enum {string} */
+                    period_type: "week";
+                    /**
+                     * Format: date
+                     * @description The normalized start date of the confirmation period.
+                     */
+                    starts_on: string;
+                    /** Format: date-time */
+                    created_at?: string;
+                    /** Format: date-time */
+                    updated_at?: string;
+                }[];
+            };
+        };
+        /** @description Response returned after confirming attendance for a week. */
+        create_attendance_confirmation_response: {
+            /** @description Shared status metadata returned by API responses. */
+            status: {
+                message: string;
+            };
+            data: {
+                /** @description An attendance confirmation for a specific time period. */
+                attendance_confirmation: {
+                    id: number;
+                    user_id: number;
+                    office_id: number;
+                    /** @enum {string} */
+                    period_type: "week";
+                    /**
+                     * Format: date
+                     * @description The normalized start date of the confirmation period.
+                     */
+                    starts_on: string;
+                    /** Format: date-time */
+                    created_at?: string;
+                    /** Format: date-time */
+                    updated_at?: string;
+                };
+                visits: {
+                    id: number;
+                    /** @description Public user account data returned by the API. */
+                    user: {
+                        id: number;
+                        /** Format: email */
+                        email: string;
+                        first_name: string;
+                        last_name: string;
+                        office: {
+                            id: number;
+                            name: string;
+                        } | null;
+                        default_schedule?: {
+                            id: number;
+                            is_default: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            monday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            tuesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            wednesday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            thursday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            friday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            saturday: boolean;
+                            /** @description Whether the user has selected this day in their schedule */
+                            sunday: boolean;
+                        } | null;
+                        lab?: string;
+                        is_onboarding_complete: boolean;
+                    };
+                    /**
+                     * Format: date
+                     * @description Calendar date only with no timezone (YYYY-MM-DD)
+                     * @example 2026-07-10
+                     */
+                    visit_date: string;
+                    /**
+                     * Format: date-time
+                     * @description Created-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    created_at: string;
+                    /**
+                     * Format: date-time
+                     * @description Updated-at time in ISO 8601 format
+                     * @example 2026-07-10T13:42:18.123Z
+                     */
+                    updated_at: string;
+                    office_id: number;
+                }[];
+            };
+        };
     };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
