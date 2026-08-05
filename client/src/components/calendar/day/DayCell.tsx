@@ -1,6 +1,6 @@
 import { DayHeader } from "@/components/calendar/day/DayHeader";
 import { DayRoster } from "@/components/calendar/day/DayRoster";
-import type { RosterUser } from "@/types/calendar/calendar";
+import type { CalendarScheduleEntry } from "@/types/calendar/schedule/weekSchedule";
 
 interface DayCellProps {
   date: Date;
@@ -8,7 +8,7 @@ interface DayCellProps {
       reset its In/Out tab whenever the user switches offices. */
   officeId: number;
   /** The full office roster with each person's status for this day. */
-  rosterUsers: RosterUser[];
+  entries: CalendarScheduleEntry[];
   myUserId: number;
   /** Whether the logged-in user has selected this day — "planning" while the
       week is open, "in the office" once it's confirmed. */
@@ -32,7 +32,7 @@ interface DayCellProps {
 export function DayCell({
   date,
   officeId,
-  rosterUsers,
+  entries,
   myUserId,
   isMine,
   visitorCount,
@@ -54,11 +54,6 @@ export function DayCell({
         locked={locked}
         myUserId={myUserId}
         onToggleMine={onToggleMine}
-        // isConfirmedElsewhere={rosterUsers.some(
-        //   (person) =>
-        //     person.userId == myUserId &&
-        //     person.status === "confirmed-elsewhere",
-        // )}
         isConfirmedElsewhere={isConfirmedElsewhere}
         externalOfficeName={externalOfficeName}
         externalOfficeEmoji={externalOfficeEmoji}
@@ -68,7 +63,7 @@ export function DayCell({
       <DayRoster
         date={date}
         officeId={officeId}
-        rosterUsers={rosterUsers}
+        entries={entries}
         myUserId={myUserId}
         locked={locked}
       />

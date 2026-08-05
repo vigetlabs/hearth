@@ -45,7 +45,7 @@ export default function CalendarGrid() {
             key={day.key}
             date={day.date}
             officeId={scope.activeOffice.id}
-            rosterUsers={day.rosterUsers}
+            entries={day.entries}
             myUserId={scope.user.id}
             isMine={day.currentUserSelected}
             visitorCount={day.visitorCount}

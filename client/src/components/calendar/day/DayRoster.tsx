@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { StatusIcon } from "@/components/icons/StatusIcon";
 import type { StatusMark, StatusVariant } from "@/components/icons/StatusIcon";
 import NudgeIcon from "@/components/icons/NudgeIcon";
-import type { RosterUser } from "@/types/calendar/calendar";
 import { isInOffice } from "@/types/calendar/calendar";
 import { isFuture } from "@/util/dates/date";
 import { cn } from "@/util/cn";
+import type { CalendarScheduleEntry } from "@/types/calendar/schedule/weekSchedule";
 
 // Nudge feature is built but hidden for now. Flip to true to re-enable the
 // Nudge button next to roster names.
@@ -20,7 +20,7 @@ interface DayRosterProps {
       back to "In Office". */
   officeId: number;
   /** The full office roster with each person's status for this day. */
-  rosterUsers: RosterUser[];
+  entries: CalendarScheduleEntry[];
   myUserId: number;
   /** Whether the week is confirmed (locked). Used to flip the tab to the user's
       own pick at the moment they confirm. */
@@ -35,7 +35,7 @@ type Tab = "in" | "out";
 export function DayRoster({
   date,
   officeId,
-  rosterUsers,
+  entries,
   myUserId,
   locked,
 }: DayRosterProps) {
@@ -43,22 +43,24 @@ export function DayRoster({
   const canNudge = isFuture(date);
 
   const meFirst = byMeThenName(myUserId);
-  const confirmed = rosterUsers
-    .filter((rosterUser) => rosterUser.status === "confirmed-yes")
+
+  const confirmed = entries
+    .filter((entry) => entry.status === "confirmed-yes")
     .sort(meFirst);
-  const planning = rosterUsers
-    .filter((rosterUser) => rosterUser.status === "planning-yes")
-    .sort(meFirst);
-  const confirmedOut = rosterUsers
+
+  const planning = entries
+    .filter((entry) => entry.status === "planning-yes")
+
+  const confirmedOut = entries
     .filter(
-      (rosterUser) =>
-        rosterUser.status === "confirmed-no" ||
-        rosterUser.status === "confirmed-elsewhere",
+      (entry) =>
+        entry.status === "confirmed-no" ||
+        entry.status === "confirmed-elsewhere"
     )
-    .sort(meFirst);
-  const plannedOut = rosterUsers
-    .filter((rosterUser) => rosterUser.status === "planning-no")
-    .sort(meFirst);
+    .sort(meFirst)
+
+  const plannedOut = entries
+    .filter((entry) => entry.status === "planning-no")
 
   const confirmedInCount = confirmed.length;
   const planningInCount = planning.length;
@@ -72,9 +74,9 @@ export function DayRoster({
   // Otherwise it stays wherever the user leaves it.
   const [tab, setTab] = useState<Tab>("in");
 
-  const amInOffice = rosterUsers.some(
-    (rosterUser) =>
-      rosterUser.userId === myUserId && isInOffice(rosterUser.status),
+  const amInOffice = entries.some(
+    (entry) =>
+      entry.user.id === myUserId && isInOffice(entry.status)
   );
 
   const wasLocked = useRef(locked);
@@ -149,10 +151,10 @@ export function DayRoster({
           <div className="space-y-4">
             {confirmed.length > 0 && (
               <RosterSection title="Confirmed In" count={confirmedInCount}>
-                {confirmed.map((person) => (
+                {confirmed.map((entry) => (
                   <RosterRow
-                    key={person.userId}
-                    person={person}
+                    key={entry.user.id}
+                    entry={entry}
                     myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="solid"
@@ -166,10 +168,10 @@ export function DayRoster({
                 title="Planning to Come In"
                 count={planningInCount}
               >
-                {planning.map((person) => (
+                {planning.map((entry) => (
                   <RosterRow
-                    key={person.userId}
-                    person={person}
+                    key={entry.user.id}
+                    entry={entry}
                     myUserId={myUserId}
                     mark="confirmed-yes"
                     variant="outline"
@@ -187,10 +189,10 @@ export function DayRoster({
         <div className="space-y-4">
           {confirmedOut.length > 0 && (
             <RosterSection title="Confirmed Out" count={confirmedOutCount}>
-              {confirmedOut.map((person) => (
+              {confirmedOut.map((entry) => (
                 <RosterRow
-                  key={person.userId}
-                  person={person}
+                  key={entry.user.id}
+                  entry={entry}
                   myUserId={myUserId}
                   mark="confirmed-no"
                   variant="solid"
@@ -205,10 +207,10 @@ export function DayRoster({
               count={planningOutCount}
               titleClassName="text-fg-muted"
             >
-              {plannedOut.map((person) => (
+              {plannedOut.map((entry) => (
                 <RosterRow
-                  key={person.userId}
-                  person={person}
+                  key={entry.user.id}
+                  entry={entry}
                   myUserId={myUserId}
                   mark="planning-no"
                   variant="outline"
@@ -228,10 +230,10 @@ export function DayRoster({
 
 // Floats the current user to the top of their section; everyone else keeps
 // their existing name order.
-const byMeThenName = (myUserId: number) => (a: RosterUser, b: RosterUser) => {
-  if (a.userId === myUserId) return -1;
-  if (b.userId === myUserId) return 1;
-  return a.name.localeCompare(b.name);
+const byMeThenName = (myUserId: number) => (a: CalendarScheduleEntry, b: CalendarScheduleEntry) => {
+  if (a.user.id === myUserId) return -1;
+  if (b.user.id === myUserId) return 1;
+  return a.user.first_name.localeCompare(b.user.first_name);
 };
 
 function TabButton({
@@ -285,23 +287,23 @@ function RosterSection({
 }
 
 function RosterRow({
-  person,
+  entry,
   myUserId,
   mark,
   variant,
   iconClassName,
   nudgeable = false,
 }: {
-  person: RosterUser;
+  entry: CalendarScheduleEntry
   myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;
   iconClassName?: string;
   nudgeable?: boolean;
 }) {
-  const isMe = person.userId === myUserId;
+  const isMe = entry.user.id === myUserId;
   const isPending =
-    person.status === "planning-yes" || person.status === "planning-no";
+    entry.status === "planning-yes" || entry.status === "planning-no";
 
   return (
     <li className="flex items-center gap-2 py-1.5">
@@ -314,11 +316,11 @@ function RosterRow({
       <span className="flex min-w-0 flex-1 items-center gap-1">
         <span
           className="min-w-0 truncate text-sm font-semibold text-fg"
-          title={person.name}
+          title={entry.user.first_name}
         >
-          {person.name}
+          {entry.user.first_name}
         </span>
-        {person.isVisitor && (
+        {entry.isVisitor && (
           <span
             className="shrink-0 text-fg-subtle"
             title="Visiting from another office"
@@ -342,7 +344,7 @@ function RosterRow({
       {SHOW_NUDGE_BUTTON && nudgeable && !isMe && (
         <button
           type="button"
-          aria-label={`Nudge ${person.name}`}
+          aria-label={`Nudge ${entry.user.first_name}`}
           className="flex shrink-0 items-center gap-0.5 rounded-full border border-line-strong px-1.5 py-px text-[0.625rem] font-medium text-fg-subtle transition-colors hover:bg-surface-muted hover:text-fg"
         >
           <NudgeIcon className="h-3 w-3" />

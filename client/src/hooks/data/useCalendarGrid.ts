@@ -107,6 +107,7 @@ export function useCalendarGrid({
       buildWeekSchedule({
         officeUsers: data.rosterUsers,
         officeVisits: data.visits,
+        officesById,
         weekDateKeys: weekDateKeys,
         confirmedUserIds: confirmedUserIds,
         editingUserIds: editingUserIds,
