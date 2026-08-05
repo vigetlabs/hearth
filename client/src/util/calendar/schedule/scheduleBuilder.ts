@@ -75,12 +75,9 @@ export function buildWeekSchedule({
         activeOfficeId,
         dateKey,
       });
-      console.log(facts);
 
       const resolution: CalendarAttendanceResolution =
         resolveAttendanceStatus(facts);
-
-      console.log(resolution);
 
       const externalOffice =
         resolution.status === "confirmed-elsewhere" && externalVisit

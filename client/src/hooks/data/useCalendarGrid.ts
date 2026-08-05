@@ -5,12 +5,6 @@ import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
 import type { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
-import {
-  baseAttendanceForUser,
-  planningOverrideStateForUser,
-  resolveAttendance,
-  resolveEditingAttendance,
-} from "@/util/cable/planning/overrideState";
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { buildWeekSchedule } from "@/util/calendar/schedule/scheduleBuilder";
 import {
@@ -37,12 +31,8 @@ export function useCalendarGrid({
 
   const weekDateKeys = useMemo(
     () => scope.weekDates.map((day) => day.key),
-    [scope.weekDates]
-  )
-  const weekDates = useMemo(
-    () => scope.weekDates.map((day) => day.date),
-    [scope.weekDates]
-  )
+    [scope.weekDates],
+  );
 
   const confirmedUserIds = useMemo(
     () =>
@@ -114,19 +104,21 @@ export function useCalendarGrid({
         officeUsers: data.rosterUsers,
         officeVisits: data.visits,
         officesById,
-        weekDateKeys: weekDateKeys,
-        confirmedUserIds: confirmedUserIds,
-        editingUserIds: editingUserIds,
-        planningStatesByDate: planningStatesByDate,
-        activeOfficeId: scope.activeOffice.id
+        weekDateKeys,
+        confirmedUserIds,
+        editingUserIds,
+        planningStatesByDate,
+        activeOfficeId: scope.activeOffice.id,
       }),
     [
       data.rosterUsers,
       data.visits,
-      weekDates,
+      officesById,
+      weekDateKeys,
       confirmedUserIds,
-      scope.user.id,
-      currentUserExternalVisitsByDate,
+      editingUserIds,
+      planningStatesByDate,
+      scope.activeOffice.id,
     ],
   );
 
@@ -164,50 +156,26 @@ export function useCalendarGrid({
         return;
       }
 
-      const baseDay = schedule[dateKey] ?? [];
-      const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser(
-        {
-          day: baseDay,
-          userId: scope.user.id,
-        },
+      const currentUserEntry = schedule[dateKey]?.find(
+        (entry) => entry.user.id === scope.user.id,
       );
 
       const isEditing = editingUserIds.has(scope.user.id);
 
-      if (hasConfirmedVisit && !isEditing) {
+      if (currentUserEntry?.status === "confirmed-yes" && !isEditing) {
         return;
       }
 
-      const planningOverrideState = planningOverrideStateForUser(
-        planningStatesByDate[dateKey],
-        scope.user.id,
-      );
-
-      const currentlyAttending = isEditing
-        ? resolveEditingAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-          })
-        : resolveAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-            isDefaultScheduleDay,
-          });
+      const currentlyAttending =
+        currentUserEntry?.status === "confirmed-yes" ||
+        currentUserEntry?.status === "planning-yes";
 
       if (currentlyAttending) {
         deselectDate(dateKey);
-        dispatch(
-          calendarEvents.dateDeselected(
-            dateKey
-          )
-        );
+        dispatch(calendarEvents.dateDeselected(dateKey));
       } else {
         selectDate(dateKey);
-        dispatch(
-          calendarEvents.dateSelected(
-            dateKey
-          )
-        );
+        dispatch(calendarEvents.dateSelected(dateKey));
       }
     },
     [
@@ -216,10 +184,10 @@ export function useCalendarGrid({
       currentUserExternalVisitsByDate,
       schedule,
       editingUserIds,
-      planningStatesByDate,
       scope.user.id,
       deselectDate,
       selectDate,
+      dispatch,
     ],
   );
 

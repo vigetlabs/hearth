@@ -73,6 +73,8 @@ export default function CalendarWorkspaceRoot({
       <CalendarMachineProvider
         key={`${scope.activeOffice.id}:${scope.focusedWeekStartKey}`}
         bootstrap={bootstrap}
+        activeOfficeId={scope.activeOffice.id}
+        focusedWeekStartKey={scope.focusedWeekStartKey}
       >
         {children}
       </CalendarMachineProvider>

@@ -161,10 +161,6 @@ export function useOfficePlanning({
             officeId: subscribedOfficeId,
             connected: true,
           });
-
-          subscription.perform("snapshot", {
-            dates: datesRef.current,
-          });
         },
 
         disconnected() {

@@ -1,5 +1,5 @@
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import { machineStates, type CalendarMachineState, type CalendarMachineStatus, type ConfirmingState, type PlanningState } from "@/types/calendar/machine/machineState";
+import { machineStates, type CalendarMachineState, type CalendarMachineStatus, type ConfirmedState, type ConfirmingState, type PlanningState } from "@/types/calendar/machine/machineState";
 import { validStateTransitions } from "@/types/calendar/machine/machineTransitions";
 
 
@@ -8,6 +8,7 @@ export function calendarMachineReducer(
   evt: CalendarMachineEvent
 ): CalendarMachineState {
   const nextState = transitionReduce(currentState, evt);
+  console.log(nextState);
 
   assertValidTransition(currentState, evt, nextState);
 
@@ -77,7 +78,9 @@ function transitionFromPlanning(
     case "DATE_SELECTED": {
       const nextState: PlanningState = {
         ...currentState,
-        draftDates: new Set(currentState.draftDates).add(evt.date)
+        draftDates: currentState.draftDates.includes(evt.date)
+          ? currentState.draftDates
+          : [...currentState.draftDates, evt.date]
       }
       return nextState;
     }
@@ -88,8 +91,19 @@ function transitionFromPlanning(
 
       const nextState: PlanningState = {
         ...currentState,
-        draftDates: draftDates
+        draftDates: currentState.draftDates.filter(
+          (date) => date !== evt.date
+        )
       }
+      return nextState;
+    }
+
+    case "CONFIRM_WEEK_REQUESTED": {
+      const nextState: ConfirmingState = {
+        ...currentState,
+        status: machineStates.CONFIRMING
+      }
+
       return nextState;
     }
   }
@@ -99,7 +113,24 @@ function trasitionFromConfirming(
   currentState: ConfirmingState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {
-  return currentState
+  switch (evt.type) {
+    case "CONFIRM_WEEK_COMPLETED": {
+      const nextState: ConfirmedState = {
+        ...currentState,
+        status: machineStates.CONFIRMED,
+        confirmedDates: [...currentState.draftDates]
+      }
+      return nextState;
+    }
+
+    case "CONFIRM_WEEK_FAILED": {
+      const nextState: PlanningState = {
+        ...currentState,
+        status: machineStates.PLANNING
+      }
+      return nextState
+    }
+  }
 }
 
 function transitionFromConfirmed(

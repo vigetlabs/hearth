@@ -3,6 +3,7 @@ import PencilIcon from "@/components/icons/PencilIcon";
 import type { CalendarToolbarViewModel } from "@/util/calendar/viewModel/toolbarBuilder";
 import { useCalendarToolbar } from "@/hooks/data/useCalendarToolbar";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
+import { useCalendarMachineContext } from "@/hooks/contexts/useCalendarMachineContext";
 
 const arrowButton =
   "flex h-7 w-7 items-center justify-center rounded-full text-fg transition-colors hover:bg-surface-subtle";
@@ -19,6 +20,7 @@ const unlockButton = `ml-auto ${darkPillButton} bg-[#6f281d]! hover:bg-fg!`;
 
 export default function CalendarToolbar() {
   const scope = useCalendarScope();
+  const { state, dispatch } = useCalendarMachineContext();
 
   const {
     viewModel,
@@ -31,6 +33,8 @@ export default function CalendarToolbar() {
     activeOffice: scope.activeOffice,
     focusedWeekStart: scope.focusedWeekStart,
     changeWeek: scope.changeWeek,
+    machineState: state,
+    dispatch: dispatch
   });
 
   return (

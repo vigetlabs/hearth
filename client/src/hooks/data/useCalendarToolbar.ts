@@ -1,9 +1,13 @@
 import type { Office } from "@/types/api/offices";
+import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
+import type { CalendarMachineState } from "@/types/calendar/machine/machineState";
+import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import {
   buildCalendarToolbarViewModel,
   type CalendarToolbarViewModel,
 } from "@/util/calendar/viewModel/toolbarBuilder";
 import { addDays } from "@/util/dates/date";
+import type { Dispatch } from "react";
 
 export interface UseCalendarToolbarResult {
   viewModel: CalendarToolbarViewModel;
@@ -14,17 +18,21 @@ export interface UseCalendarToolbarResult {
   editWeek: () => void;
 }
 
-interface UseCalendarToolbarOptions {
+interface UseCalendarToolbarInput {
   activeOffice: Office;
   focusedWeekStart: Date;
   changeWeek: (nextWeek: Date) => void;
+  machineState: CalendarMachineState,
+  dispatch: Dispatch<CalendarMachineEvent>
 }
 
 export function useCalendarToolbar({
   activeOffice,
   focusedWeekStart,
   changeWeek,
-}: UseCalendarToolbarOptions): UseCalendarToolbarResult {
+  machineState,
+  dispatch
+}: UseCalendarToolbarInput): UseCalendarToolbarResult {
   /*
    * Temporary sources.
    */
@@ -59,7 +67,7 @@ export function useCalendarToolbar({
   }
 
   function confirmWeek() {
-    // Connect confirmation mutation later.
+    dispatch(calendarEvents.confirmWeekRequested());
   }
 
   function editWeek() {

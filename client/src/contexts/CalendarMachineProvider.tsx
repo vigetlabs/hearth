@@ -3,14 +3,19 @@ import { calendarMachineReducer } from "@/util/calendar/machine/machineTransitio
 import { useMemo, useReducer } from "react";
 import { CalendarMachineContext } from "./CalendarMachineContext";
 import { machineStates, type CalendarMachineState, type ConfirmedState, type PlanningState } from "@/types/calendar/machine/machineState";
+import { useCalendarMachineEffects } from "@/hooks/data/useCalendarMachineEffects";
 
 interface CalendarMachineProviderProps {
   bootstrap: CalendarMachineBootstrap;
+  activeOfficeId: number;
+  focusedWeekStartKey: string;
   children: React.ReactNode;
 }
 
 export function CalendarMachineProvider({
   bootstrap,
+  activeOfficeId,
+  focusedWeekStartKey,
   children
 }: CalendarMachineProviderProps) {
   const [state, dispatch] = useReducer(
@@ -27,7 +32,12 @@ export function CalendarMachineProvider({
     [state],
   );
 
-
+  useCalendarMachineEffects({
+    state,
+    dispatch,
+    activeOfficeId,
+    focusedWeekStartKey
+  });
 
   return (
     <CalendarMachineContext.Provider
@@ -41,7 +51,7 @@ export function CalendarMachineProvider({
 function createCalendarMachineInitialState(
   bootstrap: CalendarMachineBootstrap
 ): CalendarMachineState {
-  const selectedDates = new Set(bootstrap.selectedDates);
+  const selectedDates = [...bootstrap.selectedDates];
 
   if (bootstrap.isConfirmed) {
     const confirmedState: ConfirmedState = {
@@ -50,6 +60,7 @@ function createCalendarMachineInitialState(
       confirmedDates: selectedDates
     }
 
+    console.log("CONFIRMED STATE");
     return confirmedState;
   }
 
@@ -59,5 +70,6 @@ function createCalendarMachineInitialState(
     draftDates: selectedDates
   }
 
+    console.log("PLANNING STATE");
   return planningState
 }

@@ -15,19 +15,19 @@ export interface CalendarMachineScope {
 export interface PlanningState {
   status: typeof machineStates.PLANNING;
   scope: CalendarMachineScope;
-  draftDates: ReadonlySet<string>;
+  draftDates: string[];
 }
 
 export interface ConfirmingState {
   status: typeof machineStates.CONFIRMING;
   scope: CalendarMachineScope;
-  draftDates: ReadonlySet<string>;
+  draftDates: string[];
 }
 
 export interface ConfirmedState {
   status: typeof machineStates.CONFIRMED;
   scope: CalendarMachineScope;
-  confirmedDates: ReadonlySet<string>;
+  confirmedDates: string[];
 }
 
 export type CalendarMachineState =
