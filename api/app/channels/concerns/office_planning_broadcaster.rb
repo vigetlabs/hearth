@@ -7,6 +7,20 @@ class OfficePlanningBroadcaster
     T::Hash[Integer, User]
   end
 
+  ChannelSerializedSchedule = T.type_alias do
+    {
+      id: Integer,
+      is_default: T::Boolean,
+      monday: T::Boolean,
+      tuesday: T::Boolean,
+      wednesday: T::Boolean,
+      thursday: T::Boolean,
+      friday: T::Boolean,
+      saturday: T::Boolean,
+      sunday: T::Boolean,
+    }
+  end
+
   ChannelSerializedOffice = T.type_alias do
     {
       id: Integer,
@@ -17,9 +31,12 @@ class OfficePlanningBroadcaster
   ChannelSerializedUser = T.type_alias do
     {
       id: Integer,
+      email: String,
       first_name: String,
       last_name: String,
-      office: T.nilable(ChannelSerializedOffice)
+      office: T.nilable(ChannelSerializedOffice),
+      default_schedule: T.nilable(ChannelSerializedSchedule),
+      is_onboarding_complete: T::Boolean
     }
   end
 
@@ -135,14 +152,8 @@ class OfficePlanningBroadcaster
   sig { params(user_ids: T::Array[Integer]).returns(UserMap) }
   def load_users(user_ids)
     User
-      .includes(:office)
+      .includes(:office, :default_schedule)
       .where(id: user_ids)
-      .select(
-        :id,
-        :first_name,
-        :last_name,
-        :office_id
-      )
       .index_by(&:id)
   end
 
@@ -153,16 +164,19 @@ class OfficePlanningBroadcaster
     ).returns(T::Array[ChannelSerializedUser])
   end
   def serialize_users(user_ids, users_by_id:)
-    user_ids.filter_map do |user_id|
-      user = users_by_id[user_id]
-      next unless user
+    users = user_ids.filter_map do |user_id|
+      users_by_id[user_id]
+    end
 
-      {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        office: serialize_office(user)
-      }
+    serialized_users = UserSerializer
+      .new(users)
+      .serializable_hash[:data]
+
+    serialized_users.map do |serialized_user |
+      T.cast(
+        serialized_user[:attributes],
+        ChannelSerializedUser
+      )
     end
   end
 

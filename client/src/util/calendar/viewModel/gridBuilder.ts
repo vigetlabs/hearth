@@ -1,16 +1,7 @@
 import type {
   OfficeDatesPlanningOverrideStates,
-  TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
-import type { RosterUser } from "@/types/calendar/calendar";
 import type { CalendarScheduleEntry, WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
-import { userDisplayName } from "@/util/auth/displayName";
-import {
-  baseAttendanceForUser,
-  planningOverrideStateForUser,
-  resolveAttendance,
-  resolveEditingAttendance,
-} from "@/util/cable/planning/overrideState";
 import { addDays, generateDateKey, isSameDay } from "@/util/dates/date";
 
 export const WEEKDAYS_PER_WEEK = 5;
@@ -24,7 +15,7 @@ export interface CalendarGridViewModel {
 export interface CalendarDayViewModel {
   key: string;
   date: Date;
-  rosterUsers: RosterUser[];
+  entries: CalendarScheduleEntry[];
   currentUserSelected: boolean;
   visitorCount: number;
   isHotSpot: boolean;
@@ -48,20 +39,18 @@ interface BuildCalendarGridViewModelInput {
 interface BaseCalendarDay {
   key: string;
   date: Date;
-  rosterUsers: RosterUser[];
+  entries: CalendarScheduleEntry[];
   confirmedCount: number;
   planningCount: number;
   isConfirmedElsewhere: boolean;
+  externalOfficeName: string;
+  externalOfficeEmoji: string;
 }
 
 export function buildCalendarGridViewModel({
   focusedWeekStart,
   schedule,
-  planningByDate,
   currentUserId,
-  editingUserIds,
-  externalOfficeNamesByDate,
-  externalOfficeEmojisByDate,
   locked,
   today = new Date(),
 }: BuildCalendarGridViewModelInput): CalendarGridViewModel {
@@ -72,19 +61,25 @@ export function buildCalendarGridViewModel({
       const key = generateDateKey(date);
       const calendarEntries: CalendarScheduleEntry[] = schedule[key] ?? [];
 
-      const currentUser = calendarEntries.find(
+      const currentUserEntry = calendarEntries.find(
         (entry) => entry.user.id === currentUserId
       );
 
-      const isConfirmedElsewhere = currentUser?.status === "confirmed-elsewhere";
+      const isConfirmedElsewhere = currentUserEntry?.status === "confirmed-elsewhere";
 
       return {
         key,
         date,
-        calendarEntries,
+        entries: calendarEntries,
         confirmedCount: countConfirmedPeople(calendarEntries),
         planningCount: countPlanningPeople(calendarEntries),
         isConfirmedElsewhere,
+        externalOfficeName: isConfirmedElsewhere
+          ? currentUserEntry.externalOffice?.name ?? ""
+          : "",
+        externalOfficeEmoji: isConfirmedElsewhere
+          ? currentUserEntry.externalOffice?.emoji ?? ""
+          : ""
       };
     },
   );
@@ -94,15 +89,15 @@ export function buildCalendarGridViewModel({
   const days: CalendarDayViewModel[] = baseDays.map((day, index) => ({
     key: day.key,
     date: day.date,
-    rosterUsers: day.rosterUsers,
+    entries: day.entries,
     currentUserSelected:
       !day.isConfirmedElsewhere &&
-      isCurrentUserSelected(day.rosterUsers, currentUserId),
-    visitorCount: countConfirmedVisitors(day.rosterUsers),
+      isCurrentUserSelected(day.entries, currentUserId),
+    visitorCount: countConfirmedVisitors(day.entries),
     isHotSpot: hotSpotIndexes.has(index) && !day.isConfirmedElsewhere,
     isConfirmedElsewhere: day.isConfirmedElsewhere,
-    externalOfficeName: externalOfficeNamesByDate.get(day.key) ?? "",
-    externalOfficeEmoji: externalOfficeEmojisByDate.get(day.key) ?? "",
+    externalOfficeName: day.externalOfficeName,
+    externalOfficeEmoji: day.externalOfficeEmoji 
   }));
 
   const todayIndex = days.findIndex((day) => isSameDay(day.date, today));
@@ -114,72 +109,6 @@ export function buildCalendarGridViewModel({
   };
 }
 
-// function resolveRosterUsers(
-//   calendarEntries: CalendarScheduleEntry[],
-//   overrides: TogglePlanningOverrideState | undefined,
-//   editingUserIds: ReadonlySet<number>,
-// ): RosterUser[] {
-//   const resolvedRosterUsers = calendarEntries.map((rosterUser): RosterUser => {
-//     if (rosterUser.status === "confirmed-elsewhere") {
-//       return rosterUser;
-//     }
-//
-//     const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser({
-//       day: calendarEntries,
-//       userId: rosterUser.userId,
-//     });
-//
-//     const isEditing = editingUserIds.has(rosterUser.userId);
-//     const hasConfirmedWeekStatus =
-//       rosterUser.status === "confirmed-yes" ||
-//       rosterUser.status === "confirmed-no";
-//
-//     if (!isEditing && hasConfirmedWeekStatus) {
-//       return rosterUser;
-//     }
-//
-//     const planningOverrideState = planningOverrideStateForUser(
-//       overrides,
-//       rosterUser.userId,
-//     );
-//
-//     const attending = isEditing
-//       ? resolveEditingAttendance({
-//           hasConfirmedVisit,
-//           planningOverrideState,
-//         })
-//       : resolveAttendance({
-//           hasConfirmedVisit,
-//           planningOverrideState,
-//           isDefaultScheduleDay,
-//         });
-//
-//     return {
-//       ...rosterUser,
-//       status: attending ? "planning-yes" : "planning-no",
-//     };
-//   });
-//
-//   const rosterUserIds = new Set(
-//     rosterUsers.map((rosterUser) => rosterUser.userId),
-//   );
-//
-//   const additionalSelectedUsers =
-//     overrides?.selected
-//       .filter(
-//         (planningUser: ChannelSerializedUser) =>
-//           !rosterUserIds.has(planningUser.id),
-//       )
-//       .map((planningUser: ChannelSerializedUser): RosterUser => ({
-//         userId: planningUser.id,
-//         name: userDisplayName(planningUser),
-//         status: "planning-yes",
-//         isVisitor: false,
-//       })) ?? [];
-//
-//   return [...additionalSelectedUsers, ...resolvedRosterUsers];
-// }
-
 function countConfirmedPeople(entries: CalendarScheduleEntry[]): number {
   return entries.filter((entry) => entry.status === "confirmed-yes").length;
 }
@@ -188,21 +117,21 @@ function countPlanningPeople(entries: CalendarScheduleEntry[]): number {
   return entries.filter((entry) => entry.status === "planning-yes").length;
 }
 
-function countConfirmedVisitors(people: RosterUser[]): number {
-  return people.filter(
-    (person) => person.status === "confirmed-yes" && person.isVisitor,
-  ).length;
+function countConfirmedVisitors(entries: CalendarScheduleEntry[]): number {
+  return entries.filter(
+    (entry) => entry.status === "confirmed-yes" && entry.isVisitor
+  ).length
 }
 
 function isCurrentUserSelected(
-  people: RosterUser[],
+  entries: CalendarScheduleEntry[],
   currentUserId: number,
 ): boolean {
-  return people.some(
-    (person) =>
-      person.userId === currentUserId &&
-      (person.status === "confirmed-yes" || person.status === "planning-yes"),
-  );
+  return entries.some(
+    (entry) =>
+      entry.user.id === currentUserId &&
+      (entry.status === "confirmed-yes" || entry.status === "planning-yes")
+  )
 }
 
 interface HotSpotCandidate {

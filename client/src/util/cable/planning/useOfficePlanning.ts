@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
-  ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
   OfficePlanningState,
   TogglePlanningOverrideState,
@@ -17,7 +16,7 @@ import { generateOfficesUsersKey } from "@/util/api/keys/officeKeys";
 const EMPTY_PLANNING_DATES: OfficeDatesPlanningOverrideStates = {};
 
 /*
- * Represents a snapshot of all dates and all serialized users on that date
+ * Represents a snapshot of all dates and all users on that date
  */
 interface PlanningSnapshotMessage {
   type: "planning.snapshot";
@@ -26,7 +25,7 @@ interface PlanningSnapshotMessage {
 }
 
 /*
- * Represents a single date update for all serialized users on that date
+ * Represents a single date update for all users on that date
  */
 interface PlanningDateUpdatedMessage {
   type: "planning.date.updated";
@@ -243,11 +242,11 @@ export function useOfficePlanning({
 
     Object.entries(planningStatesByDate).forEach(([date, overrides]) => {
       const isSelected = overrides.selected.some(
-        (user: ChannelSerializedUser) => user.id === currentUserId,
+        (user) => user.id === currentUserId,
       );
 
       const isDeselected = overrides.deselected.some(
-        (user: ChannelSerializedUser) => user.id === currentUserId,
+        (user) => user.id === currentUserId,
       );
 
       if (isSelected) {
