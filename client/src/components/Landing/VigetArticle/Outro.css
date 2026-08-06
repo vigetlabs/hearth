@@ -45,6 +45,10 @@
   mark is lighter than the terracotta under it, which an `<img>` of a
   terracotta-filled SVG can't be without a filter stack.
 
+  Phones don't get it. The card there is barely wider than the copy it holds,
+  so the mark has no corner to sit in without running under the headline and
+  the sign-in button — it is the one thing on the card that can go, so it does.
+
   The mask is unprefixed plus `-webkit-`: Safari only dropped the prefix in
   15.4, and the mark silently fills the corner as a solid block without it.
 

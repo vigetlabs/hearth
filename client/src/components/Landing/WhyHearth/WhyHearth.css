@@ -48,19 +48,29 @@
   max-width: calc(0.92 * var(--why-heading-measure));
 }
 
-/* The callouts are the smallest type in the section — 0.345 of the heading —
-   and the pills one step up from them, at 0.415. Both run a little larger than
-   the mock's 0.32 and 0.385 so they hold their own against the screenshot;
-   since the pills are sized in `em`, the step up takes their padding and their
-   gap with it and the bubble grows as a whole. Both are set from the viewport
-   for the same reason the header is: they have to stay pinned to the same
-   features of the screenshot as everything scales. */
-.why-hearth-note {
-  font-size: clamp(0.8125rem, 1.12vw, 1rem);
-}
-
+/* The pills are 0.415 of the heading and the callouts, once they are pinned to
+   the screenshot, the smallest type in the section at 0.345. Both run a little
+   larger than the mock's 0.385 and 0.32 so they hold their own against the
+   screenshot; since the bubbles are sized in `em`, the step up takes their
+   padding and their gap with it and the bubble grows as a whole. Both are set
+   from the viewport for the same reason the header is: they have to stay
+   pinned to the same features of the screenshot as everything scales. */
 .why-hearth-pill {
   font-size: clamp(0.875rem, 1.35vw, 1.1875rem);
+}
+
+/* Below lg the callouts leave the screenshot's margins and stack in with the
+   pills as bubbles of their own, so they take the pill's size — one column of
+   labels reads as one set of type, not two. They only drop back to their own
+   smaller scale once they are pinned to the screenshot again. */
+.why-hearth-note {
+  font-size: clamp(0.875rem, 1.35vw, 1.1875rem);
+}
+
+@media (width >= 64rem) {
+  .why-hearth-note {
+    font-size: clamp(0.8125rem, 1.12vw, 1rem);
+  }
 }
 
 /* The screenshot's own 510x1182 shape, so the section reserves the full height

@@ -53,17 +53,17 @@ export default function Product() {
   return (
     <section
       id="product"
-      className="product-section flex min-h-screen flex-col items-center bg-[linear-gradient(to_bottom,var(--color-strong)_0%,var(--color-strong-deep)_100%)] px-4 py-24 text-center sm:py-32"
+      className="product-section flex min-h-screen flex-col items-center bg-[linear-gradient(to_bottom,var(--color-strong)_0%,var(--color-strong-deep)_100%)] px-4 pb-10 pt-24 text-center sm:py-32"
     >
       <p className="product-eyebrow font-semibold uppercase tracking-[0.22em] text-panel-eyebrow">
         The Product
       </p>
 
-      <h2 className="product-heading mt-6 font-bold leading-[1.05] tracking-tight text-panel-heading">
+      <h2 className="product-heading mt-4 font-bold leading-[1.05] tracking-tight text-panel-heading sm:mt-6">
         Weekly planning across locations.
       </h2>
 
-      <p className="product-subhead mt-6 font-medium leading-[1.45] text-panel-body">
+      <p className="product-subhead mt-4 font-medium leading-[1.45] text-panel-body sm:mt-6">
         A simple Monday&ndash;Friday view focused on day-level office
         attendance, so you can see who&rsquo;s in and check every office at a
         glance.
@@ -83,7 +83,7 @@ export default function Product() {
           pause button below, which sits on the frame rather than appearing on
           hover: a loop you can't obviously stop is the thing worth avoiding, so
           the control has to be visible before you go looking for it. */}
-      <div className="product-demo relative mt-16 w-full max-w-[65rem] overflow-hidden rounded-2xl shadow-demo sm:mt-20">
+      <div className="product-demo relative mt-8 w-full max-w-[65rem] overflow-hidden rounded-2xl shadow-demo sm:mt-20">
         {reducedMotion ? (
           <img
             src={DEMO_POSTER}

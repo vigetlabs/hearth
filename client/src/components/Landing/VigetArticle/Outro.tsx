@@ -24,10 +24,14 @@ export default function Outro() {
             path in `favicon.svg` ends at y=28.08 of a 29-unit viewBox, so
             sitting the box on `bottom-0` leaves 3.2% of its height — 2.5% of
             the card's — as a sliver of terracotta under the glyph. Dropping it
-            by that much puts the glyph itself flush with the card's edge. */}
+            by that much puts the glyph itself flush with the card's edge.
+
+            Hidden on phones: the card down there is barely wider than the copy
+            on it, so the mark has nowhere to sit that isn't behind the
+            headline and the button. See Outro.css. */}
         <div
           aria-hidden="true"
-          className="outro-mark pointer-events-none absolute -bottom-[2.5%] left-[81.5%] h-[79%] bg-white/15"
+          className="outro-mark pointer-events-none absolute -bottom-[2.5%] left-[81.5%] hidden h-[79%] bg-white/15 sm:block"
         />
 
         <div className="relative flex flex-col items-center">

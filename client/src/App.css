@@ -107,6 +107,9 @@
                                     phrases inside marketing headings */
   --color-strong-soft: #de8e6e; /* the ramp's lightest step — hover preview on
                                    marketing nav links (State/Selected border) */
+  --color-strong-outline: #a13e20; /* outlined marketing CTAs — border and label
+                                      together, so the pill reads as one drawn
+                                      shape (Read Article on narrow screens) */
 
   /* Attendance toggle — in/out of office active states (day cell roster tabs) */
   --color-in-office: #c25706; /* "In Office" tab active */

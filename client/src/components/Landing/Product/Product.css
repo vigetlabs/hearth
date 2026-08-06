@@ -54,3 +54,37 @@
 .product-demo {
   aspect-ratio: 1360 / 864;
 }
+
+/*
+  ============================================================================
+  Below `sm`
+
+  The desktop ramp is built around the heading staying on one line, and on a
+  phone that assumption costs it: 4vw is ~15px at 390px wide, so the floor
+  takes over and the heading ends up small against the panel rather than in
+  proportion to it. The mobile treatment lets the line wrap to two instead,
+  which frees the width back up — the heading then spans ~7.45x its own font
+  size per line, and filling ~81% of the viewport works out to 7.1vw.
+
+  The eyebrow and subhead follow it up at the same proportions they hold on
+  desktop. Every cap here lands within a couple of pixels of what the desktop
+  ramp reaches at 640px, so crossing the breakpoint doesn't jump.
+  ============================================================================
+*/
+@media (max-width: 39.9375rem) {
+  .product-section {
+    --product-heading-size: clamp(1.375rem, 7.1vw, 1.75rem);
+  }
+
+  .product-eyebrow {
+    font-size: clamp(0.6875rem, 3.15vw, 0.75rem);
+  }
+
+  /* The measure the desktop rule derives from is the heading's *single-line*
+     width, which no longer exists once the heading wraps — so the subhead
+     just takes the panel, and the section's own padding sets its measure. */
+  .product-subhead {
+    font-size: clamp(0.8125rem, 3.95vw, 0.9375rem);
+    max-width: none;
+  }
+}

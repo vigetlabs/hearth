@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import WordLogo from "@/components/landing/Logo/WordLogo";
+import PlusIcon from "@/components/icons/PlusIcon";
 
 import { redirectToGoogleSso } from "@/util/auth/redirectToGoogleSso";
 import { cn } from "@/util/cn";
@@ -83,10 +84,10 @@ export default function Navbar() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center px-4 pt-6 sm:pt-8">
-      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-nav backdrop-blur-md sm:pl-10 sm:pr-6">
+      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl bg-surface/70 py-4 pl-7 pr-4 shadow-nav backdrop-blur-md sm:pl-10 sm:pr-6">
         <WordLogo className="h-6 text-fg sm:h-7" />
 
-        <div className="flex items-center gap-6 sm:gap-8">
+        <div className="flex items-center gap-4 sm:gap-8">
           {/* The section the page is parked on holds the full terracotta the
               rest of the page accents with (`strong`), so the bar always says
               where you are. Hovering an *unselected* label previews that move
@@ -115,13 +116,25 @@ export default function Navbar() {
 
           {/* The only filled button on the page, so it takes the same hover the
               app's other `bg-strong` actions do: down to the darker
-              Brand/Confirmed border color. */}
+              Brand/Confirmed border color. It sits tighter on phones, where it
+              shares the bar with the menu button rather than trailing a row of
+              links. */}
           <button
             type="button"
             onClick={redirectToGoogleSso}
-            className="cursor-pointer rounded-full bg-strong px-5 py-2.5 text-base font-medium text-fg-inverse transition-colors hover:bg-strong-hover"
+            className="cursor-pointer rounded-full bg-strong px-5 py-2 text-sm font-medium text-fg-inverse transition-colors hover:bg-strong-hover sm:py-2.5 sm:text-base sm:font-semibold"
           >
             Sign in
+          </button>
+
+          {/* Stands in for the nav links on phones, which have no room for
+              them. */}
+          <button
+            type="button"
+            aria-label="Open menu"
+            className="cursor-pointer text-fg transition-colors hover:text-strong-soft sm:hidden"
+          >
+            <PlusIcon weight="x-thin" className="h-6 w-6" />
           </button>
         </div>
       </nav>

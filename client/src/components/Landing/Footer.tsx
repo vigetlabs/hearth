@@ -46,23 +46,28 @@ export default function Footer() {
           4rem off that so the content sits a touch nearer the center. The
           padding takes over once the viewport is narrow enough that the calc
           exceeds it. */}
-      <div className="mx-auto max-w-[calc(50%_+_28rem)] px-3 py-12 sm:px-4">
+      <div className="mx-auto max-w-[calc(50%_+_28rem)] px-6 py-12 sm:px-4">
         <div className="flex flex-col gap-8 sm:flex-row sm:justify-between sm:gap-12">
           <div>
             <WordLogo className="h-7 w-auto text-fg-inverse" />
-            <p className="mt-4 text-sm text-footer-muted">
+            <p className="mt-4 text-sm text-footer-muted font-medium">
               Good days at the office happen together.
             </p>
           </div>
 
-          <div className="flex gap-10 sm:gap-16">
+          {/* On phones the columns stack under the wordmark and have the full
+              width to themselves, so they push out to the two edges rather
+              than huddling together on the left. From `sm:` up they sit in the
+              row beside the wordmark, where the block is only as wide as its
+              contents and the gap is what separates them. */}
+          <div className="flex justify-between sm:gap-16">
             {LINK_COLUMNS.map(({ heading, links }) => (
               <div key={heading}>
-                <h2 className="text-xs uppercase tracking-[0.18em] text-footer-faint">
+                <h2 className="text-xs uppercase tracking-[0.18em] text-footer-faint font-bold">
                   {heading}
                 </h2>
 
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-3 space-y-2 font-medium">
                   {links.map((link) => (
                     <li key={link.label}>
                       <a
