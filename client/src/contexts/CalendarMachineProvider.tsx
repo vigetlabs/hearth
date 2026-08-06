@@ -60,7 +60,6 @@ function createCalendarMachineInitialState(
       confirmedDates: selectedDates
     }
 
-    console.log("CONFIRMED STATE");
     return confirmedState;
   }
 
@@ -70,6 +69,5 @@ function createCalendarMachineInitialState(
     draftDates: selectedDates
   }
 
-    console.log("PLANNING STATE");
   return planningState
 }

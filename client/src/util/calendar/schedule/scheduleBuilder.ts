@@ -39,7 +39,6 @@ export function buildWeekSchedule({
   activeOfficeId,
   currentUserId
 }: BuildWeekScheduleInput): WeekSchedule {
-  console.count("buildWeekSchedule call");
   const schedule: WeekSchedule = {};
 
   for (const dateKey of weekDateKeys) {
@@ -130,7 +129,6 @@ function buildCalendarFacts({
   const hasVisitElsewhere = userVisitsOnDate.some(
     (visit) => visit.office_id !== activeOfficeId,
   );
-  console.log(hasVisitElsewhere);
 
   const defaultScheduled = isDefaultScheduleDay(
     user,
