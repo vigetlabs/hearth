@@ -82,23 +82,33 @@ export default function CalendarWorkspaceRoot({
     return <div>Unable to load calendar</div>
   }
 
-  const baseSelectedDates = new Set(
+  const currentUserOfficeVisitDates = new Set(
     currentUserVisitsQuery.data
       .filter((visit) => visit.office_id === scope.activeOffice.id)
       .map((visit) => visit.visit_date),
   );
 
+  const currentUserExternalVisitDates = new Set(
+    currentUserVisitsQuery.data
+      .filter((visit) => visit.office_id !== scope.activeOffice.id)
+      .map((visit) => visit.visit_date)
+  );
+
+  const baseSelectedDates = new Set(currentUserOfficeVisitDates);
+
   for (const date of weekDates) {
-    if (isDefaultScheduleDay(scope.user, date)) {
-      baseSelectedDates.add(generateDateKey(date));
+    const dateKey = generateDateKey(date);
+
+    if (
+      isDefaultScheduleDay(scope.user, date) &&
+      !currentUserExternalVisitDates.has(dateKey)
+    ) {
+      baseSelectedDates.add(dateKey);
     }
   }
 
-  const persistedSelectedDates = [...baseSelectedDates];
-
-
   const allSelectedDates: string[] = resolvePlanningSelectedDates({
-    baseSelectedDates: persistedSelectedDates,
+    baseSelectedDates: [...baseSelectedDates],
     planningStatesByDate: planning.planningStatesByDate,
     currentUserId: scope.user.id,
     weekDateKeys: weekDateKeys
