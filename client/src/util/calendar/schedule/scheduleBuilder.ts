@@ -18,24 +18,26 @@ type ScheduleOffice = Pick<Office, "id" | "name" | "emoji">;
 
 interface BuildWeekScheduleInput {
   officeUsers: User[];
-  officeVisits: Visit[];
+  relevantVisits: Visit[];
   officesById: ReadonlyMap<number, ScheduleOffice>;
   weekDateKeys: readonly string[];
   confirmedUserIds: ReadonlySet<number>;
   editingUserIds: ReadonlySet<number>;
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
   activeOfficeId: number;
+  currentUserId: number;
 }
 
 export function buildWeekSchedule({
   officeUsers,
-  officeVisits,
+  relevantVisits,
   officesById,
   weekDateKeys,
   confirmedUserIds,
   editingUserIds,
   planningStatesByDate,
   activeOfficeId,
+  currentUserId
 }: BuildWeekScheduleInput): WeekSchedule {
   console.count("buildWeekSchedule call");
   const schedule: WeekSchedule = {};
@@ -45,7 +47,7 @@ export function buildWeekSchedule({
 
     const users = findAllUsersForDateAndOffice({
       officeUsers,
-      officeVisits,
+      relevantVisits,
       planningStatesByDate,
       activeOfficeId,
       dateKey,
@@ -55,13 +57,14 @@ export function buildWeekSchedule({
       const userVisitsOnDate = findUserVisitsOnDate(
         dateKey,
         user.id,
-        officeVisits,
+        relevantVisits,
       );
 
       const visitHere = userVisitsOnDate.find(
         (visit) => visit.office_id === activeOfficeId,
       );
 
+      //@ TODO: THIS SHOULD SOMEHOW READ ALL VISITS OF USER...
       const externalVisit = userVisitsOnDate.find(
         (visit) => visit.office_id !== activeOfficeId,
       );
@@ -127,6 +130,7 @@ function buildCalendarFacts({
   const hasVisitElsewhere = userVisitsOnDate.some(
     (visit) => visit.office_id !== activeOfficeId,
   );
+  console.log(hasVisitElsewhere);
 
   const defaultScheduled = isDefaultScheduleDay(
     user,
@@ -154,7 +158,7 @@ function buildCalendarFacts({
 
 interface FindAllUsersForDateAndOfficeInput {
   officeUsers: User[];
-  officeVisits: Visit[];
+  relevantVisits: Visit[];
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
   activeOfficeId: number;
   dateKey: string;
@@ -162,7 +166,7 @@ interface FindAllUsersForDateAndOfficeInput {
 
 function findAllUsersForDateAndOffice({
   officeUsers,
-  officeVisits,
+  relevantVisits,
   planningStatesByDate,
   activeOfficeId,
   dateKey,
@@ -171,7 +175,7 @@ function findAllUsersForDateAndOffice({
     officeUsers.map((user) => [user.id, user]),
   );
 
-  for (const visit of officeVisits) {
+  for (const visit of relevantVisits) {
     if (
       visit.visit_date === dateKey &&
       visit.office_id === activeOfficeId

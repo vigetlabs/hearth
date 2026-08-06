@@ -94,13 +94,14 @@ export function useCalendarGrid({
     () =>
       buildWeekSchedule({
         officeUsers: data.rosterUsers,
-        officeVisits: data.visits,
+        relevantVisits: data.visits,
         officesById,
         weekDateKeys,
         confirmedUserIds,
         editingUserIds,
         planningStatesByDate,
         activeOfficeId: scope.activeOffice.id,
+        currentUserId: scope.user.id
       }),
     [
       data.rosterUsers,

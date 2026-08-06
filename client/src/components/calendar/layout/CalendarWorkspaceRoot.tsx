@@ -45,7 +45,7 @@ export default function CalendarWorkspaceRoot({
 
   const officeRosterQuery = useOfficeRosterQuery(scope.activeOffice.id);
 
-  const officeVisitsQuery = useVisitsQuery({
+  const relevantVisitsQuery = useVisitsQuery({
     office_id: scope.activeOffice.id,
     date: scope.focusedWeekStartKey,
     view: "week"
@@ -67,7 +67,7 @@ export default function CalendarWorkspaceRoot({
     attendanceConfirmationsQuery.isPending ||
     currentUserVisitsQuery.isPending ||
     officeRosterQuery.isPending ||
-    officeVisitsQuery.isPending ||
+    relevantVisitsQuery.isPending ||
     !planning.hasInitialSnapshot
   ) {
     return <CalendarPageSkeleton />
@@ -77,7 +77,7 @@ export default function CalendarWorkspaceRoot({
     attendanceConfirmationsQuery.isError ||
     currentUserVisitsQuery.isError ||
     officeRosterQuery.isError ||
-    officeVisitsQuery.isError
+    relevantVisitsQuery.isError
   ) {
     return <div>Unable to load calendar</div>
   }
@@ -119,7 +119,7 @@ export default function CalendarWorkspaceRoot({
 
   const calendarData: CalendarData = {
     rosterUsers: officeRosterQuery.data ?? [],
-    visits: officeVisitsQuery.data ?? [],
+    visits: relevantVisitsQuery.data ?? [],
     currentUserVisits: currentUserVisitsQuery.data ?? [],
     attendanceConfirmations: attendanceConfirmationsQuery.data ?? []
   }

@@ -11,7 +11,7 @@ export async function getVisits({
   office_id,
 }: GetVisitsParams): Promise<VisitsResponse> {
   const response = api
-    .get("/visits", {
+    .get("/visits/relevant", {
       searchParams: {
         ...(date && { date }),
         ...(view && { view }),
