@@ -8,6 +8,7 @@ import { isInOffice } from "@/types/calendar/calendar";
 import { isFuture } from "@/util/dates/date";
 import { cn } from "@/util/cn";
 import type { CalendarScheduleEntry } from "@/types/calendar/schedule/weekSchedule";
+import { userDisplayName } from "@/util/auth/displayName";
 
 // Nudge feature is built but hidden for now. Flip to true to re-enable the
 // Nudge button next to roster names.
@@ -305,6 +306,8 @@ function RosterRow({
   const isPending =
     entry.status === "planning-yes" || entry.status === "planning-no";
 
+  const displayName = userDisplayName(entry.user);
+
   return (
     <li className="flex items-center gap-2 py-1.5">
       <StatusIcon
@@ -316,9 +319,9 @@ function RosterRow({
       <span className="flex min-w-0 flex-1 items-center gap-1">
         <span
           className="min-w-0 truncate text-sm font-semibold text-fg"
-          title={entry.user.first_name}
+          title={displayName}
         >
-          {entry.user.first_name}
+          {displayName}
         </span>
         {entry.isVisitor && (
           <span
@@ -344,7 +347,7 @@ function RosterRow({
       {SHOW_NUDGE_BUTTON && nudgeable && !isMe && (
         <button
           type="button"
-          aria-label={`Nudge ${entry.user.first_name}`}
+          aria-label={`Nudge ${displayName}`}
           className="flex shrink-0 items-center gap-0.5 rounded-full border border-line-strong px-1.5 py-px text-[0.625rem] font-medium text-fg-subtle transition-colors hover:bg-surface-muted hover:text-fg"
         >
           <NudgeIcon className="h-3 w-3" />
