@@ -17,7 +17,7 @@ class OfficePlanningBroadcaster
       thursday: T::Boolean,
       friday: T::Boolean,
       saturday: T::Boolean,
-      sunday: T::Boolean,
+      sunday: T::Boolean
     }
   end
 
@@ -35,7 +35,7 @@ class OfficePlanningBroadcaster
       first_name: String,
       last_name: String,
       office: T.nilable(ChannelSerializedOffice),
-      default_schedule: T.nilable(ChannelSerializedSchedule),
+      default_schedule: T.nilable(ChannelSerializedSchedule)
     }
   end
 
@@ -221,7 +221,7 @@ class OfficePlanningBroadcaster
       thursday: schedule.thursday,
       friday: schedule.friday,
       saturday: schedule.saturday,
-      sunday: schedule.sunday,
+      sunday: schedule.sunday
     }
   end
 end
