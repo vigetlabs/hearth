@@ -108,6 +108,7 @@ export default function CalendarWorkspaceRoot({
     (confirmation) => confirmation.user_id === scope.user.id
   );
 
+
   const bootstrap: CalendarMachineBootstrap = {
     scope: {
       activeOfficeId: scope.activeOffice.id,

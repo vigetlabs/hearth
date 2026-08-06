@@ -86,6 +86,29 @@ export function useCalendarGrid({
     [currentUserExternalVisitsByDate, officesById],
   );
 
+  /* Contains visits relevant to office and week start being viewed and currentUserVisits.
+   * It is necessary to do both so that when viewing an office and my external visits are considered
+   * to be irrelevant by the relevant endpoint query, my visits will still show
+   *
+   * EX: My default office is Boulder, I have external visits at Durham. If I view Chatanooga, the
+   * relevant endpoint would not fetch my Durham visits. `scheduleVisits` is necessary to include
+   * such visits so that it properly displays for the current user (me), while still being able to
+   * exclude those irrelevant visits for other users.
+  */
+  const scheduleVisits = useMemo(() => {
+    const visitsById = new Map<number, Visit>();
+
+    for (const visit of data.visits) {
+      visitsById.set(visit.id, visit);
+    }
+
+    for (const visit of data.currentUserVisits) {
+      visitsById.set(visit.id, visit);
+    }
+
+    return [...visitsById.values()];
+  }, [data.visits, data.currentUserVisits]);
+
   const isWeekConfirmed = confirmedUserIds.has(scope.user.id);
   const isEditingWeek = editingUserIds.has(scope.user.id);
   const locked = isWeekConfirmed && !isEditingWeek;
@@ -94,7 +117,7 @@ export function useCalendarGrid({
     () =>
       buildWeekSchedule({
         officeUsers: data.rosterUsers,
-        relevantVisits: data.visits,
+        relevantVisits: scheduleVisits,
         officesById,
         weekDateKeys,
         confirmedUserIds,
@@ -105,7 +128,7 @@ export function useCalendarGrid({
       }),
     [
       data.rosterUsers,
-      data.visits,
+      scheduleVisits,
       officesById,
       weekDateKeys,
       confirmedUserIds,

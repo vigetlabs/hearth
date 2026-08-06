@@ -51,6 +51,7 @@ export function buildWeekSchedule({
       planningStatesByDate,
       activeOfficeId,
       dateKey,
+      currentUserId
     });
 
     for (const user of users) {
@@ -64,7 +65,6 @@ export function buildWeekSchedule({
         (visit) => visit.office_id === activeOfficeId,
       );
 
-      //@ TODO: THIS SHOULD SOMEHOW READ ALL VISITS OF USER...
       const externalVisit = userVisitsOnDate.find(
         (visit) => visit.office_id !== activeOfficeId,
       );
@@ -162,6 +162,7 @@ interface FindAllUsersForDateAndOfficeInput {
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
   activeOfficeId: number;
   dateKey: string;
+  currentUserId: number;
 }
 
 function findAllUsersForDateAndOffice({
@@ -170,16 +171,29 @@ function findAllUsersForDateAndOffice({
   planningStatesByDate,
   activeOfficeId,
   dateKey,
+  currentUserId
 }: FindAllUsersForDateAndOfficeInput): User[] {
   const usersById = new Map<number, User>(
     officeUsers.map((user) => [user.id, user]),
   );
 
   for (const visit of relevantVisits) {
-    if (
-      visit.visit_date === dateKey &&
+    if (visit.visit_date !== dateKey) {
+      continue;
+    }
+
+    const isVistingActiveOffice =
       visit.office_id === activeOfficeId
-    ) {
+    // if (
+    //   visit.visit_date === dateKey &&
+    //   visit.office_id === activeOfficeId
+    // ) {
+    //   usersById.set(visit.user.id, visit.user);
+    // }
+    const isCurrentUserVisit =
+      visit.user.id === currentUserId
+
+    if (isVistingActiveOffice || isCurrentUserVisit) {
       usersById.set(visit.user.id, visit.user);
     }
   }
