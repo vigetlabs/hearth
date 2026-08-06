@@ -4,7 +4,8 @@ class UserSerializer
              :email,
              :first_name,
              :last_name,
-             :default_schedule
+             :default_schedule,
+             :is_onboarding_complete
 
   attribute :office do |user|
     next unless user.office

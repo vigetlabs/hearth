@@ -45,6 +45,7 @@ Rails.application.routes.draw do
       resources :visits, only: [ :create, :index ], module: :visits do
         collection do
           get :mine
+          get :relevant
         end
       end
 

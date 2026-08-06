@@ -1,6 +1,188 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Visits::Visits", type: :request do
+  describe "GET /visits/relevant" do
+    let(:week_start) { Date.new(2026, 8, 3) }
+    let(:calendar_office) { create(:office) }
+    let(:other_office) { create(:office) }
+
+    let(:current_user) do
+      create(:user, office: calendar_office)
+    end
+
+    context "when the user is authenticated" do
+      let(:headers) { auth_headers_for(current_user) }
+
+      subject(:make_request) do
+        get api_path("/visits/relevant"),
+          params: {
+            office_id: calendar_office.id,
+            date: week_start.to_s,
+            view: "week"
+          },
+          headers: headers
+      end
+
+      it "returns visits occuring at the requested office" do
+        visitor = create(:user, office: other_office)
+
+        relevant_visit = create(
+          :visit,
+          user: visitor,
+          office: calendar_office,
+          visit_date: week_start
+        )
+
+        make_request
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        visit_ids = json.dig("data", "visits").pluck("id")
+        expect(visit_ids).to include(relevant_visit.id)
+      end
+
+      it "returns visits by roster users even when they occur at another office" do
+        roster_user = create(:user, office: calendar_office)
+
+        external_visit = create(
+          :visit,
+          user: roster_user,
+          office: other_office,
+          visit_date: week_start
+        )
+
+        make_request
+
+        json = JSON.parse(response.body)
+        visit_ids = json.dig("data", "visits").pluck("id")
+        expect(visit_ids).to include(external_visit.id)
+      end
+
+      it "it does not return visits at another office by users outside the roster" do
+        unrelated_user = create(:user, office: other_office)
+
+        unrelated_visit = create(
+          :visit,
+          user: unrelated_user,
+          office: other_office,
+          visit_date: week_start
+        )
+        make_request
+
+        json = JSON.parse(response.body)
+        visit_ids = json.dig("data", "visits").pluck("id")
+        expect(visit_ids).not_to include(unrelated_visit.id)
+      end
+
+      it "does not return visits outside the requested date range" do
+        roster_user = create(:user, office: calendar_office)
+
+        visit_outside_range = create(
+          :visit,
+          user: roster_user,
+          office: calendar_office,
+          visit_date: week_start + 7.days
+        )
+        make_request
+
+        json = JSON.parse(response.body)
+
+        visit_ids = json.dig("data", "visits").pluck("id")
+        expect(visit_ids).not_to include(visit_outside_range.id)
+      end
+
+      it "returns each visit only once when it matches both relevance conditions" do
+        roster_user = create(:user, office: calendar_office)
+
+        visit = create(
+          :visit,
+          user: roster_user,
+          office: calendar_office,
+          visit_date: week_start
+        )
+
+        make_request
+
+        json = JSON.parse(response.body)
+        visit_ids = json.dig("data", "visits").pluck("id")
+        expect(visit_ids.count(visit.id)).to eq(1)
+      end
+
+      it "orders visits by visit date and then user id" do
+        first_user = create(:user, office: calendar_office)
+        second_user = create(:user, office: calendar_office)
+
+        later_visit = create(
+          :visit,
+          user: first_user,
+          office: calendar_office,
+          visit_date: week_start + 1.day
+        )
+
+        second_visit = create(
+          :visit,
+          user: second_user,
+          office: calendar_office,
+          visit_date: week_start
+        )
+
+        first_visit = create(
+          :visit,
+          user: first_user,
+          office: calendar_office,
+          visit_date: week_start
+        )
+
+        make_request
+
+        visit_ids = response.parsed_body
+          .dig("data", "visits")
+          .pluck("id")
+
+        expect(visit_ids).to eq([
+          first_visit.id,
+          second_visit.id,
+          later_visit.id
+        ])
+      end
+
+      it "returns the expected success message" do
+        make_request
+        json = JSON.parse(response.body)
+        expect(json["status"]["message"]).to eq("Fetched calendar-relevant visits successfully")
+      end
+    end
+
+    context "when the user is unauthenticated" do
+      subject(:make_request) do
+        get api_path("/visits/relevant"),
+          params: {
+            office_id: calendar_office.id,
+            date: week_start.to_s,
+            view: "week"
+          }
+      end
+
+      it "returns unauthorized response" do
+        make_request
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns an authentication error" do
+        make_request
+        json = JSON.parse(response.body)
+        expect(json).to include(
+          "status" => include(
+            "code" => 401
+          ),
+          "error" => include(
+            "type" => ApiErrorTypes::AUTHENTICATION
+          )
+        )
+      end
+    end
+  end
+
   describe "GET /visits/mine" do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }

@@ -7,7 +7,7 @@ class Api::V1::Visits::VisitsController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :handle_missing_parameter
   rescue_from ActionController::BadRequest, with: :handle_bad_request
 
-  before_action :authenticate_user!, only: [ :create, :index, :mine ]
+  before_action :authenticate_user!, only: [ :create, :index, :mine, :relevant ]
 
   CALENDAR_VIEWS = %w[week]
 
@@ -31,6 +31,40 @@ class Api::V1::Visits::VisitsController < ApplicationController
     success_response(
       data: data,
       message: "Fetched visits successfully"
+    )
+  end
+
+
+  def relevant
+    office_id = calendar_office_id
+
+    roster_user_ids = User
+      .where(office_id: office_id)
+      .select(:id)
+
+    base_scope = Visit.where(visit_date: date_range)
+
+    visits = base_scope
+      .where(office_id: office_id)
+      .or(
+        base_scope.where(user_id: roster_user_ids)
+      )
+      .includes(
+        user: [ :office, :default_schedule ]
+      )
+      .distinct
+      .order(:visit_date, :user_id)
+
+    serialized_visits = VisitSerializer
+      .new(visits)
+      .serializable_hash[:data]
+      .map { |visit| visit[:attributes] }
+
+    data = { visits: serialized_visits }
+
+    success_response(
+      data: data,
+      message: "Fetched calendar-relevant visits successfully"
     )
   end
 
