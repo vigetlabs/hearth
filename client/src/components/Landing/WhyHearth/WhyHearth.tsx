@@ -11,10 +11,11 @@ const DAY_SHOT = "/images/landing/example-day.png";
 // Positions are percentages of the figure — which is exactly as tall and wide
 // as the screenshot's own box at `lg` — so the scatter keeps its shape as the
 // section grows and shrinks. `top` is the center of the row, hence the
-// half-height offset on each. The left column runs just past the card's left
-// edge (to 38.5% across, a touch over the edge's 37.5%) and the right one
-// starts at its right edge (61.7%), so every rule ends against the card rather
-// than at some arbitrary length.
+// half-height offset on each. The screenshot is 21% of the figure, centered, so
+// its edges sit at 39.5% and 60.5%. The left column runs just past the left
+// edge (to 40.5% across) and the right one starts just inside the right edge
+// (60%), so every rule ends against the card rather than at some arbitrary
+// length.
 //
 // Callouts are positioned relative to the figure, a certain distance away, with the two
 // lower callouts pulled in slightly — the right one more so, the left one less.
@@ -27,19 +28,19 @@ const NOTES = [
   {
     label: "Cross-office visitors called out 📣",
     side: "left",
-    position: "lg:left-0 lg:right-[61.5%] lg:top-[13.5%]",
+    position: "lg:left-0 lg:right-[59.5%] lg:top-[13.5%]",
     order: "order-5",
   },
   {
     label: "Confirmed vs. planning modes",
     side: "left",
-    position: "lg:left-[4%] lg:right-[61.5%] lg:top-[28.5%]",
+    position: "lg:left-[4%] lg:right-[59.5%] lg:top-[28.5%]",
     order: "order-4",
   },
   {
     label: "Peer visibility",
     side: "right",
-    position: "lg:left-[61.7%] lg:right-[17%] lg:top-[42.3%]",
+    position: "lg:left-[60%] lg:right-[17%] lg:top-[42.3%]",
     order: "order-1",
   },
 ] as const;
@@ -85,14 +86,14 @@ export default function WhyHearth() {
         Why Hearth
       </p>
 
-      <h2 className="why-hearth-heading mt-6 font-semibold leading-[1.05] tracking-tight text-fg">
+      <h2 className="why-hearth-heading mt-4 font-bold leading-[1.05] tracking-tight text-fg sm:mt-6">
         Spot the best day{" "}
         <span className="text-strong-vivid">before you commute</span>
       </h2>
 
       {/* Measure is set in WhyHearth.css, off the heading's own line width, so
           this sits just inside the heading above it. */}
-      <p className="why-hearth-subhead mt-6 font-medium leading-[1.45] text-fg">
+      <p className="why-hearth-subhead mt-4 font-medium leading-[1.45] text-fg sm:mt-6">
         Hearth combines decision-making about scheduling with unmatched
         visibility and ease of use.
       </p>
@@ -112,17 +113,17 @@ export default function WhyHearth() {
           width={510}
           height={1182}
           alt="A day in the Hearth week view: Tuesday, four people in, flagged as having two visitors and the most confirmed day of the week, above the list of seven people confirmed in office."
-          className="why-hearth-shot order-last mt-8 w-[16rem] max-w-full lg:mt-0 lg:w-[24.5%]"
+          className="why-hearth-shot order-last mt-8 w-[13rem] max-w-full lg:mt-0 lg:w-[21%]"
         />
 
         <ul className="contents lg:absolute lg:inset-0 lg:block">
           {NOTES.map(({ label, side, position, order }) => (
             <li
               key={label}
-              /* Below `lg` the callout wears the pill's bubble — same border,
-                 fill and drop as the pills it stacks with — and sheds all of it
-                 again once it is pinned to the screenshot. */
-              className={`why-hearth-note flex items-center gap-2 rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] font-semibold leading-[1.35] text-fg shadow-badge lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none ${order} lg:absolute lg:-translate-y-1/2 ${position} ${
+              /* Below `lg` the callout wears the pill's bubble — same fill and
+                 corner as the pills it stacks with — and sheds all of it again
+                 once it is pinned to the screenshot. */
+              className={`why-hearth-note flex items-center gap-2 rounded-[0.75em] bg-surface px-[1.25em] py-[0.7em] font-semibold leading-[1.35] text-fg lg:rounded-none lg:bg-transparent lg:p-0 ${order} lg:absolute lg:-translate-y-1/2 ${position} ${
                 side === "left"
                   ? "lg:flex-row lg:text-right"
                   : "lg:flex-row-reverse lg:text-left"
@@ -144,7 +145,7 @@ export default function WhyHearth() {
           {PILLS.map(({ label, emoji, position, tilt, order }) => (
             <li
               key={label}
-              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] cursor-default select-none font-semibold text-fg shadow-badge ${order} lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
+              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-[0.75em] bg-surface px-[1.25em] py-[0.7em] cursor-default select-none font-semibold text-fg ${order} lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
             >
               <span>{label}</span>
               {/* leading-[0] collapses the line box so the glyph sits centered

@@ -2,9 +2,9 @@
   ============================================================================
   Quote section type scale
 
-  Like the Product panel it continues, this section is sized off the viewport
-  width rather than the breakpoint scale, so the mark, the quote and the
-  attribution keep their proportions to each other — and to the panel — at
+  Like the rest of the Product panel it sits on, this block is sized off the
+  viewport width rather than the breakpoint scale, so the mark, the quote and
+  the attribution keep their proportions to each other — and to the panel — at
   every window size.
 
   Measured off the mock at a 1440px frame: the quote reads at ~34px, which is
@@ -59,9 +59,9 @@
   ============================================================================
   Below `sm`
 
-  The quote follows the Product panel up (see Product.css): 2.35vw is ~9px on
+  The quote follows the demo half up (see Product.css): 2.35vw is ~9px on
   a phone, small enough that the floor takes over and the quote stops reading
-  as the section's centrepiece. Re-derived against the mobile panel it wants
+  as the block's centrepiece. Re-derived against the mobile panel it wants
   ~5.1vw, and the cap holds it near what the desktop ramp reaches at 640px so
   the breakpoint doesn't jump. The measure goes with it — 25em is wider than
   a phone, so the quote already takes the full panel and wraps to four lines.

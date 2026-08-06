@@ -78,6 +78,24 @@
 }
 
 /*
+  Below sm the pill drops to a line of its own, centered under the sentence,
+  and is the last thing in it — the closing clause is hidden at this width (see
+  Home.tsx). Going from `inline-flex` to `flex` is what forces the break;
+  `width: fit-content` keeps the pill hugging its text instead of stretching
+  the full line. The words above are then free to balance across two full
+  lines rather than leaving a ragged one behind the pill.
+*/
+@media (width < 40rem) {
+  .landing-tagline-pill {
+    display: flex;
+    width: fit-content;
+    /* Replaces the inline side margins, which do nothing once it's centered. */
+    margin-inline: auto;
+    margin-block-start: 0.3em;
+  }
+}
+
+/*
   ============================================================================
   Floating emoji badges (Home)
 

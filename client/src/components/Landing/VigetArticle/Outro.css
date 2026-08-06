@@ -23,6 +23,26 @@
   min-height: clamp(22rem, 38vw, 34rem);
 }
 
+/*
+  Below `sm`
+
+  38vw is ~150px on a phone, so the desktop ramp is pinned to its 22rem floor —
+  a height picked to keep the card in proportion to a 1440px frame, not to the
+  three short lines actually on it. The copy stops shrinking down here too (the
+  heading is on its 2rem floor), so the card ends up a good bit taller than its
+  contents and `justify-center` splits the slack into a band of empty terracotta
+  above and below them, on top of the card's own padding.
+
+  15rem is the same three lines at the phone's reduced padding plus a little
+  slack, so the band mostly goes and the card sits closer to the copy. Still a
+  minimum, so it grows if the heading ever wraps.
+*/
+@media (max-width: 39.9375rem) {
+  .outro-card {
+    min-height: 15rem;
+  }
+}
+
 .outro-heading {
   font-size: clamp(2rem, 4vw, 3.75rem);
 }

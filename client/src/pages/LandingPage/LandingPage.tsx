@@ -3,7 +3,6 @@ import Home from "@/components/Landing/Home/Home";
 import Navbar from "@/components/Landing/Navbar";
 import Outro from "@/components/Landing/VigetArticle/Outro";
 import Product from "@/components/Landing/Product/Product";
-import Quote from "@/components/Landing/Product/Quote";
 import Slack from "@/components/Landing/WhyHearth/Slack";
 import VigetArticle from "@/components/Landing/VigetArticle/VigetArticle";
 import WhyHearth from "@/components/Landing/WhyHearth/WhyHearth";
@@ -15,7 +14,6 @@ export default function LandingPage() {
 
       <Home />
       <Product />
-      <Quote />
       <WhyHearth />
       <Slack />
       <VigetArticle />

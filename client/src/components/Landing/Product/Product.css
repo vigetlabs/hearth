@@ -2,7 +2,7 @@
   ============================================================================
   Product section type scale
 
-  The section reads as its own full-height panel, so the font is sized off the
+  The demo half reads as its own full-height panel, so the font is sized off the
   viewport width rather than the breakpoint scale — the heading, eyebrow and
   subhead then keep the same proportions to each other (and to the panel) at
   every window size, the way the mock shows them.

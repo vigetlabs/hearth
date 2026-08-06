@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 
 import WordLogo from "@/components/landing/Logo/WordLogo";
-import PlusIcon from "@/components/icons/PlusIcon";
+import MobileNavMenu from "@/components/Landing/MobileNavMenu";
 
+import { NAV_LINKS, navLinkClass } from "@/components/Landing/navLinks";
 import { redirectToGoogleSso } from "@/util/auth/redirectToGoogleSso";
 import { cn } from "@/util/cn";
-
-const NAV_LINKS = [
-  { label: "Home", targetId: "home" },
-  { label: "Product", targetId: "product" },
-  { label: "Why Hearth", targetId: "why-hearth" },
-  { label: "Viget article", targetId: "viget-article" },
-];
 
 // How far down the viewport a section's top edge has to climb before that
 // section counts as the one being read: the bottom edge of the floating bar,
@@ -88,14 +82,9 @@ export default function Navbar() {
         <WordLogo className="h-6 text-fg sm:h-7" />
 
         <div className="flex items-center gap-4 sm:gap-8">
-          {/* The section the page is parked on holds the full terracotta the
-              rest of the page accents with (`strong`), so the bar always says
-              where you are. Hovering an *unselected* label previews that move
-              in the ramp's lightest step (`strong-soft`) — lighter than the
-              selected color, so a hovered label can never be mistaken for the
-              selected one. The selected label takes no hover at all: it is
-              already at the end of that ramp, and lightening it on hover would
-              read as it switching off. */}
+          {/* The links themselves, on screens wide enough to hold them. Below
+              `sm` they give way to the menu button at the end of the bar, which
+              serves the same list from a dropdown. */}
           {NAV_LINKS.map(({ label, targetId }) => {
             const active = targetId === activeId;
 
@@ -106,7 +95,7 @@ export default function Navbar() {
                 aria-current={active ? "true" : undefined}
                 className={cn(
                   "hidden cursor-pointer text-base font-medium transition-colors sm:block",
-                  active ? "text-strong" : "text-fg hover:text-strong-soft",
+                  navLinkClass(active, "hover"),
                 )}
               >
                 {label}
@@ -128,14 +117,8 @@ export default function Navbar() {
           </button>
 
           {/* Stands in for the nav links on phones, which have no room for
-              them. */}
-          <button
-            type="button"
-            aria-label="Open menu"
-            className="cursor-pointer text-fg transition-colors hover:text-strong-soft sm:hidden"
-          >
-            <PlusIcon weight="x-thin" className="h-6 w-6" />
-          </button>
+              them. Hides itself from `sm` up. */}
+          <MobileNavMenu activeId={activeId} />
         </div>
       </nav>
     </div>

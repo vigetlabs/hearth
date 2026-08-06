@@ -168,29 +168,17 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Tagline, sitting just below the giant wordmark at the base of the
-          hero. Wrapping to two balanced lines (see `.landing-tagline` in
-          Home.css).
-
-          The "hybrid teams" pill flows inline with the sentence:
-          `inline-flex` + `align-middle` keeps it vertically centered on the
-          text line rather than sitting on the baseline. Its own type scale is
-          one step below the sentence, and because every dimension it owns is
-          in `em` (see the CSS), it tracks the sentence exactly as that scales.
-          Shrinking that font size would shrink the pill with it, so the
-          smaller lettering comes from scaling the glyphs inside the box — the
-          box measures at full size, the text just draws smaller. */}
-      <section className="px-4 py-20 sm:py-28">
-        <p className="landing-tagline mx-auto text-center font-medium leading-[1.45] text-fg">
+      <section className="px-4 pb-10 pt-10 sm:pb-14 sm:pt-28">
+        <p className="landing-tagline mx-auto text-center font-semibold leading-[1.45] text-fg">
           A shared office planning tool for{" "}
           <span className="landing-tagline-pill inline-flex items-center rounded-full bg-strong-deep align-middle font-bold leading-[1.6] text-fg-inverse">
             <span className="inline-block scale-[0.85]">hybrid teams</span>
-          </span>{" "}
-          to make office days count.
+          </span>
+          <span className="hidden sm:inline"> to make office days count.</span>
         </p>
       </section>
 
-      <div aria-hidden="true" className="h-[30vh]" />
+      <div aria-hidden="true" className="h-[10vh]" />
     </>
   );
 }
