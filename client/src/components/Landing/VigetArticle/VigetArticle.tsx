@@ -89,7 +89,7 @@ export default function VigetArticle() {
               <img
                 src={photo}
                 alt=""
-                className="aspect-square w-full max-w-[10.25rem] object-cover"
+                className="aspect-square w-full max-w-[10.25rem] object-cover rounded-[0.5em] shadow-sm"
               />
 
               <p className="article-name mt-4 font-bold leading-[1.35] text-fg-warm">

@@ -126,7 +126,7 @@ export default function WhyHearth() {
           {PILLS.map(({ label, emoji, position, tilt }) => (
             <li
               key={label}
-              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] font-semibold text-fg shadow-badge lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
+              className={`why-hearth-pill flex items-center gap-[0.5em] whitespace-nowrap rounded-full border-[1.185px] border-line bg-surface px-[1.25em] py-[0.7em] cursor-default select-none font-semibold text-fg shadow-badge lg:absolute lg:-translate-x-1/2 lg:-translate-y-1/2 ${position} ${tilt}`}
             >
               <span>{label}</span>
               {/* leading-[0] collapses the line box so the glyph sits centered
