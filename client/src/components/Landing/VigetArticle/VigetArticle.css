@@ -1,0 +1,60 @@
+/*
+  ============================================================================
+  Viget article section type scale
+
+  Sized off the viewport width like every panel above it, so the copy column on
+  the left and the three portraits on the right keep the same proportions to
+  each other at every window size.
+
+  Heading: measured off the mock, "Want to see more?" — 
+  spans ~10.5x its own font size in Plus Jakarta Sans at this weight
+  and tracking. The mock runs that line across ~27.5% of the frame, which works
+  out to 27.5 / 10.5 = 2.6vw. The 2.5rem cap stops it growing past ~1540px of
+  viewport (it drifts narrower instead), and the 1.625rem floor binds below
+  ~1000px — just under the breakpoint where the two columns stack and the
+  heading gets the full width to itself anyway.
+  ============================================================================
+*/
+.article-section {
+  --article-heading-size: clamp(1.625rem, 2.6vw, 2.5rem);
+}
+
+.article-heading {
+  font-size: var(--article-heading-size);
+}
+
+/* Matches the Product, Why Hearth and Slack eyebrows exactly — all four read as
+   the same label a scroll apart, so they share a scale rather than each
+   deriving one. */
+.article-eyebrow {
+  font-size: clamp(0.6875rem, 1vw, 0.9375rem);
+}
+
+/* 0.48 of the heading, scaled down alongside it so the two keep their
+   proportions — the same scale the Slack section sets its body copy at, since
+   both are a paragraph in a column rather than a centered subhead. 23em is the
+   mock's measure (~419px against its 18px body) expressed against the body's
+   own size, so the paragraph breaks onto the same two lines as the type scales
+   rather than drifting wider or narrower. */
+.article-body {
+  font-size: clamp(0.9375rem, 1.3vw, 1.125rem);
+  max-width: 23em;
+}
+
+/* One step below the body. Everything the pill owns is in
+   `em` (see VigetArticle.tsx), so the box grows and shrinks with this. */
+.article-cta {
+  font-size: clamp(0.875rem, 1.15vw, 1.0625rem);
+}
+
+/* The captions are the smallest type in the section, the name a step above the
+   role. Both are set from the viewport like the header beside them, so the two
+   columns scale together rather than the captions holding still while the
+   heading grows. */
+.article-name {
+  font-size: clamp(0.8125rem, 1.1vw, 1rem);
+}
+
+.article-role {
+  font-size: clamp(0.75rem, 1vw, 0.9375rem);
+}

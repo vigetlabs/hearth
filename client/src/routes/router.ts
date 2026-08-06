@@ -7,12 +7,12 @@ import { schedulePickerLoader } from "@/routes/loaders/schedulePickerLoader";
 
 import OfficePickerPage from "@/pages/OfficePickerPage/OfficePickerPage";
 import SchedulePickerPage from "@/pages/SchedulePickerPage/SchedulePickerPage";
-import SigninPage from "@/pages/SigninPage/SigninPage";
+import LandingPage from "@/pages/LandingPage/LandingPage";
 import ProfilePage from "@/pages/ProfilePage/ProfilePage";
 import CalendarPage from "@/pages/CalendarPage/CalendarPage";
 import RemotePage from "@/pages/RemotePage/RemotePage";
 import SandboxPage from "@/pages/SandboxPage/SandboxPage";
-import { signinLoader } from "@/routes/loaders/signinLoader";
+import { landingLoader } from "@/routes/loaders/landingLoader";
 
 const devRoutes = import.meta.env.DEV
   ? [{ path: "sandbox", Component: SandboxPage }]
@@ -26,8 +26,8 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: SigninPage,
-        loader: signinLoader,
+        Component: LandingPage,
+        loader: landingLoader,
       },
       ...devRoutes,
       {

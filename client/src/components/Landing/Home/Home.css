@@ -1,0 +1,144 @@
+/*
+  ============================================================================
+  Hero wordmark sizing (Home)
+
+  The giant "Hearth" watermark sits at the bottom of the hero, deliberately
+  cropped by the fold: a bit over half of it shows on first load and the rest
+  is revealed as the page scrolls. Driving both the mark's size and the hero's
+  height from one variable is what makes that ratio hold on every screen — the
+  hero is exactly one viewport plus the slice of the mark that hangs below it,
+  so the crop can't drift with the window size.
+
+  Width is what drives the size: the mark spans 92% of the viewport, running
+  wider than the decorative rules at 8%/92% and stopping just short of either
+  edge. The wordmark is ~4.15x as wide as it is tall (viewBox 477x115), so that
+  works out to a height of 92 / 4.15 = 22.2vw. The 48vh term is only a backstop
+  for short, wide windows, where a mark sized purely off the width would eat the
+  viewport. Keeping both here rather than as a `max-width` on the SVG means the
+  hero always knows the mark's real rendered height.
+  ============================================================================
+*/
+.landing-hero {
+  --wordmark-h: min(22.2vw, 48vh);
+  /* The portion left below the fold on first load — 45%, so slightly more than
+     half of the word reads as visible. */
+  --wordmark-hidden: calc(var(--wordmark-h) * 0.45);
+
+  /*
+  These rules control how far down the 4 vertical lines in the background extend.
+  This allows the vertical lines to stop exactly when they intersect the wordmark.
+  They are calculated as portions of the wordmark's height so they scale with it.
+  This also makes it look the same when the wordmark changes sizes due to viewport
+  changes.
+  */
+  --rule-stop-1: calc(var(--wordmark-h) * 0.9898);
+  --rule-stop-2: calc(var(--wordmark-h) * 0.6897);
+  --rule-stop-3: calc(var(--wordmark-h) * 0.7289);
+  --rule-stop-4: calc(var(--wordmark-h) * 0.7298);
+}
+
+/* the tagline that contains the "hybrid teams" pill, just below the large hearth wordmark */
+.landing-tagline {
+  font-size: max(2.05rem, 4.25vw);
+  max-width: 80vw;
+  text-wrap: balance;
+}
+
+.landing-tagline-pill {
+  font-size: 0.8em;
+  margin-inline: 0.1em;
+  padding-inline: 0.42em;
+  /* Optically centers the glyphs in the box — they sit high in the line box. */
+  padding-block: 0.083em 0.125em;
+}
+
+/*
+  ============================================================================
+  Floating emoji badges (Home)
+
+  Each badge drifts slowly around its resting position without ever migrating
+  away from it: every keyframe track starts and ends at translate(0, 0) so the
+  motion loops seamlessly and stays centered on the badge's absolute position.
+  The waypoints use offset x/y values and a touch of rotation to read as an
+  organic, non-repeating wander. Four distinct tracks (plus varied durations
+  and delays per badge) keep the badges from moving in visible unison.
+  ============================================================================
+*/
+@keyframes badge-float-a {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -14px) rotate(3deg);
+  }
+  50% {
+    transform: translate(-8px, -6px) rotate(-2deg);
+  }
+  75% {
+    transform: translate(6px, 12px) rotate(2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-b {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-12px, 8px) rotate(-3deg);
+  }
+  45% {
+    transform: translate(9px, 13px) rotate(2deg);
+  }
+  70% {
+    transform: translate(13px, -9px) rotate(3deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-c {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  30% {
+    transform: translate(7px, 11px) rotate(2deg);
+  }
+  55% {
+    transform: translate(14px, -7px) rotate(-2deg);
+  }
+  80% {
+    transform: translate(-9px, -12px) rotate(-3deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes badge-float-d {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate(-10px, -11px) rotate(3deg);
+  }
+  48% {
+    transform: translate(-13px, 7px) rotate(-2deg);
+  }
+  74% {
+    transform: translate(8px, 10px) rotate(2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* Respect users who prefer minimal motion — hold the badges still. */
+@media (prefers-reduced-motion: reduce) {
+  .badge-float {
+    animation: none !important;
+  }
+}
