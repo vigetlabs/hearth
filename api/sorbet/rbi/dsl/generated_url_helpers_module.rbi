@@ -31,6 +31,9 @@ module GeneratedUrlHelpersModule
   def api_v1_schedules_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
+  def api_v1_slack_interactions_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
   def api_v1_users_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
@@ -149,6 +152,9 @@ module GeneratedUrlHelpersModule
 
   sig { params(args: T.untyped).returns(String) }
   def rails_storage_redirect_url(*args); end
+
+  sig { params(args: T.untyped).returns(String) }
+  def relevant_api_v1_visits_url(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def rswag_api_url(*args); end
