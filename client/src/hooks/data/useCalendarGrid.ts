@@ -4,7 +4,6 @@ import { useCalendarDataContext } from "@/hooks/contexts/useCalendarDataContext"
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
 import type { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
-import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
 import { buildWeekSchedule } from "@/util/calendar/schedule/scheduleBuilder";
 import {
   buildCalendarGridViewModel,
@@ -13,6 +12,7 @@ import {
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import { useCalendarRedisPlanningContext } from "../contexts/useCalendarRedisPlanningContext";
+import { useCalendarRedisAttendingContext } from "../contexts/useCalendarRedisAttendingContext";
 
 export interface UseCalendarGridResult {
   viewModel: CalendarGridViewModel;
@@ -35,6 +35,8 @@ export function useCalendarGrid({
     selectDate,
     deselectDate
   } = useCalendarRedisPlanningContext();
+
+  const { editingUserIds } = useCalendarRedisAttendingContext();
 
   const weekDateKeys = useMemo(
     () => scope.weekDates.map((day) => day.key),
@@ -83,12 +85,6 @@ export function useCalendarGrid({
       ),
     [currentUserExternalVisitsByDate, officesById],
   );
-
-  const { editingUserIds } = useOfficeAttending({
-    officeId: scope.activeOffice.id,
-    weekStart: scope.focusedWeekStartKey,
-    currentUserId: scope.user.id,
-  });
 
   const isWeekConfirmed = confirmedUserIds.has(scope.user.id);
   const isEditingWeek = editingUserIds.has(scope.user.id);

@@ -1,7 +1,8 @@
 export const machineStates = {
   PLANNING: "PLANNING",
   CONFIRMING: "CONFIRMING",
-  CONFIRMED: "CONFIRMED"
+  CONFIRMED: "CONFIRMED",
+  EDITING: "EDITING"
 } as const;
 
 export type CalendarMachineStatus =
@@ -30,7 +31,14 @@ export interface ConfirmedState {
   confirmedDates: string[];
 }
 
+export interface EditingState {
+  status: typeof machineStates.EDITING;
+  scope: CalendarMachineScope;
+  confirmedDates: string[];
+}
+
 export type CalendarMachineState =
   | PlanningState
   | ConfirmingState
   | ConfirmedState
+  | EditingState

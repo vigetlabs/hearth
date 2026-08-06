@@ -11,8 +11,12 @@ export const validStateTransitions = {
     machineStates.CONFIRMED
   ],
   [machineStates.CONFIRMED]: [
-    machineStates.PLANNING,
+    machineStates.EDITING,
   ],
+  [machineStates.EDITING]: [
+    machineStates.CONFIRMED,
+    machineStates.PLANNING
+  ]
 } satisfies Record<
   CalendarMachineStatus,
   readonly CalendarMachineStatus[]

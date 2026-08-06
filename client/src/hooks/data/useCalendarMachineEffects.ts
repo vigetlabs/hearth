@@ -8,6 +8,7 @@ import { useWeekAttendanceConfirmation } from "@/util/api/mutations/attendanceCo
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, type Dispatch } from "react";
+import { useCalendarRedisAttendingContext } from "../contexts/useCalendarRedisAttendingContext";
 
 interface UseCalendarMachineEffectsInput {
   state: CalendarMachineState;
@@ -24,6 +25,8 @@ export function useCalendarMachineEffects({
 }: UseCalendarMachineEffectsInput) {
   const queryClient = useQueryClient();
   const confirmWeekMutation = useWeekAttendanceConfirmation();
+
+  const { startEditing } = useCalendarRedisAttendingContext();
 
   useEffect(() => {
     if (machineState.status !== machineStates.CONFIRMING) {
@@ -76,6 +79,24 @@ export function useCalendarMachineEffects({
     confirmWeekMutation.isPending,
     confirmWeekMutation,
     queryClient,
+    dispatch
+  ]);
+
+
+  useEffect(() => {
+    if (machineState.status !== machineStates.EDITING) {
+      return;
+    }
+
+    try {
+      startEditing();
+      dispatch(calendarEvents.editWeekCompleted());
+    } catch {
+      dispatch(calendarEvents.editWeekFailed());
+    }
+  }, [
+    machineState,
+    startEditing,
     dispatch
   ]);
 }

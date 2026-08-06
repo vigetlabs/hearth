@@ -12,6 +12,8 @@ import { CalendarRedisPlanningProvider } from "@/contexts/CalendarRedisPlanningP
 import { resolvePlanningSelectedDates } from "@/util/calendar/machine/bootstrapSelectedDatesResolver";
 import { isDefaultScheduleDay } from "@/util/calendar/schedule/scheduleFilter";
 import { generateDateKey } from "@/util/dates/date";
+import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
+import { CalendarRedisAttendingProvider } from "@/contexts/CalendarRedisAttendingProvider";
 
 interface CalendarWorkspaceRootProps {
   children: React.ReactNode;
@@ -54,6 +56,12 @@ export default function CalendarWorkspaceRoot({
     currentUserId: scope.user.id,
     dates: weekDateKeys
   });
+
+  const attending = useOfficeAttending({
+    officeId: scope.activeOffice.id,
+    weekStart: scope.focusedWeekStartKey,
+    currentUserId: scope.user.id
+  })
 
   if (
     attendanceConfirmationsQuery.isPending ||
@@ -119,14 +127,16 @@ export default function CalendarWorkspaceRoot({
   return (
     <CalendarDataProvider value={calendarData}>
       <CalendarRedisPlanningProvider value={planning}>
-        <CalendarMachineProvider
-          key={`${scope.activeOffice.id}:${scope.focusedWeekStartKey}`}
-          bootstrap={bootstrap}
-          activeOfficeId={scope.activeOffice.id}
-          focusedWeekStartKey={scope.focusedWeekStartKey}
-        >
-          {children}
-        </CalendarMachineProvider>
+        <CalendarRedisAttendingProvider value={attending}>
+          <CalendarMachineProvider
+            key={`${scope.activeOffice.id}:${scope.focusedWeekStartKey}`}
+            bootstrap={bootstrap}
+            activeOfficeId={scope.activeOffice.id}
+            focusedWeekStartKey={scope.focusedWeekStartKey}
+          >
+            {children}
+          </CalendarMachineProvider>
+        </CalendarRedisAttendingProvider>
       </CalendarRedisPlanningProvider>
     </CalendarDataProvider>
   )

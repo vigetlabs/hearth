@@ -33,12 +33,14 @@ export function useCalendarToolbar({
   machineState,
   dispatch
 }: UseCalendarToolbarInput): UseCalendarToolbarResult {
-  /*
-   * Temporary sources.
-   */
   const isWeekConfirmed = machineState.status === machineStates.CONFIRMED;
   const isEditingWeek = machineState.status === machineStates.PLANNING;
   const isConfirmationPending = machineState.status === machineStates.CONFIRMING;
+
+
+  /*
+   * Temporary sources.
+   */
   const isPlanningConnected = true;
   const isAttendanceConnected = true;
 

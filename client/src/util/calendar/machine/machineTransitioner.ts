@@ -1,5 +1,5 @@
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import { machineStates, type CalendarMachineState, type CalendarMachineStatus, type ConfirmedState, type ConfirmingState, type PlanningState } from "@/types/calendar/machine/machineState";
+import { machineStates, type CalendarMachineState, type CalendarMachineStatus, type ConfirmedState, type ConfirmingState, type EditingState, type PlanningState } from "@/types/calendar/machine/machineState";
 import { validStateTransitions } from "@/types/calendar/machine/machineTransitions";
 
 
@@ -7,14 +7,7 @@ export function calendarMachineReducer(
   currentState: CalendarMachineState,
   evt: CalendarMachineEvent
 ): CalendarMachineState {
-  console.log("Calendar transition:", {
-    state: currentState.status,
-    event: evt.type,
-    evt,
-  });
-
   const nextState = transitionReduce(currentState, evt);
-  console.log(nextState);
 
   assertValidTransition(currentState, evt, nextState);
 
@@ -68,6 +61,9 @@ function transitionReduce(
     }
     case machineStates.CONFIRMED: {
       return transitionFromConfirmed(currentState, evt)
+    }
+    case machineStates.EDITING: {
+      return transitionFromEditing(currentState, evt)
     }
     default: {
       console.error("Invalid transition reduce");
@@ -144,8 +140,19 @@ function transitionFromConfirmed(
   evt: CalendarMachineEvent
 ): CalendarMachineState {
   switch (evt.type) {
-    case "EDIT_WEEK_REQUESTED":
-    case "EDIT_WEEK_FAILED":
+    case "EDIT_WEEK_REQUESTED": {
+      const nextState: EditingState = {
+        ...currentState,
+        status: machineStates.EDITING,
+      }
+      return nextState;
+    }
+    case "EDIT_WEEK_FAILED": {
+      const nextState: ConfirmedState = {
+        ...currentState
+      }
+      return nextState;
+    }
     case "EDIT_WEEK_COMPLETED": {
       const nextState: PlanningState = {
         ...currentState,
@@ -157,5 +164,28 @@ function transitionFromConfirmed(
 
     default:
       return currentState;
+  }
+}
+
+function transitionFromEditing(
+  currentState: EditingState,
+  evt: CalendarMachineEvent
+): CalendarMachineState {
+  switch (evt.type) {
+    case "EDIT_WEEK_COMPLETED": {
+      const nextState: PlanningState = {
+        ...currentState,
+        status: machineStates.PLANNING,
+        draftDates: [...currentState.confirmedDates]
+      }
+      return nextState;
+    }
+    case "EDIT_WEEK_FAILED": {
+      const nextState: ConfirmedState = {
+        ...currentState,
+        status: machineStates.CONFIRMED
+      }
+      return nextState
+    }
   }
 }
