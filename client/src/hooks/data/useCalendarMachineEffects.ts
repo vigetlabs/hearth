@@ -9,6 +9,7 @@ import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, type Dispatch } from "react";
 import { useCalendarRedisAttendingContext } from "../contexts/useCalendarRedisAttendingContext";
+import { useCalendarScope } from "../contexts/useCalendarScopeContext";
 
 interface UseCalendarMachineEffectsInput {
   state: CalendarMachineState;
@@ -23,6 +24,7 @@ export function useCalendarMachineEffects({
   activeOfficeId,
   focusedWeekStartKey
 }: UseCalendarMachineEffectsInput) {
+  const scope = useCalendarScope();
   const queryClient = useQueryClient();
   const confirmWeekMutation = useWeekAttendanceConfirmation();
 
@@ -49,6 +51,12 @@ export function useCalendarMachineEffects({
           queryClient.invalidateQueries({
             queryKey: generateAttendanceConfirmationKey(
               activeOfficeId,
+              focusedWeekStartKey
+            )
+          }),
+          queryClient.invalidateQueries({
+            queryKey: generateAttendanceConfirmationKey(
+              scope.user.office.id,
               focusedWeekStartKey
             )
           }),
