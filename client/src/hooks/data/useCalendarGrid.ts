@@ -5,7 +5,6 @@ import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
 import type { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
 import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
-import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { buildWeekSchedule } from "@/util/calendar/schedule/scheduleBuilder";
 import {
   buildCalendarGridViewModel,
@@ -13,6 +12,7 @@ import {
 } from "@/util/calendar/viewModel/gridBuilder";
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
+import { useCalendarRedisPlanningContext } from "../contexts/useCalendarRedisPlanningContext";
 
 export interface UseCalendarGridResult {
   viewModel: CalendarGridViewModel;
@@ -28,6 +28,13 @@ export function useCalendarGrid({
 }: UseCalendarGridOptions): UseCalendarGridResult {
   const scope = useCalendarScope();
   const data = useCalendarDataContext();
+
+  const {
+    planningStatesByDate,
+    isConnected: isPlanningConnected,
+    selectDate,
+    deselectDate
+  } = useCalendarRedisPlanningContext();
 
   const weekDateKeys = useMemo(
     () => scope.weekDates.map((day) => day.key),
@@ -76,17 +83,6 @@ export function useCalendarGrid({
       ),
     [currentUserExternalVisitsByDate, officesById],
   );
-
-  const {
-    planningStatesByDate,
-    isConnected: isPlanningConnected,
-    selectDate,
-    deselectDate,
-  } = useOfficePlanning({
-    officeId: scope.activeOffice.id,
-    currentUserId: scope.user.id,
-    dates: weekDateKeys,
-  });
 
   const { editingUserIds } = useOfficeAttending({
     officeId: scope.activeOffice.id,
