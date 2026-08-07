@@ -1,0 +1,55 @@
+/*
+  ============================================================================
+  Mobile nav menu — open/close motion
+
+  Radix only mounts the panel while the menu is open, so the way in has to be
+  an animation rather than a transition. It does hold the panel mounted until a
+  closing animation finishes, so the way out can be one too.
+
+  Both grow from `--radix-dropdown-menu-content-transform-origin`, the corner of
+  the panel nearest the button that opened it, so the menu reads as coming out
+  of the plus rather than as a card appearing under it. Radix sets that variable
+  on the panel itself, which is why the origin can't just be hard-coded to the
+  top right: if the panel ever has to flip or shift to stay on screen, the
+  origin follows it.
+
+  The way out is quicker than the way in, and eases in rather than out: on the
+  way in the panel is arriving somewhere and settles, on the way out it is only
+  getting off the screen and shouldn't hold up the tap that dismissed it.
+  ============================================================================
+*/
+.landing-nav-menu {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-nav-menu[data-state="open"] {
+    animation: landing-nav-menu-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .landing-nav-menu[data-state="closed"] {
+    animation: landing-nav-menu-out 130ms ease-in;
+  }
+}
+
+@keyframes landing-nav-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes landing-nav-menu-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-0.25rem);
+  }
+}

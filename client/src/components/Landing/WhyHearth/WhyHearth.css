@@ -10,12 +10,15 @@
   ~17.3x its own font size in Plus Jakarta Sans at this weight and tracking.
   The mock runs that line across ~56% of the frame, which works out to
   56 / 17.3 = 3.25vw. The 3rem cap stops it growing past ~1475px of viewport
-  (it drifts narrower instead), and the 1.375rem floor only binds below ~675px,
-  where the line is allowed to wrap to two rather than shrink any further.
+  (it drifts narrower instead), and the 1.75rem floor binds below ~860px — it
+  is the size the mobile rule at the bottom of this file caps at, so the two
+  ramps meet at `sm` rather than stepping across it. The heading still fits on
+  one line at that size down to ~520px of viewport, well past where the mobile
+  rule takes over.
   ============================================================================
 */
 .why-hearth-section {
-  --why-heading-size: clamp(1.375rem, 3.25vw, 3rem);
+  --why-heading-size: clamp(1.75rem, 3.25vw, 3rem);
 
   /* The heading's rendered line width, from the same ~17.3x measurement above.
      Holds whenever the heading fits on one line, which is everywhere the
@@ -39,34 +42,91 @@
 
    The measure is tied to the heading's own line width rather than to a ch
    count, so the subhead tracks the heading instead of drifting as the two font
-   sizes scale. It's held just inside that line at 0.92 of it, so the two lines
-   break a touch earlier and the block reads as sitting under the heading rather
-   than running the same width as it — still wider than the mock's 0.87. It
-   re-wraps freely on narrower screens. */
+   sizes scale. It runs the full width of that line, so the copy breaks as late
+   as the heading does and the two blocks square off against each other —
+   noticeably wider than the mock's 0.87. It re-wraps freely on narrower
+   screens. */
 .why-hearth-subhead {
   font-size: clamp(1rem, 1.8vw, 1.3125rem);
-  max-width: calc(0.92 * var(--why-heading-measure));
+  max-width: var(--why-heading-measure);
 }
 
-/* The callouts are the smallest type in the section — 0.345 of the heading —
-   and the pills one step up from them, at 0.415. Both run a little larger than
-   the mock's 0.32 and 0.385 so they hold their own against the screenshot;
-   since the pills are sized in `em`, the step up takes their padding and their
-   gap with it and the bubble grows as a whole. Both are set from the viewport
-   for the same reason the header is: they have to stay pinned to the same
-   features of the screenshot as everything scales. */
-.why-hearth-note {
-  font-size: clamp(0.8125rem, 1.12vw, 1rem);
-}
-
+/* The pills are 0.415 of the heading and the callouts, once they are pinned to
+   the screenshot, the smallest type in the section at 0.345. Both run a little
+   larger than the mock's 0.385 and 0.32 so they hold their own against the
+   screenshot; since the bubbles are sized in `em`, the step up takes their
+   padding and their gap with it and the bubble grows as a whole. Both are set
+   from the viewport for the same reason the header is: they have to stay
+   pinned to the same features of the screenshot as everything scales. */
 .why-hearth-pill {
   font-size: clamp(0.875rem, 1.35vw, 1.1875rem);
 }
 
+/* Below lg the callouts leave the screenshot's margins and stack in with the
+   pills as bubbles of their own, so they take the pill's size — one column of
+   labels reads as one set of type, not two. They only drop back to their own
+   smaller scale once they are pinned to the screenshot again. */
+.why-hearth-note {
+  font-size: clamp(0.875rem, 1.35vw, 1.1875rem);
+}
+
+@media (width >= 64rem) {
+  .why-hearth-note {
+    font-size: clamp(0.8125rem, 1.12vw, 1rem);
+  }
+}
+
 /* The screenshot's own 510x1182 shape, so the section reserves the full height
    of the image before it loads and the callouts pinned to it don't jump on
-   arrival. */
+   arrival.
+
+   With the bubbles around it flattened, the screenshot is the only lifted thing
+   left in the section, so it carries the drop on its own: the section's soft
+   ambient shadow with a tighter, darker one under it to seat the rounded
+   corners against the cream, plus a hairline in the default border color (set
+   on the element in WhyHearth.tsx) to close the edge off where the shot's own
+   light chrome would otherwise bleed into the page. */
 .why-hearth-shot {
   aspect-ratio: 510 / 1182;
-  box-shadow: var(--shadow-shot);
+  border-radius: 0.875rem;
+  box-shadow:
+    var(--shadow-shot),
+    0 6px 16px -6px #59291238;
+}
+
+/*
+  ============================================================================
+  Below `sm`
+
+  Like the Product header above it, the desktop ramp here is built around the
+  heading staying on one line, and a phone can't hold that line: 3.25vw is
+  ~13px at 390px wide, so the heading bottoms out on its floor and reads small
+  against the section rather than leading it. Letting the line wrap to two
+  frees the width back up — each of the two lines spans ~9.1x its own font
+  size, and filling ~76% of the viewport works out to 7.6vw, capped at the size
+  the desktop ramp holds on the other side of the breakpoint.
+
+  The measure follows: the 17.3x the section derives from is the *single-line*
+  width, which no longer exists once the heading wraps, so it is re-stated as
+  the width of one wrapped line. The subhead's own rule then holds it to that
+  line exactly as it does on desktop, which keeps the copy under the heading
+  instead of running the full width of the panel.
+  ============================================================================
+*/
+@media (max-width: 39.9375rem) {
+  .why-hearth-section {
+    --why-heading-size: clamp(1.375rem, 7.6vw, 1.75rem);
+    --why-heading-measure: calc(9.1 * var(--why-heading-size));
+  }
+
+  /* Matches the Product eyebrow's mobile size for the same reason the two
+     match on desktop: they read as the same label. */
+  .why-hearth-eyebrow {
+    font-size: clamp(0.6875rem, 3.15vw, 0.75rem);
+  }
+
+  /* Follows the heading up at the ~0.55 of it the two hold on desktop. */
+  .why-hearth-subhead {
+    font-size: clamp(0.8125rem, 3.95vw, 0.9375rem);
+  }
 }

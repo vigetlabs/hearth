@@ -1,40 +1,65 @@
 /*
   ============================================================================
-  Hero wordmark sizing (Home)
+  Hero watermark sizing (Home)
 
-  The giant "Hearth" watermark sits at the bottom of the hero, deliberately
-  cropped by the fold: a bit over half of it shows on first load and the rest
-  is revealed as the page scrolls. Driving both the mark's size and the hero's
+  A giant Hearth watermark sits at the bottom of the hero, deliberately cropped
+  by the fold: a bit over half of it shows on first load and the rest is
+  revealed as the page scrolls. Driving both the mark's size and the hero's
   height from one variable is what makes that ratio hold on every screen — the
   hero is exactly one viewport plus the slice of the mark that hangs below it,
-  so the crop can't drift with the window size.
+  so the crop can't drift with the window size. That is why both values live
+  here rather than as a `max-width` on the SVG: the hero has to know the mark's
+  real rendered height.
 
-  Width is what drives the size: the mark spans 92% of the viewport, running
-  wider than the decorative rules at 8%/92% and stopping just short of either
-  edge. The wordmark is ~4.15x as wide as it is tall (viewBox 477x115), so that
-  works out to a height of 92 / 4.15 = 22.2vw. The 48vh term is only a backstop
-  for short, wide windows, where a mark sized purely off the width would eat the
-  viewport. Keeping both here rather than as a `max-width` on the SVG means the
-  hero always knows the mark's real rendered height.
+  Which mark it is changes with the viewport, and each has its own block below,
+  so `--wordmark-h` always means "however tall the watermark actually is".
+
+  --- Phones: the brand mark ---
+
+  The wordmark would have to shrink to a thread to fit across a phone, so
+  narrow screens swap it for the nearly-square brand mark, which can stay big.
+  Width still drives the size: the mark spans 60% of the viewport, and it is
+  22/29 as wide as it is tall (viewBox 22x29), so that works out to a height of
+  60 / (22 / 29) = 79vw. The 70vh term is a backstop for landscape phones.
   ============================================================================
 */
 .landing-hero {
-  --wordmark-h: min(22.2vw, 48vh);
-  /* The portion left below the fold on first load — 45%, so slightly more than
-     half of the word reads as visible. */
-  --wordmark-hidden: calc(var(--wordmark-h) * 0.45);
+  --wordmark-h: min(79vw, 70vh);
+  /* The portion left below the fold on first load. The mark's notch — the gap
+     between its two upright strokes — bottoms out 39% of the way down, so
+     leaving 56% hidden lands the fold just past it: the notch reads in full
+     and the solid body below it is what fills in on scroll. */
+  --wordmark-hidden: calc(var(--wordmark-h) * 0.56);
+}
 
-  /*
-  These rules control how far down the 4 vertical lines in the background extend.
-  This allows the vertical lines to stop exactly when they intersect the wordmark.
-  They are calculated as portions of the wordmark's height so they scale with it.
-  This also makes it look the same when the wordmark changes sizes due to viewport
-  changes.
-  */
-  --rule-stop-1: calc(var(--wordmark-h) * 0.9898);
-  --rule-stop-2: calc(var(--wordmark-h) * 0.6897);
-  --rule-stop-3: calc(var(--wordmark-h) * 0.7289);
-  --rule-stop-4: calc(var(--wordmark-h) * 0.7298);
+/*
+  --- sm and up: the "Hearth" wordmark ---
+
+  The mark spans 92% of the viewport, running wider than the decorative rules
+  at 8%/92% and stopping just short of either edge. The wordmark is ~4.15x as
+  wide as it is tall (viewBox 477x115), so that works out to a height of
+  92 / 4.15 = 22.2vw. The 48vh term is only a backstop for short, wide windows,
+  where a mark sized purely off the width would eat the viewport.
+*/
+@media (width >= 40rem) {
+  .landing-hero {
+    --wordmark-h: min(22.2vw, 48vh);
+    /* 45%, so slightly more than half of the word reads as visible. */
+    --wordmark-hidden: calc(var(--wordmark-h) * 0.45);
+
+    /*
+    These rules control how far down the 4 vertical lines in the background extend.
+    This allows the vertical lines to stop exactly when they intersect the wordmark.
+    They are calculated as portions of the wordmark's height so they scale with it.
+    This also makes it look the same when the wordmark changes sizes due to viewport
+    changes. They live in this block because the lines they size are themselves
+    part of the wordmark layout — phones drop both.
+    */
+    --rule-stop-1: calc(var(--wordmark-h) * 0.9898);
+    --rule-stop-2: calc(var(--wordmark-h) * 0.6897);
+    --rule-stop-3: calc(var(--wordmark-h) * 0.7289);
+    --rule-stop-4: calc(var(--wordmark-h) * 0.7298);
+  }
 }
 
 /* the tagline that contains the "hybrid teams" pill, just below the large hearth wordmark */
@@ -50,6 +75,24 @@
   padding-inline: 0.42em;
   /* Optically centers the glyphs in the box — they sit high in the line box. */
   padding-block: 0.083em 0.125em;
+}
+
+/*
+  Below sm the pill drops to a line of its own, centered under the sentence,
+  and is the last thing in it — the closing clause is hidden at this width (see
+  Home.tsx). Going from `inline-flex` to `flex` is what forces the break;
+  `width: fit-content` keeps the pill hugging its text instead of stretching
+  the full line. The words above are then free to balance across two full
+  lines rather than leaving a ragged one behind the pill.
+*/
+@media (width < 40rem) {
+  .landing-tagline-pill {
+    display: flex;
+    width: fit-content;
+    /* Replaces the inline side margins, which do nothing once it's centered. */
+    margin-inline: auto;
+    margin-block-start: 0.3em;
+  }
 }
 
 /*

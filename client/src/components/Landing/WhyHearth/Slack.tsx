@@ -18,7 +18,9 @@ const ACTION =
 
 // "Slack-centric" section of the sign-in page, sitting between "Why Hearth" and
 // the Viget article — a mock of the weekly Slack message on the left, and the
-// pitch for it on the right.
+// pitch for it on the right. Once the two stack the order flips: the pitch
+// reads first and the card follows it, so the section leads with what it is
+// rather than dropping the reader into the mock cold.
 //
 // The card is also the one thing on this page you can actually use. Confirming
 // swaps the message for the confirmed one Hearth posts back, and "Edit
@@ -56,7 +58,10 @@ export default function Slack() {
 
   return (
     <section className="slack-section flex min-h-screen items-center justify-center bg-fg px-4 py-24 sm:py-32">
-      <div className="flex w-full max-w-[71rem] flex-col items-center gap-16 lg:flex-row lg:items-center lg:gap-20">
+      {/* `flex-col-reverse` is what puts the copy above the card once the two
+          stack — the card stays first in the source so it keeps leading the
+          row at `lg`, where it sits on the left. */}
+      <div className="flex w-full max-w-[71rem] flex-col-reverse items-center gap-16 lg:flex-row lg:items-center lg:gap-20">
         {/* The card's column. `slack-card-frame` is what the card's `cqw` type
             size measures itself against (see Slack.css), so the box that sets
             the card's width is the same box that sets its scale. It is also
@@ -190,7 +195,13 @@ export default function Slack() {
 
             One `gap-6` for the whole column — eyebrow, heading, paragraph and
             each of the three claims — so every break between blocks is the same
-            height and the column reads as one evenly-set list of statements. */}
+            height and the column reads as one evenly-set list of statements.
+
+            The three claims are `lg`-only. Beside the card they fill the
+            column's height against it; once the two stack they're just three
+            more lines between the reader and the card, restating what the
+            paragraph above already said and what the card itself demonstrates.
+            The gap closes with them, so the header sits straight on the card. */}
         <div className="flex w-full max-w-[32rem] flex-col gap-6 text-left lg:max-w-none lg:pl-8">
           <p className="slack-eyebrow font-semibold uppercase tracking-[0.22em] text-panel-eyebrow">
             Slack-centric
@@ -206,7 +217,7 @@ export default function Slack() {
             without opening another tab.
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+          <p className="slack-highlight hidden font-semibold leading-[1.35] text-panel-heading lg:block">
             <span
               aria-hidden="true"
               className="inline-block size-1 rounded-full bg-current align-middle mx-2"
@@ -214,7 +225,7 @@ export default function Slack() {
             A weekly nudge at the right time
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+          <p className="slack-highlight hidden font-semibold leading-[1.35] text-panel-heading lg:block">
             <span
               aria-hidden="true"
               className="inline-block size-1 rounded-full bg-current align-middle mx-2"
@@ -222,7 +233,7 @@ export default function Slack() {
             Confirm or edit straight from the message
           </p>
 
-          <p className="slack-highlight font-semibold leading-[1.35] text-panel-heading">
+          <p className="slack-highlight hidden font-semibold leading-[1.35] text-panel-heading lg:block">
             <span
               aria-hidden="true"
               className="inline-block size-1 rounded-full bg-current align-middle mx-2"

@@ -35,12 +35,13 @@ export default function VigetArticle() {
       {/* Same frame as the Slack section above, so the two panels line up down
           the page. The sign-off card below shares it as well, which is what
           puts its left edge on the eyebrow's. */}
-      <div className="flex w-full max-w-[71rem] flex-col gap-16 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-        {/* The copy column. Left-aligned at every size, like the Slack column
-            above: it reads as a column beside the portraits rather than as a
-            header over them, and staying left-aligned once the two stack holds
-            it flush with the grid's own left edge. */}
-        <div className="lg:w-[38%] lg:shrink-0">
+      <div className="flex w-full max-w-[71rem] flex-col gap-10 sm:gap-16 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+        {/* The copy column. Left-aligned beside the portraits, where it reads
+            as a column next to them rather than as a header over them. Once
+            the two stack it is a header over them, so it centers: the pitch
+            sits over the row of faces on its own axis, the same way the
+            Product and Why Hearth sections lead their panels. */}
+        <div className="text-center lg:w-[38%] lg:shrink-0 lg:text-left">
           <p className="article-eyebrow font-semibold uppercase tracking-[0.22em] text-strong">
             Article
           </p>
@@ -50,14 +51,17 @@ export default function VigetArticle() {
           </h2>
 
           {/* Measure is set in VigetArticle.css, off the body's own size, so
-              this holds the mock's two lines as the type scales. */}
-          <p className="article-body mt-6 font-medium leading-[1.5] text-fg-warm">
+              this holds the mock's two lines as the type scales. The measure
+              is narrower than the stacked column, so the box needs centering
+              itself once the column centers — `text-center` above only
+              centers the lines inside it. */}
+          <p className="article-body mx-auto mt-6 font-medium leading-[1.5] text-fg-warm lg:mx-0">
             Hearth is a three-week intern sprint project created by
             Viget&rsquo;s 2026 intern cohort.
           </p>
 
           {/* Points at the published write-up on viget.com. It leaves the app,
-              so it opens in its own tab and leaves the sign-in page where it is.W
+              so it opens in its own tab and leaves the sign-in page where it is.
 
               Every dimension is in `em` off `.article-cta`, so the pill grows
               and shrinks as one piece with its label rather than needing its own
@@ -69,7 +73,7 @@ export default function VigetArticle() {
               href={ARTICLE_URL}
               target="_blank"
               rel="noreferrer"
-              className="article-cta inline-flex cursor-pointer items-center rounded-full border-[1.5px] border-fg px-[1.9em] py-[1em] font-bold leading-none text-fg transition-colors hover:bg-surface-sunken"
+              className="article-cta inline-flex cursor-pointer items-center rounded-full border-[1.5px] border-strong-outline px-[1.9em] py-[1em] font-bold leading-none text-strong-outline transition-colors hover:bg-surface-sunken sm:border-fg sm:text-fg"
             >
               Read Article
             </a>

@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
 
 import WordLogo from "@/components/landing/Logo/WordLogo";
+import MobileNavMenu from "@/components/Landing/MobileNavMenu";
 
+import { NAV_LINKS, navLinkClass } from "@/components/Landing/navLinks";
 import { redirectToGoogleSso } from "@/util/auth/redirectToGoogleSso";
 import { cn } from "@/util/cn";
-
-const NAV_LINKS = [
-  { label: "Home", targetId: "home" },
-  { label: "Product", targetId: "product" },
-  { label: "Why Hearth", targetId: "why-hearth" },
-  { label: "Viget article", targetId: "viget-article" },
-];
 
 // How far down the viewport a section's top edge has to climb before that
 // section counts as the one being read: the bottom edge of the floating bar,
@@ -83,18 +78,13 @@ export default function Navbar() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center px-4 pt-6 sm:pt-8">
-      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl border border-line bg-surface/70 py-4 pl-7 pr-4 shadow-nav backdrop-blur-md sm:pl-10 sm:pr-6">
+      <nav className="pointer-events-auto flex w-full max-w-[73rem] items-center justify-between gap-8 rounded-3xl bg-surface/70 py-4 pl-7 pr-4 shadow-nav backdrop-blur-md sm:pl-10 sm:pr-6">
         <WordLogo className="h-6 text-fg sm:h-7" />
 
-        <div className="flex items-center gap-6 sm:gap-8">
-          {/* The section the page is parked on holds the full terracotta the
-              rest of the page accents with (`strong`), so the bar always says
-              where you are. Hovering an *unselected* label previews that move
-              in the ramp's lightest step (`strong-soft`) — lighter than the
-              selected color, so a hovered label can never be mistaken for the
-              selected one. The selected label takes no hover at all: it is
-              already at the end of that ramp, and lightening it on hover would
-              read as it switching off. */}
+        <div className="flex items-center gap-4 sm:gap-8">
+          {/* The links themselves, on screens wide enough to hold them. Below
+              `sm` they give way to the menu button at the end of the bar, which
+              serves the same list from a dropdown. */}
           {NAV_LINKS.map(({ label, targetId }) => {
             const active = targetId === activeId;
 
@@ -105,7 +95,7 @@ export default function Navbar() {
                 aria-current={active ? "true" : undefined}
                 className={cn(
                   "hidden cursor-pointer text-base font-medium transition-colors sm:block",
-                  active ? "text-strong" : "text-fg hover:text-strong-soft",
+                  navLinkClass(active, "hover"),
                 )}
               >
                 {label}
@@ -115,14 +105,20 @@ export default function Navbar() {
 
           {/* The only filled button on the page, so it takes the same hover the
               app's other `bg-strong` actions do: down to the darker
-              Brand/Confirmed border color. */}
+              Brand/Confirmed border color. It sits tighter on phones, where it
+              shares the bar with the menu button rather than trailing a row of
+              links. */}
           <button
             type="button"
             onClick={redirectToGoogleSso}
-            className="cursor-pointer rounded-full bg-strong px-5 py-2.5 text-base font-medium text-fg-inverse transition-colors hover:bg-strong-hover"
+            className="cursor-pointer rounded-full bg-strong px-5 py-2 text-sm font-medium text-fg-inverse transition-colors hover:bg-strong-hover sm:py-2.5 sm:text-base sm:font-semibold"
           >
             Sign in
           </button>
+
+          {/* Stands in for the nav links on phones, which have no room for
+              them. Hides itself from `sm` up. */}
+          <MobileNavMenu activeId={activeId} />
         </div>
       </nav>
     </div>
