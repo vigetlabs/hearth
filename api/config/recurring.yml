@@ -24,6 +24,6 @@ production:
     schedule: every hour at minute 12
 
   send_slack_reminder_job: 
-    class: SlackReminderJob
+    class: SendSlackReminderJob
     schedule: every friday at 12:30 pm America/Denver
 
