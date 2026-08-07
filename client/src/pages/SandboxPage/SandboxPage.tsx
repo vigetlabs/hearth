@@ -9,7 +9,7 @@ import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 import {
   type StatusMark,
   type StatusVariant,
-  StatusIcon
+  StatusIcon,
 } from "@/components/icons/StatusIcon";
 import type { Office } from "@/types/api/offices";
 

@@ -7,15 +7,15 @@ interface ResolveAttendanceModeInput {
 
 export function resolveAttendanceMode({
   isEditing,
-  isConfirmed
+  isConfirmed,
 }: ResolveAttendanceModeInput): AttendanceMode {
   if (isEditing) {
-    return "editing"
+    return "editing";
   }
 
   if (isConfirmed) {
-    return "confirmed"
+    return "confirmed";
   }
 
-  return "planning"
+  return "planning";
 }

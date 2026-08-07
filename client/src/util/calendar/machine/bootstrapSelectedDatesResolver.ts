@@ -1,6 +1,4 @@
-import type {
-  OfficeDatesPlanningOverrideStates,
-} from "@/types/cable/officePlanning";
+import type { OfficeDatesPlanningOverrideStates } from "@/types/cable/officePlanning";
 
 interface ResolvePlanningSelectedDatesInput {
   baseSelectedDates: string[];
@@ -13,25 +11,23 @@ export function resolvePlanningSelectedDates({
   baseSelectedDates,
   planningStatesByDate,
   currentUserId,
-  weekDateKeys
+  weekDateKeys,
 }: ResolvePlanningSelectedDatesInput): string[] {
   const selectedDates = new Set(baseSelectedDates);
   const weekDateKeySet = new Set(weekDateKeys);
 
-  for (const [dateKey, overrides] of Object.entries(
-    planningStatesByDate
-  )) {
+  for (const [dateKey, overrides] of Object.entries(planningStatesByDate)) {
     if (!weekDateKeySet.has(dateKey)) {
       continue;
     }
 
     const isSelected = overrides.selected.some(
-      (user) => user.id === currentUserId
+      (user) => user.id === currentUserId,
     );
 
     const isDeselected = overrides.deselected.some(
-      (user) => user.id === currentUserId
-    )
+      (user) => user.id === currentUserId,
+    );
 
     if (isSelected) {
       selectedDates.add(dateKey);
@@ -40,7 +36,5 @@ export function resolvePlanningSelectedDates({
     }
   }
 
-  return weekDateKeys.filter((dateKey) =>
-    selectedDates.has(dateKey)
-  );
+  return weekDateKeys.filter((dateKey) => selectedDates.has(dateKey));
 }

@@ -38,7 +38,7 @@ export default function CalendarPage() {
     focusedWeekStartKey: weekSelection.weekStartKey,
     changeOffice: officeSelection.changeOffice,
     changeWeek: weekSelection.changeWeek,
-    weekDates: getWeekDays(weekSelection.weekStart)
+    weekDates: getWeekDays(weekSelection.weekStart),
   };
 
   return (

@@ -1,4 +1,4 @@
-import type { CalendarDateAttendanceFacts as Facts} from "@/types/calendar/attendance/attendanceFacts";
+import type { CalendarDateAttendanceFacts as Facts } from "@/types/calendar/attendance/attendanceFacts";
 import type { CalendarAttendanceRule } from "@/types/calendar/attendance/attendanceRules";
 
 /*
@@ -21,27 +21,27 @@ export const ATTENDANCE_RULES = [
   {
     id: "external-visit",
     matches: (facts: Facts) => facts.hasVisitElsewhere,
-    status: "confirmed-elsewhere"
+    status: "confirmed-elsewhere",
   },
   {
     id: "persisted-visit",
     matches: (facts: Facts) => facts.hasVisitHere,
-    status: "confirmed-yes"
+    status: "confirmed-yes",
   },
   {
     id: "confirmed-absence",
     matches: (facts: Facts) => facts.mode === "confirmed",
-    status: "confirmed-no"
+    status: "confirmed-no",
   },
   {
     id: "selected-override",
     matches: (facts: Facts) => facts.planningOverride === "selected",
-    status: "planning-yes"
+    status: "planning-yes",
   },
   {
     id: "deselected-override",
     matches: (facts: Facts) => facts.planningOverride === "deselected",
-    status: "planning-no"
+    status: "planning-no",
   },
   // {
   //   id: "editing-visit",
@@ -56,11 +56,11 @@ export const ATTENDANCE_RULES = [
   {
     id: "default-schedule",
     matches: (facts: Facts) => facts.defaultScheduled,
-    status: "planning-yes"
+    status: "planning-yes",
   },
   {
     id: "fallback",
     matches: () => true,
-    status: "planning-no"
+    status: "planning-no",
   },
 ] satisfies readonly CalendarAttendanceRule[];

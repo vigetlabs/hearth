@@ -6,7 +6,7 @@ export function useCalendarMachineContext() {
 
   if (!context) {
     throw new Error(
-      "useCalendarMachineContext must be used inside a CalendarMachineProvider"
+      "useCalendarMachineContext must be used inside a CalendarMachineProvider",
     );
   }
   return context;

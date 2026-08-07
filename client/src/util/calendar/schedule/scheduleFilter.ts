@@ -12,7 +12,7 @@ const WEEKDAY_FIELDS = [
 
 export function isDefaultScheduleDay(
   user: Pick<User, "default_schedule">,
-  date: Date
+  date: Date,
 ): boolean {
   const schedule = user.default_schedule;
 
@@ -20,6 +20,6 @@ export function isDefaultScheduleDay(
     return false;
   }
 
-  const weekday = WEEKDAY_FIELDS[date.getDay()]
-  return schedule[weekday]
+  const weekday = WEEKDAY_FIELDS[date.getDay()];
+  return schedule[weekday];
 }

@@ -2,7 +2,12 @@ import type { CalendarMachineBootstrap } from "@/types/calendar/machine/machineB
 import { calendarMachineReducer } from "@/util/calendar/machine/machineTransitioner";
 import { useMemo, useReducer } from "react";
 import { CalendarMachineContext } from "./CalendarMachineContext";
-import { machineStates, type CalendarMachineState, type ConfirmedState, type PlanningState } from "@/types/calendar/machine/machineState";
+import {
+  machineStates,
+  type CalendarMachineState,
+  type ConfirmedState,
+  type PlanningState,
+} from "@/types/calendar/machine/machineState";
 import { useCalendarMachineEffects } from "@/hooks/data/useCalendarMachineEffects";
 
 interface CalendarMachineProviderProps {
@@ -16,18 +21,18 @@ export function CalendarMachineProvider({
   bootstrap,
   activeOfficeId,
   focusedWeekStartKey,
-  children
+  children,
 }: CalendarMachineProviderProps) {
   const [state, dispatch] = useReducer(
     calendarMachineReducer,
     bootstrap,
-    createCalendarMachineInitialState
+    createCalendarMachineInitialState,
   );
 
   const contextValue = useMemo(
     () => ({
       state,
-      dispatch
+      dispatch,
     }),
     [state],
   );
@@ -36,20 +41,18 @@ export function CalendarMachineProvider({
     state,
     dispatch,
     activeOfficeId,
-    focusedWeekStartKey
+    focusedWeekStartKey,
   });
 
   return (
-    <CalendarMachineContext.Provider
-      value={contextValue}
-    >
+    <CalendarMachineContext.Provider value={contextValue}>
       {children}
     </CalendarMachineContext.Provider>
-  )
+  );
 }
 
 function createCalendarMachineInitialState(
-  bootstrap: CalendarMachineBootstrap
+  bootstrap: CalendarMachineBootstrap,
 ): CalendarMachineState {
   const selectedDates = [...bootstrap.selectedDates];
 
@@ -57,8 +60,8 @@ function createCalendarMachineInitialState(
     const confirmedState: ConfirmedState = {
       status: machineStates.CONFIRMED,
       scope: bootstrap.scope,
-      confirmedDates: selectedDates
-    }
+      confirmedDates: selectedDates,
+    };
 
     return confirmedState;
   }
@@ -66,8 +69,8 @@ function createCalendarMachineInitialState(
   const planningState: PlanningState = {
     status: machineStates.PLANNING,
     scope: bootstrap.scope,
-    draftDates: selectedDates
-  }
+    draftDates: selectedDates,
+  };
 
-  return planningState
+  return planningState;
 }

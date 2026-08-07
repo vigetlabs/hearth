@@ -33,7 +33,7 @@ export function useCalendarGrid({
     planningStatesByDate,
     isConnected: isPlanningConnected,
     selectDate,
-    deselectDate
+    deselectDate,
   } = useCalendarRedisPlanningContext();
 
   const { editingUserIds } = useCalendarRedisAttendingContext();
@@ -94,7 +94,7 @@ export function useCalendarGrid({
    * relevant endpoint would not fetch my Durham visits. `scheduleVisits` is necessary to include
    * such visits so that it properly displays for the current user (me), while still being able to
    * exclude those irrelevant visits for other users.
-  */
+   */
   const scheduleVisits = useMemo(() => {
     const visitsById = new Map<number, Visit>();
 
@@ -124,7 +124,7 @@ export function useCalendarGrid({
         editingUserIds,
         planningStatesByDate,
         activeOfficeId: scope.activeOffice.id,
-        currentUserId: scope.user.id
+        currentUserId: scope.user.id,
       }),
     [
       data.rosterUsers,
@@ -135,6 +135,7 @@ export function useCalendarGrid({
       editingUserIds,
       planningStatesByDate,
       scope.activeOffice.id,
+      scope.user.id,
     ],
   );
 

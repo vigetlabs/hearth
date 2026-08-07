@@ -1,6 +1,9 @@
 import type { Office } from "@/types/api/offices";
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import { machineStates, type CalendarMachineState } from "@/types/calendar/machine/machineState";
+import {
+  machineStates,
+  type CalendarMachineState,
+} from "@/types/calendar/machine/machineState";
 import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import {
   buildCalendarToolbarViewModel,
@@ -22,8 +25,8 @@ interface UseCalendarToolbarInput {
   activeOffice: Office;
   focusedWeekStart: Date;
   changeWeek: (nextWeek: Date) => void;
-  machineState: CalendarMachineState,
-  dispatch: Dispatch<CalendarMachineEvent>
+  machineState: CalendarMachineState;
+  dispatch: Dispatch<CalendarMachineEvent>;
 }
 
 export function useCalendarToolbar({
@@ -31,12 +34,12 @@ export function useCalendarToolbar({
   focusedWeekStart,
   changeWeek,
   machineState,
-  dispatch
+  dispatch,
 }: UseCalendarToolbarInput): UseCalendarToolbarResult {
   const isWeekConfirmed = machineState.status === machineStates.CONFIRMED;
   const isEditingWeek = machineState.status === machineStates.PLANNING;
-  const isConfirmationPending = machineState.status === machineStates.CONFIRMING;
-
+  const isConfirmationPending =
+    machineState.status === machineStates.CONFIRMING;
 
   /*
    * Temporary sources.

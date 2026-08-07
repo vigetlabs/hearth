@@ -4,7 +4,7 @@ import { createContext, type Dispatch } from "react";
 
 interface CalendarMachineContext {
   state: CalendarMachineState;
-  dispatch: Dispatch<CalendarMachineEvent>
+  dispatch: Dispatch<CalendarMachineEvent>;
 }
 
 export const CalendarMachineContext =

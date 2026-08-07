@@ -37,7 +37,7 @@ export function buildWeekSchedule({
   editingUserIds,
   planningStatesByDate,
   activeOfficeId,
-  currentUserId
+  currentUserId,
 }: BuildWeekScheduleInput): WeekSchedule {
   const schedule: WeekSchedule = {};
 
@@ -50,7 +50,7 @@ export function buildWeekSchedule({
       planningStatesByDate,
       activeOfficeId,
       dateKey,
-      currentUserId
+      currentUserId,
     });
 
     for (const user of users) {
@@ -83,7 +83,7 @@ export function buildWeekSchedule({
 
       const externalOffice =
         resolution.status === "confirmed-elsewhere" && externalVisit
-          ? officesById.get(externalVisit.office_id) ?? null
+          ? (officesById.get(externalVisit.office_id) ?? null)
           : null;
 
       entries.push({
@@ -91,8 +91,7 @@ export function buildWeekSchedule({
         status: resolution.status,
         resolvedBy: resolution.matchedRule,
         isVisitor:
-          visitHere !== undefined &&
-          user.office?.id !== activeOfficeId,
+          visitHere !== undefined && user.office?.id !== activeOfficeId,
         externalOffice,
       });
     }
@@ -169,7 +168,7 @@ function findAllUsersForDateAndOffice({
   planningStatesByDate,
   activeOfficeId,
   dateKey,
-  currentUserId
+  currentUserId,
 }: FindAllUsersForDateAndOfficeInput): User[] {
   const usersById = new Map<number, User>(
     officeUsers.map((user) => [user.id, user]),
@@ -180,24 +179,21 @@ function findAllUsersForDateAndOffice({
       continue;
     }
 
-    const isVistingActiveOffice =
-      visit.office_id === activeOfficeId
+    const isVistingActiveOffice = visit.office_id === activeOfficeId;
     // if (
     //   visit.visit_date === dateKey &&
     //   visit.office_id === activeOfficeId
     // ) {
     //   usersById.set(visit.user.id, visit.user);
     // }
-    const isCurrentUserVisit =
-      visit.user.id === currentUserId
+    const isCurrentUserVisit = visit.user.id === currentUserId;
 
     if (isVistingActiveOffice || isCurrentUserVisit) {
       usersById.set(visit.user.id, visit.user);
     }
   }
 
-  const selectedPlanningUsers =
-    planningStatesByDate[dateKey]?.selected ?? [];
+  const selectedPlanningUsers = planningStatesByDate[dateKey]?.selected ?? [];
 
   for (const user of selectedPlanningUsers) {
     usersById.set(user.id, user);

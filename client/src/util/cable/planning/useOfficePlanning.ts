@@ -78,8 +78,9 @@ export function useOfficePlanning({
   currentUserId,
   dates,
 }: UseOfficePlanningOptions): UseOfficePlanningResult {
-  const [hasInitialSnapshot, setHasInitialSnapshot] =
-    useState<boolean>(false);
+  const [initialSnapshotKey, setInitialSnapshotKey] = useState<string | null>(
+    null,
+  );
 
   const [planningState, setPlanningState] =
     useState<OfficePlanningState | null>(null);
@@ -104,9 +105,10 @@ export function useOfficePlanning({
 
   const datesKey = useMemo(() => [...dates].sort().join(","), [dates]);
 
-  useEffect(() => {
-    setHasInitialSnapshot(false);
-  }, [officeId, datesKey]);
+  const snapshotKey = officeId === null ? null : `${officeId}:${datesKey}`;
+
+  const hasInitialSnapshot =
+    snapshotKey !== null && initialSnapshotKey === snapshotKey;
 
   useEffect(() => {
     datesRef.current = dates;
@@ -202,7 +204,9 @@ export function useOfficePlanning({
                 officeId: subscribedOfficeId,
                 dates: message.dates,
               });
-              setHasInitialSnapshot(true);
+              setInitialSnapshotKey(
+                `${subscribedOfficeId}:${[...datesRef.current].sort().join(",")}`,
+              );
               return;
 
             case "planning.date.updated":
