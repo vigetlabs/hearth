@@ -1,4 +1,4 @@
-import GoogleSsoButton from "@/components/GoogleSsoButton/GoogleSsoButton";
+import GoogleSsoButton from "@/components/auth/GoogleSsoButton";
 //
 // This is a single, page-colored rectangle behind the whole block (headline
 // and subhead). Its purpose is the obscure the two vertical lines in the

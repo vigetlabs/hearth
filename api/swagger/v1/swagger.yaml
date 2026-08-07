@@ -306,6 +306,54 @@ paths:
             schema:
               "$ref": "#/components/schemas/patch_user_request"
         required: true
+  "/api/v1/visits/relevant":
+    get:
+      summary: Retrieves the relevant visits based on office and calendar week range
+      tags:
+      - Visits
+      security:
+      - cookie_auth: []
+      parameters:
+      - name: office_id
+        in: query
+        required: true
+        description: The id of the active office being viewed in calendar page
+        schema:
+          type: integer
+      - name: date
+        in: query
+        required: false
+        schema:
+          "$ref": "#/components/schemas/visit_date"
+        description: Anchor date for the calendar range. Defaults to the current date.
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - week
+          default: week
+        description: Calendar view used to calculate the returned range.
+      responses:
+        '200':
+          description: relevant visits retrieved successfully
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/visits_response"
+        '400':
+          description: invalid query parameters
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
   "/api/v1/visits/mine":
     get:
       summary: Retrieves the authenticated user's visits for a calendar range
@@ -342,6 +390,12 @@ paths:
             Application/json:
               schema:
                 "$ref": "#/components/schemas/bad_request_error_response"
+        '401':
+          description: authentication required
+          content:
+            Application/json:
+              schema:
+                "$ref": "#/components/schemas/authentication_error_response"
   "/api/v1/visits":
     get:
       summary: Retrieves visits for a calendar range
@@ -987,17 +1041,80 @@ components:
           type: integer
         user:
           type: object
+          description: Public user account data returned by the API.
           required:
           - id
+          - email
           - first_name
           - last_name
+          - office
+          - is_onboarding_complete
           properties:
             id:
               type: integer
+            email:
+              type: string
+              format: email
             first_name:
               type: string
             last_name:
               type: string
+            office:
+              type: object
+              nullable: true
+              required:
+              - id
+              - name
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+            default_schedule:
+              nullable: true
+              allOf:
+              - type: object
+                description: Public schedule data returned by the API.
+                required:
+                - id
+                - is_default
+                - monday
+                - tuesday
+                - wednesday
+                - thursday
+                - friday
+                - saturday
+                - sunday
+                properties:
+                  id:
+                    type: integer
+                  is_default:
+                    type: boolean
+                  monday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  tuesday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  wednesday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  thursday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  friday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  saturday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+                  sunday:
+                    type: boolean
+                    description: Whether the user has selected this day in their schedule
+            lab:
+              type: string
+            is_onboarding_complete:
+              type: boolean
         visit_date:
           type: string
           format: date
@@ -1077,17 +1194,87 @@ components:
                   type: integer
                 user:
                   type: object
+                  description: Public user account data returned by the API.
                   required:
                   - id
+                  - email
                   - first_name
                   - last_name
+                  - office
+                  - is_onboarding_complete
                   properties:
                     id:
                       type: integer
+                    email:
+                      type: string
+                      format: email
                     first_name:
                       type: string
                     last_name:
                       type: string
+                    office:
+                      type: object
+                      nullable: true
+                      required:
+                      - id
+                      - name
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                    default_schedule:
+                      nullable: true
+                      allOf:
+                      - type: object
+                        description: Public schedule data returned by the API.
+                        required:
+                        - id
+                        - is_default
+                        - monday
+                        - tuesday
+                        - wednesday
+                        - thursday
+                        - friday
+                        - saturday
+                        - sunday
+                        properties:
+                          id:
+                            type: integer
+                          is_default:
+                            type: boolean
+                          monday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          tuesday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          wednesday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          thursday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          friday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          saturday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                          sunday:
+                            type: boolean
+                            description: Whether the user has selected this day in
+                              their schedule
+                    lab:
+                      type: string
+                    is_onboarding_complete:
+                      type: boolean
                 visit_date:
                   type: string
                   format: date
@@ -1142,17 +1329,87 @@ components:
                     type: integer
                   user:
                     type: object
+                    description: Public user account data returned by the API.
                     required:
                     - id
+                    - email
                     - first_name
                     - last_name
+                    - office
+                    - is_onboarding_complete
                     properties:
                       id:
                         type: integer
+                      email:
+                        type: string
+                        format: email
                       first_name:
                         type: string
                       last_name:
                         type: string
+                      office:
+                        type: object
+                        nullable: true
+                        required:
+                        - id
+                        - name
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                      default_schedule:
+                        nullable: true
+                        allOf:
+                        - type: object
+                          description: Public schedule data returned by the API.
+                          required:
+                          - id
+                          - is_default
+                          - monday
+                          - tuesday
+                          - wednesday
+                          - thursday
+                          - friday
+                          - saturday
+                          - sunday
+                          properties:
+                            id:
+                              type: integer
+                            is_default:
+                              type: boolean
+                            monday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            tuesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            wednesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            thursday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            friday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            saturday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            sunday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                      lab:
+                        type: string
+                      is_onboarding_complete:
+                        type: boolean
                   visit_date:
                     type: string
                     format: date
@@ -1737,17 +1994,87 @@ components:
                     type: integer
                   user:
                     type: object
+                    description: Public user account data returned by the API.
                     required:
                     - id
+                    - email
                     - first_name
                     - last_name
+                    - office
+                    - is_onboarding_complete
                     properties:
                       id:
                         type: integer
+                      email:
+                        type: string
+                        format: email
                       first_name:
                         type: string
                       last_name:
                         type: string
+                      office:
+                        type: object
+                        nullable: true
+                        required:
+                        - id
+                        - name
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                      default_schedule:
+                        nullable: true
+                        allOf:
+                        - type: object
+                          description: Public schedule data returned by the API.
+                          required:
+                          - id
+                          - is_default
+                          - monday
+                          - tuesday
+                          - wednesday
+                          - thursday
+                          - friday
+                          - saturday
+                          - sunday
+                          properties:
+                            id:
+                              type: integer
+                            is_default:
+                              type: boolean
+                            monday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            tuesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            wednesday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            thursday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            friday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            saturday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                            sunday:
+                              type: boolean
+                              description: Whether the user has selected this day
+                                in their schedule
+                      lab:
+                        type: string
+                      is_onboarding_complete:
+                        type: boolean
                   visit_date:
                     type: string
                     format: date

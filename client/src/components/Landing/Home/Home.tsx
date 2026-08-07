@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import WordLogo from "@/components/Logo/WordLogo";
+import WordLogo from "@/components/landing/Logo/WordLogo";
 import SigninCard from "@/components/Landing/Home/SigninCard";
 
 import "./Home.css";

@@ -1,6 +1,6 @@
 import "@/App.css";
 
-import Layout from "@/components/Layout/Layout";
+import Layout from "@/components/layout/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet } from "react-router";
 

@@ -1008,10 +1008,37 @@ export interface components {
     /** @description Public visit data returned by the API. */
     visit: {
       id: number;
+      /** @description Public user account data returned by the API. */
       user: {
         id: number;
+        /** Format: email */
+        email: string;
         first_name: string;
         last_name: string;
+        office: {
+          id: number;
+          name: string;
+        } | null;
+        default_schedule?: {
+          id: number;
+          is_default: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          monday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          tuesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          wednesday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          thursday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          friday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          saturday: boolean;
+          /** @description Whether the user has selected this day in their schedule */
+          sunday: boolean;
+        } | null;
+        lab?: string;
+        is_onboarding_complete: boolean;
       };
       /**
        * Format: date
@@ -1061,10 +1088,37 @@ export interface components {
         /** @description Public visit data returned by the API. */
         visit: {
           id: number;
+          /** @description Public user account data returned by the API. */
           user: {
             id: number;
+            /** Format: email */
+            email: string;
             first_name: string;
             last_name: string;
+            office: {
+              id: number;
+              name: string;
+            } | null;
+            default_schedule?: {
+              id: number;
+              is_default: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              monday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              tuesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              wednesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              thursday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              friday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              saturday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              sunday: boolean;
+            } | null;
+            lab?: string;
+            is_onboarding_complete: boolean;
           };
           /**
            * Format: date
@@ -1097,10 +1151,37 @@ export interface components {
       data: {
         visits: {
           id: number;
+          /** @description Public user account data returned by the API. */
           user: {
             id: number;
+            /** Format: email */
+            email: string;
             first_name: string;
             last_name: string;
+            office: {
+              id: number;
+              name: string;
+            } | null;
+            default_schedule?: {
+              id: number;
+              is_default: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              monday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              tuesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              wednesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              thursday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              friday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              saturday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              sunday: boolean;
+            } | null;
+            lab?: string;
+            is_onboarding_complete: boolean;
           };
           /**
            * Format: date
@@ -1371,10 +1452,37 @@ export interface components {
         };
         visits: {
           id: number;
+          /** @description Public user account data returned by the API. */
           user: {
             id: number;
+            /** Format: email */
+            email: string;
             first_name: string;
             last_name: string;
+            office: {
+              id: number;
+              name: string;
+            } | null;
+            default_schedule?: {
+              id: number;
+              is_default: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              monday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              tuesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              wednesday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              thursday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              friday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              saturday: boolean;
+              /** @description Whether the user has selected this day in their schedule */
+              sunday: boolean;
+            } | null;
+            lab?: string;
+            is_onboarding_complete: boolean;
           };
           /**
            * Format: date

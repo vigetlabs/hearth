@@ -12,13 +12,3 @@ export type AttendanceStatus =
 /** Whether a status counts as being in the office (as opposed to out). */
 export const isInOffice = (status: AttendanceStatus) =>
   status === "confirmed-yes" || status === "planning-yes";
-
-/** One roster member's status for a single day. */
-export interface RosterUser {
-  userId: number;
-  name: string;
-  status: AttendanceStatus;
-  isVisitor: boolean;
-}
-
-export type WeekSchedule = Record<string, RosterUser[]>;
