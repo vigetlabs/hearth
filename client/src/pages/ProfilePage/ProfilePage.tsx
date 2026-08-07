@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useBlocker } from "react-router";
 
-import { useAuth } from "@/util/auth/useAuth";
-import ConfirmationModal from "@/components/ConfirmationModal/ConfirmationModal";
+import { useAuth } from "@/hooks/contexts/useAuth";
+import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import LockIcon from "@/components/icons/LockIcon";
-import OfficeOptions from "@/components/OfficeOptions/OfficeOptions";
+import OfficeOptions from "@/components/office/OfficeOptions";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
 import { useUpdateUserMutation } from "@/util/api/mutations/users/updateUserMutation";
 import type { PatchUserRequest } from "@/types/api/users";
@@ -13,7 +13,7 @@ import { generateCurrentUserKey } from "@/util/api/keys/userKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Schedule } from "@/types/api/schedules";
 import { WEEKDAYS } from "@/types/schedule/schedule";
-import ScheduleDayItem from "@/components/ScheduleDayItem/ScheduleDayItem";
+import ScheduleDayItem from "@/components/schedule/ScheduleDayItem";
 import { buildScheduleAttributes } from "@/util/api/functions/schedules";
 import { cn } from "@/util/cn";
 

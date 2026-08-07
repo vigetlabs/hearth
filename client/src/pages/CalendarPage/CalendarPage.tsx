@@ -1,8 +1,8 @@
-import CalendarPageSkeleton from "@/pages/CalendarPage/CalendarPageSkeleton";
-import CalendarWorkspace from "@/components/Calendar/CalendarWorkspace";
+import CalendarPageSkeleton from "@/components/feedback/CalendarSkeletonLoader";
+import CalendarWorkspace from "@/components/calendar/CalendarWorkspace";
 import { CalendarScopeProvider } from "@/contexts/CalendarScopeProvider";
 import type { CalendarScope } from "@/contexts/CalendarScopeContext";
-import { useAuth } from "@/util/auth/useAuth";
+import { useAuth } from "@/hooks/contexts/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/selection/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/selection/useCalendarWeekSelection";
 

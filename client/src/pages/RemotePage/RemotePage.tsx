@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 
 import type { Office } from "@/types/api/offices";
 import { useOfficesQuery } from "@/util/api/queries/officeQueries";
-import { heroImageFor } from "@/components/OfficePicker/heroImage";
+import { heroImageFor } from "@/components/office/OfficePicker/heroImage";
 
 // Offices map to their hero photo by a slugified name (e.g. "Falls Church" ->
 // "falls-church-hero.webp"), the same convention the office picker uses.
