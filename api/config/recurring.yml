@@ -14,7 +14,7 @@ staging:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
 
-  send_slack_reminder: 
+  send_slack_reminder_job: 
     class: SlackReminderJob
     schedule: every friday at 11:00 am America/Denver
 
@@ -23,7 +23,7 @@ production:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
 
-  send_slack_reminder: 
+  send_slack_reminder_job: 
     class: SlackReminderJob
     schedule: every friday at 12:30 pm America/Denver
 
