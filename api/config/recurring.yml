@@ -15,7 +15,7 @@ staging:
     schedule: every hour at minute 12
 
   send_slack_reminder_job: 
-    class: SlackReminderJob
+    class: SendSlackReminderJob
     schedule: every friday at 11:00 am America/Denver
 
 production:
