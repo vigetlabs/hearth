@@ -1,11 +1,17 @@
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { CalendarMachineBootstrap } from "@/types/calendar/machine/machineBootstrap";
 import { useAttendanceConfirmationsQuery } from "@/util/api/queries/attendanceConfirmationQueries";
-import { useCurrentVisitsQuery, useVisitsQuery } from "@/util/api/queries/visitQueries";
+import {
+  useCurrentVisitsQuery,
+  useVisitsQuery,
+} from "@/util/api/queries/visitQueries";
 import { CalendarMachineProvider } from "@/contexts/CalendarMachineProvider";
 import { useOfficeRosterQuery } from "@/util/api/queries/userQueries";
 import CalendarPageSkeleton from "@/components/feedback/CalendarSkeletonLoader";
-import { type CalendarData, CalendarDataProvider } from "@/contexts/CalendarDataProvider";
+import {
+  type CalendarData,
+  CalendarDataProvider,
+} from "@/contexts/CalendarDataProvider";
 import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
 import { useMemo } from "react";
 import { CalendarRedisPlanningProvider } from "@/contexts/CalendarRedisPlanningProvider";
@@ -20,27 +26,27 @@ interface CalendarWorkspaceRootProps {
 }
 
 export default function CalendarWorkspaceRoot({
-  children
+  children,
 }: CalendarWorkspaceRootProps) {
   const scope = useCalendarScope();
 
   const weekDateKeys = useMemo(
     () => scope.weekDates.map((day) => day.key),
-    [scope.weekDates]
+    [scope.weekDates],
   );
   const weekDates = useMemo(
     () => scope.weekDates.map((day) => day.date),
-    [scope.weekDates]
+    [scope.weekDates],
   );
 
   const attendanceConfirmationsQuery = useAttendanceConfirmationsQuery({
     officeId: scope.activeOffice.id,
-    startsOn: scope.focusedWeekStartKey
+    startsOn: scope.focusedWeekStartKey,
   });
 
   const currentUserVisitsQuery = useCurrentVisitsQuery({
     date: scope.focusedWeekStartKey,
-    view: "week"
+    view: "week",
   });
 
   const officeRosterQuery = useOfficeRosterQuery(scope.activeOffice.id);
@@ -48,20 +54,20 @@ export default function CalendarWorkspaceRoot({
   const relevantVisitsQuery = useVisitsQuery({
     office_id: scope.activeOffice.id,
     date: scope.focusedWeekStartKey,
-    view: "week"
+    view: "week",
   });
 
   const planning = useOfficePlanning({
     officeId: scope.activeOffice.id,
     currentUserId: scope.user.id,
-    dates: weekDateKeys
+    dates: weekDateKeys,
   });
 
   const attending = useOfficeAttending({
     officeId: scope.activeOffice.id,
     weekStart: scope.focusedWeekStartKey,
-    currentUserId: scope.user.id
-  })
+    currentUserId: scope.user.id,
+  });
 
   if (
     attendanceConfirmationsQuery.isPending ||
@@ -70,7 +76,7 @@ export default function CalendarWorkspaceRoot({
     relevantVisitsQuery.isPending ||
     !planning.hasInitialSnapshot
   ) {
-    return <CalendarPageSkeleton />
+    return <CalendarPageSkeleton />;
   }
 
   if (
@@ -79,7 +85,7 @@ export default function CalendarWorkspaceRoot({
     officeRosterQuery.isError ||
     relevantVisitsQuery.isError
   ) {
-    return <div>Unable to load calendar</div>
+    return <div>Unable to load calendar</div>;
   }
 
   const currentUserOfficeVisitDates = new Set(
@@ -91,7 +97,7 @@ export default function CalendarWorkspaceRoot({
   const currentUserExternalVisitDates = new Set(
     currentUserVisitsQuery.data
       .filter((visit) => visit.office_id !== scope.activeOffice.id)
-      .map((visit) => visit.visit_date)
+      .map((visit) => visit.visit_date),
   );
 
   const baseSelectedDates = new Set(currentUserOfficeVisitDates);
@@ -111,29 +117,29 @@ export default function CalendarWorkspaceRoot({
     baseSelectedDates: [...baseSelectedDates],
     planningStatesByDate: planning.planningStatesByDate,
     currentUserId: scope.user.id,
-    weekDateKeys: weekDateKeys
+    weekDateKeys: weekDateKeys,
   });
 
-  const isCurrentUserConfirmed: boolean = attendanceConfirmationsQuery.data.some(
-    (confirmation) => confirmation.user_id === scope.user.id
-  );
-
+  const isCurrentUserConfirmed: boolean =
+    attendanceConfirmationsQuery.data.some(
+      (confirmation) => confirmation.user_id === scope.user.id,
+    );
 
   const bootstrap: CalendarMachineBootstrap = {
     scope: {
       activeOfficeId: scope.activeOffice.id,
-      focusedWeekStartKey: scope.focusedWeekStartKey
+      focusedWeekStartKey: scope.focusedWeekStartKey,
     },
     isConfirmed: isCurrentUserConfirmed,
-    selectedDates: allSelectedDates
-  }
+    selectedDates: allSelectedDates,
+  };
 
   const calendarData: CalendarData = {
     rosterUsers: officeRosterQuery.data ?? [],
     visits: relevantVisitsQuery.data ?? [],
     currentUserVisits: currentUserVisitsQuery.data ?? [],
-    attendanceConfirmations: attendanceConfirmationsQuery.data ?? []
-  }
+    attendanceConfirmations: attendanceConfirmationsQuery.data ?? [],
+  };
 
   return (
     <CalendarDataProvider value={calendarData}>
@@ -150,5 +156,5 @@ export default function CalendarWorkspaceRoot({
         </CalendarRedisAttendingProvider>
       </CalendarRedisPlanningProvider>
     </CalendarDataProvider>
-  )
+  );
 }

@@ -2,7 +2,7 @@ export const machineStates = {
   PLANNING: "PLANNING",
   CONFIRMING: "CONFIRMING",
   CONFIRMED: "CONFIRMED",
-  EDITING: "EDITING"
+  EDITING: "EDITING",
 } as const;
 
 export type CalendarMachineStatus =
@@ -38,7 +38,4 @@ export interface EditingState {
 }
 
 export type CalendarMachineState =
-  | PlanningState
-  | ConfirmingState
-  | ConfirmedState
-  | EditingState
+  PlanningState | ConfirmingState | ConfirmedState | EditingState;

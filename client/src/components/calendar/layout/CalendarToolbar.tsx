@@ -34,7 +34,7 @@ export default function CalendarToolbar() {
     focusedWeekStart: scope.focusedWeekStart,
     changeWeek: scope.changeWeek,
     machineState: state,
-    dispatch: dispatch
+    dispatch: dispatch,
   });
 
   return (

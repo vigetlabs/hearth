@@ -13,11 +13,11 @@ interface CalendarRedisAttendingProviderProps {
 
 export function CalendarRedisAttendingProvider({
   value,
-  children
+  children,
 }: CalendarRedisAttendingProviderProps) {
   return (
     <CalendarRedisAttendingContext.Provider value={value}>
       {children}
     </CalendarRedisAttendingContext.Provider>
-  )
+  );
 }

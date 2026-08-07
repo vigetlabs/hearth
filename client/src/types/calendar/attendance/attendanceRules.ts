@@ -12,13 +12,13 @@ export type CalendarAttendanceRuleId =
   | "default-schedule"
   | "fallback";
 
-  export interface CalendarAttendanceResolution {
-    status: CalendarDateAttendanceStatus;
-    matchedRule: CalendarAttendanceRuleId
-  }
+export interface CalendarAttendanceResolution {
+  status: CalendarDateAttendanceStatus;
+  matchedRule: CalendarAttendanceRuleId;
+}
 
-  export interface CalendarAttendanceRule {
-    id: CalendarAttendanceRuleId;
-    matches: (facts: CalendarDateAttendanceFacts) => boolean;
-    status: CalendarDateAttendanceStatus
-  }
+export interface CalendarAttendanceRule {
+  id: CalendarAttendanceRuleId;
+  matches: (facts: CalendarDateAttendanceFacts) => boolean;
+  status: CalendarDateAttendanceStatus;
+}

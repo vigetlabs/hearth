@@ -1,11 +1,18 @@
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import { machineStates, type CalendarMachineState, type CalendarMachineStatus, type ConfirmedState, type ConfirmingState, type EditingState, type PlanningState } from "@/types/calendar/machine/machineState";
+import {
+  machineStates,
+  type CalendarMachineState,
+  type CalendarMachineStatus,
+  type ConfirmedState,
+  type ConfirmingState,
+  type EditingState,
+  type PlanningState,
+} from "@/types/calendar/machine/machineState";
 import { validStateTransitions } from "@/types/calendar/machine/machineTransitions";
-
 
 export function calendarMachineReducer(
   currentState: CalendarMachineState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   const nextState = transitionReduce(currentState, evt);
 
@@ -17,7 +24,7 @@ export function calendarMachineReducer(
 function assertValidTransition(
   prev: CalendarMachineState,
   evt: CalendarMachineEvent,
-  nextState: CalendarMachineState
+  nextState: CalendarMachineState,
 ): void {
   if (isValidTransition(prev.status, nextState.status)) {
     return;
@@ -29,41 +36,40 @@ function assertValidTransition(
       `State: ${prev.status}.`,
       `Event: ${evt.type}.`,
       `Result: ${nextState.status}.`,
-    ].join(" ")
-
-  )
+    ].join(" "),
+  );
 }
 
 function isValidTransition(
   prev: CalendarMachineStatus,
-  after: CalendarMachineStatus
+  after: CalendarMachineStatus,
 ): boolean {
   if (prev === after) {
     return true;
   }
 
   const allowedTransitions: readonly CalendarMachineStatus[] =
-    validStateTransitions[prev]
+    validStateTransitions[prev];
 
   return allowedTransitions.includes(after);
 }
 
 function transitionReduce(
   currentState: CalendarMachineState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   switch (currentState.status) {
     case machineStates.PLANNING: {
-      return transitionFromPlanning(currentState, evt)
+      return transitionFromPlanning(currentState, evt);
     }
     case machineStates.CONFIRMING: {
-      return trasitionFromConfirming(currentState, evt)
+      return trasitionFromConfirming(currentState, evt);
     }
     case machineStates.CONFIRMED: {
-      return transitionFromConfirmed(currentState, evt)
+      return transitionFromConfirmed(currentState, evt);
     }
     case machineStates.EDITING: {
-      return transitionFromEditing(currentState, evt)
+      return transitionFromEditing(currentState, evt);
     }
     default: {
       console.error("Invalid transition reduce");
@@ -71,10 +77,9 @@ function transitionReduce(
   }
 }
 
-
 function transitionFromPlanning(
   currentState: PlanningState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   switch (evt.type) {
     case "DATE_SELECTED": {
@@ -82,8 +87,8 @@ function transitionFromPlanning(
         ...currentState,
         draftDates: currentState.draftDates.includes(evt.date)
           ? currentState.draftDates
-          : [...currentState.draftDates, evt.date]
-      }
+          : [...currentState.draftDates, evt.date],
+      };
       return nextState;
     }
 
@@ -93,18 +98,16 @@ function transitionFromPlanning(
 
       const nextState: PlanningState = {
         ...currentState,
-        draftDates: currentState.draftDates.filter(
-          (date) => date !== evt.date
-        )
-      }
+        draftDates: currentState.draftDates.filter((date) => date !== evt.date),
+      };
       return nextState;
     }
 
     case "CONFIRM_WEEK_REQUESTED": {
       const nextState: ConfirmingState = {
         ...currentState,
-        status: machineStates.CONFIRMING
-      }
+        status: machineStates.CONFIRMING,
+      };
 
       return nextState;
     }
@@ -113,53 +116,53 @@ function transitionFromPlanning(
 
 function trasitionFromConfirming(
   currentState: ConfirmingState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   switch (evt.type) {
     case "CONFIRM_WEEK_COMPLETED": {
       const nextState: ConfirmedState = {
         ...currentState,
         status: machineStates.CONFIRMED,
-        confirmedDates: [...currentState.draftDates]
-      }
+        confirmedDates: [...currentState.draftDates],
+      };
       return nextState;
     }
 
     case "CONFIRM_WEEK_FAILED": {
       const nextState: PlanningState = {
         ...currentState,
-        status: machineStates.PLANNING
-      }
-      return nextState
+        status: machineStates.PLANNING,
+      };
+      return nextState;
     }
   }
 }
 
 function transitionFromConfirmed(
   currentState: ConfirmedState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   switch (evt.type) {
     case "EDIT_WEEK_REQUESTED": {
       const nextState: EditingState = {
         ...currentState,
         status: machineStates.EDITING,
-      }
+      };
       return nextState;
     }
     case "EDIT_WEEK_FAILED": {
       const nextState: ConfirmedState = {
-        ...currentState
-      }
+        ...currentState,
+      };
       return nextState;
     }
     case "EDIT_WEEK_COMPLETED": {
       const nextState: PlanningState = {
         ...currentState,
         status: machineStates.PLANNING,
-        draftDates: [...currentState.confirmedDates]
-      }
-      return nextState
+        draftDates: [...currentState.confirmedDates],
+      };
+      return nextState;
     }
 
     default:
@@ -169,23 +172,23 @@ function transitionFromConfirmed(
 
 function transitionFromEditing(
   currentState: EditingState,
-  evt: CalendarMachineEvent
+  evt: CalendarMachineEvent,
 ): CalendarMachineState {
   switch (evt.type) {
     case "EDIT_WEEK_COMPLETED": {
       const nextState: PlanningState = {
         ...currentState,
         status: machineStates.PLANNING,
-        draftDates: [...currentState.confirmedDates]
-      }
+        draftDates: [...currentState.confirmedDates],
+      };
       return nextState;
     }
     case "EDIT_WEEK_FAILED": {
       const nextState: ConfirmedState = {
         ...currentState,
-        status: machineStates.CONFIRMED
-      }
-      return nextState
+        status: machineStates.CONFIRMED,
+      };
+      return nextState;
     }
   }
 }

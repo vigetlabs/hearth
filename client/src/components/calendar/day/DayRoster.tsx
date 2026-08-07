@@ -49,19 +49,17 @@ export function DayRoster({
     .filter((entry) => entry.status === "confirmed-yes")
     .sort(meFirst);
 
-  const planning = entries
-    .filter((entry) => entry.status === "planning-yes")
+  const planning = entries.filter((entry) => entry.status === "planning-yes");
 
   const confirmedOut = entries
     .filter(
       (entry) =>
         entry.status === "confirmed-no" ||
-        entry.status === "confirmed-elsewhere"
+        entry.status === "confirmed-elsewhere",
     )
-    .sort(meFirst)
+    .sort(meFirst);
 
-  const plannedOut = entries
-    .filter((entry) => entry.status === "planning-no")
+  const plannedOut = entries.filter((entry) => entry.status === "planning-no");
 
   const confirmedInCount = confirmed.length;
   const planningInCount = planning.length;
@@ -76,8 +74,7 @@ export function DayRoster({
   const [tab, setTab] = useState<Tab>("in");
 
   const amInOffice = entries.some(
-    (entry) =>
-      entry.user.id === myUserId && isInOffice(entry.status)
+    (entry) => entry.user.id === myUserId && isInOffice(entry.status),
   );
 
   const wasLocked = useRef(locked);
@@ -231,11 +228,13 @@ export function DayRoster({
 
 // Floats the current user to the top of their section; everyone else keeps
 // their existing name order.
-const byMeThenName = (myUserId: number) => (a: CalendarScheduleEntry, b: CalendarScheduleEntry) => {
-  if (a.user.id === myUserId) return -1;
-  if (b.user.id === myUserId) return 1;
-  return a.user.first_name.localeCompare(b.user.first_name);
-};
+const byMeThenName =
+  (myUserId: number) =>
+  (a: CalendarScheduleEntry, b: CalendarScheduleEntry) => {
+    if (a.user.id === myUserId) return -1;
+    if (b.user.id === myUserId) return 1;
+    return a.user.first_name.localeCompare(b.user.first_name);
+  };
 
 function TabButton({
   active,
@@ -295,7 +294,7 @@ function RosterRow({
   iconClassName,
   nudgeable = false,
 }: {
-  entry: CalendarScheduleEntry
+  entry: CalendarScheduleEntry;
   myUserId: number;
   mark: StatusMark;
   variant: StatusVariant;

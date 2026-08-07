@@ -14,14 +14,13 @@ interface CalendarRedisPlanningProviderProps {
   children: React.ReactNode;
 }
 
-
 export function CalendarRedisPlanningProvider({
   value,
-  children
+  children,
 }: CalendarRedisPlanningProviderProps) {
   return (
     <CalendarRedisPlanningContext.Provider value={value}>
       {children}
     </CalendarRedisPlanningContext.Provider>
-  )
+  );
 }

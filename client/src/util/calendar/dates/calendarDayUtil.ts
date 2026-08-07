@@ -4,14 +4,14 @@ const WEEKDAYS_PER_WEEK = 5;
 
 export function getWeekDays(
   weekStart: Date,
-  length = WEEKDAYS_PER_WEEK
+  length = WEEKDAYS_PER_WEEK,
 ): CalendarDay[] {
   return Array.from({ length }, (_, index) => {
     const date = addDays(weekStart, index);
 
     return {
       date,
-      key: generateDateKey(date)
+      key: generateDateKey(date),
     };
   });
 }

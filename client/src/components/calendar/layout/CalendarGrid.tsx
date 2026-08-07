@@ -16,7 +16,7 @@ export default function CalendarGrid() {
 
   //@ TODO: PASS SCOPE INTO CALENDAR GRID HOOK FOR EXPLICIT (LIKE OTHERS)
   const { viewModel, toggleCurrentUser } = useCalendarGrid({
-    dispatch
+    dispatch,
   });
 
   if (scope.activeOffice.name.toLowerCase() === "remote") {

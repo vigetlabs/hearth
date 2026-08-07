@@ -1,5 +1,8 @@
 import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
-import { machineStates, type CalendarMachineState } from "@/types/calendar/machine/machineState";
+import {
+  machineStates,
+  type CalendarMachineState,
+} from "@/types/calendar/machine/machineState";
 import { createAttendanceConfirmationObjectPayload } from "@/util/api/functions/attendanceConfirmations";
 import { generateAttendanceConfirmationKey } from "@/util/api/keys/attendanceConfirmationsKeys";
 import { generateCurrentUserVisitsKey } from "@/util/api/keys/userKeys";
@@ -9,7 +12,6 @@ import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, type Dispatch } from "react";
 import { useCalendarRedisAttendingContext } from "../contexts/useCalendarRedisAttendingContext";
-import { useCalendarScope } from "../contexts/useCalendarScopeContext";
 
 interface UseCalendarMachineEffectsInput {
   state: CalendarMachineState;
@@ -22,9 +24,8 @@ export function useCalendarMachineEffects({
   state: machineState,
   dispatch,
   activeOfficeId,
-  focusedWeekStartKey
+  focusedWeekStartKey,
 }: UseCalendarMachineEffectsInput) {
-  const scope = useCalendarScope();
   const queryClient = useQueryClient();
   const confirmWeekMutation = useWeekAttendanceConfirmation();
 
@@ -42,7 +43,7 @@ export function useCalendarMachineEffects({
     const payload = createAttendanceConfirmationObjectPayload({
       officeId: activeOfficeId,
       startsOn: focusedWeekStartKey,
-      selectedDates: machineState.draftDates
+      selectedDates: machineState.draftDates,
     });
 
     confirmWeekMutation.mutate(payload, {
@@ -51,34 +52,25 @@ export function useCalendarMachineEffects({
           queryClient.invalidateQueries({
             queryKey: generateAttendanceConfirmationKey(
               activeOfficeId,
-              focusedWeekStartKey
-            )
-          }),
-          queryClient.invalidateQueries({
-            queryKey: generateAttendanceConfirmationKey(
-              scope.user.office.id,
-              focusedWeekStartKey
-            )
+              focusedWeekStartKey,
+            ),
           }),
           queryClient.invalidateQueries({
             queryKey: generateVisitsKey({
               date: focusedWeekStartKey,
               view: "week",
-              office_id: activeOfficeId
-            })
+              office_id: activeOfficeId,
+            }),
           }),
           queryClient.invalidateQueries({
-            queryKey: generateCurrentUserVisitsKey(
-              focusedWeekStartKey,
-              "week"
-            )
-          })
+            queryKey: generateCurrentUserVisitsKey(focusedWeekStartKey, "week"),
+          }),
         ]);
         dispatch(calendarEvents.confirmWeekCompleted());
       },
       onError: () => {
         dispatch(calendarEvents.confirmWeekFailed());
-      }
+      },
     });
   }, [
     machineState,
@@ -87,9 +79,8 @@ export function useCalendarMachineEffects({
     confirmWeekMutation.isPending,
     confirmWeekMutation,
     queryClient,
-    dispatch
+    dispatch,
   ]);
-
 
   useEffect(() => {
     if (machineState.status !== machineStates.EDITING) {
@@ -102,9 +93,5 @@ export function useCalendarMachineEffects({
     } catch {
       dispatch(calendarEvents.editWeekFailed());
     }
-  }, [
-    machineState,
-    startEditing,
-    dispatch
-  ]);
+  }, [machineState, startEditing, dispatch]);
 }

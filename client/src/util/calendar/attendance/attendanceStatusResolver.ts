@@ -3,7 +3,7 @@ import type { CalendarAttendanceResolution } from "@/types/calendar/attendance/a
 import { ATTENDANCE_RULES } from "./attendanceRules";
 
 export function resolveAttendanceStatus(
-  facts: CalendarDateAttendanceFacts
+  facts: CalendarDateAttendanceFacts,
 ): CalendarAttendanceResolution {
   const rule = ATTENDANCE_RULES.find((candidate) => candidate.matches(facts));
 
@@ -13,6 +13,6 @@ export function resolveAttendanceStatus(
 
   return {
     status: rule.status,
-    matchedRule: rule.id
-  }
+    matchedRule: rule.id,
+  };
 }

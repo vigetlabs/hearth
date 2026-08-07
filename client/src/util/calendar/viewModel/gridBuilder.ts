@@ -1,7 +1,8 @@
+import type { OfficeDatesPlanningOverrideStates } from "@/types/cable/officePlanning";
 import type {
-  OfficeDatesPlanningOverrideStates,
-} from "@/types/cable/officePlanning";
-import type { CalendarScheduleEntry, WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
+  CalendarScheduleEntry,
+  WeekSchedule,
+} from "@/types/calendar/schedule/weekSchedule";
 import { addDays, generateDateKey, isSameDay } from "@/util/dates/date";
 
 export const WEEKDAYS_PER_WEEK = 5;
@@ -62,10 +63,11 @@ export function buildCalendarGridViewModel({
       const calendarEntries: CalendarScheduleEntry[] = schedule[key] ?? [];
 
       const currentUserEntry = calendarEntries.find(
-        (entry) => entry.user.id === currentUserId
+        (entry) => entry.user.id === currentUserId,
       );
 
-      const isConfirmedElsewhere = currentUserEntry?.status === "confirmed-elsewhere";
+      const isConfirmedElsewhere =
+        currentUserEntry?.status === "confirmed-elsewhere";
 
       return {
         key,
@@ -75,11 +77,11 @@ export function buildCalendarGridViewModel({
         planningCount: countPlanningPeople(calendarEntries),
         isConfirmedElsewhere,
         externalOfficeName: isConfirmedElsewhere
-          ? currentUserEntry.externalOffice?.name ?? ""
+          ? (currentUserEntry.externalOffice?.name ?? "")
           : "",
         externalOfficeEmoji: isConfirmedElsewhere
-          ? currentUserEntry.externalOffice?.emoji ?? ""
-          : ""
+          ? (currentUserEntry.externalOffice?.emoji ?? "")
+          : "",
       };
     },
   );
@@ -97,7 +99,7 @@ export function buildCalendarGridViewModel({
     isHotSpot: hotSpotIndexes.has(index) && !day.isConfirmedElsewhere,
     isConfirmedElsewhere: day.isConfirmedElsewhere,
     externalOfficeName: day.externalOfficeName,
-    externalOfficeEmoji: day.externalOfficeEmoji 
+    externalOfficeEmoji: day.externalOfficeEmoji,
   }));
 
   const todayIndex = days.findIndex((day) => isSameDay(day.date, today));
@@ -119,8 +121,8 @@ function countPlanningPeople(entries: CalendarScheduleEntry[]): number {
 
 function countConfirmedVisitors(entries: CalendarScheduleEntry[]): number {
   return entries.filter(
-    (entry) => entry.status === "confirmed-yes" && entry.isVisitor
-  ).length
+    (entry) => entry.status === "confirmed-yes" && entry.isVisitor,
+  ).length;
 }
 
 function isCurrentUserSelected(
@@ -130,8 +132,8 @@ function isCurrentUserSelected(
   return entries.some(
     (entry) =>
       entry.user.id === currentUserId &&
-      (entry.status === "confirmed-yes" || entry.status === "planning-yes")
-  )
+      (entry.status === "confirmed-yes" || entry.status === "planning-yes"),
+  );
 }
 
 interface HotSpotCandidate {

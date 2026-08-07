@@ -7,7 +7,7 @@ export function useCalendarRedisPlanningContext() {
 
   if (!planningContext) {
     throw new Error(
-      "useCalendarRedisPlanningContext must be used within CalendarRedisPlanningProvider"
+      "useCalendarRedisPlanningContext must be used within CalendarRedisPlanningProvider",
     );
   }
 

@@ -8,37 +8,37 @@ export const calendarEvents = {
   dateDeselected(dateKey: string) {
     return {
       type: "DATE_DESELECTED" as const,
-      date: dateKey
-    }
+      date: dateKey,
+    };
   },
   confirmWeekRequested() {
     return {
-      type: "CONFIRM_WEEK_REQUESTED" as const
+      type: "CONFIRM_WEEK_REQUESTED" as const,
     };
   },
   confirmWeekCompleted() {
     return {
-      type: "CONFIRM_WEEK_COMPLETED" as const
-    }
+      type: "CONFIRM_WEEK_COMPLETED" as const,
+    };
   },
   confirmWeekFailed() {
     return {
-      type: "CONFIRM_WEEK_FAILED" as const
-    }
+      type: "CONFIRM_WEEK_FAILED" as const,
+    };
   },
   editWeekRequested() {
     return {
-      type: "EDIT_WEEK_REQUESTED" as const
-    }
+      type: "EDIT_WEEK_REQUESTED" as const,
+    };
   },
   editWeekCompleted() {
     return {
-      type: "EDIT_WEEK_COMPLETED" as const
-    }
+      type: "EDIT_WEEK_COMPLETED" as const,
+    };
   },
   editWeekFailed() {
     return {
-      type: "EDIT_WEEK_FAILED" as const
-    }
+      type: "EDIT_WEEK_FAILED" as const,
+    };
   },
 };

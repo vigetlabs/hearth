@@ -7,7 +7,7 @@ export function useCalendarRedisAttendingContext() {
 
   if (!attendingContext) {
     throw new Error(
-      "useCalendarRedisAttendingContext must be used within CalendarRedisAttendingProvider"
+      "useCalendarRedisAttendingContext must be used within CalendarRedisAttendingProvider",
     );
   }
 

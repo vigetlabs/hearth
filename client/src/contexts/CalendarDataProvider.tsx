@@ -6,7 +6,7 @@ import type { AttendanceConfirmation } from "@/types/api/attendanceConfirmations
 export interface CalendarData {
   rosterUsers: User[];
   visits: Visit[];
-  currentUserVisits: Visit[]
+  currentUserVisits: Visit[];
   attendanceConfirmations: AttendanceConfirmation[];
 }
 

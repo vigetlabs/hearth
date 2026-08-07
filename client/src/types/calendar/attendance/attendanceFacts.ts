@@ -3,7 +3,7 @@ export type PlanningOverride = "selected" | "deselected" | null;
 
 export interface CalendarDateAttendanceFacts {
   /*
-   * Represents a person's state for this week. Editing takes 
+   * Represents a person's state for this week. Editing takes
    * precedence over confirmed when deriving this value
    */
   mode: AttendanceMode;
@@ -29,5 +29,5 @@ export interface CalendarDateAttendanceFacts {
   /*
    * Live action cable planning override for this person and date
    */
-  planningOverride: PlanningOverride
+  planningOverride: PlanningOverride;
 }
