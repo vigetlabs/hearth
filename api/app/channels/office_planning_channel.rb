@@ -23,14 +23,18 @@ class OfficePlanningChannel < ApplicationCable::Channel
     stream_for @office
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def snapshot(data)
     dates = Calendar::DateUtility.validate_dates(data["dates"])
 
     transmit_snapshot(dates:)
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def select(data)
     date = Calendar::DateUtility.normalize_to_string(data["date"])
     return unless date
@@ -43,7 +47,9 @@ class OfficePlanningChannel < ApplicationCable::Channel
     broadcast_date_snapshot(date:)
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def heartbeat(data)
     selected_dates =
       Calendar::DateUtility.validate_dates(data["selected_dates"])
@@ -58,7 +64,9 @@ class OfficePlanningChannel < ApplicationCable::Channel
     )
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def deselect(data)
     date = Calendar::DateUtility.normalize_to_string(data["date"])
     return unless date
@@ -71,7 +79,9 @@ class OfficePlanningChannel < ApplicationCable::Channel
     broadcast_date_snapshot(date:)
   end
 
-  sig { params(data: ApplicationCable::Types::ChannelData).void }
+  T::Sig::WithoutRuntime.sig do
+    params(data: ApplicationCable::Types::ChannelData).void
+  end
   def clear(data)
     dates = Calendar::DateUtility.validate_dates(data["dates"])
 

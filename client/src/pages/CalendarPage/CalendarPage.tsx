@@ -5,6 +5,8 @@ import type { CalendarScope } from "@/contexts/CalendarScopeContext";
 import { useAuth } from "@/hooks/contexts/useAuth";
 import { useCalendarOfficeSelection } from "@/hooks/selection/useCalendarOfficeSelection";
 import { useCalendarWeekSelection } from "@/hooks/selection/useCalendarWeekSelection";
+import CalendarWorkspaceRoot from "@/components/calendar/layout/CalendarWorkspaceRoot";
+import { getWeekDays } from "@/util/calendar/dates/calendarDayUtil";
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -36,17 +38,20 @@ export default function CalendarPage() {
     focusedWeekStartKey: weekSelection.weekStartKey,
     changeOffice: officeSelection.changeOffice,
     changeWeek: weekSelection.changeWeek,
+    weekDates: getWeekDays(weekSelection.weekStart),
   };
 
   return (
     <CalendarScopeProvider value={scope}>
-      <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
-        />
-        <CalendarWorkspace />
-      </div>
+      <CalendarWorkspaceRoot>
+        <div className="relative flex flex-1 flex-col overflow-hidden bg-page">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_top_left,rgba(180,72,32,0.14),transparent),radial-gradient(60%_60%_at_right_82%,rgba(180,72,32,0.14),transparent)]"
+          />
+          <CalendarWorkspace />
+        </div>
+      </CalendarWorkspaceRoot>
     </CalendarScopeProvider>
   );
 }

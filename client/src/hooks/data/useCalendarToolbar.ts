@@ -1,9 +1,16 @@
 import type { Office } from "@/types/api/offices";
+import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
+import {
+  machineStates,
+  type CalendarMachineState,
+} from "@/types/calendar/machine/machineState";
+import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
 import {
   buildCalendarToolbarViewModel,
   type CalendarToolbarViewModel,
 } from "@/util/calendar/viewModel/toolbarBuilder";
 import { addDays } from "@/util/dates/date";
+import type { Dispatch } from "react";
 
 export interface UseCalendarToolbarResult {
   viewModel: CalendarToolbarViewModel;
@@ -14,23 +21,29 @@ export interface UseCalendarToolbarResult {
   editWeek: () => void;
 }
 
-interface UseCalendarToolbarOptions {
+interface UseCalendarToolbarInput {
   activeOffice: Office;
   focusedWeekStart: Date;
   changeWeek: (nextWeek: Date) => void;
+  machineState: CalendarMachineState;
+  dispatch: Dispatch<CalendarMachineEvent>;
 }
 
 export function useCalendarToolbar({
   activeOffice,
   focusedWeekStart,
   changeWeek,
-}: UseCalendarToolbarOptions): UseCalendarToolbarResult {
+  machineState,
+  dispatch,
+}: UseCalendarToolbarInput): UseCalendarToolbarResult {
+  const isWeekConfirmed = machineState.status === machineStates.CONFIRMED;
+  const isEditingWeek = machineState.status === machineStates.PLANNING;
+  const isConfirmationPending =
+    machineState.status === machineStates.CONFIRMING;
+
   /*
    * Temporary sources.
    */
-  const isWeekConfirmed = false;
-  const isEditingWeek = false;
-  const isConfirmationPending = false;
   const isPlanningConnected = true;
   const isAttendanceConnected = true;
 
@@ -59,12 +72,11 @@ export function useCalendarToolbar({
   }
 
   function confirmWeek() {
-    console.log("HELLO FROM TOOLBAR CALLBACK");
-    // Connect confirmation mutation later.
+    dispatch(calendarEvents.confirmWeekRequested());
   }
 
   function editWeek() {
-    // Connect editing behavior later.
+    dispatch(calendarEvents.editWeekRequested());
   }
 
   return {

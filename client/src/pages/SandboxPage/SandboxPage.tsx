@@ -7,9 +7,9 @@ import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import NotFoundPage from "@/pages/NotFoundPage/NotFoundPage";
 import ErrorPage from "@/pages/ErrorPage/ErrorPage";
 import {
-  StatusIcon,
   type StatusMark,
   type StatusVariant,
+  StatusIcon,
 } from "@/components/icons/StatusIcon";
 import type { Office } from "@/types/api/offices";
 

@@ -1,45 +1,46 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, type Dispatch } from "react";
 
 import { useCalendarDataContext } from "@/hooks/contexts/useCalendarDataContext";
 import { useCalendarScope } from "@/hooks/contexts/useCalendarScopeContext";
 import type { Visit } from "@/types/api/visits";
-import type { WeekSchedule } from "@/types/calendar/calendar";
-import { useOfficeAttending } from "@/util/cable/attendance/useOfficeAttending";
-import {
-  baseAttendanceForUser,
-  planningOverrideStateForUser,
-  resolveAttendance,
-  resolveEditingAttendance,
-} from "@/util/cable/planning/overrideState";
-import { useOfficePlanning } from "@/util/cable/planning/useOfficePlanning";
-import { buildWeekSchedule } from "@/util/calendar/schedule";
+import type { WeekSchedule } from "@/types/calendar/schedule/weekSchedule";
+import { buildWeekSchedule } from "@/util/calendar/schedule/scheduleBuilder";
 import {
   buildCalendarGridViewModel,
   type CalendarGridViewModel,
-  WEEKDAYS_PER_WEEK,
 } from "@/util/calendar/viewModel/gridBuilder";
-import { addDays, generateDateKey } from "@/util/dates/date";
+import type { CalendarMachineEvent } from "@/types/calendar/machine/machineEvent";
+import { calendarEvents } from "@/util/calendar/machine/calendarEvents";
+import { useCalendarRedisPlanningContext } from "../contexts/useCalendarRedisPlanningContext";
+import { useCalendarRedisAttendingContext } from "../contexts/useCalendarRedisAttendingContext";
 
 export interface UseCalendarGridResult {
   viewModel: CalendarGridViewModel;
   toggleCurrentUser: (dateKey: string) => void;
 }
 
-export function useCalendarGrid(): UseCalendarGridResult {
+interface UseCalendarGridOptions {
+  dispatch: Dispatch<CalendarMachineEvent>;
+}
+
+export function useCalendarGrid({
+  dispatch,
+}: UseCalendarGridOptions): UseCalendarGridResult {
   const scope = useCalendarScope();
   const data = useCalendarDataContext();
 
-  const weekDates = useMemo(
-    () =>
-      Array.from({ length: WEEKDAYS_PER_WEEK }, (_, index) =>
-        addDays(scope.focusedWeekStart, index),
-      ),
-    [scope.focusedWeekStart],
-  );
+  const {
+    planningStatesByDate,
+    isConnected: isPlanningConnected,
+    selectDate,
+    deselectDate,
+  } = useCalendarRedisPlanningContext();
+
+  const { editingUserIds } = useCalendarRedisAttendingContext();
 
   const weekDateKeys = useMemo(
-    () => weekDates.map(generateDateKey),
-    [weekDates],
+    () => scope.weekDates.map((day) => day.key),
+    [scope.weekDates],
   );
 
   const confirmedUserIds = useMemo(
@@ -85,22 +86,28 @@ export function useCalendarGrid(): UseCalendarGridResult {
     [currentUserExternalVisitsByDate, officesById],
   );
 
-  const {
-    planningStatesByDate,
-    isConnected: isPlanningConnected,
-    selectDate,
-    deselectDate,
-  } = useOfficePlanning({
-    officeId: scope.activeOffice.id,
-    currentUserId: scope.user.id,
-    dates: weekDateKeys,
-  });
+  /* Contains visits relevant to office and week start being viewed and currentUserVisits.
+   * It is necessary to do both so that when viewing an office and my external visits are considered
+   * to be irrelevant by the relevant endpoint query, my visits will still show
+   *
+   * EX: My default office is Boulder, I have external visits at Durham. If I view Chatanooga, the
+   * relevant endpoint would not fetch my Durham visits. `scheduleVisits` is necessary to include
+   * such visits so that it properly displays for the current user (me), while still being able to
+   * exclude those irrelevant visits for other users.
+   */
+  const scheduleVisits = useMemo(() => {
+    const visitsById = new Map<number, Visit>();
 
-  const { editingUserIds } = useOfficeAttending({
-    officeId: scope.activeOffice.id,
-    weekStart: scope.focusedWeekStartKey,
-    currentUserId: scope.user.id,
-  });
+    for (const visit of data.visits) {
+      visitsById.set(visit.id, visit);
+    }
+
+    for (const visit of data.currentUserVisits) {
+      visitsById.set(visit.id, visit);
+    }
+
+    return [...visitsById.values()];
+  }, [data.visits, data.currentUserVisits]);
 
   const isWeekConfirmed = confirmedUserIds.has(scope.user.id);
   const isEditingWeek = editingUserIds.has(scope.user.id);
@@ -108,21 +115,27 @@ export function useCalendarGrid(): UseCalendarGridResult {
 
   const schedule = useMemo<WeekSchedule>(
     () =>
-      buildWeekSchedule(
-        data.rosterUsers,
-        data.visits,
-        weekDates,
+      buildWeekSchedule({
+        officeUsers: data.rosterUsers,
+        relevantVisits: scheduleVisits,
+        officesById,
+        weekDateKeys,
         confirmedUserIds,
-        scope.user.id,
-        currentUserExternalVisitsByDate,
-      ),
+        editingUserIds,
+        planningStatesByDate,
+        activeOfficeId: scope.activeOffice.id,
+        currentUserId: scope.user.id,
+      }),
     [
       data.rosterUsers,
-      data.visits,
-      weekDates,
+      scheduleVisits,
+      officesById,
+      weekDateKeys,
       confirmedUserIds,
+      editingUserIds,
+      planningStatesByDate,
+      scope.activeOffice.id,
       scope.user.id,
-      currentUserExternalVisitsByDate,
     ],
   );
 
@@ -160,40 +173,26 @@ export function useCalendarGrid(): UseCalendarGridResult {
         return;
       }
 
-      const baseDay = schedule[dateKey] ?? [];
-      const { hasConfirmedVisit, isDefaultScheduleDay } = baseAttendanceForUser(
-        {
-          day: baseDay,
-          userId: scope.user.id,
-        },
+      const currentUserEntry = schedule[dateKey]?.find(
+        (entry) => entry.user.id === scope.user.id,
       );
 
       const isEditing = editingUserIds.has(scope.user.id);
 
-      if (hasConfirmedVisit && !isEditing) {
+      if (currentUserEntry?.status === "confirmed-yes" && !isEditing) {
         return;
       }
 
-      const planningOverrideState = planningOverrideStateForUser(
-        planningStatesByDate[dateKey],
-        scope.user.id,
-      );
-
-      const currentlyAttending = isEditing
-        ? resolveEditingAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-          })
-        : resolveAttendance({
-            hasConfirmedVisit,
-            planningOverrideState,
-            isDefaultScheduleDay,
-          });
+      const currentlyAttending =
+        currentUserEntry?.status === "confirmed-yes" ||
+        currentUserEntry?.status === "planning-yes";
 
       if (currentlyAttending) {
         deselectDate(dateKey);
+        dispatch(calendarEvents.dateDeselected(dateKey));
       } else {
         selectDate(dateKey);
+        dispatch(calendarEvents.dateSelected(dateKey));
       }
     },
     [
@@ -202,10 +201,10 @@ export function useCalendarGrid(): UseCalendarGridResult {
       currentUserExternalVisitsByDate,
       schedule,
       editingUserIds,
-      planningStatesByDate,
       scope.user.id,
       deselectDate,
       selectDate,
+      dispatch,
     ],
   );
 

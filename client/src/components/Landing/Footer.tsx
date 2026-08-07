@@ -1,4 +1,4 @@
-import WordLogo from "@/components/Logo/WordLogo";
+import WordLogo from "@/components/landing/Logo/WordLogo";
 import { ARTICLE_URL, VIGET_URL } from "@/components/Landing/links";
 
 // A footer link is one of two things: a jump to a section of this page, or a

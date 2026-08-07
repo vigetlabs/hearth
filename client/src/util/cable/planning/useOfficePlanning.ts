@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
-  ChannelSerializedUser,
   OfficeDatesPlanningOverrideStates,
   OfficePlanningState,
   TogglePlanningOverrideState,
@@ -17,7 +16,7 @@ import { generateOfficesUsersKey } from "@/util/api/keys/officeKeys";
 const EMPTY_PLANNING_DATES: OfficeDatesPlanningOverrideStates = {};
 
 /*
- * Represents a snapshot of all dates and all serialized users on that date
+ * Represents a snapshot of all dates and all users on that date
  */
 interface PlanningSnapshotMessage {
   type: "planning.snapshot";
@@ -26,7 +25,7 @@ interface PlanningSnapshotMessage {
 }
 
 /*
- * Represents a single date update for all serialized users on that date
+ * Represents a single date update for all users on that date
  */
 interface PlanningDateUpdatedMessage {
   type: "planning.date.updated";
@@ -61,6 +60,7 @@ interface UseOfficePlanningOptions {
 
 interface UseOfficePlanningResult {
   planningStatesByDate: OfficeDatesPlanningOverrideStates;
+  hasInitialSnapshot: boolean;
   isConnected: boolean;
   selectDate: (date: string) => void;
   deselectDate: (date: string) => void;
@@ -78,6 +78,10 @@ export function useOfficePlanning({
   currentUserId,
   dates,
 }: UseOfficePlanningOptions): UseOfficePlanningResult {
+  const [initialSnapshotKey, setInitialSnapshotKey] = useState<string | null>(
+    null,
+  );
+
   const [planningState, setPlanningState] =
     useState<OfficePlanningState | null>(null);
 
@@ -100,6 +104,11 @@ export function useOfficePlanning({
   const datesRef = useRef(dates);
 
   const datesKey = useMemo(() => [...dates].sort().join(","), [dates]);
+
+  const snapshotKey = officeId === null ? null : `${officeId}:${datesKey}`;
+
+  const hasInitialSnapshot =
+    snapshotKey !== null && initialSnapshotKey === snapshotKey;
 
   useEffect(() => {
     datesRef.current = dates;
@@ -162,10 +171,6 @@ export function useOfficePlanning({
             officeId: subscribedOfficeId,
             connected: true,
           });
-
-          subscription.perform("snapshot", {
-            dates: datesRef.current,
-          });
         },
 
         disconnected() {
@@ -199,6 +204,9 @@ export function useOfficePlanning({
                 officeId: subscribedOfficeId,
                 dates: message.dates,
               });
+              setInitialSnapshotKey(
+                `${subscribedOfficeId}:${[...datesRef.current].sort().join(",")}`,
+              );
               return;
 
             case "planning.date.updated":
@@ -243,11 +251,11 @@ export function useOfficePlanning({
 
     Object.entries(planningStatesByDate).forEach(([date, overrides]) => {
       const isSelected = overrides.selected.some(
-        (user: ChannelSerializedUser) => user.id === currentUserId,
+        (user) => user.id === currentUserId,
       );
 
       const isDeselected = overrides.deselected.some(
-        (user: ChannelSerializedUser) => user.id === currentUserId,
+        (user) => user.id === currentUserId,
       );
 
       if (isSelected) {
@@ -306,6 +314,7 @@ export function useOfficePlanning({
 
   return {
     planningStatesByDate,
+    hasInitialSnapshot,
     isConnected,
     selectDate,
     deselectDate,

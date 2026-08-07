@@ -2,8 +2,6 @@ import type {
   PlanningOverrideState,
   TogglePlanningOverrideState,
 } from "@/types/cable/officePlanning";
-import type { RosterUser } from "@/types/calendar/calendar";
-import { isInOffice } from "@/types/calendar/calendar";
 
 export function planningOverrideStateForUser(
   overrides: TogglePlanningOverrideState | undefined,
@@ -87,39 +85,4 @@ export function resolveEditingAttendance({
   }
 
   return hasConfirmedVisit;
-}
-
-interface BaseAttendanceForUserOptions {
-  day: RosterUser[];
-  userId: number;
-}
-
-interface BaseAttendanceForUserResult {
-  hasConfirmedVisit: boolean;
-  isDefaultScheduleDay: boolean;
-}
-
-/*
- * Determines the user's attendance information for one day before live
- * planning overrides are applied
- */
-export function baseAttendanceForUser({
-  day,
-  userId,
-}: BaseAttendanceForUserOptions): BaseAttendanceForUserResult {
-  const person = day.find((dayPerson) => dayPerson.userId === userId);
-
-  if (!person) {
-    return {
-      hasConfirmedVisit: false,
-      isDefaultScheduleDay: false,
-    };
-  }
-
-  const hasConfirmedVisit = person.status === "confirmed-yes";
-
-  return {
-    hasConfirmedVisit,
-    isDefaultScheduleDay: !hasConfirmedVisit && isInOffice(person.status),
-  };
 }
