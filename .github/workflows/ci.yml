@@ -20,7 +20,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.5
+          ruby-version: 4.0.10
           working-directory: api
           bundler-cache: true
 
@@ -79,7 +79,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 4.0.5
+          ruby-version: 4.0.10
           working-directory: api
           bundler-cache: true
 
